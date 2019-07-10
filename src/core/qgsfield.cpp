@@ -19,6 +19,7 @@
 #include "qgis.h"
 #include "qgsapplication.h"
 #include "qgssettings.h"
+#include "qgsarrayparser.h"
 
 #include <QDataStream>
 #include <QIcon>
@@ -421,6 +422,31 @@ bool QgsField::convertCompatible( QVariant &v ) const
       v = QVariant( static_cast< long long >( std::round( dbl ) ) );
       return true;
     }
+  }
+
+  // array display as a single string
+  if ( ( d->type == QVariant::StringList || d->type == QVariant::List ) && v.type() == QVariant::String )
+  {
+    QStringList elements = QgsArrayParser::parseArray( v.toString() );
+    if ( d->subType != QVariant::String )
+      {
+        QVariantList result;
+        for ( int i=0; i<elements.count(); i++ )
+          {
+            QVariant elt = elements.at( i );
+            if ( !convertCompatible( elt ) )
+              {
+                return false;
+              };
+            result.append( elt );
+          }
+        v = QVariant(result);
+      }
+    else
+      {
+        v = QVariant(elements);
+      }
+    return true;
   }
 
   if ( !v.convert( d->type ) )
