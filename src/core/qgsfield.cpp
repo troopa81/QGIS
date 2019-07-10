@@ -429,23 +429,23 @@ bool QgsField::convertCompatible( QVariant &v ) const
   {
     QStringList elements = QgsArrayParser::parseArray( v.toString() );
     if ( d->subType != QVariant::String )
+    {
+      QVariantList result;
+      for ( int i = 0; i < elements.count(); i++ )
       {
-        QVariantList result;
-        for ( int i=0; i<elements.count(); i++ )
-          {
-            QVariant elt = elements.at( i );
-            if ( !convertCompatible( elt ) )
-              {
-                return false;
-              };
-            result.append( elt );
-          }
-        v = QVariant(result);
+        QVariant elt = elements.at( i );
+        if ( !convertCompatible( elt ) )
+        {
+          return false;
+        };
+        result.append( elt );
       }
+      v = QVariant( result );
+    }
     else
-      {
-        v = QVariant(elements);
-      }
+    {
+      v = QVariant( elements );
+    }
     return true;
   }
 
