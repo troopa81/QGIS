@@ -409,7 +409,7 @@ class TestQgsSnappingUtils : public QObject
       mapSettings.setExtent( QgsRectangle( 0, 0, 1, 1 ) );
       QVERIFY( mapSettings.hasValidSettings() );
 
-      QgsSnappingUtils u( nullptr, true, true );
+      QgsSnappingUtils u( nullptr, true );
       u.setMapSettings( mapSettings );
       u.setCurrentLayer( mVL );
 

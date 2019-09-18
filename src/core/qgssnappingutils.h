@@ -56,22 +56,29 @@ class CORE_EXPORT QgsSnappingUtils : public QObject
      * Constructor for QgsSnappingUtils
      * \param parent parent object
      * \param enableSnappingForInvisibleFeature TRUE if we want to snap feature even if there are not visible
-     * \param asynchronous indicated if point locator creation has to be made asynchronously (see QgsPointLocator())
      */
-    QgsSnappingUtils( QObject *parent SIP_TRANSFERTHIS = nullptr, bool enableSnappingForInvisibleFeature = true,
-                      bool asynchronous = false );
+    QgsSnappingUtils( QObject *parent SIP_TRANSFERTHIS = nullptr, bool enableSnappingForInvisibleFeature = true );
     ~QgsSnappingUtils() override;
 
     // main actions
 
-    //! Gets a point locator for the given layer. If such locator does not exist, it will be created
-    QgsPointLocator *locatorForLayer( QgsVectorLayer *vl );
+    /**
+     * Gets a point locator for the given layer. If such locator does not exist, it will be created
+     * \param asynchronous if TRUE the returned locator will be asynchronous (non blocking)
+     */
+    QgsPointLocator *locatorForLayer( QgsVectorLayer *vl, bool asynchronous = false );
 
     //! Snap to map according to the current configuration. Optional filter allows discarding unwanted matches.
     QgsPointLocator::Match snapToMap( QPoint point, QgsPointLocator::MatchFilter *filter = nullptr );
     QgsPointLocator::Match snapToMap( const QgsPointXY &pointMap, QgsPointLocator::MatchFilter *filter = nullptr );
 
-    //! Snap to current layer
+    /**
+     * Snap to map according to the current configuration. Optional filter allows discarding unwanted matches.
+     * Unlike the snapToMap() method, this method is non blocking and return matches from point locators which
+     * are not currently indexing
+     */
+    QgsPointLocator::Match snapToMapRelaxed( QPoint point, QgsPointLocator::MatchFilter *filter = nullptr );
+    QgsPointLocator::Match snapToMapRelaxed( const QgsPointXY &pointMap, QgsPointLocator::MatchFilter *filter = nullptr );
 
     //! Snap to current layer
     QgsPointLocator::Match snapToCurrentLayer( QPoint point, QgsPointLocator::Types type, QgsPointLocator::MatchFilter *filter = nullptr );
@@ -197,17 +204,10 @@ class CORE_EXPORT QgsSnappingUtils : public QObject
 
   protected:
 
-    /**
-     * This methods is now deprecated and never called
-     * \deprecated since QGIS 3.10
-     */
-    Q_DECL_DEPRECATED virtual void prepareIndexStarting( int count ) { Q_UNUSED( count ); }
-
-    /**
-     * This methods is now deprecated and never called
-     * \deprecated since QGIS 3.10
-     */
-    Q_DECL_DEPRECATED virtual void prepareIndexProgress( int index ) { Q_UNUSED( index ); }
+    //! Called when starting to index with snapToMap - can be overridden and e.g. progress dialog can be provided
+    virtual void prepareIndexStarting( int count ) { Q_UNUSED( count ); }
+    //! Called when finished indexing a layer with snapToMap. When index == count the indexing is complete
+    virtual void prepareIndexProgress( int index ) { Q_UNUSED( index ); }
 
     //! Deletes all existing locators (e.g. when destination CRS has changed and we need to reindex)
     void clearAllLocators();
@@ -223,16 +223,23 @@ class CORE_EXPORT QgsSnappingUtils : public QObject
     QgsCoordinateReferenceSystem destinationCrs() const;
 
     //! Returns a locator (temporary or not) according to the indexing strategy
-    QgsPointLocator *locatorForLayerUsingStrategy( QgsVectorLayer *vl, const QgsPointXY &pointMap, double tolerance );
+    QgsPointLocator *locatorForLayerUsingStrategy( QgsVectorLayer *vl, const QgsPointXY &pointMap, double tolerance, bool asynchronous );
     //! Returns a temporary locator with index only for a small area (will be replaced by another one on next request)
     QgsPointLocator *temporaryLocatorForLayer( QgsVectorLayer *vl, const QgsPointXY &pointMap, double tolerance );
 
     typedef QPair< QgsVectorLayer *, QgsRectangle > LayerAndAreaOfInterest;
 
-    //! find out whether the strategy would index such layer or just use a temporary locator
-    bool isIndexPrepared( QgsVectorLayer *vl, const QgsRectangle &areaOfInterest );
+    //! Returns TRUE if \a loc index is ready to be used in the area of interest \a areaOfInterest
+    bool isIndexPrepared( QgsPointLocator *loc, const QgsRectangle &areaOfInterest );
     //! initialize index for layers where it makes sense (according to the indexing strategy)
-    void prepareIndex( const QList<LayerAndAreaOfInterest> &layers );
+    void prepareIndex( const QList<LayerAndAreaOfInterest> &layers, bool asynchronous );
+
+    /**
+     * Internal snap to map according to the current configuration.
+     * Optional \a filter allows discarding unwanted matches.
+     * \param asynchronous TRUE if we have to use asycnrhonous point locators
+     */
+    QgsPointLocator::Match _snapToMap( const QgsPointXY &pointMap, QgsPointLocator::MatchFilter *filter, bool asynchronous );
 
   private:
     // environment
@@ -251,6 +258,8 @@ class CORE_EXPORT QgsSnappingUtils : public QObject
     LocatorsMap mLocators;
     //! temporary locators (indexing just a part of layers). owned by the instance
     LocatorsMap mTemporaryLocators;
+    //! on-demand asynchronous locators used (locators are owned)
+    LocatorsMap mAsynchronousLocators;
     //! list of layer IDs that are too large to be indexed (hybrid strategy will use temporary locators for those)
     QSet<QString> mHybridNonindexableLayers;
 
@@ -270,9 +279,6 @@ class CORE_EXPORT QgsSnappingUtils : public QObject
 
     //! Disable or not the snapping on all features. By default is always TRUE except for non visible features on map canvas.
     bool mEnableSnappingForInvisibleFeature = true;
-
-    //! true if we have to build point locator asynchronously
-    bool mAsynchronous = false;
 };
 
 
