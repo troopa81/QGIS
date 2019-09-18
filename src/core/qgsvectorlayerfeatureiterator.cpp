@@ -28,6 +28,7 @@
 #include "qgsexception.h"
 #include "qgsexpressioncontextutils.h"
 
+
 QgsVectorLayerFeatureSource::QgsVectorLayerFeatureSource( const QgsVectorLayer *layer )
 {
   QMutexLocker locker( &layer->mFeatureSourceConstructorMutex );
@@ -355,15 +356,15 @@ bool QgsVectorLayerFeatureIterator::fetchFeature( QgsFeature &f )
   if ( mClosed )
     return false;
 
-  static QThreadStorage<QStack<QString>> sStack;
+  static QThreadStorage<QSet<QPair<QString, int > > > sStack;
 
-  QgsThreadStackOverflowGuard guard( sStack, mSource->id(), 255 );
+  // QgsThreadStackOverflowGuard guard( sStack, mSource->id(), 255 );
 
-  if ( guard.hasStackOverflow() )
-  {
-    QgsMessageLog::logMessage( QObject::tr( "Stack overflow, too many nested feature iterators.\nIterated layers:\n%3\n..." ).arg( mSource->id(), guard.topFrames() ), QObject::tr( "General" ), Qgis::Critical );
-    return false;
-  }
+  // if ( guard.hasStackOverflow() )
+  // {
+  //   QgsMessageLog::logMessage( QObject::tr( "Stack overflow, too many nested feature iterators.\nIterated layers:\n%3\n..." ).arg( mSource->id(), guard.topFrames() ), QObject::tr( "General" ), Qgis::Critical );
+  //   return false;
+  // }
 
   if ( mRequest.filterType() == QgsFeatureRequest::FilterFid )
   {
@@ -426,7 +427,27 @@ bool QgsVectorLayerFeatureIterator::fetchFeature( QgsFeature &f )
       updateChangedAttributes( f );
 
     if ( mHasVirtualAttributes )
+    {
+      if ( !sStack.hasLocalData() )
+      {
+        sStack.setLocalData( QSet<QPair<QString, int>>() );
+      }
+
+      QMap<int, QgsExpression *>::ConstIterator it = mExpressionFieldInfo.constBegin();
+      for ( ; it != mExpressionFieldInfo.constEnd(); ++it )
+      {
+        if ( sStack.localData().contains( QPair<QString, int>( mSource->id(), it.key() ) ) )
+        {
+          QgsMessageLog::logMessage( QObject::tr( "Recursive expression!!!" ), QString(), Qgis::Critical );
+          return false;
+        }
+        sStack.localData().insert( QPair<QString, int>( mSource->id(), it.key() ) );
+
+      }
+
       addVirtualAttributes( f );
+      sStack.localData().clear();
+    }
 
     if ( mRequest.filterType() == QgsFeatureRequest::FilterExpression && mProviderRequest.filterType() != QgsFeatureRequest::FilterExpression )
     {
@@ -452,6 +473,7 @@ bool QgsVectorLayerFeatureIterator::fetchFeature( QgsFeature &f )
   // no more provider features
 
   close();
+  sStack.localData().clear();
   return false;
 }
 
@@ -696,16 +718,6 @@ void QgsVectorLayerFeatureIterator::prepareJoin( int fieldIdx )
 
 void QgsVectorLayerFeatureIterator::prepareExpression( int fieldIdx )
 {
-  static QThreadStorage<QStack<QString>> sStack;
-
-  QgsThreadStackOverflowGuard guard( sStack, mSource->id(), 255 );
-
-  if ( guard.hasStackOverflow() )
-  {
-    QgsMessageLog::logMessage( QObject::tr( "Stack overflow when preparing field %1 of layer %2.\nLast frames:\n%3\n..." ).arg( mSource->fields().at( fieldIdx ).name(), mSource->id(), guard.topFrames() ), QObject::tr( "General" ), Qgis::Critical );
-    return;
-  }
-
   const QList<QgsExpressionFieldBuffer::ExpressionField> &exps = mSource->mExpressionFieldBuffer->expressions();
 
   int oi = mSource->mFields.fieldOriginIndex( fieldIdx );
