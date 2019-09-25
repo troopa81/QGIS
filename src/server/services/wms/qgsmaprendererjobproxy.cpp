@@ -52,6 +52,10 @@ namespace QgsWms
   {
     if ( mParallelRendering )
     {
+
+      QTime t;
+      t.start();
+
       QgsMapRendererParallelJob renderJob( mapSettings );
 #ifdef HAVE_SERVER_PYTHON_PLUGINS
       renderJob.setFeatureFilterProvider( mFeatureFilterProvider );
@@ -69,6 +73,8 @@ namespace QgsWms
       mPainter.reset( new QPainter( image ) );
 
       mErrors = renderJob.errors();
+
+      QgsMessageLog::logMessage( QString( "temps de rendu %1" ).arg( t.elapsed() ), QStringLiteral( "server" ), Qgis::Info );
     }
     else
     {

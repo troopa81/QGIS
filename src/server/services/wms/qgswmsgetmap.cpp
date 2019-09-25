@@ -53,8 +53,11 @@ namespace QgsWms
 
     if ( result )
     {
+      QTime t;
+      t.start();
       const QString format = request.parameters().value( QStringLiteral( "FORMAT" ), QStringLiteral( "PNG" ) );
       writeImage( response, *result, format, context.imageQuality() );
+      QgsDebugMsg( QStringLiteral( "temps ecriture t=%1" ).arg( t.elapsed() ) );
     }
     else
     {

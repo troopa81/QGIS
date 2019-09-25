@@ -195,6 +195,9 @@ void QgsMapRendererParallelJob::renderLayersFinished()
 {
   Q_ASSERT( mStatus == RenderingLayers );
 
+  QTime t;
+  t.start();
+
   LayerRenderJobs::const_iterator it = mLayerJobs.constBegin();
   for ( ; it != mLayerJobs.constEnd(); ++it )
   {
@@ -224,10 +227,16 @@ void QgsMapRendererParallelJob::renderLayersFinished()
   {
     renderingFinished();
   }
+
+  QgsDebugMsg( QStringLiteral( "renderLayersFinished t=%1" ).arg( t.elapsed() ) );
+
 }
 
 void QgsMapRendererParallelJob::renderingFinished()
 {
+  QTime t;
+  t.start();
+
   QgsDebugMsgLevel( QStringLiteral( "PARALLEL finished" ), 2 );
 
   logRenderingTime( mLayerJobs, mLabelJob );
@@ -240,7 +249,12 @@ void QgsMapRendererParallelJob::renderingFinished()
 
   mRenderingTime = mRenderingStart.elapsed();
 
+  QgsDebugMsg( QStringLiteral( "renderingFinished t=%1" ).arg( t.elapsed() ) );
+
   emit finished();
+
+  QgsDebugMsg( QStringLiteral( "renderingFinishedWithSignal t=%1" ).arg( t.elapsed() ) );
+
 }
 
 void QgsMapRendererParallelJob::renderLayerStatic( LayerRenderJob &job )
@@ -262,7 +276,10 @@ void QgsMapRendererParallelJob::renderLayerStatic( LayerRenderJob &job )
   QgsDebugMsgLevel( QStringLiteral( "job %1 start (layer %2)" ).arg( reinterpret_cast< quint64 >( &job ), 0, 16 ).arg( job.layerId ), 2 );
   try
   {
+    QTime t;
+    t.start();
     job.renderer->render();
+    QgsDebugMsg( QString( "Just render parallel t=%1" ).arg( t.elapsed() ) );
   }
   catch ( QgsException &e )
   {
@@ -287,6 +304,9 @@ void QgsMapRendererParallelJob::renderLayerStatic( LayerRenderJob &job )
 
 void QgsMapRendererParallelJob::renderLabelsStatic( QgsMapRendererParallelJob *self )
 {
+  QTime t;
+  t.start();
+
   LabelRenderJob &job = self->mLabelJob;
 
   if ( !job.cached )
@@ -335,5 +355,6 @@ void QgsMapRendererParallelJob::renderLabelsStatic( QgsMapRendererParallelJob *s
       self->mFinalImage = composeImage( self->mSettings, self->mLayerJobs, self->mLabelJob );
     }
   }
-}
 
+  QgsDebugMsg( QStringLiteral( "renderLabels t=%1" ).arg( t.elapsed() ) );
+}

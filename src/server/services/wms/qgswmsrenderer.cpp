@@ -741,6 +741,8 @@ namespace QgsWms
                                     QStringLiteral( "The requested map size is too large" ) );
     }
 
+    QTime t;
+    t.start();
     // init layer restorer before doing anything
     std::unique_ptr<QgsLayerRestorer> restorer;
     restorer.reset( new QgsLayerRestorer( mContext.layers() ) );
@@ -751,21 +753,33 @@ namespace QgsWms
     QgsMapSettings mapSettings;
     configureLayers( layers, &mapSettings );
 
+    QgsDebugMsg( QStringLiteral( "configureLayers t=%1" ).arg( t.restart() ) );
+
     // create the output image and the painter
     std::unique_ptr<QPainter> painter;
     std::unique_ptr<QImage> image( createImage( mContext.mapSize() ) );
 
+    QgsDebugMsg( QStringLiteral( "create image t=%1" ).arg( t.restart() ) );
+
     // configure map settings (background, DPI, ...)
     configureMapSettings( image.get(), mapSettings );
+
+    QgsDebugMsg( QStringLiteral( "configureMapSettings t=%1" ).arg( t.restart() ) );
 
     // add layers to map settings
     mapSettings.setLayers( layers );
 
+    QgsDebugMsg( QStringLiteral( "add layers t=%1" ).arg( t.restart() ) );
+
     // rendering step for layers
     painter.reset( layersRendering( mapSettings, *image ) );
 
+    QgsDebugMsg( QStringLiteral( "layersRendering t=%1" ).arg( t.restart() ) );
+
     // rendering step for annotations
     annotationsRendering( painter.get() );
+
+    QgsDebugMsg( QStringLiteral( "annotationRendering t=%1" ).arg( t.restart() ) );
 
     // painting is terminated
     painter->end();
@@ -774,6 +788,8 @@ namespace QgsWms
     QImage *scaledImage = scaleImage( image.get() );
     if ( scaledImage )
       image.reset( scaledImage );
+
+    QgsDebugMsg( QStringLiteral( "scaleImage t=%1" ).arg( t.restart() ) );
 
     // return
     return image.release();

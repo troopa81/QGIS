@@ -281,9 +281,12 @@ void QgsMapRendererCustomPainterJob::doRender()
   QgsDebugMsgLevel( QStringLiteral( "Starting to render layer stack." ), 5 );
   QTime renderTime;
   renderTime.start();
+  QTime t;
+  t.start();
 
   for ( LayerRenderJobs::iterator it = mLayerJobs.begin(); it != mLayerJobs.end(); ++it )
   {
+
     LayerRenderJob &job = *it;
 
     if ( job.context.renderingStopped() )
@@ -307,7 +310,10 @@ void QgsMapRendererCustomPainterJob::doRender()
         job.imageInitialized = true;
       }
 
+      QTime t;
+      t.start();
       job.renderer->render();
+      QgsDebugMsg( QString( "Just render sync t=%1" ).arg( t.elapsed() ) );
 
       job.renderingTime += layerTime.elapsed();
     }
@@ -320,6 +326,7 @@ void QgsMapRendererCustomPainterJob::doRender()
       mPainter->setOpacity( 1.0 );
     }
 
+    QgsDebugMsg( QString( "render %1 t=%2" ).arg( job.layerId ).arg( t.restart() ) );
   }
 
   QgsDebugMsgLevel( QStringLiteral( "Done rendering map layers" ), 5 );
@@ -357,7 +364,7 @@ void QgsMapRendererCustomPainterJob::doRender()
     mPainter->drawImage( 0, 0, *mLabelJob.img );
   }
 
+  QgsDebugMsg( QString( "renderLabel t=%1" ).arg( t.elapsed() ) );
+
   QgsDebugMsgLevel( QStringLiteral( "Rendering completed in (seconds): %1" ).arg( renderTime.elapsed() / 1000.0 ), 2 );
 }
-
-

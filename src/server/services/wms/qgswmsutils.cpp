@@ -120,11 +120,15 @@ namespace QgsWms
         // Rendering is made with the format QImage::Format_ARGB32_Premultiplied
         // So we need to convert it in QImage::Format_ARGB32 in order to properly build
         // the color table.
+
+        QTime t;
+        t.start();
         QImage img256 = img.convertToFormat( QImage::Format_ARGB32 );
         medianCut( colorTable, 256, img256 );
         result = img256.convertToFormat( QImage::Format_Indexed8, colorTable,
                                          Qt::ColorOnly | Qt::ThresholdDither |
                                          Qt::ThresholdAlphaDither | Qt::NoOpaqueDetection );
+        QgsDebugMsg( QStringLiteral( "temps convertion t=%1" ).arg( t.elapsed() ) );
       }
       contentType = "image/png";
       saveFormat = "PNG";
