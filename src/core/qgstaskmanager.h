@@ -310,7 +310,12 @@ class CORE_EXPORT QgsTask : public QObject
      * it's used as a trigger for waitForFinished.
      */
     QMutex mNotFinishedMutex;
-    QMutex mNotStartedMutex;
+
+    /**
+     * This mutex remains locked from task creation until the task actually start,
+     * it's used in waitForFinished to actually wait the task to be started.
+     */
+    QSemaphore mNotStartedMutex;
 
     //! Progress of this (parent) task alone
     double mProgress = 0.0;
