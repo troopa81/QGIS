@@ -2409,10 +2409,10 @@ QOCISpatialCols::CurveParts QOCISpatialCols::getCurveParts( int &iElem, const QV
     // CompoundCurve
     baseType = WKBCompoundCurve;
     int compoundParts = n;
-    iElem += 3;
     CurveParts parts;
-    for ( int k = 0; k < compoundParts; k += 1, iElem += 3 )
+    for ( int k = 0; k < compoundParts; k += 1 )
     {
+      iElem += 3;
       if ( !getElemInfoElem( iElem, vElems, nOrds, startOffset, endOffset, etype, n ) )
       {
         qWarning() << "could not fetch element info" << iElem;

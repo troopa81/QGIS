@@ -255,7 +255,7 @@ class TestPyQgsOracleProvider(unittest.TestCase, ProviderTestCase):
         self.assertTrue(
             compareWkt(features[7].geometry().asWkt(), 'MultiCurve (CircularString (1 2, 5 4, 7 2.2, 10 0.1, 13 4),CircularString (-11 -3, 5 7, 10 -1))', 0.00001), features[7].geometry().asWkt())
         self.assertTrue(
-            compareWkt(features[8].geometry().asWkt(), 'MultiCurve (CompoundCurve ((-1 -5, 1 2),CircularString (1 2, 5 4, 7 2.2, 10 0.1, 13 4),(13 4, 17 -6)),CompoundCurve (CircularString (1 2, 5 4, 7 2.2, 10 0.1, 13 4)),CompoundCurve ((-11 -3, 5 7, 10 -1)))', 0.00001), features[8].geometry().asWkt())
+            compareWkt(features[8].geometry().asWkt(), 'MultiCurve (CompoundCurve ((-1 -5, 1 2),CircularString (1 2, 5 4, 7 2.2, 10 0.1, 13 4),(13 4, 17 -6)),CompoundCurve (CircularString (1 3, 5 5, 7 3.2, 10 1.1, 13 5)),CompoundCurve ((-11 -3, 5 7, 10 -1)))', 0.00001), features[8].geometry().asWkt())
 
     def testSurfaces(self):
         vl = QgsVectorLayer('%s table="QGIS"."POLY_DATA" (GEOM) srid=4326 type=POLYGON sql=' %
