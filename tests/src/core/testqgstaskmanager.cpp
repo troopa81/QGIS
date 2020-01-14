@@ -533,9 +533,6 @@ void TestQgsTaskManager::taskFinished()
 
 void TestQgsTaskManager::subTask()
 {
-  if ( QgsTest::isTravis() )
-    QSKIP( "This test is disabled on Travis CI environment" );
-
   QgsTaskManager manager;
 
   // parent with one subtask

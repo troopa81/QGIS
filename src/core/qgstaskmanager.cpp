@@ -263,7 +263,7 @@ void QgsTask::setProgress( double progress )
 void QgsTask::completed()
 {
   mStatus = Complete;
-  processSubTasksForCompletion();
+  QMetaObject::invokeMethod(this, &QgsTask::processSubTasksForCompletion, Qt::QueuedConnection);
 }
 
 void QgsTask::processSubTasksForCompletion()

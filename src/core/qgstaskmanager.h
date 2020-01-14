@@ -357,7 +357,6 @@ class CORE_EXPORT QgsTask : public QObject
      */
     void terminated();
 
-    void processSubTasksForCompletion();
 
     void processSubTasksForTermination();
 
@@ -366,6 +365,10 @@ class CORE_EXPORT QgsTask : public QObject
     friend class QgsTaskManager;
     friend class QgsTaskRunnableWrapper;
     friend class TestQgsTaskManager;
+
+    private slots:
+
+      void processSubTasksForCompletion();
 
 };
 
