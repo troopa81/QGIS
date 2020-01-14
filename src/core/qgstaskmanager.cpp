@@ -17,9 +17,16 @@
 
 #include "qgstaskmanager.h"
 #include "qgsproject.h"
+#include "qgslogger.h"
 #include "qgsmaplayerlistutils.h"
 #include <QtConcurrentRun>
 
+
+void randomSleep( const QString& text, QgsTask* task )
+{
+  QgsDebugMsg( QStringLiteral( "%1 task=%2" ).arg( text, task->description() ) );
+  QThread::currentThread()->msleep( QRandomGenerator::global()->bounded(1000) );
+}
 
 //
 // QgsTask
@@ -189,6 +196,8 @@ void QgsTask::setDependentLayers( const QList< QgsMapLayer * > &dependentLayers 
 
 void QgsTask::subTaskStatusChanged( int status )
 {
+  QgsDebugMsg( QStringLiteral( "subTaskStatusChanged task=%1" ).arg( description() ) );
+
   QgsTask *subTask = qobject_cast< QgsTask * >( sender() );
   if ( !subTask )
     return;
@@ -272,16 +281,23 @@ void QgsTask::processSubTasksForCompletion()
 
   if ( mStatus == Complete && subTasksCompleted )
   {
+    QgsDebugMsg( QStringLiteral( "statusComplete task=%1" ).arg( description() ) );
     mOverallStatus = Complete;
 
     setProgress( 100.0 );
+    randomSleep( "emit statusChanged", this );
     emit statusChanged( Complete );
+
+    randomSleep( "taskCompleted", this );
     emit taskCompleted();
+
+    randomSleep( "mNotFinishedMutex.tryLock", this );
     mNotFinishedMutex.tryLock(); // we're not guaranteed to already have the lock in place here
     mNotFinishedMutex.unlock();
   }
   else if ( mStatus == Complete )
   {
+    randomSleep( "subTask to complete", this );
     // defer completion until all subtasks are complete
     mOverallStatus = Running;
   }
@@ -793,6 +809,7 @@ bool QgsTaskManager::cleanupAndDeleteTask( QgsTask *task )
     if ( isParent )
     {
       //task already finished, kill it
+      randomSleep( "deleteLayer", task );
       task->deleteLater();
     }
   }
