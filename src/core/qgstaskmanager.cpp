@@ -99,7 +99,9 @@ void QgsTask::cancel()
   if ( mOverallStatus == Complete || mOverallStatus == Terminated )
     return;
 
+  mShouldTerminateMutex.lock();
   mShouldTerminate = true;
+  mShouldTerminateMutex.unlock();
   if ( mStatus == Queued || mStatus == OnHold )
   {
     // immediately terminate unstarted jobs
@@ -117,6 +119,12 @@ void QgsTask::cancel()
   {
     subTask.task->cancel();
   }
+}
+
+bool QgsTask::isCanceled() const
+{
+  QMutexLocker locker( &mShouldTerminateMutex );
+  return mShouldTerminate;
 }
 
 void QgsTask::hold()
