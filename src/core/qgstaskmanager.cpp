@@ -64,7 +64,7 @@ qint64 QgsTask::elapsedTime() const
 
 void QgsTask::start()
 {
-  mNotFinishedMutex.lock();
+  QMutexLocker locker( &mNotFinishedMutex );
   mNotStartedMutex.release();
   mStartCount++;
   Q_ASSERT( mStartCount == 1 );
@@ -266,7 +266,6 @@ void QgsTask::completed()
 {
   mStatus = Complete;
   QMetaObject::invokeMethod( this, &QgsTask::processSubTasksForCompletion, Qt::AutoConnection );
-  mNotFinishedMutex.unlock();
 }
 
 void QgsTask::processSubTasksForCompletion()
@@ -358,7 +357,6 @@ void QgsTask::terminated()
 {
   mStatus = Terminated;
   QMetaObject::invokeMethod( this, &QgsTask::processSubTasksForTermination, Qt::AutoConnection );
-  mNotFinishedMutex.unlock();
 }
 
 
