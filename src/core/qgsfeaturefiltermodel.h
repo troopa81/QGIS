@@ -336,6 +336,7 @@ class CORE_EXPORT QgsFeatureFilterModel : public QAbstractItemModel
     QgsFieldExpressionValuesGatherer *mGatherer = nullptr;
     QTimer mReloadTimer;
     bool mShouldReloadCurrentFeature = false;
+    bool mKeepCurrentEntry = false; // need to keep the current value after a reload or if the value does not exist
     bool mExtraValueDoesNotExist = false;
     bool mAllowNull = false;
     bool mIsSettingExtraIdentifierValue = false;
@@ -346,6 +347,7 @@ class CORE_EXPORT QgsFeatureFilterModel : public QAbstractItemModel
     int mExtraIdentifierValueIndex = -1;
 
     friend class QgsFieldExpressionValuesGatherer;
+    friend class TestQgsFeatureListComboBox;
 };
 
 #endif // QGSFEATUREFILTERMODEL_H
