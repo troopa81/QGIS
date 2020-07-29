@@ -103,6 +103,15 @@ Encodes a shape to its string representation.
     virtual QRectF bounds( QPointF point, QgsSymbolRenderContext &context );
 
 
+    QPainterPath path();
+%Docstring
+Returns the symbol layer path as a QPainterPath
+
+:return: the path
+
+.. versionadded:: 3.22
+%End
+
   protected:
 
     bool prepareMarkerShape( Qgis::MarkerShape shape );

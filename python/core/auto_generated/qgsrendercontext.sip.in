@@ -935,6 +935,8 @@ rendering using QBrush objects.
 .. versionadded:: 3.16
 %End
 
+
+
     QgsDoubleRange zRange() const;
 %Docstring
 Returns the range of z-values which should be rendered.
@@ -991,6 +993,15 @@ Sets the device pixel ``ratio``.
 Common values are 1 for normal-dpi displays and 2 for high-dpi "retina" displays.
 
 .. seealso:: :py:func:`devicePixelRatio`
+
+.. versionadded:: 3.22
+%End
+
+    void addPainterForSymbolLayer( const QgsSymbolLayer *symbolLayer, QPainter *painter );
+%Docstring
+Add a subpainter for a specific symbolLayer
+
+};
 
 .. versionadded:: 3.22
 %End

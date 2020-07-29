@@ -17,6 +17,7 @@
 #include "qgsmarkersymbollayer.h"
 #include "qgssymbollayerutils.h"
 #include "qgspainteffect.h"
+#include "qgspainterswapper.h"
 
 QgsMarkerSymbol *QgsMarkerSymbol::createSimple( const QVariantMap &properties )
 {
@@ -425,6 +426,10 @@ void QgsMarkerSymbol::renderPoint( QPointF point, const QgsFeature *f, QgsRender
     QgsSymbolLayer *symbolLayer = mLayers.value( layerIdx );
     if ( symbolLayer && symbolLayer->enabled() && context.isSymbolLayerEnabled( symbolLayer ) )
     {
+      QPainter *symbolLayerPainter = symbolContext.renderContext().painterForSymbolLayer( symbolLayer );
+      QPainter *painter = symbolLayerPainter != nullptr ? symbolLayerPainter : symbolContext.renderContext().painter();
+      QgsPainterSwapper swapper( symbolContext.renderContext(), painter );
+
       if ( symbolLayer->type() == Qgis::SymbolType::Marker )
       {
         QgsMarkerSymbolLayer *markerLayer = static_cast<QgsMarkerSymbolLayer *>( symbolLayer );
@@ -448,6 +453,10 @@ void QgsMarkerSymbol::renderPoint( QPointF point, const QgsFeature *f, QgsRender
 
     if ( !symbolLayer->enabled() || !context.isSymbolLayerEnabled( symbolLayer ) )
       continue;
+
+    QPainter *symbolLayerPainter = symbolContext.renderContext().painterForSymbolLayer( symbolLayer );
+    QPainter *painter = symbolLayerPainter != nullptr ? symbolLayerPainter : symbolContext.renderContext().painter();
+    QgsPainterSwapper swapper( symbolContext.renderContext(), painter );
 
     if ( symbolLayer->type() == Qgis::SymbolType::Marker )
     {
@@ -500,4 +509,3 @@ QgsMarkerSymbol *QgsMarkerSymbol::clone() const
   cloneSymbol->setFlags( mSymbolFlags );
   return cloneSymbol;
 }
-

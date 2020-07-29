@@ -108,6 +108,13 @@ class CORE_EXPORT QgsSimpleMarkerSymbolLayerBase : public QgsMarkerSymbolLayer
     void renderPoint( QPointF point, QgsSymbolRenderContext &context ) override;
     QRectF bounds( QPointF point, QgsSymbolRenderContext &context ) override;
 
+    /**
+     * Returns the symbol layer path as a QPainterPath
+     * \returns the path
+     * \since QGIS 3.22
+     */
+    QPainterPath path();
+
   protected:
 
     /**

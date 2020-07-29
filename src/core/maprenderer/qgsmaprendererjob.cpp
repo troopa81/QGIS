@@ -20,6 +20,9 @@
 #include <QTimer>
 #include <QtConcurrentMap>
 
+#include <QWidget>
+#include <QPicture>
+
 #include "qgslogger.h"
 #include "qgsrendercontext.h"
 #include "qgsmaplayer.h"
@@ -44,6 +47,7 @@
 #include "qgsmaplayerelevationproperties.h"
 #include "qgsvectorlayerrenderer.h"
 #include "qgsrendereditemresults.h"
+
 
 ///@cond PRIVATE
 
@@ -407,6 +411,19 @@ QPainter *QgsMapRendererJob::allocateImageAndPainter( QString layerId, QImage *&
   return painter;
 }
 
+QPainter *QgsMapRendererJob::allocatePictureAndPainter( QPicture *&picture )
+{
+  QPainter *painter = nullptr;
+  picture = new QPicture();
+  if ( picture )
+  {
+    painter = new QPainter( picture );
+    painter->fillRect( 0, 0, mSettings.deviceOutputSize().height(), mSettings.deviceOutputSize().width(), Qt::transparent );
+    painter->setRenderHint( QPainter::Antialiasing, mSettings.testFlag( Qgis::MapSettingsFlag::Antialiasing ) );
+  }
+  return painter;
+}
+
 std::vector<LayerRenderJob> QgsMapRendererJob::prepareJobs( QPainter *painter, QgsLabelingEngine *labelingEngine2, bool deferredPainterSet )
 {
   std::vector< LayerRenderJob > layerJobs;
@@ -493,6 +510,9 @@ std::vector<LayerRenderJob> QgsMapRendererJob::prepareJobs( QPainter *painter, Q
 
     layerJobs.emplace_back( LayerRenderJob() );
     LayerRenderJob &job = layerJobs.back();
+    job.cached = false;
+    job.img = nullptr;
+    job.imgPic = nullptr;
     job.layer = ml;
     job.layerId = ml->id();
     job.estimatedRenderingTime = mLayerRenderingTimeHints.value( ml->id(), 0 );
@@ -678,14 +698,21 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
   if ( maskedSymbolLayers.isEmpty() )
     return secondPassJobs;
 
+  //Prepare what is needed for the painterpath generation
+
   // Now that we know some layers have a mask, we have to allocate a mask image and painter
   // for them in the first pass job
   for ( LayerRenderJob &job : firstPassJobs )
   {
-    if ( job.img == nullptr )
+    if ( job.img == nullptr && mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) == false )
     {
       job.context()->setPainter( allocateImageAndPainter( job.layerId, job.img ) );
     }
+    else if ( job.imgPic == nullptr && mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) )
+    {
+      job.context()->setPainter( allocatePictureAndPainter( job.imgPic ) );
+    }
+
     if ( layerHasMask.contains( job.layerId ) )
     {
       // Note: we only need an alpha channel here, rather than a full RGBA image
@@ -695,9 +722,13 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
   }
 
   // Allocate an image for labels
-  if ( labelJob.img == nullptr )
+  if ( labelJob.img == nullptr && mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) == false )
   {
     labelJob.img = allocateImage( QStringLiteral( "labels" ) );
+  }
+  else if ( labelJob.imgPic == nullptr && mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) )
+  {
+    labelJob.imgPic = new QPicture();
   }
 
   // Prepare label mask images
@@ -733,13 +764,18 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
     // associate first pass job with second pass job
     job2.firstPassJob = &job;
 
-    QgsVectorLayer *vl1 = qobject_cast<QgsVectorLayer *>( job.layer );
-
-    // create a new destination image for the second pass job, and update
-    // second pass job context accordingly
+    // ... but clear the image
     job2.context()->setMaskPainter( nullptr );
-    job2.context()->setPainter( allocateImageAndPainter( job.layerId, job2.img ) );
-    if ( ! job2.img )
+    if ( mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) == false )
+    {
+      job2.context()->setPainter( allocateImageAndPainter( job.layerId, job2.img ) );
+    }
+    else
+    {
+      job2.context()->setPainter( allocatePictureAndPainter( job2.imgPic ) );
+    }
+
+    if ( ! job2.img && ! job2.imgPic )
     {
       secondPassJobs.pop_back();
       continue;
@@ -756,16 +792,37 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
 
     // FIXME: another possibility here, to avoid allocating a new map renderer and reuse the one from
     // the first pass job, would be to be able to call QgsMapLayerRenderer::render() with a QgsRenderContext.
-    QgsVectorLayerRenderer *mapRenderer = static_cast<QgsVectorLayerRenderer *>( vl1->createMapRenderer( *job2.context() ) );
+    QgsVectorLayerRenderer *mapRenderer = static_cast<QgsVectorLayerRenderer *>( ml->createMapRenderer( *job2.context() ) );
     job2.renderer = mapRenderer;
     if ( job2.renderer )
     {
       job2.context()->setFeedback( job2.renderer->feedback() );
     }
 
-    // Modify the render context so that symbol layers get disabled as needed.
-    // The map renderer stores a reference to the context, so we can modify it even after the map renderer creation (what we need here)
-    job2.context()->setDisabledSymbolLayers( QgsSymbolLayerUtils::toSymbolLayerPointers( mapRenderer->featureRenderer(), symbolList ) );
+    if ( mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) == false )
+    {
+      // Modify the render context so that symbol layers get disabled as needed.
+      // The map renderer stores a reference to the context, so we can modify it even after the map renderer creation (what we need here)
+      job2.context()->setDisabledSymbolLayers( QgsSymbolLayerUtils::toSymbolLayerPointers( mapRenderer->featureRenderer(), symbolList ) );
+    }
+    else
+    {
+      QList< QPair<QgsSymbolLayerId, const QgsSymbolLayer *> > slList = QgsSymbolLayerUtils::listSymbolLayers( mapRenderer->featureRenderer() );
+
+      for ( QPair<QgsSymbolLayerId, const QgsSymbolLayer *> &slId : slList )
+      {
+        QPicture *slPic = nullptr;
+        QPainter *slPainter = allocatePictureAndPainter( slPic );
+
+        job2.symbolLayerPic.append( QPair<const QgsSymbolLayer *, QPicture *>( slId.second, slPic ) );
+        job2.context()->addPainterForSymbolLayer( slId.second, slPainter );
+
+        if ( symbolList.find( slId.first ) != symbolList.end() )
+        {
+          job2.isSymbolLayerMasked.insert( slId.second );
+        }
+      }
+    }
   }
 
   return secondPassJobs;
@@ -830,6 +887,14 @@ void QgsMapRendererJob::cleanupJobs( std::vector<LayerRenderJob> &jobs )
       job.img = nullptr;
     }
 
+    if ( job.imgPic )
+    {
+      delete job.context()->painter();
+      job.context()->setPainter( nullptr );
+      delete job.imgPic;
+      job.imgPic = nullptr;
+    }
+
     // delete the mask image and painter
     if ( job.maskImage )
     {
@@ -870,6 +935,25 @@ void QgsMapRendererJob::cleanupSecondPassJobs( std::vector< LayerRenderJob > &jo
       job.img = nullptr;
     }
 
+    if ( job.imgPic )
+    {
+      delete job.context()->painter();
+      job.context()->setPainter( nullptr );
+
+      delete job.imgPic;
+      job.imgPic = nullptr;
+    }
+
+    for ( auto symbolPicturePair : job.symbolLayerPic )
+    {
+      delete symbolPicturePair.second;
+    }
+
+    for ( auto subPainter : job.renderer->renderContext()->getSubPainter() )
+    {
+      delete subPainter;
+    }
+
     if ( job.renderer )
     {
       delete job.renderer;
@@ -896,6 +980,12 @@ void QgsMapRendererJob::cleanupLabelJob( LabelRenderJob &job )
 
     delete job.img;
     job.img = nullptr;
+  }
+
+  if ( job.imgPic )
+  {
+    delete job.imgPic;
+    job.imgPic = nullptr;
   }
 
   for ( int maskId = 0; maskId < job.maskImages.size(); maskId++ )
@@ -1011,20 +1101,13 @@ QImage QgsMapRendererJob::layerImageToBeComposed(
   }
 }
 
-void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPassJobs, LabelRenderJob &labelJob )
+void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPassJobs, LabelRenderJob &labelJob, bool forceVector, bool hasClipping, const QPainterPath &clipPath )
 {
-#if DEBUG_RENDERING
-  int i = 0;
-#endif
   // compose the second pass with the mask
   for ( LayerRenderJob &job : secondPassJobs )
   {
-#if DEBUG_RENDERING
-    i++;
-    job.img->save( QString( "/tmp/second_%1.png" ).arg( i ) );
-    int mask = 0;
-#endif
-
+    QPainterPath mergedMasks;
+    mergedMasks.setFillRule( Qt::WindingFill );
     // Merge all mask images into the first one if we have more than one mask image
     if ( job.maskJobs.size() > 1 )
     {
@@ -1032,9 +1115,6 @@ void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPa
       for ( QPair<LayerRenderJob *, int> p : job.maskJobs )
       {
         QImage *maskImage = p.first ? p.first->maskImage : labelJob.maskImages[p.second];
-#if DEBUG_RENDERING
-        maskImage->save( QString( "/tmp/mask_%1_%2.png" ).arg( i ).arg( mask++ ) );
-#endif
         if ( ! maskPainter )
         {
           maskPainter = p.first ? p.first->context()->maskPainter() : labelJob.context.maskPainter( p.second );
@@ -1046,61 +1126,132 @@ void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPa
       }
     }
 
+    if ( forceVector )
+    {
+      for ( QPair<LayerRenderJob *, int> p : job.maskJobs )
+      {
+        if ( p.first )
+        {
+          mergedMasks.addPath( p.first->context()->maskPainterPath() );
+        }
+        else
+        {
+          mergedMasks.addPath( labelJob.context.maskLabelPainterPath( p.second ) );
+        }
+      }
+    }
+
     if ( ! job.maskJobs.isEmpty() )
     {
       // All have been merged into the first
       QPair<LayerRenderJob *, int> p = *job.maskJobs.begin();
       QImage *maskImage = p.first ? p.first->maskImage : labelJob.maskImages[p.second];
-#if DEBUG_RENDERING
-      maskImage->save( QString( "/tmp/mask_%1.png" ).arg( i ) );
-#endif
-
-      // Only retain parts of the second rendering that are "inside" the mask image
-      QPainter *painter = job.context()->painter();
-      painter->setCompositionMode( QPainter::CompositionMode_DestinationIn );
-
-      //Create an "alpha binarized" image of the maskImage to :
-      //* Eliminate antialiasing artifact
-      //* Avoid applying mask opacity to elements under the mask but not masked
-      QImage maskBinAlpha = maskImage->createMaskFromColor( 0 );
-      QVector<QRgb> mswTable;
-      mswTable.push_back( qRgba( 0, 0, 0, 255 ) );
-      mswTable.push_back( qRgba( 0, 0, 0, 0 ) );
-      maskBinAlpha.setColorTable( mswTable );
-      painter->drawImage( 0, 0, maskBinAlpha );
-#if DEBUG_RENDERING
-      job.img->save( QString( "/tmp/second_%1_a.png" ).arg( i ) );
-#endif
-
-      // Modify the first pass' image ...
+      if ( !forceVector )
       {
-        QPainter tempPainter;
+        // Only retain parts of the second rendering that are "inside" the mask image
+        QPainter *painter = job.context()->painter();
+        painter->setCompositionMode( QPainter::CompositionMode_DestinationIn );
 
-        // reuse the first pass painter, if available
-        QPainter *painter1 = job.firstPassJob->context()->painter();
-        if ( ! painter1 )
+        //Create an "alpha binarized" image of the maskImage to :
+        //* Eliminate antialiasing artifact
+        //* Avoid applying mask opacity to elements under the mask but not masked
+        QImage maskBinAlpha = maskImage->createMaskFromColor( 0 );
+        QVector<QRgb> mswTable;
+        mswTable.push_back( qRgba( 0, 0, 0, 255 ) );
+        mswTable.push_back( qRgba( 0, 0, 0, 0 ) );
+        maskBinAlpha.setColorTable( mswTable );
+        painter->drawImage( 0, 0, maskBinAlpha );
+
+        // Modify the first pass' image ...
         {
-          tempPainter.begin( job.firstPassJob->img );
-          painter1 = &tempPainter;
-        }
-#if DEBUG_RENDERING
-        job.firstPassJob->img->save( QString( "/tmp/second_%1_first_pass_1.png" ).arg( i ) );
-#endif
-        // ... first retain parts that are "outside" the mask image
-        painter1->setCompositionMode( QPainter::CompositionMode_DestinationOut );
-        painter1->drawImage( 0, 0, *maskImage );
+          QPainter tempPainter;
 
-#if DEBUG_RENDERING
-        job.firstPassJob->img->save( QString( "/tmp/second_%1_first_pass_2.png" ).arg( i ) );
-#endif
-        // ... and overpaint the second pass' image on it
-        painter1->setCompositionMode( QPainter::CompositionMode_DestinationOver );
-        painter1->drawImage( 0, 0, *job.img );
-#if DEBUG_RENDERING
-        job.img->save( QString( "/tmp/second_%1_b.png" ).arg( i ) );
-        if ( job.firstPassJob )
-          job.firstPassJob->img->save( QString( "/tmp/second_%1_first_pass_3.png" ).arg( i ) );
-#endif
+          // reuse the first pass painter, if available
+          QPainter *painter1 = job.firstPassJob->context()->painter();
+          if ( ! painter1 )
+          {
+            tempPainter.begin( job.firstPassJob->img );
+            painter1 = &tempPainter;
+          }
+
+          // ... first retain parts that are "outside" the mask image
+          painter1->setCompositionMode( QPainter::CompositionMode_DestinationOut );
+          painter1->drawImage( 0, 0, *maskImage );
+
+          // ... and overpaint the second pass' image on it
+          painter1->setCompositionMode( QPainter::CompositionMode_DestinationOver );
+          painter1->drawImage( 0, 0, *job.img );
+        }
+      }
+      else
+      {
+        //Masking is done with clipping so our final clip path is actually the full image
+        //minus the path of the masking symbols
+        QPainterPath finalMask;
+        if ( hasClipping )
+        {
+          finalMask = clipPath;
+        }
+        else
+        {
+          finalMask.addRect( 0, 0, job.context()->painter()->device()->width(),
+                             job.context()->painter()->device()->height() );
+        }
+        finalMask = finalMask.subtracted( mergedMasks );
+
+        //Draw the first pass image and compose it with the rasterized masks
+        //If the masks are fully opaque : the result should be a completely transparent image
+        //If the mask have some transparency : masked elements of the first pass will appear here
+        QPainter tempPainter;
+        QImage firstPassMasked( maskImage->width(), maskImage->height(), QImage::Format_ARGB32 );
+        firstPassMasked.fill( QColor( 0, 0, 0, 0 ) );
+        tempPainter.begin( &firstPassMasked );
+        tempPainter.setClipPath( mergedMasks );
+        tempPainter.drawPicture( 0, 0, *job.firstPassJob->imgPic );
+        tempPainter.setCompositionMode( QPainter::CompositionMode_DestinationOut );
+        tempPainter.drawImage( 0, 0, *maskImage );
+        tempPainter.end();
+
+        //Combine the results in the first pass painter / qpicture
+        QPainter *painter1 = job.firstPassJob->context()->painter();
+        QPicture firstJobPic = *job.firstPassJob->imgPic;
+        *job.firstPassJob->imgPic = QPicture();
+        painter1->begin( job.firstPassJob->imgPic );
+
+        for ( QPair<const QgsSymbolLayer *, QPicture *> &elem : job.symbolLayerPic )
+        {
+          if ( job.isSymbolLayerMasked.find( elem.first ) != job.isSymbolLayerMasked.end() )
+          {
+            painter1->setClipping( true );
+            painter1->setClipPath( finalMask );
+            painter1->drawPicture( 0, 0, *elem.second );
+          }
+          else
+          {
+            if ( hasClipping )
+            {
+              painter1->setClipPath( clipPath );
+            }
+            else
+            {
+              painter1->setClipping( false );
+            }
+            painter1->drawPicture( 0, 0, *elem.second );
+          }
+        }
+
+        //First the rasterized alpha blended first pass (containing only what is under the mask if not opaque)
+        if ( hasClipping )
+        {
+          painter1->setClipPath( clipPath );
+        }
+        else
+        {
+          painter1->setClipping( false );
+        }
+        painter1->drawImage( 0, 0, firstPassMasked );
+
+        painter1->end();
       }
     }
   }

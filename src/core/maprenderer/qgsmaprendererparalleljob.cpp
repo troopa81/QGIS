@@ -315,7 +315,7 @@ void QgsMapRendererParallelJob::renderLayersSecondPassFinished()
   QgsDebugMsgLevel( QStringLiteral( "PARALLEL finished" ), 2 );
 
   // compose second pass images into first pass images
-  composeSecondPass( mSecondPassLayerJobs, mLabelJob );
+  composeSecondPass( mSecondPassLayerJobs, mLabelJob, false, false, QPainterPath() );
 
   // compose final image
   mFinalImage = composeImage( mSettings, mLayerJobs, mLabelJob );

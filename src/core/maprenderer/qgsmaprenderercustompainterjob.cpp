@@ -23,6 +23,10 @@
 #include "qgsvectorlayerlabeling.h"
 
 #include <QtConcurrentRun>
+#include <QPicture>
+
+Q_GUI_EXPORT extern int qt_defaultDpiX();
+Q_GUI_EXPORT extern int qt_defaultDpiY();
 
 //
 // QgsMapRendererAbstractCustomPainterJob
@@ -290,6 +294,8 @@ void QgsMapRendererCustomPainterJob::doRender()
   QElapsedTimer renderTime;
   renderTime.start();
 
+  // Is i really usefull
+  int i = 0;
   for ( LayerRenderJob &job : mLayerJobs )
   {
     if ( job.context()->renderingStopped() )
@@ -315,7 +321,18 @@ void QgsMapRendererCustomPainterJob::doRender()
         job.imageInitialized = true;
       }
 
+      if ( job.imgPic )
+      {
+        QPainter *jobPtr = job.renderer->renderContext()->painter();
+        jobPtr->fillRect( 0, 0, jobPtr->device()->height(), jobPtr->device()->width(), Qt::transparent );
+      }
+
       job.completed = job.renderer->render();
+
+      if ( job.imgPic )
+      {
+        job.renderer->renderContext()->painter()->end();
+      }
 
       job.renderingTime += layerTime.elapsed();
     }
@@ -329,6 +346,7 @@ void QgsMapRendererCustomPainterJob::doRender()
     }
 
     emit layerRendered( job.layerId );
+    ++i;
   }
 
   emit renderingLayersFinished();
@@ -346,6 +364,14 @@ void QgsMapRendererCustomPainterJob::doRender()
         QPainter painter;
         mLabelJob.img->fill( 0 );
         painter.begin( mLabelJob.img );
+        mLabelJob.context.setPainter( &painter );
+        drawLabeling( mLabelJob.context, mLabelingEngineV2.get(), &painter );
+        painter.end();
+      }
+      else if ( mLabelJob.imgPic )
+      {
+        QPainter painter;
+        painter.begin( mLabelJob.imgPic );
         mLabelJob.context.setPainter( &painter );
         drawLabeling( mLabelJob.context, mLabelingEngineV2.get(), &painter );
         painter.end();
@@ -388,22 +414,57 @@ void QgsMapRendererCustomPainterJob::doRender()
           job.imageInitialized = true;
         }
 
+        if ( job.imgPic )
+        {
+          QPainter *jobPtr = job.renderer->renderContext()->painter();
+          jobPtr->fillRect( 0, 0, jobPtr->device()->height(), jobPtr->device()->width(), Qt::transparent );
+        }
+
         job.completed = job.renderer->render();
+
+        if ( job.imgPic )
+        {
+          job.renderer->renderContext()->painter()->end();
+        }
+
+        for ( auto elem : job.renderer->renderContext()->getSubPainter() )
+        {
+          elem->end();
+        }
 
         job.renderingTime += layerTime.elapsed();
       }
     }
 
-    composeSecondPass( mSecondPassLayerJobs, mLabelJob );
+    bool forceVector = mSettings.testFlag( Qgis::MapSettingsFlag::ForceVectorOutput );
+    bool hasClipping = mPainter->hasClipping();
+    QPainterPath existingPath = mPainter->clipPath();
+    composeSecondPass( mSecondPassLayerJobs, mLabelJob, forceVector, hasClipping, existingPath );
 
-    const QImage finalImage = composeImage( mSettings, mLayerJobs, mLabelJob );
+    if ( forceVector == false )
+    {
+      const QImage finalImage = composeImage( mSettings, mLayerJobs, mLabelJob );
 
-    mPainter->setCompositionMode( QPainter::CompositionMode_SourceOver );
-    mPainter->setOpacity( 1.0 );
-    mPainter->drawImage( 0, 0, finalImage );
+      mPainter->setCompositionMode( QPainter::CompositionMode_SourceOver );
+      mPainter->setOpacity( 1.0 );
+      mPainter->drawImage( 0, 0, finalImage );
+    }
+    else
+    {
+      //Vector composition is simply draw the saved picture on the painter
+      double scaleFactor = static_cast<double>( qt_defaultDpiX() / mSettings.outputDpi() );
+      mPainter->scale( scaleFactor, scaleFactor );
+      for ( LayerRenderJob &job : mLayerJobs )
+      {
+        mPainter->drawPicture( 0, 0, *job.imgPic );
+      }
+
+      if ( mLabelJob.imgPic )
+      {
+        mPainter->drawPicture( 0, 0, *mLabelJob.imgPic );
+      }
+    }
   }
 
   QgsDebugMsgLevel( QStringLiteral( "Rendering completed in (seconds): %1" ).arg( renderTime.elapsed() / 1000.0 ), 2 );
 }
-
-

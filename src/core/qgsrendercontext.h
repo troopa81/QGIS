@@ -22,6 +22,7 @@
 #include "qgis_sip.h"
 #include <QColor>
 #include <QPainter>
+#include <QPainterPath>
 #include <memory>
 
 #include "qgscoordinatetransform.h"
@@ -890,6 +891,29 @@ class CORE_EXPORT QgsRenderContext : public QgsTemporalRangeObject
     void setTextureOrigin( const QPointF &origin );
 
     /**
+     * Add a painter path to the mask painter path of this render context
+     */
+    void addToMaskPainterPath( QPainterPath const &path ); SIP_SKIP
+
+    /**
+     * Returns the mask painter path stored in this render context
+     * \since QGIS 3.22
+     */
+    const QPainterPath &maskPainterPath() { return mMaskPainterPath; } SIP_SKIP
+
+    /**
+     * Add a painter path to the mask label painter path of this render context with id
+     * \since QGIS 3.22
+     */
+    void addToMaskLabelPainterPath( int id, QPainterPath const &path ); SIP_SKIP
+
+    /**
+     * Returns the label mask painter path with id
+     * \since QGIS 3.22
+     */
+    const QPainterPath &maskLabelPainterPath( int id = 0 ) { return mMaskLabelPainterPaths[id]; } SIP_SKIP
+
+    /**
      * Returns the range of z-values which should be rendered.
      *
      * \see setZRange()
@@ -993,6 +1017,26 @@ class CORE_EXPORT QgsRenderContext : public QgsTemporalRangeObject
     */
     void setRendererUsage( Qgis::RendererUsage usage ) {mRendererUsage = usage;}
 
+    /*
+     * Add a subpainter for a specific symbolLayer
+     * \since QGIS 3.22
+     */
+    void addPainterForSymbolLayer( const QgsSymbolLayer *symbolLayer, QPainter *painter );
+
+    /**
+     * Returns the sub painter for a specifi symbolLayer. Returns nullptr if there is no
+     * qpainter for the symbolLayer.
+     * \returns A pointer to a qpainter
+     * \since QGIS 3.22
+     */
+    QPainter *painterForSymbolLayer( QgsSymbolLayer *symbolLayer ); SIP_SKIP
+
+    /**
+     * Returns a map of all symbolLayers and associated qpainters.
+     * \since QGIS 3.22
+     */
+    QMap<const QgsSymbolLayer *, QPainter * > getSubPainter(); SIP_SKIP
+
   private:
 
     Qgis::RenderContextFlags mFlags;
@@ -1026,6 +1070,10 @@ class CORE_EXPORT QgsRenderContext : public QgsTemporalRangeObject
      * \since QGIS 3.12
      */
     bool mIsGuiPreview = false;
+
+    QPainterPath mMaskPainterPath;
+
+    QMap<int, QPainterPath> mMaskLabelPainterPaths;
 
     //! For transformation between coordinate systems. Can be invalid if on-the-fly reprojection is not used
     QgsCoordinateTransform mCoordTransform;
@@ -1105,6 +1153,8 @@ class CORE_EXPORT QgsRenderContext : public QgsTemporalRangeObject
     QSize mSize;
     float mDevicePixelRatio = 1.0;
     QImage::Format mImageFormat = QImage::Format_ARGB32_Premultiplied;
+    //!Sub painter for separated layer rendering
+    QMap< const QgsSymbolLayer *, QPainter * > mSubPainterMap;
 
     Qgis::RendererUsage mRendererUsage = Qgis::RendererUsage::Unknown;
 

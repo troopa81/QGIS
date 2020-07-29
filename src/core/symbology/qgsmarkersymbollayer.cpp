@@ -30,6 +30,7 @@
 #include "qgsfillsymbol.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QSvgRenderer>
 #include <QFileInfo>
 #include <QDir>
@@ -186,9 +187,14 @@ void QgsSimpleMarkerSymbolLayerBase::startRender( QgsSymbolRenderContext &contex
   }
 
   if ( !mPolygon.isEmpty() )
+  {
     mPolygon = transform.map( mPolygon );
-  else
     mPath = transform.map( mPath );
+  }
+  else
+  {
+    mPath = transform.map( mPath );
+  }
 
   QgsMarkerSymbolLayer::startRender( context );
 }
@@ -276,6 +282,7 @@ void QgsSimpleMarkerSymbolLayerBase::renderPoint( QPointF point, QgsSymbolRender
   if ( !mPolygon.isEmpty() )
   {
     polygon = transform.map( mPolygon );
+    path = transform.map( mPath );
   }
   else
   {
@@ -675,7 +682,6 @@ bool QgsSimpleMarkerSymbolLayerBase::prepareMarkerPath( Qgis::MarkerShape symbol
   switch ( symbol )
   {
     case Qgis::MarkerShape::Circle:
-
       mPath.addEllipse( QRectF( -1, -1, 2, 2 ) ); // x,y,w,h
       return true;
 
@@ -833,6 +839,10 @@ void QgsSimpleMarkerSymbolLayerBase::calculateOffsetAndRotation( QgsSymbolRender
     offset = _rotatedOffset( offset, angle );
 }
 
+QPainterPath QgsSimpleMarkerSymbolLayerBase::path()
+{
+  return mPath;
+}
 
 //
 // QgsSimpleMarkerSymbolLayer
@@ -1185,9 +1195,13 @@ void QgsSimpleMarkerSymbolLayer::draw( QgsSymbolRenderContext &context, Qgis::Ma
   p->setPen( context.selected() ? mSelPen : mPen );
 
   if ( !polygon.isEmpty() )
+  {
     p->drawPolygon( polygon );
+  }
   else
+  {
     p->drawPath( path );
+  }
 }
 
 void QgsSimpleMarkerSymbolLayer::renderPoint( QPointF point, QgsSymbolRenderContext &context )
