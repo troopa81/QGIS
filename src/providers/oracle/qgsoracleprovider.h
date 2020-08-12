@@ -404,6 +404,7 @@ class QgsOracleProviderMetadata final: public QgsProviderMetadata
     QString loadStyle( const QString &uri, QString &errCause ) override;
     bool saveStyle( const QString &uri, const QString &qmlStyle, const QString &sldStyle, const QString &styleName,
                     const QString &styleDescription, const QString &uiFileContent, bool useAsDefault, QString &errCause ) override;
+    void initProvider() override;
     void cleanupProvider() override;
     QgsVectorLayerExporter::ExportError createEmptyLayer( const QString &uri,
         const QgsFields &fields, QgsWkbTypes::Type wkbType,

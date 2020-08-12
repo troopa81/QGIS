@@ -15,6 +15,7 @@ SET(ORACLE_SRCS
   qgsoracleconnpool.cpp
   qgsoracleexpressioncompiler.cpp
   qgsoracletransaction.cpp
+  qgsoracleprojectstorage.cpp
 )
 
 IF (WITH_GUI)

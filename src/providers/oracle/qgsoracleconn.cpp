@@ -226,6 +226,7 @@ void QgsOracleConn::unref()
 
 bool QgsOracleConn::exec( QSqlQuery &qry, const QString &sql, const QVariantList &params )
 {
+  QMutexLocker locker( &mLock );
   QgsDebugMsgLevel( QStringLiteral( "SQL: %1" ).arg( sql ), 4 );
 
   bool res = qry.prepare( sql );

@@ -29,6 +29,7 @@
 #include "qgscoordinatereferencesystem.h"
 #include "qgsvectorlayerexporter.h"
 #include "qgslogger.h"
+#include "qgsprojectstorageregistry.h"
 
 #include "qgsoracleprovider.h"
 #include "qgsoracletablemodel.h"
@@ -36,6 +37,7 @@
 #include "qgsoraclefeatureiterator.h"
 #include "qgsoracleconnpool.h"
 #include "qgsoracletransaction.h"
+#include "qgsoracleprojectstorage.h"
 
 #ifdef HAVE_GUI
 #include "qgsoraclesourceselect.h"
@@ -3376,8 +3378,20 @@ QgsVectorLayerExporter::ExportError QgsOracleProviderMetadata::createEmptyLayer(
          );
 }
 
+QgsOracleProjectStorage *gProjectStorage = nullptr;   // when not null it is owned by QgsApplication::projectStorageRegistry()
+
+void QgsOracleProviderMetadata::initProvider()
+{
+  Q_ASSERT( !gProjectStorage );
+  gProjectStorage = new QgsOracleProjectStorage;
+  QgsApplication::projectStorageRegistry()->registerProjectStorage( gProjectStorage );  // takes ownership
+}
+
 void QgsOracleProviderMetadata::cleanupProvider()
 {
+  QgsApplication::projectStorageRegistry()->unregisterProjectStorage( gProjectStorage );  // destroys the object
+  gProjectStorage = nullptr;
+
   QgsOracleConnPool::cleanupInstance();
 }
 

@@ -142,6 +142,8 @@ class QgsOracleConn : public QObject
 
     bool exec( const QString &query, bool logError = true, QString *errorMessage = nullptr );
 
+    bool exec( QSqlQuery &qry, const QString &sql, const QVariantList &params );
+
     bool begin( QSqlDatabase &db );
     bool commit( QSqlDatabase &db );
     bool rollback( QSqlDatabase &db );
@@ -207,8 +209,6 @@ class QgsOracleConn : public QObject
   private:
     explicit QgsOracleConn( QgsDataSourceUri uri, bool transaction );
     ~QgsOracleConn() override;
-
-    bool exec( QSqlQuery &qry, const QString &sql, const QVariantList &params );
 
     //! reference count
     int mRef;
