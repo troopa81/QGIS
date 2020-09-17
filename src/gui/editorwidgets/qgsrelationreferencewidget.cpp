@@ -190,8 +190,10 @@ void QgsRelationReferenceWidget::setRelation( const QgsRelation &relation, bool 
     }
     if ( mComboBox )
     {
+      mComboBox->setAllowNull( mAllowNull );
       mComboBox->setSourceLayer( mReferencedLayer );
       mComboBox->setIdentifierFields( mReferencedFields );
+      // mComboBox->setFilterExpression( mFilterExpression );
     }
     mAttributeEditorFrame->setObjectName( QStringLiteral( "referencing/" ) + relation.name() );
 
@@ -358,7 +360,7 @@ void QgsRelationReferenceWidget::deleteForeignKeys()
   mRemoveFKButton->setEnabled( false );
   updateAttributeEditorFrame( QgsFeature() );
 
-  emitForeignKeysChanged( foreignKeys(), true );
+  emitForeignKeysChanged( foreignKeys() );
 }
 
 QgsFeature QgsRelationReferenceWidget::referencedFeature() const
