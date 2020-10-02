@@ -204,7 +204,7 @@ class QgsOracleConn : public QObject
     static bool estimatedMetadata( const QString &connName );
     static bool onlyExistingTypes( const QString &connName );
     static void deleteConnection( const QString &connName );
-    static QString databaseName( const QString &database, const QString &host, const QString &port );
+    static QString databaseName( const QgsDataSourceUri &uri );
     static QString toPoolName( const QgsDataSourceUri &uri );
 
     operator QSqlDatabase() { return mDatabase; }

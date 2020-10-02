@@ -13,6 +13,8 @@ __copyright__ = 'Copyright 2016, The QGIS Project'
 import qgis  # NOQA
 
 import os
+import tempfile
+import pathlib
 
 from qgis.core import (
     QgsSettings,
@@ -49,19 +51,19 @@ class TestPyQgsOracleProvider(unittest.TestCase, ProviderTestCase):
         cls.vl = QgsVectorLayer(
             cls.dbconn + ' sslmode=disable key=\'pk\' srid=4326 type=POINT table="QGIS"."SOME_DATA" (GEOM) sql=', 'test', 'oracle')
         assert(cls.vl.isValid())
-        cls.source = cls.vl.dataProvider()
-        cls.poly_vl = QgsVectorLayer(
-            cls.dbconn + ' sslmode=disable key=\'pk\' srid=4326 type=POLYGON table="QGIS"."SOME_POLY_DATA" (GEOM) sql=', 'test', 'oracle')
-        assert(cls.poly_vl.isValid())
-        cls.poly_provider = cls.poly_vl.dataProvider()
+        # cls.source = cls.vl.dataProvider()
+        # cls.poly_vl = QgsVectorLayer(
+        #     cls.dbconn + ' sslmode=disable key=\'pk\' srid=4326 type=POLYGON table="QGIS"."SOME_POLY_DATA" (GEOM) sql=', 'test', 'oracle')
+        # assert(cls.poly_vl.isValid())
+        # cls.poly_provider = cls.poly_vl.dataProvider()
 
-        cls.conn = QSqlDatabase.addDatabase('QOCISPATIAL', "oracletest")
-        cls.conn.setDatabaseName('localhost/XEPDB1')
-        if 'QGIS_ORACLETEST_DBNAME' in os.environ:
-            cls.conn.setDatabaseName(os.environ['QGIS_ORACLETEST_DBNAME'])
-        cls.conn.setUserName('QGIS')
-        cls.conn.setPassword('qgis')
-        assert cls.conn.open()
+        # cls.conn = QSqlDatabase.addDatabase('QOCISPATIAL', "oracletest")
+        # cls.conn.setDatabaseName('localhost/XEPDB1')
+        # if 'QGIS_ORACLETEST_DBNAME' in os.environ:
+        #     cls.conn.setDatabaseName(os.environ['QGIS_ORACLETEST_DBNAME'])
+        # cls.conn.setUserName('QGIS')
+        # cls.conn.setPassword('qgis')
+        # assert cls.conn.open()
 
     @classmethod
     def tearDownClass(cls):
@@ -776,6 +778,29 @@ class TestPyQgsOracleProvider(unittest.TestCase, ProviderTestCase):
         """
         return (QgsVectorLayer(self.dbconn + ' sslmode=disable table="QGIS"."GENERATED_COLUMNS"', 'test', 'oracle'),
                 """'test:'||TO_CHAR("pk")""")
+
+    def testService(self):
+        """ Test if we can use a service file"""
+
+        oracle_home = tempfile.TemporaryDirectory()
+        path = os.path.join(oracle_home.name, "network/admin")
+        pathlib.Path(path).mkdir(parents=True)
+        f = open(os.path.join(path, "tnsnames.ora"), "w")
+        f.write("""local_oracle =
+        (DESCRIPTION=
+        (ADDRESS = (PROTOCOL = TCP)(HOST = 127.0.0.1)(PORT = 1521)
+        )
+        (CONNECT_DATA =
+        (SERVICE_NAME=XEPDB1)
+        )
+        )""")
+        f.close()
+
+        os.environ['ORACLE_HOME'] = oracle_home.name
+
+        layer = QgsVectorLayer('service=\'local_oracle\' user=\'QGIS\' password=\'qgis\' sslmode=disable key=\'pk\' srid=4326 type=POINT table="QGIS"."SOME_DATA" (GEOM) sql=', 'tutu', 'oracle')
+        self.assertTrue(layer.isValid())
+        print(layer.featureCount())
 
 
 if __name__ == '__main__':

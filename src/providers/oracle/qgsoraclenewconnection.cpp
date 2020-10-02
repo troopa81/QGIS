@@ -38,6 +38,7 @@ QgsOracleNewConnection::QgsOracleNewConnection( QWidget *parent, const QString &
 
   buttonBox->button( QDialogButtonBox::Ok )->setDisabled( true );
   connect( txtName, &QLineEdit::textChanged, this, &QgsOracleNewConnection::updateOkButtonState );
+  connect( txtService, &QLineEdit::textChanged, this, &QgsOracleNewConnection::updateOkButtonState );
   connect( txtDatabase, &QLineEdit::textChanged, this, &QgsOracleNewConnection::updateOkButtonState );
   connect( txtHost, &QLineEdit::textChanged, this, &QgsOracleNewConnection::updateOkButtonState );
   connect( txtPort, &QLineEdit::textChanged, this, &QgsOracleNewConnection::updateOkButtonState );
@@ -52,6 +53,7 @@ QgsOracleNewConnection::QgsOracleNewConnection( QWidget *parent, const QString &
     QgsSettings settings;
 
     QString key = QStringLiteral( "/Oracle/connections/" ) + connName;
+    txtService->setText( settings.value( key + QStringLiteral( "/service" ) ).toString() );
     txtDatabase->setText( settings.value( key + QStringLiteral( "/database" ) ).toString() );
     txtHost->setText( settings.value( key + QStringLiteral( "/host" ) ).toString() );
     QString port = settings.value( key + QStringLiteral( "/port" ) ).toString();
@@ -138,6 +140,7 @@ void QgsOracleNewConnection::accept()
   }
 
   baseKey += txtName->text();
+  settings.setValue( baseKey + QStringLiteral( "/service" ), txtService->text() );
   settings.setValue( baseKey + QStringLiteral( "/database" ), txtDatabase->text() );
   settings.setValue( baseKey + QStringLiteral( "/host" ), txtHost->text() );
   settings.setValue( baseKey + QStringLiteral( "/port" ), txtPort->text() );
@@ -162,10 +165,21 @@ void QgsOracleNewConnection::accept()
 void QgsOracleNewConnection::testConnection()
 {
   QgsDataSourceUri uri;
-  uri.setConnection( txtHost->text(), txtPort->text(), txtDatabase->text(),
-                     mAuthSettings->username(), mAuthSettings->password(),
-                     QgsDataSourceUri::SslPrefer /* meaningless for oracle */,
-                     mAuthSettings->configId() );
+  if ( !txtService->text().isEmpty() )
+  {
+    uri.setConnection( txtService->text(), txtDatabase->text(),
+                       mAuthSettings->username(), mAuthSettings->password(),
+                       QgsDataSourceUri::SslPrefer /* meaningless for oracle */,
+                       mAuthSettings->configId() );
+  }
+  else
+  {
+    uri.setConnection( txtHost->text(), txtPort->text(), txtDatabase->text(),
+                       mAuthSettings->username(), mAuthSettings->password(),
+                       QgsDataSourceUri::SslPrefer /* meaningless for oracle */,
+                       mAuthSettings->configId() );
+  }
+
   if ( !txtOptions->text().isEmpty() )
     uri.setParam( QStringLiteral( "dboptions" ), txtOptions->text() );
   if ( !txtWorkspace->text().isEmpty() )
@@ -195,6 +209,8 @@ void QgsOracleNewConnection::showHelp()
 
 void QgsOracleNewConnection::updateOkButtonState()
 {
-  bool enabled = !txtName->text().isEmpty() && !txtHost->text().isEmpty() && !txtPort->text().isEmpty() && !txtDatabase->text().isEmpty();
+  bool enabled = !txtName->text().isEmpty()
+                 && ( ( !txtDatabase->text().isEmpty() && !txtHost->text().isEmpty() && !txtPort->text().isEmpty() )
+                      || !txtService->text().isEmpty() );
   buttonBox->button( QDialogButtonBox::Ok )->setEnabled( enabled );
 }

@@ -25,6 +25,7 @@
 #include "qgssettings.h"
 
 #include <QSqlError>
+#include <QDebug>
 
 QMap<QString, QgsOracleConn *> QgsOracleConn::sConnections;
 int QgsOracleConn::snConnections = 0;
@@ -34,10 +35,13 @@ QMap<QString, QDateTime> QgsOracleConn::sBrokenConnections;
 QgsOracleConn *QgsOracleConn::connectDb( const QgsDataSourceUri &uri, bool transaction )
 {
   const QString conninfo = toPoolName( uri );
+
+  qDebug() << "connInfo=" << conninfo;
   if ( !transaction )
   {
     if ( sConnections.contains( conninfo ) )
     {
+      qDebug() << "cached";
       QgsDebugMsgLevel( QStringLiteral( "Using cached connection for %1" ).arg( conninfo ), 2 );
       sConnections[conninfo]->mRef++;
       return sConnections[conninfo];
@@ -71,7 +75,7 @@ QgsOracleConn::QgsOracleConn( QgsDataSourceUri uri, bool transaction )
 
   uri = QgsDataSourceUri( uri.connectionInfo( true ) );
 
-  QString database = databaseName( uri.database(), uri.host(), uri.port() );
+  QString database = databaseName( uri );
   QgsDebugMsgLevel( QStringLiteral( "New Oracle database " ) + database, 2 );
 
   mDatabase = QSqlDatabase::addDatabase( QStringLiteral( "QOCISPATIAL" ), QStringLiteral( "oracle%1" ).arg( snConnections++ ) );
@@ -853,6 +857,7 @@ QgsDataSourceUri QgsOracleConn::connUri( const QString &connName )
 
   QString key = QStringLiteral( "/Oracle/connections/" ) + connName;
 
+  QString service = settings.value( key + QStringLiteral( "/service" ) ).toString();
   QString database = settings.value( key + QStringLiteral( "/database" ) ).toString();
 
   QString host = settings.value( key + QStringLiteral( "/host" ) ).toString();
@@ -875,7 +880,14 @@ QgsDataSourceUri QgsOracleConn::connUri( const QString &connName )
   }
 
   QgsDataSourceUri uri;
-  uri.setConnection( host, port, database, username, password );
+  if ( !service.isEmpty() )
+  {
+    uri.setConnection( service, database, username, password );
+  }
+  else
+  {
+    uri.setConnection( host, port, database, username, password );
+  }
 
   bool useEstimatedMetadata = settings.value( key + QStringLiteral( "/estimatedMetadata" ), false ).toBool();
   uri.setUseEstimatedMetadata( useEstimatedMetadata );
@@ -934,11 +946,20 @@ bool QgsOracleConn::onlyExistingTypes( const QString &connName )
   return settings.value( "/Oracle/connections/" + connName + "/onlyExistingTypes", false ).toBool();
 }
 
-QString QgsOracleConn::databaseName( const QString &database, const QString &host, const QString &port )
+QString QgsOracleConn::databaseName( const QgsDataSourceUri &uri )
 {
   QString db;
 
-  if ( !host.isEmpty() )
+  const QString service = uri.service();
+  const QString host = uri.host();
+  const QString port = uri.port();
+  const QString database = uri.database();
+
+  if ( !service.isEmpty() )
+  {
+    db = service;
+  }
+  else if ( !host.isEmpty() )
   {
     db += host;
 
@@ -951,10 +972,6 @@ QString QgsOracleConn::databaseName( const QString &database, const QString &hos
     {
       db += "/" + database;
     }
-  }
-  else if ( !database.isEmpty() )
-  {
-    db = database;
   }
 
   return db;
