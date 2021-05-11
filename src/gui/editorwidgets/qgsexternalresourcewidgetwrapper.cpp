@@ -26,9 +26,9 @@
 #include "qgsexpressioncontextutils.h"
 
 
-QgsExternalResourceWidgetWrapper::QgsExternalResourceWidgetWrapper( QgsVectorLayer *layer, int fieldIdx, QWidget *editor, QWidget *parent )
+QgsExternalResourceWidgetWrapper::QgsExternalResourceWidgetWrapper( QgsVectorLayer *layer, int fieldIdx, QWidget *editor, QgsMessageBar *messageBar, QWidget *parent )
   : QgsEditorWidgetWrapper( layer, fieldIdx, editor, parent )
-
+  , mMessageBar( messageBar )
 {
 }
 
@@ -121,6 +121,11 @@ void QgsExternalResourceWidgetWrapper::setFeature( const QgsFeature &feature )
 {
   updateProperties( feature );
   QgsEditorWidgetWrapper::setFeature( feature );
+
+  if ( mQgsWidget )
+  {
+    updateFileWidgetExpressionContext();
+  }
 }
 
 QWidget *QgsExternalResourceWidgetWrapper::createWidget( QWidget *parent )
@@ -152,9 +157,17 @@ void QgsExternalResourceWidgetWrapper::initWidget( QWidget *editor )
 
   if ( mQgsWidget )
   {
+    mQgsWidget->setMessageBar( mMessageBar );
+
     mQgsWidget->fileWidget()->setStorageMode( QgsFileWidget::GetFile );
 
     QVariantMap cfg = config();
+
+    mQgsWidget->setStorageType( cfg.value( QStringLiteral( "StorageType" ) ).toString() );
+    mQgsWidget->setStorageAuthConfigId( cfg.value( QStringLiteral( "StorageAuthConfigId" ) ).toString() );
+    mQgsWidget->fileWidget()->setStorageUrlExpression( cfg.value( QStringLiteral( "StorageUrlExpression" ) ).toString() );
+
+    updateFileWidgetExpressionContext();
 
     if ( cfg.contains( QStringLiteral( "UseLink" ) ) )
     {
@@ -303,4 +316,20 @@ void QgsExternalResourceWidgetWrapper::updateConstraintWidgetStatus()
       }
     }
   }
+}
+
+void QgsExternalResourceWidgetWrapper::updateFileWidgetExpressionContext()
+{
+  Q_ASSERT( mQgsWidget );
+  Q_ASSERT( layer() );
+
+  QgsExpressionContext expressionContext( layer()->createExpressionContext() );
+  expressionContext.setFeature( formFeature() );
+  expressionContext.appendScope( QgsExpressionContextUtils::formScope( formFeature() ) );
+  if ( context().parentFormFeature().isValid() )
+  {
+    expressionContext.appendScope( QgsExpressionContextUtils::parentFormScope( context().parentFormFeature() ) );
+  }
+
+  mQgsWidget->fileWidget()->setExpressionContext( expressionContext );
 }

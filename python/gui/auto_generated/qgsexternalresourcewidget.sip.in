@@ -135,6 +135,40 @@ Configures the base path which should be used if the relativeStorage property
 is set to :py:class:`QgsFileWidget`.RelativeDefaultPath.
 %End
 
+    void setStorageType( const QString &storageType );
+%Docstring
+Set ``storageType`` storage type unique identifier as defined in :py:class:`QgsExternalStorageRegistry` or
+null QString if there is no storage defined, only file selection.
+
+.. seealso:: :py:func:`storageType`
+
+.. versionadded:: 3.20
+%End
+
+    QString storageType() const;
+%Docstring
+Get storage type unique identifier as defined in :py:class:`QgsExternalStorageRegistry`.
+Returns null QString if there is no storage defined, only file selection.
+
+.. seealso:: :py:func:`setStorageType`
+
+.. versionadded:: 3.20
+%End
+
+    void setStorageAuthConfigId( const QString &authCfg );
+%Docstring
+Sets the authentication configuration ID for current storage
+TODO complete doc (cf :py:class:`QgsFileWidget`)
+TODO property
+%End
+
+    const QString &storageAuthConfigId() const;
+
+    void setMessageBar( QgsMessageBar *messageBar );
+%Docstring
+Set ``messageBar`` to report messages
+%End
+
   signals:
     void valueChanged( const QString & );
 %Docstring
