@@ -20,14 +20,19 @@
 class QLabel;
 class QToolButton;
 class QVariant;
+class QgsExternalStorage;
 class QgsFileDropEdit;
 class QHBoxLayout;
+class QProgressBar;
+
 #include <QWidget>
 #include <QFileDialog>
 
 #include "qgis_gui.h"
 #include "qgis_sip.h"
 #include "qgshighlightablelineedit.h"
+#include "qgsexpressioncontext.h"
+
 
 /**
  * \ingroup gui
@@ -46,6 +51,7 @@ class GUI_EXPORT QgsFileWidget : public QWidget
 #endif
 
     Q_OBJECT
+    Q_PROPERTY( QString storageType READ storageType WRITE setStorageType )
     Q_PROPERTY( bool fileWidgetButtonVisible READ fileWidgetButtonVisible WRITE setFileWidgetButtonVisible )
     Q_PROPERTY( bool useLink READ useLink WRITE setUseLink )
     Q_PROPERTY( bool fullUrl READ fullUrl WRITE setFullUrl )
@@ -105,6 +111,49 @@ class GUI_EXPORT QgsFileWidget : public QWidget
 
     //! defines if the widget is readonly
     void setReadOnly( bool readOnly );
+
+    /**
+     * Set \a storageType storage type unique identifier as defined in QgsExternalStorageRegistry or
+     * null QString if there is no storage defined, only file selection.
+     * \see storageType
+     * \since QGIS 3.20
+     */
+    void setStorageType( const QString &storageType );
+
+    /**
+     * Get storage type unique identifier as defined in QgsExternalStorageRegistry.
+     * Returns null QString if there is no storage defined, only file selection.
+     * \see setStorageType
+     * \since QGIS 3.20
+     */
+    QString storageType() const;
+
+    // TODO doc
+    QgsExternalStorage *externalStorage() const;
+
+    /**
+     * Sets the authentication configuration ID for current storage
+     * TODO complete doc
+     * TODO property
+     */
+    void setStorageAuthConfigId( const QString &authCfg );
+
+    // TODO doc
+    const QString &storageAuthConfigId() const;
+
+    // TODO doc
+    // TODO miss the property?
+    void setStorageUrlExpression( const QString &urlExpression );
+
+    // TODO doc
+    QgsExpression *storageUrlExpression() const;
+
+    // TODO doc set expression context used for storage url expression evaluation
+    // TODO miss the property?
+    void setExpressionContext( const QgsExpressionContext &context );
+
+    // TODO doc return expression context used for storage url expression evaluation
+    const QgsExpressionContext &expressionContext() const;
 
     //! returns the open file dialog title
     QString dialogTitle() const;
@@ -210,12 +259,19 @@ class GUI_EXPORT QgsFileWidget : public QWidget
   private:
     void updateLayout();
 
+    // called whenever user select file names from dialog
+    void setSelectedFileNames( QStringList fileNames );
+
+    // add file widget specific scope to expression context
+    void addFileWidgetScope();
+
     QString mFilePath;
     bool mButtonVisible = true;
     bool mUseLink = false;
     bool mFullUrl = false;
     bool mReadOnly = false;
     bool mIsLinkEdited = false;
+    bool mStoreInProgress = false;
     QString mDialogTitle;
     QString mFilter;
     QString mSelectedFilter;
@@ -224,12 +280,20 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     StorageMode mStorageMode = GetFile;
     RelativeStorage mRelativeStorage = Absolute;
     QFileDialog::Options mOptions = QFileDialog::Options();
+    QgsExternalStorage *mExternalStorage = nullptr;
+    QString mAuthCfg;
+    std::unique_ptr< QgsExpression > mStorageUrlExpression;
+    QgsExpressionContext mExpressionContext;
+    QgsExpressionContextScope *mScope = nullptr;
 
     QLabel *mLinkLabel = nullptr;
     QgsFileDropEdit *mLineEdit = nullptr;
     QToolButton *mLinkEditButton = nullptr;
     QToolButton *mFileWidgetButton = nullptr;
     QHBoxLayout *mLayout = nullptr;
+    QLabel *mProgressLabel = nullptr;
+    QProgressBar *mProgressBar = nullptr;
+    QToolButton *mCancelButton = nullptr;
 
     //! returns a HTML code with a link to the given file path
     QString toUrl( const QString &path ) const;

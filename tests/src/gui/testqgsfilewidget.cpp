@@ -22,7 +22,14 @@
 #include "qgsbrowsermodel.h"
 #include "qgslayeritem.h"
 #include "qgsdirectoryitem.h"
+#include "qgsexternalstorage.h"
+#include "qgsexternalstorageregistry.h"
+#include "qgsexpressioncontextutils.h"
 #include <memory>
+
+#include <QLabel>
+#include <QToolButton>
+#include <QProgressBar>
 
 class TestQgsFileWidget: public QObject
 {
@@ -37,12 +44,55 @@ class TestQgsFileWidget: public QObject
     void testDroppedFiles();
     void testMultipleFiles();
     void testSplitFilePaths();
-
+    void testLayout_data();
+    void testLayout();
+    void testStoring();
+    void testStoring_data();
+    void testStoringChangeFeature();
 };
+
+class QgsTestStoreTask : public QgsExternalStorageTask
+{
+    Q_OBJECT
+
+  public:
+
+    QgsTestStoreTask() : QgsExternalStorageTask( "" ) {}
+
+    bool run() override { return true; }
+};
+
+class QgsTestExternalStorage : public QgsExternalStorage
+{
+  public:
+
+    QString type() const override { return QStringLiteral( "test" ); }
+
+    QgsExternalStorageTask *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
+    {
+      Q_UNUSED( filePath );
+      Q_UNUSED( url );
+      Q_UNUSED( authcfg );
+      sCurrentStorageTask = new QgsTestStoreTask();
+      QgsApplication::instance()->taskManager()->addTask( sCurrentStorageTask );
+      return sCurrentStorageTask;
+    }
+
+    QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) override
+    {
+      Q_UNUSED( url );
+      Q_UNUSED( authcfg );
+      return nullptr;
+    }
+
+    static QgsExternalStorageTask *sCurrentStorageTask;
+};
+
+QgsExternalStorageTask *QgsTestExternalStorage::sCurrentStorageTask = nullptr;
 
 void TestQgsFileWidget::initTestCase()
 {
-
+  QgsApplication::externalStorageRegistry()->registerExternalStorage( new QgsTestExternalStorage() );
 }
 
 void TestQgsFileWidget::cleanupTestCase()
@@ -201,7 +251,6 @@ void TestQgsFileWidget::testMultipleFiles()
 }
 
 
-
 void TestQgsFileWidget::testSplitFilePaths()
 {
   const QString path = QString( TEST_DATA_DIR + QStringLiteral( "/bug5598.shp" ) );
@@ -213,6 +262,232 @@ void TestQgsFileWidget::testSplitFilePaths()
   QCOMPARE( QgsFileWidget::splitFilePaths( path ), QStringList() << path );
 }
 
+void TestQgsFileWidget::testLayout_data()
+{
+  QTest::addColumn<QString>( "storageType" );
+
+  QTest::newRow( "without external storage" ) << QString();
+  QTest::newRow( "with external storage" ) << QStringLiteral( "test" );
+}
+
+void TestQgsFileWidget::testLayout()
+{
+  // test correct buttons are displayed according to different mode and interactions
+
+  QFETCH( QString, storageType );
+
+  QgsFileWidget w;
+  w.setStorageType( storageType );
+  w.show();
+
+  QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
+  QIcon saveIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionSaveEdits.svg" ) );
+
+  // with link, read-only
+  w.setReadOnly( true );
+  w.setUseLink( true );
+
+  QVERIFY( w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  // with link, edit mode
+  w.setReadOnly( false );
+
+  QVERIFY( w.mLinkLabel->isVisible() );
+  QVERIFY( w.mLinkEditButton->isVisible() );
+  QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  // with link, edit mode, we edit the link
+  w.editLink();
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( w.mLinkEditButton->isVisible() );
+  QCOMPARE( w.mLinkEditButton->icon(), saveIcon );
+  QVERIFY( w.mLineEdit->isVisible() );
+  QVERIFY( w.mLineEdit->isEnabled() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  // with link, edit mode, we finish editing the link
+  w.editLink();
+
+  QVERIFY( w.mLinkLabel->isVisible() );
+  QVERIFY( w.mLinkEditButton->isVisible() );
+  QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  // without link, read-only
+  w.setUseLink( false );
+  w.setReadOnly( true );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( w.mLineEdit->isVisible() );
+  QVERIFY( !w.mLineEdit->isEnabled() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  // without link, edit mode
+  w.setReadOnly( false );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( w.mLineEdit->isVisible() );
+  QVERIFY( w.mLineEdit->isEnabled() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+}
+
+void TestQgsFileWidget::testStoring_data()
+{
+  QTest::addColumn<bool>( "useLink" );
+
+  QTest::newRow( "use link" ) << true;
+  QTest::newRow( "don't use link" ) << false;
+}
+
+void TestQgsFileWidget::testStoring()
+{
+  // test widget when an external storage is used
+
+  QFETCH( bool, useLink );
+
+  QgsFileWidget w;
+  w.show();
+
+  QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
+  QIcon saveIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionSaveEdits.svg" ) );
+
+  w.setStorageType( "test" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+
+  // with link, edit mode
+  w.setUseLink( useLink );
+  w.setReadOnly( false );
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
+
+  QVERIFY( QgsTestExternalStorage::sCurrentStorageTask );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+
+  // TODO for now, url is updated directly but il should not, it should be done after the storing is done
+  // QCOMPARE( w.mLinkLabel->text(), QString() );
+
+  QEventLoop loop;
+  connect( QgsTestExternalStorage::sCurrentStorageTask, &QgsTask::taskCompleted, &loop, &QEventLoop::quit );
+  loop.exec();
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+  if ( useLink )
+    QCOMPARE( w.mLinkLabel->text(), QStringLiteral( "<a href=\"http://test.url.com/test/blank\">blank</a>" ) );
+  else
+    QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/test/blank" ) );
+
+  // TODO test bad expression
+
+
+  // TODO test also cancel or error (on one or multiple files), url should not be updated (or partially)
+
+
+  // TODO test also fetch
+}
+
+void TestQgsFileWidget::testStoringChangeFeature()
+{
+  // test widget with external storage to store files with different features
+
+  QgsFileWidget w;
+  w.show();
+
+  QgsFields fields;
+  fields.append( QgsField( QStringLiteral( "myfield" ), QVariant::String ) );
+
+  QgsFeature f1( fields );
+  f1.setAttribute( QStringLiteral( "myfield" ), QStringLiteral( "val1" ) );
+
+  w.setStorageType( "test" );
+  w.setStorageUrlExpression( "'http://test.url.com/' || attribute( @current_feature, 'myfield' )" );
+
+  QgsExpressionContext expressionContext;
+  expressionContext.appendScope( QgsExpressionContextUtils::formScope( f1 ) );
+  w.setExpressionContext( expressionContext );
+
+  w.setUseLink( false );
+  w.setReadOnly( false );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
+
+  QEventLoop loop;
+  connect( QgsTestExternalStorage::sCurrentStorageTask, &QgsTask::taskCompleted, &loop, &QEventLoop::quit );
+  loop.exec();
+
+  QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/val1" ) );
+
+  QgsFeature f2( fields );
+  f2.setAttribute( QStringLiteral( "myfield" ), QStringLiteral( "val2" ) );
+
+  QgsExpressionContext expressionContext2;
+  expressionContext2.appendScope( QgsExpressionContextUtils::formScope( f2 ) );
+  w.setExpressionContext( expressionContext2 );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
+
+  connect( QgsTestExternalStorage::sCurrentStorageTask, &QgsTask::taskCompleted, &loop, &QEventLoop::quit );
+  loop.exec();
+
+  QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/val2" ) );
+}
 
 
 

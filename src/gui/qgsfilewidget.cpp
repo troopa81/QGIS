@@ -23,6 +23,7 @@
 #include <QUrl>
 #include <QDropEvent>
 #include <QRegularExpression>
+#include <QProgressBar>
 
 #include "qgssettings.h"
 #include "qgsfilterlineedit.h"
@@ -32,6 +33,14 @@
 #include "qgsapplication.h"
 #include "qgsfileutils.h"
 #include "qgsmimedatautils.h"
+#include "qgsexternalstorage.h"
+#include "qgsexternalstorageregistry.h"
+
+// TODO still usefull?
+#include "qgsauthconfig.h"
+#include "qgsauthmanager.h"
+
+#define FILENAME_VARIABLE "user_file_name"
 
 QgsFileWidget::QgsFileWidget( QWidget *parent )
   : QWidget( parent )
@@ -52,10 +61,7 @@ QgsFileWidget::QgsFileWidget( QWidget *parent )
   mLinkLabel->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Preferred );
   mLinkLabel->setTextFormat( Qt::RichText );
   mLinkLabel->hide(); // do not show by default
-  mLinkEditButton = new QToolButton( this );
-  mLinkEditButton->setIcon( QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) ) );
-  connect( mLinkEditButton, &QToolButton::clicked, this, &QgsFileWidget::editLink );
-  mLinkEditButton->hide(); // do not show by default
+  mLayout->addWidget( mLinkLabel );
 
   // otherwise, use the traditional QLineEdit subclass
   mLineEdit = new QgsFileDropEdit( this );
@@ -64,11 +70,31 @@ QgsFileWidget::QgsFileWidget( QWidget *parent )
   connect( mLineEdit, &QLineEdit::textChanged, this, &QgsFileWidget::textEdited );
   mLayout->addWidget( mLineEdit );
 
+  mLinkEditButton = new QToolButton( this );
+  mLinkEditButton->setIcon( QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) ) );
+  mLayout->addWidget( mLinkEditButton );
+  connect( mLinkEditButton, &QToolButton::clicked, this, &QgsFileWidget::editLink );
+  mLinkEditButton->hide(); // do not show by default
+
   mFileWidgetButton = new QToolButton( this );
   mFileWidgetButton->setText( QChar( 0x2026 ) );
   mFileWidgetButton->setToolTip( tr( "Browse" ) );
   connect( mFileWidgetButton, &QAbstractButton::clicked, this, &QgsFileWidget::openFileDialog );
   mLayout->addWidget( mFileWidgetButton );
+
+  mProgressLabel = new QLabel( this );
+  mLayout->addWidget( mProgressLabel );
+  mProgressLabel->hide();
+
+  mProgressBar = new QProgressBar( this );
+  mLayout->addWidget( mProgressBar );
+  mProgressBar->hide();
+
+  mCancelButton = new QToolButton( this );
+  mLayout->addWidget( mCancelButton );
+  // TODO is it the better icon ? a one more specific to canceling an upload would be more appropriate no?
+  mCancelButton->setIcon( QgsApplication::getThemeIcon( QStringLiteral( "/mTaskCancel.svg" ) ) );
+  mCancelButton->hide();
 
   setLayout( mLayout );
 }
@@ -109,6 +135,75 @@ void QgsFileWidget::setReadOnly( bool readOnly )
   mReadOnly = readOnly;
 
   updateLayout();
+}
+
+void QgsFileWidget::setStorageType( const QString &storageType )
+{
+  if ( storageType.isEmpty() )
+    mExternalStorage = nullptr;
+
+  else
+  {
+    mExternalStorage = QgsApplication::externalStorageRegistry()->externalStorageFromType( storageType );
+    if ( !mExternalStorage )
+    {
+      QgsDebugMsg( QStringLiteral( "Invalid storage type: %1" ).arg( storageType ) );
+      return;
+    }
+    addFileWidgetScope();
+  }
+}
+
+QString QgsFileWidget::storageType() const
+{
+  return mExternalStorage ? mExternalStorage->type() : QString();
+}
+
+QgsExternalStorage *QgsFileWidget::externalStorage() const
+{
+  return mExternalStorage;
+}
+
+void QgsFileWidget::setStorageAuthConfigId( const QString &authCfg )
+{
+  mAuthCfg = authCfg;
+}
+
+const QString &QgsFileWidget::storageAuthConfigId() const
+{
+  return mAuthCfg;
+}
+
+void QgsFileWidget::setStorageUrlExpression( const QString &urlExpression )
+{
+  mStorageUrlExpression.reset( new QgsExpression( urlExpression ) );
+}
+
+QgsExpression *QgsFileWidget::storageUrlExpression() const
+{
+  return mStorageUrlExpression.get();
+}
+
+void QgsFileWidget::setExpressionContext( const QgsExpressionContext &context )
+{
+  mScope = nullptr; // deleted by old context when we override it with the new one
+  mExpressionContext = context;
+  addFileWidgetScope();
+}
+
+void QgsFileWidget::addFileWidgetScope()
+{
+  if ( !mExternalStorage || mScope )
+    return;
+
+  mScope = new QgsExpressionContextScope( QObject::tr( "FileWidget" ) );
+  mScope->setVariable( QStringLiteral( FILENAME_VARIABLE ), QString() );
+  mExpressionContext << mScope;
+}
+
+const QgsExpressionContext &QgsFileWidget::expressionContext() const
+{
+  return mExpressionContext;
 }
 
 QString QgsFileWidget::dialogTitle() const
@@ -240,39 +335,24 @@ QgsFilterLineEdit *QgsFileWidget::lineEdit()
 
 void QgsFileWidget::updateLayout()
 {
-  mLayout->removeWidget( mLineEdit );
-  mLayout->removeWidget( mLinkLabel );
-  mLayout->removeWidget( mLinkEditButton );
+  mProgressLabel->setVisible( mStoreInProgress );
+  mProgressBar->setVisible( mStoreInProgress );
+  mCancelButton->setVisible( mStoreInProgress );
 
-  mLinkEditButton->setVisible( mUseLink && !mReadOnly );
+  const bool linkVisible = mUseLink && !mIsLinkEdited;
 
+  mLineEdit->setVisible( !mStoreInProgress && !linkVisible );
+  mLinkLabel->setVisible( !mStoreInProgress && linkVisible );
+  mLinkEditButton->setVisible( !mStoreInProgress && mUseLink && !mReadOnly );
+
+  mFileWidgetButton->setVisible( !mStoreInProgress );
   mFileWidgetButton->setEnabled( !mReadOnly );
   mLineEdit->setEnabled( !mReadOnly );
 
-  if ( mUseLink && !mIsLinkEdited )
-  {
-    mLayout->insertWidget( 0, mLinkLabel );
-    mLineEdit->setVisible( false );
-    mLinkLabel->setVisible( true );
+  mLinkEditButton->setIcon( linkVisible && !mReadOnly ?
+                            QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) ) :
+                            QgsApplication::getThemeIcon( QStringLiteral( "/mActionSaveEdits.svg" ) ) );
 
-    if ( !mReadOnly )
-    {
-      mLayout->insertWidget( 1, mLinkEditButton );
-      mLinkEditButton->setIcon( QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) ) );
-    }
-  }
-  else
-  {
-    mLayout->insertWidget( 0, mLineEdit );
-    mLineEdit->setVisible( true );
-    mLinkLabel->setVisible( false );
-
-    if ( mIsLinkEdited )
-    {
-      mLayout->insertWidget( 1, mLinkEditButton );
-      mLinkEditButton->setIcon( QgsApplication::getThemeIcon( QStringLiteral( "/mActionSaveEdits.svg" ) ) );
-    }
-  }
 }
 
 void QgsFileWidget::openFileDialog()
@@ -350,15 +430,20 @@ void QgsFileWidget::openFileDialog()
     return;
 
   if ( mStorageMode != GetMultipleFiles )
+    fileNames << fileName;
+
+  setSelectedFileNames( fileNames );
+}
+
+void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
+{
+  Q_ASSERT( fileNames.count() );
+
+  QgsSettings settings;
+
+  for ( int i = 0; i < fileNames.length(); i++ )
   {
-    fileName = QDir::toNativeSeparators( QDir::cleanPath( QFileInfo( fileName ).absoluteFilePath() ) );
-  }
-  else
-  {
-    for ( int i = 0; i < fileNames.length(); i++ )
-    {
-      fileNames.replace( i, QDir::toNativeSeparators( QDir::cleanPath( QFileInfo( fileNames.at( i ) ).absoluteFilePath() ) ) );
-    }
+    fileNames.replace( i, QDir::toNativeSeparators( QDir::cleanPath( QFileInfo( fileNames.at( i ) ).absoluteFilePath() ) ) );
   }
 
   // Store the last used path:
@@ -366,21 +451,77 @@ void QgsFileWidget::openFileDialog()
   {
     case GetFile:
     case SaveFile:
-      settings.setValue( QStringLiteral( "UI/lastFileNameWidgetDir" ), QFileInfo( fileName ).absolutePath() );
+    case GetMultipleFiles:
+      settings.setValue( QStringLiteral( "UI/lastFileNameWidgetDir" ), QFileInfo( fileNames.first() ).absolutePath() );
       break;
     case GetDirectory:
-      settings.setValue( QStringLiteral( "UI/lastFileNameWidgetDir" ), fileName );
-      break;
-    case GetMultipleFiles:
-      settings.setValue( QStringLiteral( "UI/lastFileNameWidgetDir" ), QFileInfo( fileNames.first( ) ).absolutePath() );
+      settings.setValue( QStringLiteral( "UI/lastFileNameWidgetDir" ), fileNames.first() );
       break;
   }
 
   // Handle relative Path storage
   if ( mStorageMode != GetMultipleFiles )
   {
-    fileName = relativePath( fileName, true );
-    setFilePath( fileName );
+    if ( mExternalStorage )
+    {
+      // TODO do a function for the external storage part
+
+      if ( !mStorageUrlExpression->prepare( &mExpressionContext ) )
+      {
+        // TODO sure this is the best way to print errors ? what happen if several files
+        QgsDebugMsg( tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
+        return;
+      }
+
+      // TODO deal with multiplefiles -> only one progress bar which is the sum of progress task? or several progress bar?
+      // or one after another?
+      QStringList urls;
+      for ( const QString filePath : fileNames )
+      {
+        mProgressLabel->setText( tr( "Storing file %1 ..." ).arg( QFileInfo( filePath ).baseName() ) );
+        mStoreInProgress = true;
+        updateLayout();
+
+        // TODO Fix the URL and add basename in external storage (as an option?)
+        Q_ASSERT( mScope );
+        mScope->setVariable( QStringLiteral( FILENAME_VARIABLE ), filePath );
+
+        QVariant url = mStorageUrlExpression->evaluate( &mExpressionContext );
+        if ( !url.isValid() )
+        {
+          // TODO sure this is the best way to print errors ? what happen if several files
+          QgsDebugMsg( tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
+          continue;
+        }
+
+        QgsTask *uploadTask = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
+
+        connect( uploadTask, &QgsTask::progressChanged, mProgressBar, &QProgressBar::setValue );
+        // TODO remove lambda when uploadTask is no longer a task and a slot exists
+        connect( mCancelButton, &QToolButton::clicked, [ = ] { uploadTask->cancel(); } );
+
+        auto onStoreFinished = [ = ]
+        {
+          mStoreInProgress = false;
+          updateLayout();
+        };
+
+        connect( uploadTask, &QgsTask::taskCompleted, onStoreFinished );
+        connect( uploadTask, &QgsTask::taskTerminated, onStoreFinished );
+
+        // display error on error occured
+
+        // TODO What happen if an error occured, we don't update urls (et what if one error occured for one file and not the other?)
+        urls << url.toString();
+      }
+
+      setFilePath( urls.first() );
+    }
+    else
+    {
+      const QString fileName = relativePath( fileNames.first(), true );
+      setFilePath( fileName );
+    }
   }
   else
   {
