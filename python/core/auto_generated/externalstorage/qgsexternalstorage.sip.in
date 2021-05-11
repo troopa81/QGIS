@@ -1,0 +1,118 @@
+/************************************************************************
+ * This file has been generated automatically from                      *
+ *                                                                      *
+ * src/core/externalstorage/qgsexternalstorage.h                        *
+ *                                                                      *
+ * Do not edit manually ! Edit header and run scripts/sipify.pl again   *
+ ************************************************************************/
+
+
+
+
+
+
+class QgsExternalStorage
+{
+%Docstring(signature="appended")
+Abstract interface for external storage - to be implemented by various backends
+and registered in :py:class:`QgsExternalStorageRegistry`.
+
+.. versionadded:: 3.20
+%End
+
+%TypeHeaderCode
+#include "qgsexternalstorage.h"
+%End
+  public:
+
+
+    virtual ~QgsExternalStorage();
+
+    virtual QString type() const = 0;
+%Docstring
+Unique identifier of the external storage type.
+%End
+
+    virtual QgsExternalStorageTask *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
+%Docstring
+Store file ``filePath`` to the ``url`` for this project external storage
+Returns asynchronous task to store file. Signal :py:func:`QgsTask.taskCompleted()` will be emmitted
+whenever the upload is complete
+TODO complete doc for auth
+TODO const ?
+TODO QUrl or QString ( QString is more general in case of Postgres LargeObject for instance)
+TODO rename en :py:func:`~QgsExternalStorage.store`
+%End
+
+    virtual QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) = 0;
+%Docstring
+TODO Complete documentation
+TODO const ?
+TODO QUrl or QString ( QString is more general in case of Postgres LargeObject for instance)
+%End
+};
+
+
+class QgsExternalStorageTask : QgsTask
+{
+
+%TypeHeaderCode
+#include "qgsexternalstorage.h"
+%End
+  public:
+
+    QgsExternalStorageTask( const QString &description );
+  signals:
+
+    void errorOccured( const QString & );
+};
+
+class QgsExternalStorageFetchedContent : QObject
+{
+
+%TypeHeaderCode
+#include "qgsexternalstorage.h"
+%End
+  public:
+
+    enum ContentStatus
+    {
+      NotStarted,
+      OnGoing,
+      Finished,
+      Failed
+    };
+
+
+    QgsExternalStorageFetchedContent();
+
+    ~QgsExternalStorageFetchedContent();
+
+    virtual QString filePath() const = 0;
+
+    ContentStatus status() const;
+%Docstring
+Returns status of fetched content
+%End
+
+    const QString &errorString() const;
+%Docstring
+Returns the potential error textual description if an error occured and :py:func:`~QgsExternalStorageFetchedContent.status` returns Failed
+%End
+  signals:
+
+    void errorOccured( const QString & );
+
+    void fetched();
+
+  protected:
+
+};
+
+/************************************************************************
+ * This file has been generated automatically from                      *
+ *                                                                      *
+ * src/core/externalstorage/qgsexternalstorage.h                        *
+ *                                                                      *
+ * Do not edit manually ! Edit header and run scripts/sipify.pl again   *
+ ************************************************************************/
