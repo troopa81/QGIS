@@ -67,6 +67,11 @@ class CORE_EXPORT QgsNetworkContentFetcher : public QObject
      */
     void fetchContent( const QNetworkRequest &request, const QString &authcfg = QString() );
 
+    void setMode( const QString &mode ) { mMode = mode; }
+
+    // take ownership
+    void setContent( QIODevice *content ) { mContent = content; }
+
     /**
      * Returns a reference to the network reply
      * \returns QNetworkReply for fetched URL content
@@ -105,10 +110,19 @@ class CORE_EXPORT QgsNetworkContentFetcher : public QObject
      */
     void downloadProgress( qint64 bytesReceived, qint64 bytesTotal );
 
+    /**
+     * Emitted when an error with \a code error occured while processing the request
+     * \since QGIS 3.20
+     * TODO doc
+     */
+    void errorOccurred( QNetworkReply::NetworkError code, const QString &errorMsg );
+
   private:
 
     QString mAuthCfg;
     QNetworkReply *mReply = nullptr;
+    QString mMode;
+    QIODevice *mContent = nullptr;
 
     bool mContentLoaded = false;
 

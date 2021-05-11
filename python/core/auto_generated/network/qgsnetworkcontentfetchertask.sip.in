@@ -52,6 +52,9 @@ Optionally, authentication configuration can be set via the ``authcfg`` argument
 
     ~QgsNetworkContentFetcherTask();
 
+
+    void setMode( const QString &mode );
+    void setContent( QIODevice *content );
     virtual bool run();
 
     virtual void cancel();
@@ -91,6 +94,14 @@ of whether the fetch was successful or not.
 Users of QgsNetworkContentFetcherTask should connect to this signal,
 and from the associated slot they can then safely access the network :py:func:`~QgsNetworkContentFetcherTask.reply`
 without danger of the task being first removed by the :py:class:`QgsTaskManager`.
+%End
+
+    void errorOccurred( QNetworkReply::NetworkError code, const QString &errorMsg );
+%Docstring
+Emitted when an error with ``code`` error occured while processing the request
+
+.. versionadded:: 3.20
+TODO doc
 %End
 
 };

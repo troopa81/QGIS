@@ -55,6 +55,10 @@ Optionally, authentication configuration can be set via the ``authcfg`` argument
 .. versionadded:: 3.2
 %End
 
+    void setMode( const QString &mode );
+
+    void setContent( QIODevice *content );
+
     QNetworkReply *reply();
 %Docstring
 Returns a reference to the network reply
@@ -95,6 +99,14 @@ Emitted when content has loaded
 Emitted when data is received.
 
 .. versionadded:: 3.2
+%End
+
+    void errorOccurred( QNetworkReply::NetworkError code, const QString &errorMsg );
+%Docstring
+Emitted when an error with ``code`` error occured while processing the request
+
+.. versionadded:: 3.20
+TODO doc
 %End
 
 };

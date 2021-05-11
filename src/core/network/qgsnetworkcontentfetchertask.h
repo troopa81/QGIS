@@ -23,9 +23,9 @@
 #include "qgstaskmanager.h"
 #include "qgis_core.h"
 #include <QNetworkRequest>
+#include <QNetworkReply>
 
 class QgsNetworkContentFetcher;
-class QNetworkReply;
 
 /**
  * \class QgsNetworkContentFetcherTask
@@ -68,6 +68,11 @@ class CORE_EXPORT QgsNetworkContentFetcherTask : public QgsTask
 
     ~QgsNetworkContentFetcherTask() override;
 
+
+    void setMode( const QString &mode ) { mMode = mode; };
+
+    void setContent( QIODevice *content ) { mContent = content; };
+
     bool run() override;
     void cancel() override;
 
@@ -103,12 +108,20 @@ class CORE_EXPORT QgsNetworkContentFetcherTask : public QgsTask
      */
     void fetched();
 
+    /**
+     * Emitted when an error with \a code error occured while processing the request
+     * \since QGIS 3.20
+     * TODO doc
+     */
+    void errorOccurred( QNetworkReply::NetworkError code, const QString &errorMsg );
+
   private:
 
     QNetworkRequest mRequest;
     QString mAuthcfg;
     QgsNetworkContentFetcher *mFetcher = nullptr;
-
+    QString mMode;
+    QIODevice *mContent = nullptr;
 };
 
 #endif //QGSNETWORKCONTENTFETCHERTASK_H
