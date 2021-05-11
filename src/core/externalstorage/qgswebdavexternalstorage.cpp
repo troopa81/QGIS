@@ -20,44 +20,23 @@
 #include "qgsapplication.h"
 
 #include <QFile>
+#include <QPointer>
 
 
-
-class QgsWebDAVExternalStorageStoreTask : public QgsExternalStorageTask
+class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredContent
 {
-
     // TODO Q_OBJECT rajouter ? Apparemment il faut rajouter aussi le fichier .moc (fait par ailleur mais peu souvent)
 
   public:
 
-    QgsWebDAVExternalStorageStoreTask( const QString &filePath, const QUrl &url, const QString &authcfg = QString() )
-    // TODO complete description with path? and url?
-      : QgsExternalStorageTask( tr( "WebDAV Store task" ) )
-    {
-      QgsNetworkContentFetcherTask *uploadTask = new QgsNetworkContentFetcherTask( url, authcfg );
-      uploadTask->setMode( "PUT" );
+    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg = QString() );
 
-      QFile *f = new QFile( filePath );
-      f->open( QIODevice::ReadOnly );
-      uploadTask->setContent( f );
+    void cancel() override;
 
-      addSubTask( uploadTask );
+  private:
 
-      connect( uploadTask, &QgsNetworkContentFetcherTask::errorOccurred, [ = ]( QNetworkReply::NetworkError code, const QString & errorMsg )
-      {
-        // TODO do we map some error code to some enum error code or not?
-        emit errorOccured( errorMsg );
-      } );
-    }
-
-  protected:
-
-    bool run()
-    {
-      return true;
-    }
+    QPointer<QgsNetworkContentFetcherTask> mUploadTask;
 };
-
 
 class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedContent
 {
@@ -66,6 +45,8 @@ class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedC
     QgsWebDAVExternalStorageFetchedContent( QgsFetchedContent *fetchedContent );
 
     QString filePath() const override;
+
+    void cancel() override;
 
   private slots:
 
@@ -76,6 +57,36 @@ class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedC
     QgsFetchedContent *mFetchedContent = nullptr;
 };
 
+QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg )
+// TODO complete description with path? and url?
+// : QgsExternalStorageTask( tr( "WebDAV Store task" ) )
+{
+  mUploadTask = new QgsNetworkContentFetcherTask( url, authcfg );
+  mUploadTask->setMode( "PUT" );
+
+  QFile *f = new QFile( filePath );
+  f->open( QIODevice::ReadOnly );
+  mUploadTask->setContent( f );
+
+  QgsApplication::instance()->taskManager()->addTask( mUploadTask );
+
+  connect( mUploadTask, &QgsNetworkContentFetcherTask::errorOccurred, [ = ]( QNetworkReply::NetworkError code, const QString & errorMsg )
+  {
+    Q_UNUSED( code );
+    // TODO do we map some error code to some enum error code or not?
+    emit errorOccured( errorMsg );
+  } );
+
+  connect( mUploadTask, &QgsTask::taskCompleted, this, &QgsExternalStorageStoredContent::stored );
+
+  // TODO deal with cancel -> terminated signal
+}
+
+void QgsWebDAVExternalStorageStoredContent::cancel()
+{
+  if ( mUploadTask )
+    mUploadTask->cancel();
+}
 
 QgsWebDAVExternalStorageFetchedContent::QgsWebDAVExternalStorageFetchedContent( QgsFetchedContent *fetchedContent )
   : mFetchedContent( fetchedContent )
@@ -107,19 +118,20 @@ void QgsWebDAVExternalStorageFetchedContent::onFetched()
   emit fetched();
 }
 
+void QgsWebDAVExternalStorageFetchedContent::cancel()
+{
+  // TODO implement cancel for fetch
+}
 
 QString QgsWebDAVExternalStorage::type() const
 {
   return QStringLiteral( "WebDAV" );
 };
 
-QgsExternalStorageTask *QgsWebDAVExternalStorage::storeFile( const QString &filePath, const QUrl &url, const QString &authcfg )
+QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::storeFile( const QString &filePath, const QUrl &url, const QString &authcfg )
 {
-  QgsWebDAVExternalStorageStoreTask *storeTask = new QgsWebDAVExternalStorageStoreTask( filePath, url, authcfg );
-
-  QgsApplication::instance()->taskManager()->addTask( storeTask );
-
-  return storeTask;
+  // TODO who delete the object
+  return new QgsWebDAVExternalStorageStoredContent( filePath, url, authcfg );
 };
 
 QgsExternalStorageFetchedContent *QgsWebDAVExternalStorage::fetch( const QUrl &url, const QString &authConfig )
