@@ -96,6 +96,8 @@ class QgsTestExternalStorageFetchedContent
       emit fetched();
     }
 
+    void cancel() override {}
+
   private:
 
     ExpectedBehavior mBehavior = OK;
@@ -107,7 +109,7 @@ class QgsTestExternalStorage : public QgsExternalStorage
 
     QString type() const override { return QStringLiteral( "test" ); }
 
-    QgsExternalStorageTask *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
+    QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
     {
       Q_UNUSED( filePath );
       Q_UNUSED( url );
