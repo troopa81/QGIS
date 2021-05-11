@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - feat_dms_connexion
     paths:
     - 'src/**'
     - 'external/**'
@@ -87,11 +88,11 @@ jobs:
           docker build --build-arg UBUNTU_BASE=${UBUNTU_BASE} --cache-from qgis/qgis3-build-deps:${DOCKER_TAG} -t qgis/qgis3-build-deps:${DOCKER_TAG} -f qgis3-build-deps.dockerfile .
           popd
 
-      - name: Push deps image
-        if: ${{ github.repository_owner == 'qgis' && github.event_name != 'pull_request' }}
-        run: |
-          docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
-          docker push "qgis/qgis3-build-deps:${DOCKER_TAG}"
+      # - name: Push deps image
+      #   if: ${{ github.repository_owner == 'qgis' && github.event_name != 'pull_request' }}
+      #   run: |
+      #     docker login -u="${DOCKER_USERNAME}" -p="${DOCKER_PASSWORD}"
+      #     docker push "qgis/qgis3-build-deps:${DOCKER_TAG}"
 
       - name: Prepare build cache for pull request
         uses: pat-s/always-upload-cache@v2.1.5
@@ -251,7 +252,7 @@ jobs:
         ubuntu-base: [20.04]
         test-batch: [ALL_BUT_PROVIDERS, POSTGRES, ORACLE, HANA]
       fail-fast: false
-      
+
     services:
       # Run httpbin container for QgsNetwor* tests
       httpbin:
