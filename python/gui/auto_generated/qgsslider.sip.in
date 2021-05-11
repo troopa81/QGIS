@@ -9,6 +9,8 @@
 
 
 
+
+
 class QgsSlider : QSlider
 {
 
@@ -41,6 +43,7 @@ Constructor for QgsSlider
 
 
 };
+
 /************************************************************************
  * This file has been generated automatically from                      *
  *                                                                      *
