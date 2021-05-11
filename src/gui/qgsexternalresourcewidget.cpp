@@ -18,16 +18,23 @@
 #include "qgspixmaplabel.h"
 #include "qgsproject.h"
 #include "qgsapplication.h"
+#include "qgsnetworkaccessmanager.h"
+#include "qgstaskmanager.h"
+#include "qgsexternalstorage.h"
+#include "qgsmessagebar.h"
 
 #include <QDir>
 #include <QGridLayout>
 #include <QVariant>
 #include <QSettings>
 #include <QImageReader>
+#include <QToolButton>
+#include <QMimeType>
+#include <QMimeDatabase>
+#include <QMovie>
 #ifdef WITH_QTWEBKIT
 #include <QWebView>
 #endif
-
 
 QgsExternalResourceWidget::QgsExternalResourceWidget( QWidget *parent )
   : QWidget( parent )
@@ -49,6 +56,16 @@ QgsExternalResourceWidget::QgsExternalResourceWidget( QWidget *parent )
   mWebView = new QWebView( this );
   layout->addWidget( mWebView, 2, 0 );
 #endif
+
+  mLoadingLabel = new QLabel( this );
+  layout->addWidget( mLoadingLabel, 3, 0 );
+  mLoadingMovie = new QMovie( QgsApplication::iconPath( QStringLiteral( "/mIconLoading.gif" ) ), QByteArray(), this );
+  mLoadingMovie->setScaledSize( QSize( 32, 32 ) );
+  mLoadingLabel->setMovie( mLoadingMovie );
+
+  mErrorLabel = new QLabel( this );
+  layout->addWidget( mErrorLabel, 4, 0 );
+  mErrorLabel->setPixmap( QPixmap( QgsApplication::iconPath( QStringLiteral( "/mIconWarning.svg" ) ) ) );
 
   updateDocumentViewer();
 
@@ -134,6 +151,10 @@ void QgsExternalResourceWidget::setReadOnly( bool readOnly )
 
 void QgsExternalResourceWidget::updateDocumentViewer()
 {
+  mErrorLabel->setVisible( false );
+  mLoadingLabel->setVisible( false );
+  mLoadingMovie->stop();
+
 #ifdef WITH_QTWEBKIT
   mWebView->setVisible( mDocumentViewerContent == Web );
 #endif
@@ -208,51 +229,133 @@ void QgsExternalResourceWidget::setRelativeStorage( QgsFileWidget::RelativeStora
   mRelativeStorage = relativeStorage;
 }
 
+void QgsExternalResourceWidget::setStorageType( const QString &storageType )
+{
+  mFileWidget->setStorageType( storageType );
+}
+
+QString QgsExternalResourceWidget::storageType() const
+{
+  return mFileWidget->storageType();
+}
+
+void QgsExternalResourceWidget::setStorageAuthConfigId( const QString &authCfg )
+{
+  mFileWidget->setStorageAuthConfigId( authCfg );
+}
+
+const QString &QgsExternalResourceWidget::storageAuthConfigId() const
+{
+  return mFileWidget->storageAuthConfigId();
+}
+
+void QgsExternalResourceWidget::setMessageBar( QgsMessageBar *messageBar )
+{
+  mMessageBar = messageBar;
+}
+
+void QgsExternalResourceWidget::updateDocumentContent( const QString &filePath )
+{
+#ifdef WITH_QTWEBKIT
+  if ( mDocumentViewerContent == Web )
+  {
+    mWebView->load( QUrl::fromEncoded( filePath.toUtf8() ) );
+    mWebView->page()->settings()->setAttribute( QWebSettings::LocalStorageEnabled, true );
+  }
+#endif
+
+  if ( mDocumentViewerContent == Image )
+  {
+    // use an image reader to ensure image orientation and transforms are correctly handled
+    QImageReader ir( filePath );
+    ir.setAutoTransform( true );
+    QPixmap pm = QPixmap::fromImage( ir.read() );
+    if ( !pm.isNull() )
+      mPixmapLabel->setPixmap( pm );
+    else
+      mPixmapLabel->clear();
+  }
+
+  updateDocumentViewer();
+}
+
+void QgsExternalResourceWidget::clearContent()
+{
+#ifdef WITH_QTWEBKIT
+  if ( mDocumentViewerContent == Web )
+  {
+    mWebView->setUrl( QUrl( QStringLiteral( "about:blank" ) ) );
+  }
+#endif
+  if ( mDocumentViewerContent == Image )
+  {
+    mPixmapLabel->clear();
+    updateDocumentViewer();
+  }
+}
+
 void QgsExternalResourceWidget::loadDocument( const QString &path )
 {
   QString resolvedPath;
 
   if ( path.isEmpty() )
   {
-#ifdef WITH_QTWEBKIT
-    if ( mDocumentViewerContent == Web )
-    {
-      mWebView->setUrl( QUrl( QStringLiteral( "about:blank" ) ) );
-    }
-#endif
-    if ( mDocumentViewerContent == Image )
-    {
-      mPixmapLabel->clear();
-      updateDocumentViewer();
-    }
+    clearContent();
   }
-  else
+  else if ( mDocumentViewerContent != NoContent )
   {
     resolvedPath = resolvePath( path );
 
-#ifdef WITH_QTWEBKIT
-    if ( mDocumentViewerContent == Web )
+    if ( mFileWidget->externalStorage() )
     {
-      mWebView->load( QUrl::fromEncoded( resolvedPath.toUtf8() ) );
-      mWebView->page()->settings()->setAttribute( QWebSettings::LocalStorageEnabled, true );
-    }
-#endif
+      QgsExternalStorageFetchedContent *content = mFileWidget->externalStorage()->fetch( resolvedPath, storageAuthConfigId() );
 
-    if ( mDocumentViewerContent == Image )
-    {
-      // use an image reader to ensure image orientation and transforms are correctly handled
-      QImageReader ir( resolvedPath );
-      ir.setAutoTransform( true );
-      QPixmap pm = QPixmap::fromImage( ir.read() );
-      if ( !pm.isNull() )
+      auto onFetchFinished = [ = ]
       {
-        mPixmapLabel->setPixmap( pm );
+        if ( content->status() == QgsExternalStorageFetchedContent::Failed )
+        {
+          mWebView->setVisible( false );
+          mPixmapLabel->setVisible( false );
+          mLoadingLabel->setVisible( false );
+          mLoadingMovie->stop();
+          mErrorLabel->setVisible( true );
+
+          if ( mMessageBar )
+          {
+            // content->errorString()
+            const QString title = tr( "External resource '%1'" ).arg( path );
+            const QString msg = tr( "Error while fetching external resource : %1" ).arg( content->errorString() );
+            mMessageBar->pushWarning( title, msg );
+          }
+        }
+        else
+        {
+          const QString filePath = mDocumentViewerContent == Web
+                                   ? QString( "file://%1" ).arg( content->filePath() )
+                                   : content->filePath();
+
+          updateDocumentContent( filePath );
+        }
+
+        content->deleteLater();
+      };
+
+
+      if ( content->status() == QgsExternalStorageFetchedContent::OnGoing )
+      {
+        mWebView->setVisible( false );
+        mPixmapLabel->setVisible( false );
+        mErrorLabel->setVisible( false );
+        mLoadingLabel->setVisible( true );
+        mLoadingMovie->start();
+        connect( content, &QgsExternalStorageFetchedContent::fetched, onFetchFinished );
       }
       else
-      {
-        mPixmapLabel->clear();
-      }
-      updateDocumentViewer();
+        onFetchFinished();
+    }
+    else
+    {
+      updateDocumentContent( resolvedPath );
     }
   }
 }

@@ -19,6 +19,7 @@
 
 class QWebView;
 class QgsPixmapLabel;
+class QgsMessageBar;
 
 #include <QWidget>
 #include <QVariant>
@@ -143,6 +144,37 @@ class GUI_EXPORT QgsExternalResourceWidget : public QWidget
      */
     void setDefaultRoot( const QString &defaultRoot );
 
+    /**
+     * Set \a storageType storage type unique identifier as defined in QgsExternalStorageRegistry or
+     * null QString if there is no storage defined, only file selection.
+     * \see storageType
+     * \since QGIS 3.20
+     */
+    void setStorageType( const QString &storageType );
+
+    /**
+     * Get storage type unique identifier as defined in QgsExternalStorageRegistry.
+     * Returns null QString if there is no storage defined, only file selection.
+     * \see setStorageType
+     * \since QGIS 3.20
+     */
+    QString storageType() const;
+
+    /**
+     * Sets the authentication configuration ID for current storage
+     * TODO complete doc (cf QgsFileWidget)
+     * TODO property
+     */
+    void setStorageAuthConfigId( const QString &authCfg );
+
+    // TODO doc
+    const QString &storageAuthConfigId() const;
+
+    /**
+     * Set \a messageBar to report messages
+     */
+    void setMessageBar( QgsMessageBar *messageBar );
+
   signals:
     //! emitteed as soon as the current document changes
     void valueChanged( const QString & );
@@ -152,6 +184,16 @@ class GUI_EXPORT QgsExternalResourceWidget : public QWidget
 
   private:
     void updateDocumentViewer();
+
+    /**
+     * update document content with to \a filePath
+     */
+    void updateDocumentContent( const QString &filePath );
+
+    /**
+     * Clear content from widget
+     */
+    void clearContent();
 
     QString resolvePath( const QString &path );
 
@@ -170,7 +212,12 @@ class GUI_EXPORT QgsExternalResourceWidget : public QWidget
     //! This webview is used as a container to display the picture
     QWebView *mWebView = nullptr;
 #endif
+    QLabel *mLoadingLabel = nullptr;
+    QLabel *mErrorLabel = nullptr;
+    QMovie *mLoadingMovie = nullptr;
+    QgsMessageBar *mMessageBar = nullptr;
 
+    friend class TestQgsExternalResourceWidgetWrapper;
 };
 
 #endif // QGSEXTERNALRESOURCEWIDGET_H

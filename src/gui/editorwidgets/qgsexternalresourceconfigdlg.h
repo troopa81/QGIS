@@ -49,6 +49,13 @@ class GUI_EXPORT QgsExternalResourceConfigDlg : public QgsEditorConfigWidget, pr
 
     //! Modify RelativeDefault according to mRootPath content
     void enableRelativeDefault();
+
+    //! Display expression builder dialog for storage url
+    void editStorageUrlExpression();
+
+    //! change storage type according to index from storage type combo box
+    void changeStorageType( int index );
+
 };
 
 #endif // QGSEXTERNALRESOURCECONFIGDLG_H

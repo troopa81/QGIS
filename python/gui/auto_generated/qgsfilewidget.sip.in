@@ -9,6 +9,8 @@
 
 
 
+
+
 class QgsFileWidget : QWidget
 {
 %Docstring(signature="appended")
@@ -71,6 +73,45 @@ Sets the file path
 %Docstring
 defines if the widget is readonly
 %End
+
+    void setStorageType( const QString &storageType );
+%Docstring
+Set ``storageType`` storage type unique identifier as defined in :py:class:`QgsExternalStorageRegistry` or
+null QString if there is no storage defined, only file selection.
+
+.. seealso:: :py:func:`storageType`
+
+.. versionadded:: 3.20
+%End
+
+    QString storageType() const;
+%Docstring
+Get storage type unique identifier as defined in :py:class:`QgsExternalStorageRegistry`.
+Returns null QString if there is no storage defined, only file selection.
+
+.. seealso:: :py:func:`setStorageType`
+
+.. versionadded:: 3.20
+%End
+
+    QgsExternalStorage *externalStorage() const;
+
+    void setStorageAuthConfigId( const QString &authCfg );
+%Docstring
+Sets the authentication configuration ID for current storage
+TODO complete doc
+TODO property
+%End
+
+    const QString &storageAuthConfigId() const;
+
+    void setStorageUrlExpression( const QString &urlExpression );
+
+    QgsExpression *storageUrlExpression() const;
+
+    void setExpressionContext( const QgsExpressionContext &context );
+
+    const QgsExpressionContext &expressionContext() const;
 
     QString dialogTitle() const;
 %Docstring

@@ -22,8 +22,12 @@
 #include "qgsvectorlayer.h"
 #include "qgspropertyoverridebutton.h"
 #include "qgseditorwidgetwrapper.h"
+#include "qgsexternalstorage.h"
+#include "qgsexternalstorageregistry.h"
+#include "qgsexpressioncontextutils.h"
 
 #include <QFileDialog>
+#include <QComboBox>
 
 class QgsExternalResourceWidgetWrapper;
 
@@ -31,6 +35,16 @@ QgsExternalResourceConfigDlg::QgsExternalResourceConfigDlg( QgsVectorLayer *vl, 
   : QgsEditorConfigWidget( vl, fieldIdx, parent )
 {
   setupUi( this );
+
+  mStorageType->addItem( tr( "Select existing file" ), "fileSelect" );
+  mStorageType->addItem( tr( "Store on disk" ), "disk" );
+
+  for ( QgsExternalStorage *storage : QgsApplication::externalStorageRegistry()->externalStorages() )
+  {
+    mStorageType->addItem( tr( "Store with %1" ).arg( storage->type() ), storage->type() );
+  }
+
+  connect( mEditStorageUrlExpression, &QToolButton::clicked, this, &QgsExternalResourceConfigDlg::editStorageUrlExpression );
 
   // By default, uncheck some options
   mUseLink->setChecked( false );
@@ -69,6 +83,7 @@ QgsExternalResourceConfigDlg::QgsExternalResourceConfigDlg( QgsVectorLayer *vl, 
   mRelativeButtonGroup->setId( mRelativeDefault, QgsFileWidget::RelativeDefaultPath );
   mRelativeProject->setChecked( true );
 
+  connect( mStorageType, static_cast<void ( QComboBox::* )( int )>( &QComboBox::currentIndexChanged ), this, &QgsExternalResourceConfigDlg::changeStorageType );
   connect( mFileWidgetGroupBox, &QGroupBox::toggled, this, &QgsEditorConfigWidget::changed );
   connect( mFileWidgetButtonGroupBox, &QGroupBox::toggled, this, &QgsEditorConfigWidget::changed );
   connect( mFileWidgetFilterLineEdit, &QLineEdit::textChanged, this, &QgsEditorConfigWidget::changed );
@@ -82,6 +97,7 @@ QgsExternalResourceConfigDlg::QgsExternalResourceConfigDlg( QgsVectorLayer *vl, 
   { mDocumentViewerContentSettingsWidget->setEnabled( ( QgsExternalResourceWidget::DocumentViewerContent )idx != QgsExternalResourceWidget::NoContent ); } );
   connect( mDocumentViewerHeight, static_cast<void ( QSpinBox::* )( int )>( &QSpinBox::valueChanged ), this, &QgsEditorConfigWidget::changed );
   connect( mDocumentViewerWidth, static_cast<void ( QSpinBox::* )( int )>( &QSpinBox::valueChanged ), this, &QgsEditorConfigWidget::changed );
+  connect( mStorageUrlExpression, &QLineEdit::textChanged, this, &QgsEditorConfigWidget::changed );
 
   mDocumentViewerContentComboBox->addItem( tr( "No Content" ), QgsExternalResourceWidget::NoContent );
   mDocumentViewerContentComboBox->addItem( tr( "Image" ), QgsExternalResourceWidget::Image );
@@ -135,6 +151,10 @@ QVariantMap QgsExternalResourceConfigDlg::config()
 {
   QVariantMap cfg;
 
+  cfg.insert( QStringLiteral( "StorageType" ), mStorageType->currentData() );
+  cfg.insert( QStringLiteral( "StorageAuthConfigId" ), mAuthSettingsProtocol->configId() );
+  cfg.insert( QStringLiteral( "StorageUrlExpression" ), mStorageUrlExpression->text() );
+
   cfg.insert( QStringLiteral( "FileWidget" ), mFileWidgetGroupBox->isChecked() );
   cfg.insert( QStringLiteral( "FileWidgetButton" ), mFileWidgetButtonGroupBox->isChecked() );
   cfg.insert( QStringLiteral( "FileWidgetFilter" ), mFileWidgetFilterLineEdit->text() );
@@ -174,6 +194,16 @@ QVariantMap QgsExternalResourceConfigDlg::config()
 
 void QgsExternalResourceConfigDlg::setConfig( const QVariantMap &config )
 {
+  if ( config.contains( QStringLiteral( "StorageType" ) ) )
+  {
+    const int index = mStorageType->findData( config.value( QStringLiteral( "StorageType" ) ) );
+    if ( index >= 0 )
+      mStorageType->setCurrentIndex( index );
+  }
+
+  mAuthSettingsProtocol->setConfigId( config.value( QStringLiteral( "StorageAuthConfigId" ) ).toString() );
+  mStorageUrlExpression->setText( config.value( QStringLiteral( "StorageUrlExpression" ) ).toString() );
+
   if ( config.contains( QStringLiteral( "FileWidget" ) ) )
   {
     mFileWidgetGroupBox->setChecked( config.value( QStringLiteral( "FileWidget" ) ).toBool() );
@@ -239,4 +269,36 @@ void QgsExternalResourceConfigDlg::setConfig( const QVariantMap &config )
       mDocumentViewerWidth->setValue( config.value( QStringLiteral( "DocumentViewerWidth" ) ).toInt() );
     }
   }
+}
+
+void QgsExternalResourceConfigDlg::editStorageUrlExpression()
+{
+  Q_ASSERT( layer() );
+
+  QgsExpressionContext context( QgsExpressionContextUtils::globalProjectLayerScopes( layer() ) );
+  context << QgsExpressionContextUtils::formScope( );
+  context << QgsExpressionContextUtils::parentFormScope( );
+
+  // TODO add and highlight selectedFileName, eventually added function?
+  // context.setHighlightedFunctions( QStringList() << QStringLiteral( "current_value" ) << QStringLiteral( "current_parent_value" ) );
+  // context.setHighlightedVariables( QStringList() << QStringLiteral( "current_geometry" )
+  //                                  << QStringLiteral( "current_feature" )
+  //                                  << QStringLiteral( "form_mode" )
+  //                                  << QStringLiteral( "current_parent_geometry" )
+  //                                  << QStringLiteral( "current_parent_feature" ) );
+
+  QgsExpressionBuilderDialog dlg( layer(), mStorageUrlExpression->text(), this, QStringLiteral( "generic" ), context );
+  dlg.setWindowTitle( tr( "Edit Storage Url Expression" ) );
+
+  if ( dlg.exec() == QDialog::Accepted )
+  {
+    mStorageUrlExpression->setText( dlg.expressionBuilder()->expressionText() );
+  }
+}
+
+void QgsExternalResourceConfigDlg::changeStorageType( int storageType )
+{
+  // first one in combo box is not an external storage
+  mExternalStorageGroupBox->setVisible( storageType );
+  emit changed();
 }
