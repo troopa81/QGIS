@@ -35,11 +35,18 @@ QgsNetworkContentFetcherTask::~QgsNetworkContentFetcherTask()
 {
   if ( mFetcher )
     mFetcher->deleteLater();
+
+  // TODO sure this the best moment/place to close the file and delete it?
+  if ( mContent )
+    mContent->deleteLater();
 }
 
 bool QgsNetworkContentFetcherTask::run()
 {
   mFetcher = new QgsNetworkContentFetcher();
+  mFetcher->setMode( mMode );
+  // TODO nettoyer cette histoire de content
+  mFetcher->setContent( mContent );
   QEventLoop loop;
   connect( mFetcher, &QgsNetworkContentFetcher::finished, &loop, &QEventLoop::quit );
   connect( mFetcher, &QgsNetworkContentFetcher::downloadProgress, this, [ = ]( qint64 bytesReceived, qint64 bytesTotal )
@@ -53,6 +60,8 @@ bool QgsNetworkContentFetcherTask::run()
         setProgress( progress );
     }
   } );
+  connect( mFetcher, &QgsNetworkContentFetcher::errorOccurred, this, &QgsNetworkContentFetcherTask::errorOccurred );
+
   mFetcher->fetchContent( mRequest, mAuthcfg );
   loop.exec();
   if ( !isCanceled() )

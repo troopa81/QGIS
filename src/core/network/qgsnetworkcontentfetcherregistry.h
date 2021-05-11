@@ -51,10 +51,12 @@ class CORE_EXPORT QgsFetchedContent : public QObject
     };
 
     //! Constructs a FetchedContent with pointer to the downloaded file and status of the download
-    explicit QgsFetchedContent( const QString &url, QTemporaryFile *file = nullptr, ContentStatus status = NotStarted )
+    explicit QgsFetchedContent( const QString &url, QTemporaryFile *file = nullptr, ContentStatus status = NotStarted,
+                                const QString &authConfig = QString() )
       : mUrl( url )
       , mFile( file )
       , mStatus( status )
+      , mAuthConfig( authConfig )
     {}
 
     ~QgsFetchedContent() override
@@ -78,6 +80,14 @@ class CORE_EXPORT QgsFetchedContent : public QObject
 
     //! Returns the potential error of the download
     QNetworkReply::NetworkError error() const {return mError;}
+
+    /**
+     * Returns the potential error textual description of the download
+     */
+    const QString &errorString() const {return mErrorString;}
+
+    //! TODO doc
+    const QString authConfig() const {return mAuthConfig;}
 
   public slots:
 
@@ -106,6 +116,8 @@ class CORE_EXPORT QgsFetchedContent : public QObject
     QgsNetworkContentFetcherTask *mFetchingTask = nullptr;
     ContentStatus mStatus = NotStarted;
     QNetworkReply::NetworkError mError = QNetworkReply::NoError;
+    QString mAuthConfig;
+    QString mErrorString;
 };
 
 /**
@@ -142,8 +154,9 @@ class CORE_EXPORT QgsNetworkContentFetcherRegistry : public QObject
      * \param url the URL to be fetched
      * \param fetchingMode defines if the download will start immediately or shall be manually triggered
      * \note If the download starts immediately, it will not redownload any already fetched or currently fetching file.
+     * TODO doc auth
      */
-    const QgsFetchedContent *fetch( const QString &url, FetchingMode fetchingMode = DownloadLater );
+    QgsFetchedContent *fetch( const QString &url, FetchingMode fetchingMode = DownloadLater, const QString &authConfig = QString() );
 
 #ifndef SIP_RUN
 

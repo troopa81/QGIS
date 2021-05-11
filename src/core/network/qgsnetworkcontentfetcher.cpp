@@ -63,7 +63,15 @@ void QgsNetworkContentFetcher::fetchContent( const QNetworkRequest &r, const QSt
     mReply = nullptr;
   }
 
-  mReply = QgsNetworkAccessManager::instance()->get( request );
+  if ( mMode == "PUT" )
+  {
+    // TODO pas sur que ce soit utile
+    request.setHeader( QNetworkRequest::ContentLengthHeader, mContent->size() );
+    mReply = QgsNetworkAccessManager::instance()->put( request, mContent );
+  }
+  else
+    mReply = QgsNetworkAccessManager::instance()->get( request );
+
   if ( !mAuthCfg.isEmpty() )
   {
     QgsApplication::authManager()->updateNetworkReply( mReply, mAuthCfg );
@@ -71,6 +79,11 @@ void QgsNetworkContentFetcher::fetchContent( const QNetworkRequest &r, const QSt
   mReply->setParent( nullptr ); // we don't want thread locale QgsNetworkAccessManagers to delete the reply - we want ownership of it to belong to this object
   connect( mReply, &QNetworkReply::finished, this, [ = ] { contentLoaded(); } );
   connect( mReply, &QNetworkReply::downloadProgress, this, &QgsNetworkContentFetcher::downloadProgress );
+  connect( mReply, &QNetworkReply::errorOccurred, this, [ = ]( QNetworkReply::NetworkError code )
+  {
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>( sender() );
+    emit errorOccurred( code, reply->errorString() );
+  } );
 }
 
 QNetworkReply *QgsNetworkContentFetcher::reply()
@@ -166,6 +179,8 @@ void QgsNetworkContentFetcher::contentLoaded( bool ok )
 
   if ( mReply->error() != QNetworkReply::NoError )
   {
+    qDebug() << "errorCode=" << mReply->error();
+
     QgsMessageLog::logMessage( tr( "HTTP fetch %1 failed with error %2" ).arg( mReply->url().toString(), mReply->errorString() ) );
     mContentLoaded = true;
     emit finished();
@@ -190,7 +205,3 @@ void QgsNetworkContentFetcher::contentLoaded( bool ok )
   mReply->deleteLater();
   fetchContent( redirect.toUrl(), mAuthCfg );
 }
-
-
-
-

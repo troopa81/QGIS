@@ -111,6 +111,8 @@ set(QGIS_CORE_SRCS
 
   externalstorage/qgsexternalstorage.cpp
   externalstorage/qgsexternalstorageregistry.cpp
+  externalstorage/qgswebdavexternalstorage.cpp
+
   layertree/qgscolorramplegendnode.cpp
   layertree/qgscolorramplegendnodesettings.cpp
   layertree/qgslayertreegroup.cpp
