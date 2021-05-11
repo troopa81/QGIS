@@ -23,9 +23,8 @@
 #include <QString>
 #include <QUrl>
 
-
-class QgsExternalStorageTask;
 class QgsExternalStorageFetchedContent;
+class QgsExternalStorageStoredContent;
 
 /**
  * \ingroup core
@@ -58,7 +57,7 @@ class CORE_EXPORT QgsExternalStorage
      * TODO QUrl or QString ( QString is more general in case of Postgres LargeObject for instance)
      * TODO rename en store()
      */
-    virtual QgsExternalStorageTask *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
+    virtual QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
 
     /**
      * TODO Complete documentation
@@ -68,25 +67,8 @@ class CORE_EXPORT QgsExternalStorage
     virtual QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) = 0;
 };
 
-
 // TODO doc
-// TODO don't inherit from task and define a QgsExternalStorageStoredContent
-class CORE_EXPORT QgsExternalStorageTask : public QgsTask
-{
-    Q_OBJECT
-
-  public:
-
-    QgsExternalStorageTask( const QString &description )
-      : QgsTask( description ) {}
-
-  signals:
-
-    void errorOccured( const QString & );
-};
-
-// TODO doc
-class CORE_EXPORT QgsExternalStorageFetchedContent : public QObject
+class CORE_EXPORT QgsExternalStorageOperation : public QObject
 {
     Q_OBJECT
 
@@ -96,21 +78,12 @@ class CORE_EXPORT QgsExternalStorageFetchedContent : public QObject
     //! Status of fetched content
     enum ContentStatus
     {
-      NotStarted, //!< No download started for such URL
-      OnGoing, //!< Currently fetching
-      Finished, //!< Fetching is finished and successful
-      Failed //!< Fetching has failed
+      NotStarted, //!< No operation started
+      OnGoing, //!< Operation in progress
+      Finished, //!< Operation is finished and successful
+      Failed, //!< Operation has failed
+      Canceled, //!< Operation has been canceled
     };
-
-
-    // TODO really necessary ?
-    QgsExternalStorageFetchedContent() = default;
-
-    // TODO really necessary ?
-    ~QgsExternalStorageFetchedContent() = default;
-
-    // TODO doc
-    virtual QString filePath() const = 0;
 
     /**
      * Returns status of fetched content
@@ -122,16 +95,62 @@ class CORE_EXPORT QgsExternalStorageFetchedContent : public QObject
      */
     const QString &errorString() const {return mErrorString;};
 
+  public slots:
+
+    virtual void cancel() = 0;
+
   signals:
 
     void errorOccured( const QString & );
 
-    void fetched();
+    void progressChanged( double progress );
+
+    void canceled();
 
   protected:
 
     ContentStatus mStatus = NotStarted;
     QString mErrorString;
+};
+
+
+// TODO doc
+class CORE_EXPORT QgsExternalStorageFetchedContent : public QgsExternalStorageOperation
+{
+    Q_OBJECT
+
+  public:
+
+    /* // TODO really necessary ? */
+    /* QgsExternalStorageFetchedContent() = default; */
+
+    /* // TODO really necessary ? */
+    /* ~QgsExternalStorageFetchedContent() = default; */
+
+    // TODO doc
+    virtual QString filePath() const = 0;
+
+  signals:
+
+    void fetched();
+};
+
+// TODO doc
+class CORE_EXPORT QgsExternalStorageStoredContent : public QgsExternalStorageOperation
+{
+    Q_OBJECT
+
+  public:
+
+    /* // TODO really necessary ? */
+    /* QgsExternalStorageFetchedContent() = default; */
+
+    /* // TODO really necessary ? */
+    /* ~QgsExternalStorageFetchedContent() = default; */
+
+  signals:
+
+    void stored();
 };
 
 #endif // QGSEXTERNALSTORAGE_H

@@ -101,14 +101,14 @@ class TestPyQgsExternalStorageBase():
         f = self.getNewFile(b"New content")
 
         # store
-        task = self.storage.storeFile(f.name, QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
-        self.assertTrue(task)
+        storedContent = self.storage.storeFile(f.name, QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
+        self.assertTrue(storedContent)
 
         self.nb_errors = 0
-        task.errorOccured.connect(self.on_error)
+        storedContent.errorOccured.connect(self.on_error)
 
         loop = QEventLoop()
-        task.taskCompleted.connect(loop.quit)
+        storedContent.stored.connect(loop.quit)
         loop.exec()
 
         self.assertEqual(self.nb_errors, 0)
@@ -156,14 +156,14 @@ class TestPyQgsExternalStorageBase():
 
         f = self.getNewFile(b"New content")
 
-        task = self.storage.storeFile(f.name, QUrl("http://nothinghere/" + os.path.basename(f.name)), self.auth_config.id())
-        self.assertTrue(task)
+        storedContent = self.storage.storeFile(f.name, QUrl("http://nothinghere/" + os.path.basename(f.name)), self.auth_config.id())
+        self.assertTrue(storedContent)
 
         self.nb_errors = 0
-        task.errorOccured.connect(self.on_error)
+        storedContent.errorOccured.connect(self.on_error)
 
         loop = QEventLoop()
-        task.taskCompleted.connect(loop.quit)
+        storedContent.stored.connect(loop.quit)
         loop.exec()
 
         self.assertEqual(self.nb_errors, 1)
@@ -174,14 +174,14 @@ class TestPyQgsExternalStorageBase():
         """
 
         f = self.getNewFile(b"New content")
-        task = self.storage.storeFile(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
-        self.assertTrue(task)
+        storedContent = self.storage.storeFile(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
+        self.assertTrue(storedContent)
 
         self.nb_errors = 0
-        task.errorOccured.connect(self.on_error)
+        storedContent.errorOccured.connect(self.on_error)
 
         loop = QEventLoop()
-        task.taskCompleted.connect(loop.quit)
+        storedContent.stored.connect(loop.quit)
         loop.exec()
 
         self.assertEqual(self.nb_errors, 1)
