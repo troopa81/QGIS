@@ -36,7 +36,7 @@ class CORE_EXPORT QgsWebDAVExternalStorage : public QgsExternalStorage
 
     QString type() const override;
 
-    QgsExternalStorageTask *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override;
+    QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override;
 
     QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authConfig = QString() ) override;
 };
