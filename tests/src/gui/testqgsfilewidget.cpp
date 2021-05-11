@@ -51,15 +51,21 @@ class TestQgsFileWidget: public QObject
     void testStoringChangeFeature();
 };
 
-class QgsTestStoreTask : public QgsExternalStorageTask
+class QgsTestExternalStorageStoredContent : public QgsExternalStorageStoredContent
 {
     Q_OBJECT
 
   public:
 
-    QgsTestStoreTask() : QgsExternalStorageTask( "" ) {}
+    QgsTestExternalStorageStoredContent() : QgsExternalStorageStoredContent() {}
 
-    bool run() override { return true; }
+    void cancel() override {};
+
+    void finish()
+    {
+      mStatus = Finished;
+      emit stored();
+    }
 };
 
 class QgsTestExternalStorage : public QgsExternalStorage
@@ -68,14 +74,13 @@ class QgsTestExternalStorage : public QgsExternalStorage
 
     QString type() const override { return QStringLiteral( "test" ); }
 
-    QgsExternalStorageTask *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
+    QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
     {
       Q_UNUSED( filePath );
       Q_UNUSED( url );
       Q_UNUSED( authcfg );
-      sCurrentStorageTask = new QgsTestStoreTask();
-      QgsApplication::instance()->taskManager()->addTask( sCurrentStorageTask );
-      return sCurrentStorageTask;
+      sCurrentStoredContent = new QgsTestExternalStorageStoredContent();
+      return sCurrentStoredContent;
     }
 
     QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) override
@@ -85,10 +90,10 @@ class QgsTestExternalStorage : public QgsExternalStorage
       return nullptr;
     }
 
-    static QgsExternalStorageTask *sCurrentStorageTask;
+    static QgsTestExternalStorageStoredContent *sCurrentStoredContent;
 };
 
-QgsExternalStorageTask *QgsTestExternalStorage::sCurrentStorageTask = nullptr;
+QgsTestExternalStorageStoredContent *QgsTestExternalStorage::sCurrentStoredContent = nullptr;
 
 void TestQgsFileWidget::initTestCase()
 {
@@ -403,7 +408,7 @@ void TestQgsFileWidget::testStoring()
 
   w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
 
-  QVERIFY( QgsTestExternalStorage::sCurrentStorageTask );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
 
   QVERIFY( !w.mLinkLabel->isVisible() );
   QVERIFY( !w.mLinkEditButton->isVisible() );
@@ -416,9 +421,7 @@ void TestQgsFileWidget::testStoring()
   // TODO for now, url is updated directly but il should not, it should be done after the storing is done
   // QCOMPARE( w.mLinkLabel->text(), QString() );
 
-  QEventLoop loop;
-  connect( QgsTestExternalStorage::sCurrentStorageTask, &QgsTask::taskCompleted, &loop, &QEventLoop::quit );
-  loop.exec();
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
 
   QVERIFY( useLink == w.mLinkLabel->isVisible() );
   QVERIFY( useLink == w.mLinkEditButton->isVisible() );
@@ -468,9 +471,7 @@ void TestQgsFileWidget::testStoringChangeFeature()
 
   w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
 
-  QEventLoop loop;
-  connect( QgsTestExternalStorage::sCurrentStorageTask, &QgsTask::taskCompleted, &loop, &QEventLoop::quit );
-  loop.exec();
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
 
   QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/val1" ) );
 
@@ -483,8 +484,7 @@ void TestQgsFileWidget::testStoringChangeFeature()
 
   w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
 
-  connect( QgsTestExternalStorage::sCurrentStorageTask, &QgsTask::taskCompleted, &loop, &QEventLoop::quit );
-  loop.exec();
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
 
   QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/val2" ) );
 }

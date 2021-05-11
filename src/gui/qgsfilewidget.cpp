@@ -476,7 +476,7 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
       // TODO deal with multiplefiles -> only one progress bar which is the sum of progress task? or several progress bar?
       // or one after another?
       QStringList urls;
-      for ( const QString filePath : fileNames )
+      for ( const QString &filePath : fileNames )
       {
         mProgressLabel->setText( tr( "Storing file %1 ..." ).arg( QFileInfo( filePath ).baseName() ) );
         mStoreInProgress = true;
@@ -494,11 +494,11 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
           continue;
         }
 
-        QgsTask *uploadTask = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
+        QgsExternalStorageStoredContent *storedContent = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
 
-        connect( uploadTask, &QgsTask::progressChanged, mProgressBar, &QProgressBar::setValue );
+        connect( storedContent, &QgsExternalStorageStoredContent::progressChanged, mProgressBar, &QProgressBar::setValue );
         // TODO remove lambda when uploadTask is no longer a task and a slot exists
-        connect( mCancelButton, &QToolButton::clicked, [ = ] { uploadTask->cancel(); } );
+        connect( mCancelButton, &QToolButton::clicked, storedContent, &QgsExternalStorageStoredContent::cancel );
 
         auto onStoreFinished = [ = ]
         {
@@ -506,8 +506,8 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
           updateLayout();
         };
 
-        connect( uploadTask, &QgsTask::taskCompleted, onStoreFinished );
-        connect( uploadTask, &QgsTask::taskTerminated, onStoreFinished );
+        connect( storedContent, &QgsExternalStorageStoredContent::stored, onStoreFinished );
+        connect( storedContent, &QgsExternalStorageStoredContent::canceled, onStoreFinished );
 
         // display error on error occured
 
