@@ -302,6 +302,7 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     QString relativePath( const QString &filePath, bool removeRelative ) const;
 
     friend class TestQgsFileWidget;
+    friend class TestQgsExternalResourceWidgetWrapper;
 };
 
 ///@cond PRIVATE
