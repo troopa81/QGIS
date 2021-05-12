@@ -333,7 +333,11 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   if ( documentType == QgsExternalResourceWidget::Image )
   {
     QVERIFY( ww.mQgsWidget->mPixmapLabel->isVisible() );
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+    QVERIFY( !ww.mQgsWidget->mPixmapLabel->pixmap() );
+#else
     QVERIFY( ww.mQgsWidget->mPixmapLabel->pixmap( Qt::ReturnByValue ).isNull() );
+#endif
   }
 #ifdef WITH_QTWEBKIT
   else if ( documentType == QgsExternalResourceWidget::Web )
@@ -375,7 +379,11 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   if ( documentType == QgsExternalResourceWidget::Image )
   {
     QVERIFY( ww.mQgsWidget->mPixmapLabel->isVisible() );
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+    QVERIFY( ww.mQgsWidget->mPixmapLabel->pixmap() );
+#else
     QVERIFY( !ww.mQgsWidget->mPixmapLabel->pixmap( Qt::ReturnByValue ).isNull() );
+#endif
   }
 #ifdef WITH_QTWEBKIT
   else if ( documentType == QgsExternalResourceWidget::Web )
@@ -412,7 +420,11 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   if ( documentType == QgsExternalResourceWidget::Image )
   {
     QVERIFY( ww.mQgsWidget->mPixmapLabel->isVisible() );
+#if QT_VERSION < QT_VERSION_CHECK(5, 13, 0)
+    QVERIFY( ww.mQgsWidget->mPixmapLabel->pixmap() );
+#else
     QVERIFY( !ww.mQgsWidget->mPixmapLabel->pixmap( Qt::ReturnByValue ).isNull() );
+#endif
   }
 #ifdef WITH_QTWEBKIT
   else if ( documentType == QgsExternalResourceWidget::Web )
