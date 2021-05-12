@@ -128,7 +128,7 @@ QString QgsWebDAVExternalStorage::type() const
   return QStringLiteral( "WebDAV" );
 };
 
-QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::storeFile( const QString &filePath, const QUrl &url, const QString &authcfg )
+QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::store( const QString &filePath, const QUrl &url, const QString &authcfg )
 {
   // TODO who delete the object
   return new QgsWebDAVExternalStorageStoredContent( filePath, url, authcfg );
