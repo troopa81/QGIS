@@ -101,11 +101,11 @@ class TestPyQgsExternalStorageBase():
         f = self.getNewFile(b"New content")
 
         # store
-        storedContent = self.storage.storeFile(f.name, QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
+        storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
         self.assertTrue(storedContent)
 
         self.nb_errors = 0
-        storedContent.errorOccured.connect(self.on_error)
+        storedContent.errorOccurred.connect(self.on_error)
 
         loop = QEventLoop()
         storedContent.stored.connect(loop.quit)
@@ -156,11 +156,11 @@ class TestPyQgsExternalStorageBase():
 
         f = self.getNewFile(b"New content")
 
-        storedContent = self.storage.storeFile(f.name, QUrl("http://nothinghere/" + os.path.basename(f.name)), self.auth_config.id())
+        storedContent = self.storage.store(f.name, QUrl("http://nothinghere/" + os.path.basename(f.name)), self.auth_config.id())
         self.assertTrue(storedContent)
 
         self.nb_errors = 0
-        storedContent.errorOccured.connect(self.on_error)
+        storedContent.errorOccurred.connect(self.on_error)
 
         loop = QEventLoop()
         storedContent.stored.connect(loop.quit)
@@ -174,11 +174,11 @@ class TestPyQgsExternalStorageBase():
         """
 
         f = self.getNewFile(b"New content")
-        storedContent = self.storage.storeFile(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
+        storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
         self.assertTrue(storedContent)
 
         self.nb_errors = 0
-        storedContent.errorOccured.connect(self.on_error)
+        storedContent.errorOccurred.connect(self.on_error)
 
         loop = QEventLoop()
         storedContent.stored.connect(loop.quit)

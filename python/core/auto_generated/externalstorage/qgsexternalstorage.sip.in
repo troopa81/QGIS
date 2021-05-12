@@ -32,7 +32,7 @@ and registered in :py:class:`QgsExternalStorageRegistry`.
 Unique identifier of the external storage type.
 %End
 
-    virtual QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
+    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
 %Docstring
 Store file ``filePath`` to the ``url`` for this project external storage
 Returns asynchronous task to store file. Signal :py:func:`QgsTask.taskCompleted()` will be emmitted

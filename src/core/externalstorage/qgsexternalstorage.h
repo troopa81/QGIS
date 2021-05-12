@@ -57,7 +57,7 @@ class CORE_EXPORT QgsExternalStorage
      * TODO QUrl or QString ( QString is more general in case of Postgres LargeObject for instance)
      * TODO rename en store()
      */
-    virtual QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
+    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
 
     /**
      * TODO Complete documentation
