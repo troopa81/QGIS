@@ -74,7 +74,7 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
   {
     Q_UNUSED( code );
     // TODO do we map some error code to some enum error code or not?
-    emit errorOccured( errorMsg );
+    emit errorOccurred( errorMsg );
   } );
 
   connect( mUploadTask, &QgsTask::taskCompleted, this, &QgsExternalStorageStoredContent::stored );
