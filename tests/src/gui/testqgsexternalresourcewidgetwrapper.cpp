@@ -33,9 +33,6 @@
 #include <QWebView>
 #endif
 
-#define CACHED_URL "/home/test/cached.txt"
-#define ERROR_URL "/home/test/error.txt"
-
 /**
  * @ingroup UnitTests
  * This is a unit test for the external resource widget wrapper
@@ -55,6 +52,8 @@ class TestQgsExternalResourceWidgetWrapper : public QObject
     void testUrlStorageExpression();
     void testLoadExternalDocument_data();
     void testLoadExternalDocument();
+    void testStoreExternalDocument_data();
+    void testStoreExternalDocument();
 
   private:
     std::unique_ptr<QgsVectorLayer> vl;
@@ -103,6 +102,40 @@ class QgsTestExternalStorageFetchedContent
     ExpectedBehavior mBehavior = OK;
 };
 
+class QgsTestExternalStorageStoredContent
+  : public QgsExternalStorageStoredContent
+{
+  public:
+
+    enum ExpectedBehavior
+    {
+      OK,
+      ERROR
+    };
+
+    QgsTestExternalStorageStoredContent( ExpectedBehavior behavior ): QgsExternalStorageStoredContent()
+    {
+      mBehavior = behavior;
+    }
+
+    void emitStored()
+    {
+      if ( mBehavior == ERROR )
+        mStatus = Failed;
+      else
+        mStatus = Finished;
+
+      emit stored();
+    }
+
+    void cancel() override {}
+
+  private:
+
+    ExpectedBehavior mBehavior = OK;
+};
+
+
 class QgsTestExternalStorage : public QgsExternalStorage
 {
   public:
@@ -111,10 +144,13 @@ class QgsTestExternalStorage : public QgsExternalStorage
 
     QgsExternalStorageStoredContent *storeFile( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
     {
-      Q_UNUSED( filePath );
       Q_UNUSED( url );
       Q_UNUSED( authcfg );
-      return nullptr;
+
+      sStoreContent = new QgsTestExternalStorageStoredContent( filePath.endsWith( QStringLiteral( "error.txt" ) ) ?
+          QgsTestExternalStorageStoredContent::ERROR :
+          QgsTestExternalStorageStoredContent::OK );
+      return sStoreContent;
     }
 
     QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) override
@@ -123,17 +159,21 @@ class QgsTestExternalStorage : public QgsExternalStorage
       Q_UNUSED( authcfg );
 
       sFetchContent = new QgsTestExternalStorageFetchedContent(
-        url.toString() == CACHED_URL ? QgsTestExternalStorageFetchedContent::CACHED :
-        ( url.toString() == ERROR_URL ? QgsTestExternalStorageFetchedContent::ERROR :
+        url.toString().endsWith( QStringLiteral( "cached.txt" ) ) ?
+        QgsTestExternalStorageFetchedContent::CACHED :
+        ( url.toString().endsWith( QStringLiteral( "error.txt" ) ) ?
+          QgsTestExternalStorageFetchedContent::ERROR :
           QgsTestExternalStorageFetchedContent::OK ) );
 
       return sFetchContent;
     }
 
     static QPointer<QgsTestExternalStorageFetchedContent> sFetchContent;
+    static QPointer<QgsTestExternalStorageStoredContent> sStoreContent;
 };
 
 QPointer<QgsTestExternalStorageFetchedContent> QgsTestExternalStorage::sFetchContent;
+QPointer<QgsTestExternalStorageStoredContent> QgsTestExternalStorage::sStoreContent;
 
 void TestQgsExternalResourceWidgetWrapper::initTestCase()
 {
@@ -359,7 +399,7 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   // ----------------------------------------------------
   // load a cached url
   // ----------------------------------------------------
-  ww.mQgsWidget->loadDocument( QStringLiteral( CACHED_URL ) );
+  ww.mQgsWidget->loadDocument( QStringLiteral( "/home/test/cached.txt" ) );
 
   // cached, no fetching, content is OK
   QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
@@ -391,7 +431,7 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   // ----------------------------------------------------
   // load an error url
   // ----------------------------------------------------
-  ww.mQgsWidget->loadDocument( QStringLiteral( ERROR_URL ) );
+  ww.mQgsWidget->loadDocument( QStringLiteral( "/home/test/error.txt" ) );
 
   // still no error, fetching in progress...
   if ( documentType == QgsExternalResourceWidget::Image )
@@ -430,6 +470,94 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
 
   delete widget;
   delete messageBar;
+}
+
+void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument_data()
+{
+  QTest::addColumn<int>( "documentType" );
+
+  QTest::newRow( "image" ) << static_cast<int>( QgsExternalResourceWidget::Image );
+#ifdef WITH_QTWEBKIT
+  QTest::newRow( "webview" ) << static_cast<int>( QgsExternalResourceWidget::Web );
+#endif
+}
+
+void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
+{
+  QFETCH( int, documentType );
+
+  QEventLoop loop;
+  QgsMessageBar *messageBar = new QgsMessageBar;
+  QgsExternalResourceWidgetWrapper ww( vl.get(), 0, nullptr, messageBar, nullptr );
+
+  QWidget *widget = ww.createWidget( nullptr );
+  QVERIFY( widget );
+
+  QVariantMap config;
+  config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
+  config.insert( QStringLiteral( "DocumentViewer" ), documentType );
+  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/'" );
+  ww.setConfig( config );
+
+  QgsFeature feat = vl->getFeature( 1 );
+  QVERIFY( feat.isValid() );
+  ww.setFeature( feat );
+
+  ww.initWidget( widget );
+  QVERIFY( ww.mQgsWidget );
+
+  QgsFileWidget *fileWidget = ww.mQgsWidget->fileWidget();
+  QVERIFY( fileWidget );
+  QCOMPARE( fileWidget->storageType(), QStringLiteral( "test" ) );
+
+  widget->show();
+  ww.mQgsWidget->setReadOnly( false );
+
+  if ( documentType == QgsExternalResourceWidget::Image )
+    QVERIFY( ww.mQgsWidget->mPixmapLabel->isVisible() );
+#ifdef WITH_QTWEBKIT
+  else if ( documentType == QgsExternalResourceWidget::Web )
+    QVERIFY( ww.mQgsWidget->mWebView->isVisible() );
+#endif
+
+  QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
+  QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
+  QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
+  // QVERIFY( !fileWidget->mProgressLabel->isVisible() );
+  // QVERIFY( !fileWidget->mProgressBar->isVisible() );
+  // QVERIFY( !fileWidget->mCancelButton->isVisible() );
+  // QVERIFY( fileWidget->mLineEdit->isVisible() );
+  // QVERIFY( fileWidget->mLineEdit->enabled() );
+  // QVERIFY( fileWidget->mLinkLabel->isVisible() );
+  // QVERIFY( fileWidget->mLinkEditButton->isVisible() );
+  // QVERIFY( fileWidget->mFileWidgetButton->isVisible() );
+
+  // ----------------------------------------------------
+  // store one document
+  // ----------------------------------------------------
+  fileWidget->setSelectedFileNames( QStringList() << QStringLiteral( "/home/test/myfile.txt" ) );
+
+  QVERIFY( QgsTestExternalStorage::sStoreContent );
+
+  QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
+  QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
+  QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
+
+  QgsTestExternalStorage::sStoreContent->emitStored();
+  QCoreApplication::processEvents();
+
+  // TODO we should not fetch what we just stored
+  // QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
+  // QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
+  // QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
+
+  // wait for the store content object to be destroyed
+  connect( QgsTestExternalStorage::sStoreContent, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !QgsTestExternalStorage::sStoreContent );
+
+  // TODO test that store as updated the field url
+
 }
 
 QGSTEST_MAIN( TestQgsExternalResourceWidgetWrapper )

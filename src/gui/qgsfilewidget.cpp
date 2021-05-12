@@ -497,25 +497,25 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
         QgsExternalStorageStoredContent *storedContent = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
 
         connect( storedContent, &QgsExternalStorageStoredContent::progressChanged, mProgressBar, &QProgressBar::setValue );
-        // TODO remove lambda when uploadTask is no longer a task and a slot exists
         connect( mCancelButton, &QToolButton::clicked, storedContent, &QgsExternalStorageStoredContent::cancel );
+
+        // TODO when there are several files, we need to wait that for all content to be uploaded
+        urls << url.toString();
 
         auto onStoreFinished = [ = ]
         {
           mStoreInProgress = false;
           updateLayout();
+
+          setFilePath( QStringLiteral( "\"%1\"" ).arg( urls.join( QLatin1String( "\" \"" ) ) ) );
+          storedContent->deleteLater();
         };
 
         connect( storedContent, &QgsExternalStorageStoredContent::stored, onStoreFinished );
         connect( storedContent, &QgsExternalStorageStoredContent::canceled, onStoreFinished );
 
-        // display error on error occured
-
-        // TODO What happen if an error occured, we don't update urls (et what if one error occured for one file and not the other?)
-        urls << url.toString();
+        // TODO display error on error occured
       }
-
-      setFilePath( urls.first() );
     }
     else
     {
