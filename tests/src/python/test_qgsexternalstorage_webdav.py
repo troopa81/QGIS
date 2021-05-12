@@ -19,7 +19,7 @@ import tempfile
 import time
 
 from utilities import unitTestDataPath, waitServer
-from test_externalstorage_base import TestPyQgsExternalStorageBase
+from test_qgsexternalstorage_base import TestPyQgsExternalStorageBase
 
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QUrl
 
