@@ -48,6 +48,12 @@ class TestQgsFileWidget: public QObject
     void testLayout();
     void testStoring();
     void testStoring_data();
+    void testStoringSeveralFiles_data();
+    void testStoringSeveralFiles();
+    void testStoringSeveralFilesError_data();
+    void testStoringSeveralFilesError();
+    void testStoringSeveralFilesCancel_data();
+    void testStoringSeveralFilesCancel();
     void testStoringChangeFeature();
 };
 
@@ -59,7 +65,17 @@ class QgsTestExternalStorageStoredContent : public QgsExternalStorageStoredConte
 
     QgsTestExternalStorageStoredContent() : QgsExternalStorageStoredContent() {}
 
-    void cancel() override {};
+    void cancel() override
+    {
+      mStatus = Canceled;
+      emit canceled();
+    };
+
+    void error()
+    {
+      mErrorString = QStringLiteral( "error" );
+      emit errorOccurred( mErrorString );
+    }
 
     void finish()
     {
@@ -90,10 +106,10 @@ class QgsTestExternalStorage : public QgsExternalStorage
       return nullptr;
     }
 
-    static QgsTestExternalStorageStoredContent *sCurrentStoredContent;
+    static QPointer<QgsTestExternalStorageStoredContent> sCurrentStoredContent;
 };
 
-QgsTestExternalStorageStoredContent *QgsTestExternalStorage::sCurrentStoredContent = nullptr;
+QPointer<QgsTestExternalStorageStoredContent> QgsTestExternalStorage::sCurrentStoredContent;
 
 void TestQgsFileWidget::initTestCase()
 {
@@ -387,12 +403,11 @@ void TestQgsFileWidget::testStoring()
   w.show();
 
   QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
-  QIcon saveIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionSaveEdits.svg" ) );
 
   w.setStorageType( "test" );
   w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
 
-  // with link, edit mode
+  // start edit mode
   w.setUseLink( useLink );
   w.setReadOnly( false );
 
@@ -406,7 +421,7 @@ void TestQgsFileWidget::testStoring()
   QVERIFY( !w.mProgressBar->isVisible() );
   QVERIFY( !w.mCancelButton->isVisible() );
 
-  w.setSelectedFileNames( QStringList() << QStringLiteral( "blank" ) );
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "myfile" ) );
 
   QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
 
@@ -418,10 +433,11 @@ void TestQgsFileWidget::testStoring()
   QVERIFY( w.mProgressBar->isVisible() );
   QVERIFY( w.mCancelButton->isVisible() );
 
-  // TODO for now, url is updated directly but il should not, it should be done after the storing is done
-  // QCOMPARE( w.mLinkLabel->text(), QString() );
+  // link is not yet updated
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
 
   QgsTestExternalStorage::sCurrentStoredContent->finish();
+  QCoreApplication::processEvents();
 
   QVERIFY( useLink == w.mLinkLabel->isVisible() );
   QVERIFY( useLink == w.mLinkEditButton->isVisible() );
@@ -433,9 +449,9 @@ void TestQgsFileWidget::testStoring()
   QVERIFY( !w.mProgressBar->isVisible() );
   QVERIFY( !w.mCancelButton->isVisible() );
   if ( useLink )
-    QCOMPARE( w.mLinkLabel->text(), QStringLiteral( "<a href=\"http://test.url.com/test/blank\">blank</a>" ) );
+    QCOMPARE( w.mLinkLabel->text(), QStringLiteral( "<a href=\"http://test.url.com/test/myfile\">myfile</a>" ) );
   else
-    QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/test/blank" ) );
+    QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/test/myfile" ) );
 
   // TODO test bad expression
 
@@ -449,6 +465,300 @@ void TestQgsFileWidget::testStoring()
   // TEST error with one url
   // TEST error with one url among other (field not updated)
 }
+
+
+void TestQgsFileWidget::testStoringSeveralFiles_data()
+{
+  QTest::addColumn<bool>( "useLink" );
+
+  QTest::newRow( "use link" ) << true;
+  QTest::newRow( "don't use link" ) << false;
+}
+
+void TestQgsFileWidget::testStoringSeveralFiles()
+{
+  // test widget when storing several files with an external storage
+  QEventLoop loop;
+  QFETCH( bool, useLink );
+
+  QgsFileWidget w;
+  w.show();
+
+  QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
+
+  w.setStorageType( "test" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+
+  // start edit mode
+  w.setUseLink( useLink );
+  w.setReadOnly( false );
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "myfile1" ) << QStringLiteral( "myfile2" ) );
+
+  QPointer<QgsTestExternalStorageStoredContent> content1 = QgsTestExternalStorage::sCurrentStoredContent;
+  QVERIFY( content1 );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
+  QCoreApplication::processEvents();
+
+  // second file is being stored
+  QVERIFY( content1 );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
+  QVERIFY( content1 != QgsTestExternalStorage::sCurrentStoredContent );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+
+  // wait for first file content to be destroyed
+  connect( content1, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !content1 );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
+
+  // end second store
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
+  QCoreApplication::processEvents();
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+  if ( useLink )
+    QCOMPARE( w.mLinkLabel->text(), QStringLiteral( "<a>\"http://test.url.com/test/myfile1\" \"http://test.url.com/test/myfile2\"</a>" ) );
+  else
+    QCOMPARE( w.mLineEdit->text(), QStringLiteral( "\"http://test.url.com/test/myfile1\" \"http://test.url.com/test/myfile2\"" ) );
+
+  // wait for second file content to be destroyed
+  connect( QgsTestExternalStorage::sCurrentStoredContent, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !QgsTestExternalStorage::sCurrentStoredContent );
+}
+
+void TestQgsFileWidget::testStoringSeveralFilesError_data()
+{
+  QTest::addColumn<bool>( "useLink" );
+
+  QTest::newRow( "use link" ) << true;
+  QTest::newRow( "don't use link" ) << false;
+}
+
+void TestQgsFileWidget::testStoringSeveralFilesError()
+{
+  // test widget when storing several files with an external storage and an error occured
+  QEventLoop loop;
+  QFETCH( bool, useLink );
+
+  QgsFileWidget w;
+  w.show();
+
+  QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
+
+  w.setStorageType( "test" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+
+  // start edit mode
+  w.setUseLink( useLink );
+  w.setReadOnly( false );
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "myfile1" ) << QStringLiteral( "error.txt" ) );
+
+  QPointer<QgsTestExternalStorageStoredContent> content1 = QgsTestExternalStorage::sCurrentStoredContent;
+  QVERIFY( content1 );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
+  QCoreApplication::processEvents();
+
+  // second file is being stored
+  QVERIFY( content1 );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
+  QVERIFY( content1 != QgsTestExternalStorage::sCurrentStoredContent );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+
+  // wait for first file content to be destroyed
+  connect( content1, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !content1 );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
+
+  // error while storing second file
+  QgsTestExternalStorage::sCurrentStoredContent->error();
+  QCoreApplication::processEvents();
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+  if ( useLink )
+    QVERIFY( w.mLinkLabel->text().isEmpty() );
+  else
+    QVERIFY( w.mLineEdit->text().isEmpty() );
+
+  // wait for second file content to be destroyed
+  connect( QgsTestExternalStorage::sCurrentStoredContent, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !QgsTestExternalStorage::sCurrentStoredContent );
+}
+
+
+void TestQgsFileWidget::testStoringSeveralFilesCancel_data()
+{
+  QTest::addColumn<bool>( "useLink" );
+
+  QTest::newRow( "use link" ) << true;
+  QTest::newRow( "don't use link" ) << false;
+}
+
+void TestQgsFileWidget::testStoringSeveralFilesCancel()
+{
+  // test widget when storing several files with an external storage and user cancel operation
+  QEventLoop loop;
+  QFETCH( bool, useLink );
+
+  QgsFileWidget w;
+  w.show();
+
+  QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
+
+  w.setStorageType( "test" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+
+  // start edit mode
+  w.setUseLink( useLink );
+  w.setReadOnly( false );
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "myfile1" ) << QStringLiteral( "error.txt" ) );
+
+  QPointer<QgsTestExternalStorageStoredContent> content1 = QgsTestExternalStorage::sCurrentStoredContent;
+  QVERIFY( content1 );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+
+  QgsTestExternalStorage::sCurrentStoredContent->finish();
+  QCoreApplication::processEvents();
+
+  // second file is being stored
+  QVERIFY( content1 );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
+  QVERIFY( content1 != QgsTestExternalStorage::sCurrentStoredContent );
+
+  QVERIFY( !w.mLinkLabel->isVisible() );
+  QVERIFY( !w.mLinkEditButton->isVisible() );
+  QVERIFY( !w.mLineEdit->isVisible() );
+  QVERIFY( !w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mProgressLabel->isVisible() );
+  QVERIFY( w.mProgressBar->isVisible() );
+  QVERIFY( w.mCancelButton->isVisible() );
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+
+  // wait for first file content to be destroyed
+  connect( content1, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !content1 );
+  QVERIFY( QgsTestExternalStorage::sCurrentStoredContent );
+
+  // cancel while storing second file
+  QgsTestExternalStorage::sCurrentStoredContent->cancel();
+  QCoreApplication::processEvents();
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+  if ( useLink )
+    QVERIFY( w.mLinkLabel->text().isEmpty() );
+  else
+    QVERIFY( w.mLineEdit->text().isEmpty() );
+
+  // wait for second file content to be destroyed
+  connect( QgsTestExternalStorage::sCurrentStoredContent, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !QgsTestExternalStorage::sCurrentStoredContent );
+}
+
 
 void TestQgsFileWidget::testStoringChangeFeature()
 {
