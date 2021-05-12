@@ -525,7 +525,7 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
     return;
   }
 
-  QgsExternalStorageStoredContent *storedContent = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
+  QgsExternalStorageStoredContent *storedContent = mExternalStorage->store( filePath, QUrl( url.toString() ), mAuthCfg );
 
   connect( storedContent, &QgsExternalStorageStoredContent::progressChanged, mProgressBar, &QProgressBar::setValue );
   connect( mCancelButton, &QToolButton::clicked, storedContent, &QgsExternalStorageStoredContent::cancel );
