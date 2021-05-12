@@ -101,7 +101,7 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
 
   signals:
 
-    void errorOccured( const QString & );
+    void errorOccurred( const QString & );
 
     void progressChanged( double progress );
 

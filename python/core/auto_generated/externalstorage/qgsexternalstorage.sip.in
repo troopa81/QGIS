@@ -83,7 +83,7 @@ Returns the potential error textual description if an error occured and :py:func
 
   signals:
 
-    void errorOccured( const QString & );
+    void errorOccurred( const QString & );
 
     void progressChanged( double progress );
 
