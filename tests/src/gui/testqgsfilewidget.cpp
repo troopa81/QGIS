@@ -444,6 +444,10 @@ void TestQgsFileWidget::testStoring()
 
 
   // TODO test also fetch
+
+
+  // TEST error with one url
+  // TEST error with one url among other (field not updated)
 }
 
 void TestQgsFileWidget::testStoringChangeFeature()
