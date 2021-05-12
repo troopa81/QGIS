@@ -569,7 +569,7 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   QVERIFY( !QgsTestExternalStorage::sStoreContent );
 
   // TODO test that store as updated the field url
-
+  QVERIFY( false );
 }
 
 QGSTEST_MAIN( TestQgsExternalResourceWidgetWrapper )

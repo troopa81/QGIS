@@ -265,6 +265,15 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     // add file widget specific scope to expression context
     void addFileWidgetScope();
 
+    // store \a fileNames files using current external storage.
+    // This is a recursive method, \a storedUrls contains urls for previously stored
+    // fileNames. When all files have been successfully stored, current mFilePath
+    // is updated
+    void storeExternalFiles( QStringList fileNames, QStringList storedUrls = QStringList() );
+
+    // Returns true if \a path is a multifiles
+    static bool isMultiFiles( const QString &path );
+
     QString mFilePath;
     bool mButtonVisible = true;
     bool mUseLink = false;

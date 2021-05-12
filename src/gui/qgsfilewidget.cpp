@@ -248,12 +248,17 @@ void QgsFileWidget::setFileWidgetButtonVisible( bool visible )
   mFileWidgetButton->setVisible( visible );
 }
 
+bool QgsFileWidget::isMultiFiles( const QString &path )
+{
+  return path.contains( QStringLiteral( "\" \"" ) );
+}
+
 void QgsFileWidget::textEdited( const QString &path )
 {
   mFilePath = path;
   mLinkLabel->setText( toUrl( path ) );
   // Show tooltip if multiple files are selected
-  if ( path.contains( QStringLiteral( "\" \"" ) ) )
+  if ( isMultiFiles( path ) )
   {
     mLineEdit->setToolTip( tr( "Selected files:<br><ul><li>%1</li></ul><br>" ).arg( splitFilePaths( path ).join( QLatin1String( "</li><li>" ) ) ) );
   }
@@ -473,49 +478,7 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
         return;
       }
 
-      // TODO deal with multiplefiles -> only one progress bar which is the sum of progress task? or several progress bar?
-      // or one after another?
-      QStringList urls;
-      for ( const QString &filePath : fileNames )
-      {
-        mProgressLabel->setText( tr( "Storing file %1 ..." ).arg( QFileInfo( filePath ).baseName() ) );
-        mStoreInProgress = true;
-        updateLayout();
-
-        // TODO Fix the URL and add basename in external storage (as an option?)
-        Q_ASSERT( mScope );
-        mScope->setVariable( QStringLiteral( FILENAME_VARIABLE ), filePath );
-
-        QVariant url = mStorageUrlExpression->evaluate( &mExpressionContext );
-        if ( !url.isValid() )
-        {
-          // TODO sure this is the best way to print errors ? what happen if several files
-          QgsDebugMsg( tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
-          continue;
-        }
-
-        QgsExternalStorageStoredContent *storedContent = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
-
-        connect( storedContent, &QgsExternalStorageStoredContent::progressChanged, mProgressBar, &QProgressBar::setValue );
-        connect( mCancelButton, &QToolButton::clicked, storedContent, &QgsExternalStorageStoredContent::cancel );
-
-        // TODO when there are several files, we need to wait that for all content to be uploaded
-        urls << url.toString();
-
-        auto onStoreFinished = [ = ]
-        {
-          mStoreInProgress = false;
-          updateLayout();
-
-          setFilePath( QStringLiteral( "\"%1\"" ).arg( urls.join( QLatin1String( "\" \"" ) ) ) );
-          storedContent->deleteLater();
-        };
-
-        connect( storedContent, &QgsExternalStorageStoredContent::stored, onStoreFinished );
-        connect( storedContent, &QgsExternalStorageStoredContent::canceled, onStoreFinished );
-
-        // TODO display error on error occured
-      }
+      storeExternalFiles( fileNames );
     }
     else
     {
@@ -540,6 +503,64 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
   }
 }
 
+void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList storedUrls )
+{
+  // TODO deal with multiplefiles -> only one progress bar which is the sum of progress task? or several progress bar?
+  // or one after another?
+
+  const QString filePath = fileNames.takeFirst();
+
+  mProgressLabel->setText( tr( "Storing file %1 ..." ).arg( QFileInfo( filePath ).baseName() ) );
+  mStoreInProgress = true;
+  updateLayout();
+
+  // TODO Fix the URL and add basename in external storage (as an option?)
+  Q_ASSERT( mScope );
+  mScope->setVariable( QStringLiteral( FILENAME_VARIABLE ), filePath );
+
+  QVariant url = mStorageUrlExpression->evaluate( &mExpressionContext );
+  if ( !url.isValid() )
+  {
+    QgsDebugMsg( tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
+    return;
+  }
+
+  QgsExternalStorageStoredContent *storedContent = mExternalStorage->storeFile( filePath, QUrl( url.toString() ), mAuthCfg );
+
+  connect( storedContent, &QgsExternalStorageStoredContent::progressChanged, mProgressBar, &QProgressBar::setValue );
+  connect( mCancelButton, &QToolButton::clicked, storedContent, &QgsExternalStorageStoredContent::cancel );
+
+  storedUrls << url.toString();
+
+  auto onStoreFinished = [ = ]
+  {
+    mStoreInProgress = false;
+    updateLayout();
+    storedContent->deleteLater();
+
+    if ( storedContent->status() == QgsExternalStorageOperation::Failed )
+      // TODO is this the best way to print message ?
+      QgsDebugMsg( tr( "Storing file '%1' to url '%2' has failed : %3" ).arg( filePath, url.toString(), storedContent->errorString() ) );
+
+    if ( storedContent->status() != QgsExternalStorageOperation::Finished )
+      return;
+
+    // every thing has been stored, we update filepath
+    if ( fileNames.isEmpty() )
+    {
+      if ( storedUrls.size() > 1 )
+        setFilePath( QStringLiteral( "\"%1\"" ).arg( storedUrls.join( QLatin1String( "\" \"" ) ) ) );
+      else
+        setFilePath( storedUrls.first( ) );
+    }
+    else
+      storeExternalFiles( fileNames, storedUrls );
+  };
+
+  connect( storedContent, &QgsExternalStorageStoredContent::stored, onStoreFinished );
+  connect( storedContent, &QgsExternalStorageStoredContent::canceled, onStoreFinished );
+  connect( storedContent, &QgsExternalStorageStoredContent::errorOccurred, onStoreFinished );
+}
 
 QString QgsFileWidget::relativePath( const QString &filePath, bool removeRelative ) const
 {
@@ -577,6 +598,11 @@ QString QgsFileWidget::toUrl( const QString &path ) const
     return QgsApplication::nullRepresentation();
   }
 
+  if ( isMultiFiles( path ) )
+  {
+    return QStringLiteral( "<a>%1</a>" ).arg( path );
+  }
+
   QString urlStr = relativePath( path, false );
   QUrl url = QUrl::fromUserInput( urlStr );
   if ( !url.isValid() || !url.isLocalFile() )
@@ -598,7 +624,6 @@ QString QgsFileWidget::toUrl( const QString &path ) const
 
   return rep;
 }
-
 
 
 ///@cond PRIVATE
