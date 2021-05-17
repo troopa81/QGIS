@@ -87,9 +87,9 @@ void QgsNetworkContentFetcher::fetchContent( const QNetworkRequest &r, const QSt
   };
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
-  connect( mReply, qOverload<QNetworkReply::NetworkError>( &QNetworkReply::error ), onError );
+  connect( mReply, qOverload<QNetworkReply::NetworkError>( &QNetworkReply::error ), this, onError );
 #else
-  connect( mReply, &QNetworkReply::errorOccurred, onError );
+  connect( mReply, &QNetworkReply::errorOccurred, this, onError );
 #endif
 }
 
@@ -186,8 +186,6 @@ void QgsNetworkContentFetcher::contentLoaded( bool ok )
 
   if ( mReply->error() != QNetworkReply::NoError )
   {
-    qDebug() << "errorCode=" << mReply->error();
-
     QgsMessageLog::logMessage( tr( "HTTP fetch %1 failed with error %2" ).arg( mReply->url().toString(), mReply->errorString() ) );
     mContentLoaded = true;
     emit finished();
