@@ -64,17 +64,9 @@ class QgsTestExternalStorageFetchedContent
 {
   public:
 
-    enum ExpectedBehavior
+    QgsTestExternalStorageFetchedContent( bool cached ): QgsExternalStorageFetchedContent()
     {
-      OK,
-      CACHED,
-      ERROR
-    };
-
-    QgsTestExternalStorageFetchedContent( ExpectedBehavior behavior ): QgsExternalStorageFetchedContent()
-    {
-      mBehavior = behavior;
-      if ( mBehavior == CACHED )
+      if ( cached )
         mStatus = Finished;
       else
         mStatus = OnGoing;
@@ -87,19 +79,18 @@ class QgsTestExternalStorageFetchedContent
 
     void emitFetched()
     {
-      if ( mBehavior == ERROR )
-        mStatus = Failed;
-      else
-        mStatus = Finished;
-
+      mStatus = Finished;
       emit fetched();
     }
 
+    void emitErrorOccurred()
+    {
+      mStatus = Failed;
+      mErrorString = QStringLiteral( "an error" );
+      emit errorOccurred( mErrorString );
+    }
+
     void cancel() override {}
-
-  private:
-
-    ExpectedBehavior mBehavior = OK;
 };
 
 class QgsTestExternalStorageStoredContent
@@ -107,32 +98,24 @@ class QgsTestExternalStorageStoredContent
 {
   public:
 
-    enum ExpectedBehavior
+    QgsTestExternalStorageStoredContent(): QgsExternalStorageStoredContent()
     {
-      OK,
-      ERROR
-    };
-
-    QgsTestExternalStorageStoredContent( ExpectedBehavior behavior ): QgsExternalStorageStoredContent()
-    {
-      mBehavior = behavior;
     }
 
     void emitStored()
     {
-      if ( mBehavior == ERROR )
-        mStatus = Failed;
-      else
-        mStatus = Finished;
-
+      mStatus = Finished;
       emit stored();
     }
 
+    void emitErrorOccurred()
+    {
+      mStatus = Failed;
+      mErrorString = "an error";
+      emit errorOccurred( mErrorString );
+    }
+
     void cancel() override {}
-
-  private:
-
-    ExpectedBehavior mBehavior = OK;
 };
 
 
@@ -147,9 +130,7 @@ class QgsTestExternalStorage : public QgsExternalStorage
       Q_UNUSED( url );
       Q_UNUSED( authcfg );
 
-      sStoreContent = new QgsTestExternalStorageStoredContent( filePath.endsWith( QStringLiteral( "error.txt" ) ) ?
-          QgsTestExternalStorageStoredContent::ERROR :
-          QgsTestExternalStorageStoredContent::OK );
+      sStoreContent = new QgsTestExternalStorageStoredContent();
       return sStoreContent;
     }
 
@@ -158,12 +139,7 @@ class QgsTestExternalStorage : public QgsExternalStorage
       Q_UNUSED( url );
       Q_UNUSED( authcfg );
 
-      sFetchContent = new QgsTestExternalStorageFetchedContent(
-        url.toString().endsWith( QStringLiteral( "cached.txt" ) ) ?
-        QgsTestExternalStorageFetchedContent::CACHED :
-        ( url.toString().endsWith( QStringLiteral( "error.txt" ) ) ?
-          QgsTestExternalStorageFetchedContent::ERROR :
-          QgsTestExternalStorageFetchedContent::OK ) );
+      sFetchContent = new QgsTestExternalStorageFetchedContent( url.toString().endsWith( QStringLiteral( "cached.txt" ) ) );
 
       return sFetchContent;
     }
@@ -462,7 +438,7 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
 
   QVERIFY( QgsTestExternalStorage::sFetchContent );
 
-  QgsTestExternalStorage::sFetchContent->emitFetched();
+  QgsTestExternalStorage::sFetchContent->emitErrorOccurred();
   QCoreApplication::processEvents();
 
   QVERIFY( !ww.mQgsWidget->mPixmapLabel->isVisible() );
