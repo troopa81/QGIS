@@ -25,7 +25,8 @@ from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QUrl
 from qgis.core import (
     QgsApplication,
     QgsAuthMethodConfig,
-    QgsExternalStorageFetchedContent)
+    QgsExternalStorageFetchedContent,
+    QgsExternalStorageOperation)
 
 from qgis.testing import (
     start_app,
@@ -103,6 +104,7 @@ class TestPyQgsExternalStorageBase():
         # store
         storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
         self.assertTrue(storedContent)
+        self.assertEqual(storedContent.status(), QgsExternalStorageOperation.OnGoing)
 
         self.nb_errors = 0
         storedContent.errorOccurred.connect(self.on_error)
@@ -112,16 +114,22 @@ class TestPyQgsExternalStorageBase():
         loop.exec()
 
         self.assertEqual(self.nb_errors, 0)
+        self.assertFalse(storedContent.errorString())
+        self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Finished)
 
         # fetch
         fetchedContent = self.storage.fetch(QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
         self.assertTrue(fetchedContent)
         self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.OnGoing)
 
+        fetchedContent.errorOccurred.connect(self.on_error)
+
         loop = QEventLoop()
         fetchedContent.fetched.connect(loop.quit)
         loop.exec()
 
+        self.assertEqual(self.nb_errors, 0)
+        self.assertFalse(fetchedContent.errorString())
         self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.Finished)
         self.assertTrue(fetchedContent.filePath())
         self.checkContent(fetchedContent.filePath(), b"New content")
@@ -132,6 +140,7 @@ class TestPyQgsExternalStorageBase():
         self.assertTrue(fetchedContent)
         self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.Finished)
 
+        self.assertTrue(not fetchedContent.errorString())
         self.assertTrue(fetchedContent.filePath())
         self.checkContent(fetchedContent.filePath(), b"New content")
         self.assertEqual(os.path.splitext(fetchedContent.filePath())[1], '.txt')
@@ -142,7 +151,7 @@ class TestPyQgsExternalStorageBase():
         self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.OnGoing)
 
         loop = QEventLoop()
-        fetchedContent.fetched.connect(loop.quit)
+        fetchedContent.errorOccurred.connect(loop.quit)
         loop.exec()
 
         self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.Failed)
@@ -159,14 +168,12 @@ class TestPyQgsExternalStorageBase():
         storedContent = self.storage.store(f.name, QUrl("http://nothinghere/" + os.path.basename(f.name)), self.auth_config.id())
         self.assertTrue(storedContent)
 
-        self.nb_errors = 0
-        storedContent.errorOccurred.connect(self.on_error)
-
         loop = QEventLoop()
-        storedContent.stored.connect(loop.quit)
+        storedContent.errorOccurred.connect(loop.quit)
         loop.exec()
 
-        self.assertEqual(self.nb_errors, 1)
+        self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
+        self.assertTrue(storedContent.errorString())
 
     def testStoreMissingAuth(self):
         """
@@ -177,11 +184,9 @@ class TestPyQgsExternalStorageBase():
         storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
         self.assertTrue(storedContent)
 
-        self.nb_errors = 0
-        storedContent.errorOccurred.connect(self.on_error)
-
         loop = QEventLoop()
-        storedContent.stored.connect(loop.quit)
+        storedContent.errorOccurred.connect(loop.quit)
         loop.exec()
 
-        self.assertEqual(self.nb_errors, 1)
+        self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
+        self.assertTrue(storedContent.errorString())
