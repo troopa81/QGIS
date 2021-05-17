@@ -58,8 +58,6 @@ class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedC
 };
 
 QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg )
-// TODO complete description with path? and url?
-// : QgsExternalStorageTask( tr( "WebDAV Store task" ) )
 {
   mUploadTask = new QgsNetworkContentFetcherTask( url, authcfg );
   mUploadTask->setMode( "PUT" );
@@ -73,19 +71,34 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
   connect( mUploadTask, &QgsNetworkContentFetcherTask::errorOccurred, [ = ]( QNetworkReply::NetworkError code, const QString & errorMsg )
   {
     Q_UNUSED( code );
+    mStatus = Failed;
+    mErrorString = errorMsg;
+
     // TODO do we map some error code to some enum error code or not?
-    emit errorOccurred( errorMsg );
+    emit errorOccurred( mErrorString );
   } );
 
-  connect( mUploadTask, &QgsTask::taskCompleted, this, &QgsExternalStorageStoredContent::stored );
+  connect( mUploadTask, &QgsTask::taskCompleted, this, [ = ]
+  {
+    mStatus = Finished;
+    emit stored();
+  } );
 
-  // TODO deal with cancel -> terminated signal
+  mStatus = OnGoing;
 }
 
 void QgsWebDAVExternalStorageStoredContent::cancel()
 {
-  if ( mUploadTask )
-    mUploadTask->cancel();
+  if ( !mUploadTask )
+    return;
+
+  connect( mUploadTask, &QgsTask::taskTerminated, this, [ = ]
+  {
+    mStatus = Canceled;
+    emit canceled();
+  } );
+
+  mUploadTask->cancel();
 }
 
 QgsWebDAVExternalStorageFetchedContent::QgsWebDAVExternalStorageFetchedContent( QgsFetchedContent *fetchedContent )
@@ -108,14 +121,16 @@ QString QgsWebDAVExternalStorageFetchedContent::filePath() const
 void QgsWebDAVExternalStorageFetchedContent::onFetched()
 {
   if ( mFetchedContent->status() == QgsFetchedContent::Finished )
+  {
     mStatus = Finished;
+    emit fetched();
+  }
   else
   {
     mStatus = Failed;
     mErrorString = mFetchedContent->errorString();
+    emit errorOccurred( mErrorString );
   }
-
-  emit fetched();
 }
 
 void QgsWebDAVExternalStorageFetchedContent::cancel()
