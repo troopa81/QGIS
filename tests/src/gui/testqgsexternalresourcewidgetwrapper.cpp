@@ -500,7 +500,7 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
 
   QEventLoop loop;
   QgsMessageBar *messageBar = new QgsMessageBar;
-  QgsExternalResourceWidgetWrapper ww( vl.get(), 0, nullptr, messageBar, nullptr );
+  QgsExternalResourceWidgetWrapper ww( vl.get(), 1, nullptr, messageBar, nullptr );
 
   QWidget *widget = ww.createWidget( nullptr );
   QVERIFY( widget );
@@ -508,7 +508,8 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   QVariantMap config;
   config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
   config.insert( QStringLiteral( "DocumentViewer" ), documentType );
-  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/'" );
+  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/' "
+                 " || file_name(@user_file_name)" );
   ww.setConfig( config );
 
   QgsFeature feat = vl->getFeature( 1 );
@@ -535,14 +536,6 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
   QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
   QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
-  // QVERIFY( !fileWidget->mProgressLabel->isVisible() );
-  // QVERIFY( !fileWidget->mProgressBar->isVisible() );
-  // QVERIFY( !fileWidget->mCancelButton->isVisible() );
-  // QVERIFY( fileWidget->mLineEdit->isVisible() );
-  // QVERIFY( fileWidget->mLineEdit->enabled() );
-  // QVERIFY( fileWidget->mLinkLabel->isVisible() );
-  // QVERIFY( fileWidget->mLinkEditButton->isVisible() );
-  // QVERIFY( fileWidget->mFileWidgetButton->isVisible() );
 
   // ----------------------------------------------------
   // store one document
@@ -568,8 +561,10 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   loop.exec();
   QVERIFY( !QgsTestExternalStorage::sStoreContent );
 
-  // TODO test that store as updated the field url
-  QVERIFY( false );
+  QCOMPARE( ww.value().toString(), QStringLiteral( "http://mytest.com/1/myfile.txt" ) );
+
+  delete widget;
+  delete messageBar;
 }
 
 QGSTEST_MAIN( TestQgsExternalResourceWidgetWrapper )
