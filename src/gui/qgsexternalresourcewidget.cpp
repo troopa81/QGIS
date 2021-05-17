@@ -322,13 +322,12 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
 
           if ( mMessageBar )
           {
-            // content->errorString()
             const QString title = tr( "External resource '%1'" ).arg( path );
             const QString msg = tr( "Error while fetching external resource : %1" ).arg( content->errorString() );
             mMessageBar->pushWarning( title, msg );
           }
         }
-        else
+        else if ( content->status() == QgsExternalStorageFetchedContent::Finished )
         {
           const QString filePath = mDocumentViewerContent == Web
                                    ? QString( "file://%1" ).arg( content->filePath() )
@@ -349,6 +348,8 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
         mLoadingLabel->setVisible( true );
         mLoadingMovie->start();
         connect( content, &QgsExternalStorageFetchedContent::fetched, onFetchFinished );
+        connect( content, &QgsExternalStorageFetchedContent::errorOccurred, onFetchFinished );
+        connect( content, &QgsExternalStorageFetchedContent::canceled, onFetchFinished );
       }
       else
         onFetchFinished();
