@@ -37,7 +37,7 @@ from qgis.testing import (
 class TestPyQgsExternalStorageWebDAV(TestPyQgsExternalStorageBase, unittest.TestCase):
 
     storageType = "WebDAV"
-    url = "http://localhost/webdav_tests"
+    url = "http://localhost:8080/webdav_tests"
 
     @classmethod
     def setUpClass(cls):
