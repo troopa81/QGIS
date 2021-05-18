@@ -48,8 +48,13 @@ bool QgsNetworkContentFetcherTask::run()
   // TODO nettoyer cette histoire de content
   mFetcher->setContent( mContent );
   QEventLoop loop;
+
+  // We need to set the event loop (and not 'this') as receiver for all signal to ensure execution
+  // in the same thread and in the same order of emission. Indeed 'this' and 'loop' lives in
+  // different thread because they have been created in different thread.
+
   connect( mFetcher, &QgsNetworkContentFetcher::finished, &loop, &QEventLoop::quit );
-  connect( mFetcher, &QgsNetworkContentFetcher::downloadProgress, this, [ = ]( qint64 bytesReceived, qint64 bytesTotal )
+  connect( mFetcher, &QgsNetworkContentFetcher::downloadProgress, &loop, [ = ]( qint64 bytesReceived, qint64 bytesTotal )
   {
     if ( !isCanceled() && bytesTotal > 0 )
     {
@@ -63,9 +68,8 @@ bool QgsNetworkContentFetcherTask::run()
 
 
   bool hasErrorOccurred = false;
-  connect( mFetcher, &QgsNetworkContentFetcher::errorOccurred, this, [ &hasErrorOccurred, this ]( QNetworkReply::NetworkError code, const QString & errorMsg )
+  connect( mFetcher, &QgsNetworkContentFetcher::errorOccurred, &loop, [ &hasErrorOccurred, this ]( QNetworkReply::NetworkError code, const QString & errorMsg )
   {
-    qDebug() << "errorOccurred";
     hasErrorOccurred = true;
     emit errorOccurred( code, errorMsg );
   } );

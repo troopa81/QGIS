@@ -82,8 +82,7 @@ void QgsNetworkContentFetcher::fetchContent( const QNetworkRequest &r, const QSt
 
   auto onError = [ = ]( QNetworkReply::NetworkError code )
   {
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>( sender() );
-    emit errorOccurred( code, reply->errorString() );
+    emit errorOccurred( code, mReply->errorString() );
   };
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
