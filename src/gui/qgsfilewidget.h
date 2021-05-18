@@ -20,10 +20,11 @@
 class QLabel;
 class QToolButton;
 class QVariant;
-class QgsExternalStorage;
-class QgsFileDropEdit;
 class QHBoxLayout;
 class QProgressBar;
+class QgsExternalStorage;
+class QgsFileDropEdit;
+class QgsMessageBar;
 
 #include <QWidget>
 #include <QFileDialog>
@@ -244,6 +245,18 @@ class GUI_EXPORT QgsFileWidget : public QWidget
      */
     QgsFilterLineEdit *lineEdit();
 
+    /**
+     * Set \a messageBar to report messages
+     * \since QGIS 3.22
+     */
+    void setMessageBar( QgsMessageBar *messageBar );
+
+    /**
+     * Returns message bar used to report messages
+     * \since QGIS 3.22
+     */
+    QgsMessageBar *messageBar() const;
+
   signals:
 
     /**
@@ -303,6 +316,7 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     QLabel *mProgressLabel = nullptr;
     QProgressBar *mProgressBar = nullptr;
     QToolButton *mCancelButton = nullptr;
+    QgsMessageBar *mMessageBar = nullptr;
 
     //! returns a HTML code with a link to the given file path
     QString toUrl( const QString &path ) const;

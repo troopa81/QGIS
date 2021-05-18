@@ -64,6 +64,8 @@ class TestQgsExternalResourceWidgetWrapper : public QObject
 class QgsTestExternalStorageFetchedContent
   : public QgsExternalStorageFetchedContent
 {
+    Q_OBJECT
+
   public:
 
     QgsTestExternalStorageFetchedContent( bool cached ): QgsExternalStorageFetchedContent()
@@ -98,6 +100,8 @@ class QgsTestExternalStorageFetchedContent
 class QgsTestExternalStorageStoredContent
   : public QgsExternalStorageStoredContent
 {
+    Q_OBJECT
+
   public:
 
     QgsTestExternalStorageStoredContent(): QgsExternalStorageStoredContent()
@@ -535,6 +539,8 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   // QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
   // QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
 
+  QVERIFY( !messageBar->currentItem() );
+
   // wait for the store content object to be destroyed
   connect( QgsTestExternalStorage::sStoreContent, &QObject::destroyed, &loop, &QEventLoop::quit );
   loop.exec();
@@ -613,7 +619,7 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocumentError()
   QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
   QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
   QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
-  QVERIFY( !messageBar->currentItem() );
+  QVERIFY( messageBar->currentItem() );
 
   // wait for the store content object to be destroyed
   connect( QgsTestExternalStorage::sStoreContent, &QObject::destroyed, &loop, &QEventLoop::quit );

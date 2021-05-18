@@ -35,10 +35,7 @@
 #include "qgsmimedatautils.h"
 #include "qgsexternalstorage.h"
 #include "qgsexternalstorageregistry.h"
-
-// TODO still usefull?
-#include "qgsauthconfig.h"
-#include "qgsauthmanager.h"
+#include "qgsmessagebar.h"
 
 #define FILENAME_VARIABLE "user_file_name"
 
@@ -338,6 +335,16 @@ QgsFilterLineEdit *QgsFileWidget::lineEdit()
   return mLineEdit;
 }
 
+void QgsFileWidget::setMessageBar( QgsMessageBar *messageBar )
+{
+  mMessageBar = messageBar;
+}
+
+QgsMessageBar *QgsFileWidget::messageBar() const
+{
+  return mMessageBar;
+}
+
 void QgsFileWidget::updateLayout()
 {
   mProgressLabel->setVisible( mStoreInProgress );
@@ -521,7 +528,11 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
   QVariant url = mStorageUrlExpression->evaluate( &mExpressionContext );
   if ( !url.isValid() )
   {
-    QgsDebugMsg( tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
+    if ( messageBar() )
+    {
+      messageBar()->pushWarning( tr( "Storing External resource" ),
+                                 tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
+    }
     return;
   }
 
@@ -538,9 +549,13 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
     updateLayout();
     storedContent->deleteLater();
 
-    if ( storedContent->status() == QgsExternalStorageOperation::Failed )
-      // TODO is this the best way to print message ?
-      QgsDebugMsg( tr( "Storing file '%1' to url '%2' has failed : %3" ).arg( filePath, url.toString(), storedContent->errorString() ) );
+    qDebug() << "finished messageBar=" << messageBar() << "status=" << storedContent->status();
+
+    if ( storedContent->status() == QgsExternalStorageOperation::Failed && messageBar() )
+    {
+      messageBar()->pushWarning( tr( "Storing External resource" ),
+                                 tr( "Storing file '%1' to url '%2' has failed : %3" ).arg( filePath, url.toString(), storedContent->errorString() ) );
+    }
 
     if ( storedContent->status() != QgsExternalStorageOperation::Finished )
       return;

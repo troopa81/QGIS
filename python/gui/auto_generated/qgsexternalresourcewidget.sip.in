@@ -167,6 +167,15 @@ TODO property
     void setMessageBar( QgsMessageBar *messageBar );
 %Docstring
 Set ``messageBar`` to report messages
+
+.. versionadded:: 3.22
+%End
+
+    QgsMessageBar *messageBar() const;
+%Docstring
+Returns message bar used to report messages
+
+.. versionadded:: 3.22
 %End
 
   signals:
