@@ -60,14 +60,23 @@ bool QgsNetworkContentFetcherTask::run()
         setProgress( progress );
     }
   } );
-  connect( mFetcher, &QgsNetworkContentFetcher::errorOccurred, this, &QgsNetworkContentFetcherTask::errorOccurred );
+
+
+  bool hasErrorOccurred = false;
+  connect( mFetcher, &QgsNetworkContentFetcher::errorOccurred, this, [ &hasErrorOccurred, this ]( QNetworkReply::NetworkError code, const QString & errorMsg )
+  {
+    qDebug() << "errorOccurred";
+    hasErrorOccurred = true;
+    emit errorOccurred( code, errorMsg );
+  } );
 
   mFetcher->fetchContent( mRequest, mAuthcfg );
   loop.exec();
   if ( !isCanceled() )
     setProgress( 100 );
   emit fetched();
-  return true;
+
+  return !isCanceled() && !hasErrorOccurred;
 }
 
 void QgsNetworkContentFetcherTask::cancel()
