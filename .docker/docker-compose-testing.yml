@@ -8,6 +8,15 @@ services:
 #      ACCEPT_EULA: Y
 #      SA_PASSWORD: <YourStrong!Passw0rd>
 
+  webdav:
+    image: nginx
+    volumes:
+      - ${GH_WORKSPACE}/.docker/webdav/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ${GH_WORKSPACE}/.docker/webdav/passwords.list:/etc/nginx/.passwords.list
+      - /tmp/webdav_tests:/tmp/webdav_tests_root/webdav_tests
+    ports:
+      - "8080:80"
+
   qgis-deps:
     tty: true
     image: qgis/qgis3-build-deps-bin-only:${DOCKER_TAG}
