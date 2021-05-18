@@ -21,6 +21,7 @@ import time
 from utilities import unitTestDataPath, waitServer
 
 from qgis.PyQt.QtCore import QCoreApplication, QEventLoop, QUrl
+from qgis.PyQt.QtTest import QSignalSpy
 
 from qgis.core import (
     QgsApplication,
@@ -168,12 +169,20 @@ class TestPyQgsExternalStorageBase():
         storedContent = self.storage.store(f.name, QUrl("http://nothinghere/" + os.path.basename(f.name)), self.auth_config.id())
         self.assertTrue(storedContent)
 
+        spyStored = QSignalSpy(storedContent.stored)
+        spyCanceled = QSignalSpy(storedContent.canceled)
+
         loop = QEventLoop()
         storedContent.errorOccurred.connect(loop.quit)
         loop.exec()
 
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
         self.assertTrue(storedContent.errorString())
+
+        QCoreApplication.processEvents()
+
+        self.assertEqual(len(spyStored), 0)
+        self.assertEqual(len(spyCanceled), 0)
 
     def testStoreMissingAuth(self):
         """
@@ -184,9 +193,15 @@ class TestPyQgsExternalStorageBase():
         storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
         self.assertTrue(storedContent)
 
+        spyStored = QSignalSpy(storedContent.stored)
+        spyCanceled = QSignalSpy(storedContent.canceled)
+
         loop = QEventLoop()
         storedContent.errorOccurred.connect(loop.quit)
         loop.exec()
 
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
         self.assertTrue(storedContent.errorString())
+
+        self.assertEqual(len(spyStored), 0)
+        self.assertEqual(len(spyCanceled), 0)
