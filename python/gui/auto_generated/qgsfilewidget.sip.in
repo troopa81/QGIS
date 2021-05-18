@@ -238,6 +238,20 @@ the appearance and behavior of the line edit portion of the widget.
 .. versionadded:: 3.0
 %End
 
+    void setMessageBar( QgsMessageBar *messageBar );
+%Docstring
+Set ``messageBar`` to report messages
+
+.. versionadded:: 3.22
+%End
+
+    QgsMessageBar *messageBar() const;
+%Docstring
+Returns message bar used to report messages
+
+.. versionadded:: 3.22
+%End
+
   signals:
 
     void fileChanged( const QString &path );

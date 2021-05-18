@@ -251,7 +251,12 @@ const QString &QgsExternalResourceWidget::storageAuthConfigId() const
 
 void QgsExternalResourceWidget::setMessageBar( QgsMessageBar *messageBar )
 {
-  mMessageBar = messageBar;
+  mFileWidget->setMessageBar( messageBar );
+}
+
+QgsMessageBar *QgsExternalResourceWidget::messageBar() const
+{
+  return mFileWidget->messageBar();
 }
 
 void QgsExternalResourceWidget::updateDocumentContent( const QString &filePath )
@@ -320,11 +325,10 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
           mLoadingMovie->stop();
           mErrorLabel->setVisible( true );
 
-          if ( mMessageBar )
+          if ( messageBar() )
           {
-            const QString title = tr( "External resource '%1'" ).arg( path );
-            const QString msg = tr( "Error while fetching external resource : %1" ).arg( content->errorString() );
-            mMessageBar->pushWarning( title, msg );
+            messageBar()->pushWarning( tr( "Fetching External Resource" ),
+                                       tr( "Error while fetching external resource '%1' : %2" ).arg( path, content->errorString() ) );
           }
         }
         else if ( content->status() == QgsExternalStorageFetchedContent::Finished )

@@ -24,6 +24,7 @@
 #include "qgsdirectoryitem.h"
 #include "qgsexternalstorage.h"
 #include "qgsexternalstorageregistry.h"
+#include "qgsmessagebar.h"
 #include "qgsexpressioncontextutils.h"
 #include <memory>
 
@@ -73,6 +74,7 @@ class QgsTestExternalStorageStoredContent : public QgsExternalStorageStoredConte
 
     void error()
     {
+      mStatus = Failed;
       mErrorString = QStringLiteral( "error" );
       emit errorOccurred( mErrorString );
     }
@@ -579,12 +581,14 @@ void TestQgsFileWidget::testStoringSeveralFilesError()
   QFETCH( bool, useLink );
 
   QgsFileWidget w;
+  QgsMessageBar messageBar;
   w.show();
 
   QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
 
   w.setStorageType( "test" );
   w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+  w.setMessageBar( &messageBar );
 
   // start edit mode
   w.setUseLink( useLink );
@@ -613,6 +617,7 @@ void TestQgsFileWidget::testStoringSeveralFilesError()
   QVERIFY( w.mProgressBar->isVisible() );
   QVERIFY( w.mCancelButton->isVisible() );
   QVERIFY( w.mLinkLabel->text().isEmpty() );
+  QVERIFY( !messageBar.currentItem() );
 
   QgsTestExternalStorage::sCurrentStoredContent->finish();
   QCoreApplication::processEvents();
@@ -654,6 +659,7 @@ void TestQgsFileWidget::testStoringSeveralFilesError()
     QVERIFY( w.mLinkLabel->text().isEmpty() );
   else
     QVERIFY( w.mLineEdit->text().isEmpty() );
+  QVERIFY( messageBar.currentItem() );
 
   // wait for second file content to be destroyed
   connect( QgsTestExternalStorage::sCurrentStoredContent, &QObject::destroyed, &loop, &QEventLoop::quit );
