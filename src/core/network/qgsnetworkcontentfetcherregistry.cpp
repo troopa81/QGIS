@@ -130,6 +130,7 @@ void QgsFetchedContent::download( bool redownload )
     mFetchingTask = new QgsNetworkContentFetcherTask( mUrl, mAuthConfig );
     // use taskCompleted which is main thread rather than fetched signal in worker thread
     connect( mFetchingTask, &QgsNetworkContentFetcherTask::taskCompleted, this, &QgsFetchedContent::taskCompleted );
+    connect( mFetchingTask, &QgsNetworkContentFetcherTask::taskTerminated, this, &QgsFetchedContent::taskCompleted );
     QgsApplication::instance()->taskManager()->addTask( mFetchingTask );
     mStatus = QgsFetchedContent::Downloading;
   }
