@@ -203,5 +203,7 @@ class TestPyQgsExternalStorageBase():
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
         self.assertTrue(storedContent.errorString())
 
+        QCoreApplication.processEvents()
+
         self.assertEqual(len(spyStored), 0)
         self.assertEqual(len(spyCanceled), 0)
