@@ -54,6 +54,8 @@ class TestQgsExternalResourceWidgetWrapper : public QObject
     void testLoadExternalDocument();
     void testStoreExternalDocument_data();
     void testStoreExternalDocument();
+    void testStoreExternalDocumentError_data();
+    void testStoreExternalDocumentError();
 
   private:
     std::unique_ptr<QgsVectorLayer> vl;
@@ -129,6 +131,7 @@ class QgsTestExternalStorage : public QgsExternalStorage
     {
       Q_UNUSED( url );
       Q_UNUSED( authcfg );
+      Q_UNUSED( filePath );
 
       sStoreContent = new QgsTestExternalStorageStoredContent();
       return sStoreContent;
@@ -542,6 +545,89 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   delete widget;
   delete messageBar;
 }
+
+void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocumentError_data()
+{
+  QTest::addColumn<int>( "documentType" );
+
+  QTest::newRow( "image" ) << static_cast<int>( QgsExternalResourceWidget::Image );
+#ifdef WITH_QTWEBKIT
+  QTest::newRow( "webview" ) << static_cast<int>( QgsExternalResourceWidget::Web );
+#endif
+}
+
+void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocumentError()
+{
+  QFETCH( int, documentType );
+
+  QEventLoop loop;
+  QgsMessageBar *messageBar = new QgsMessageBar;
+  QgsExternalResourceWidgetWrapper ww( vl.get(), 1, nullptr, messageBar, nullptr );
+
+  QWidget *widget = ww.createWidget( nullptr );
+  QVERIFY( widget );
+
+  QVariantMap config;
+  config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
+  config.insert( QStringLiteral( "DocumentViewer" ), documentType );
+  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/' "
+                 " || file_name(@user_file_name)" );
+  ww.setConfig( config );
+
+  QgsFeature feat = vl->getFeature( 1 );
+  QVERIFY( feat.isValid() );
+  ww.setFeature( feat );
+
+  ww.initWidget( widget );
+  QVERIFY( ww.mQgsWidget );
+
+  QgsFileWidget *fileWidget = ww.mQgsWidget->fileWidget();
+  QVERIFY( fileWidget );
+  QCOMPARE( fileWidget->storageType(), QStringLiteral( "test" ) );
+
+  widget->show();
+  ww.mQgsWidget->setReadOnly( false );
+
+  if ( documentType == QgsExternalResourceWidget::Image )
+    QVERIFY( ww.mQgsWidget->mPixmapLabel->isVisible() );
+#ifdef WITH_QTWEBKIT
+  else if ( documentType == QgsExternalResourceWidget::Web )
+    QVERIFY( ww.mQgsWidget->mWebView->isVisible() );
+#endif
+
+  QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
+  QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
+  QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
+
+  fileWidget->setSelectedFileNames( QStringList() << QStringLiteral( "/home/test/error.txt" ) );
+
+  QVERIFY( QgsTestExternalStorage::sStoreContent );
+
+  QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
+  QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
+  QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
+
+  QgsTestExternalStorage::sStoreContent->emitErrorOccurred();
+  QCoreApplication::processEvents();
+
+  QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
+  QVERIFY( ww.mQgsWidget->mLoadingMovie->state() == QMovie::NotRunning );
+  QVERIFY( !ww.mQgsWidget->mErrorLabel->isVisible() );
+  QVERIFY( !messageBar->currentItem() );
+
+  // wait for the store content object to be destroyed
+  connect( QgsTestExternalStorage::sStoreContent, &QObject::destroyed, &loop, &QEventLoop::quit );
+  loop.exec();
+  QVERIFY( !QgsTestExternalStorage::sStoreContent );
+
+  // value hasn't changed, same as before we try to store
+  QVERIFY( ww.value().toString().isEmpty() );
+
+  delete widget;
+  delete messageBar;
+}
+
+
 
 QGSTEST_MAIN( TestQgsExternalResourceWidgetWrapper )
 #include "testqgsexternalresourcewidgetwrapper.moc"
