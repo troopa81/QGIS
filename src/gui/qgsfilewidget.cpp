@@ -549,8 +549,6 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
     updateLayout();
     storedContent->deleteLater();
 
-    qDebug() << "finished messageBar=" << messageBar() << "status=" << storedContent->status();
-
     if ( storedContent->status() == QgsExternalStorageOperation::Failed && messageBar() )
     {
       messageBar()->pushWarning( tr( "Storing External resource" ),
