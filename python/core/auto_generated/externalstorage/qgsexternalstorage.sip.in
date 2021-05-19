@@ -92,6 +92,11 @@ Returns the potential error textual description if an error occured and :py:func
 
   protected:
 
+    void reportError( const QString &errorMsg );
+%Docstring
+Update content according to given ``error`` message content
+%End
+
 };
 
 

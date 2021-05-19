@@ -109,6 +109,7 @@ set(QGIS_CORE_SRCS
   effects/qgsshadoweffect.cpp
   effects/qgstransformeffect.cpp
 
+  externalstorage/qgsexternalstorage.cpp
   externalstorage/qgsexternalstorageregistry.cpp
   layertree/qgscolorramplegendnode.cpp
   layertree/qgscolorramplegendnodesettings.cpp

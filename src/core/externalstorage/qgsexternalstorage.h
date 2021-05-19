@@ -74,7 +74,6 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
 
   public:
 
-    // TODO same for storing? put in a common class?
     //! Status of fetched content
     enum ContentStatus
     {
@@ -110,6 +109,11 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
     void canceled();
 
   protected:
+
+    /**
+     * Update content according to given \a error message content
+     */
+    void reportError( const QString &errorMsg );
 
     ContentStatus mStatus = NotStarted;
     QString mErrorString;
