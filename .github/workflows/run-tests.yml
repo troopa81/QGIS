@@ -341,4 +341,5 @@ jobs:
           [[ ${TEST_BATCH} == "ORACLE" ]] && sudo rm -rf /usr/share/dotnet/sdk
           echo "TEST_BATCH=$TEST_BATCH"
           echo "DOCKERFILE=$DOCKERFILE"
+          mkdir -p /tmp/webdav_tests && chmod 777 /tmp/webdav_tests
           docker-compose -f .docker/$DOCKERFILE run qgis-deps /root/QGIS/.docker/docker-qgis-test.sh $TEST_BATCH
