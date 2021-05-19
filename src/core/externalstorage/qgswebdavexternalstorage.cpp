@@ -13,49 +13,14 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "qgswebdavexternalstorage.h"
+#include "qgswebdavexternalstorage_p.h"
 
 #include "qgsnetworkcontentfetcherregistry.h"
-#include "qgsnetworkcontentfetchertask.h"
 #include "qgsapplication.h"
 
 #include <QFile>
 #include <QPointer>
 
-
-class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredContent
-{
-    // TODO Q_OBJECT rajouter ? Apparemment il faut rajouter aussi le fichier .moc (fait par ailleur mais peu souvent)
-
-  public:
-
-    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg = QString() );
-
-    void cancel() override;
-
-  private:
-
-    QPointer<QgsNetworkContentFetcherTask> mUploadTask;
-};
-
-class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedContent
-{
-  public:
-
-    QgsWebDAVExternalStorageFetchedContent( QgsFetchedContent *fetchedContent );
-
-    QString filePath() const override;
-
-    void cancel() override;
-
-  private slots:
-
-    void onFetched();
-
-  private:
-
-    QgsFetchedContent *mFetchedContent = nullptr;
-};
 
 QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg )
 {

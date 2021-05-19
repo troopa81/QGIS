@@ -1677,6 +1677,8 @@ set(QGIS_CORE_PRIVATE_HDRS
   qgsspatialindexkdbush_p.h
 
   editform/qgseditformconfig_p.h
+  externalstorage/qgswebdavexternalstorage_p.h
+
   proj/qgscoordinatereferencesystem_p.h
   proj/qgscoordinatetransformcontext_p.h
   proj/qgscoordinatetransform_p.h
