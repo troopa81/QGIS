@@ -21,14 +21,19 @@
 
 #include "externalstorage/qgsexternalstorage.h"
 
+#include <QPointer>
+
+class QgsNetworkContentFetcherTask;
+class QgsFetchedContent;
+
 ///@cond PRIVATE
 #define SIP_NO_FILE
 
 /**
  * \ingroup core
- * \brief Interface for external storage using the protocol WebDAV.
+ * \brief External storage implementation using the protocol WebDAV.
  *
- * \since QGIS 3.20
+ * \since QGIS 3.22
  */
 class CORE_EXPORT QgsWebDAVExternalStorage : public QgsExternalStorage
 {
@@ -41,6 +46,43 @@ class CORE_EXPORT QgsWebDAVExternalStorage : public QgsExternalStorage
     QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authConfig = QString() ) override;
 };
 
+// TODO doc
+class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredContent
+{
+  Q_OBJECT
+
+  public:
+
+    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg = QString() );
+
+    void cancel() override;
+
+  private:
+
+    QPointer<QgsNetworkContentFetcherTask> mUploadTask;
+};
+
+// TODO doc
+class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedContent
+{
+  Q_OBJECT
+
+  public:
+
+    QgsWebDAVExternalStorageFetchedContent( QgsFetchedContent *fetchedContent );
+
+    QString filePath() const override;
+
+    void cancel() override;
+
+  private slots:
+
+    void onFetched();
+
+  private:
+
+    QgsFetchedContent *mFetchedContent = nullptr;
+};
 
 
 #endif // QGSWEBDAVEXTERNALSTORAGE_H
