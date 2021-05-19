@@ -51,6 +51,7 @@ class TestPyQgsExternalStorageBase():
         cls.nb_errors = 0
 
         cls.authm = QgsApplication.authManager()
+        assert (cls.authm.setMasterPassword('masterpassword', True))
         assert not cls.authm.isDisabled(), cls.authm.disabledMessage()
 
         cls.auth_config = QgsAuthMethodConfig("Basic")
