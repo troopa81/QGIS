@@ -68,6 +68,8 @@ class QgsExternalStorageOperation : QObject
       Canceled,
     };
 
+    virtual ~QgsExternalStorageOperation();
+
     ContentStatus status() const;
 %Docstring
 Returns status of fetched content
@@ -79,8 +81,7 @@ Returns the potential error textual description if an error occured and :py:func
 %End
   public slots:
 
-    virtual void cancel() = 0;
-
+    virtual void cancel();
   signals:
 
     void errorOccurred( const QString & );
@@ -102,8 +103,6 @@ class QgsExternalStorageFetchedContent : QgsExternalStorageOperation
 %End
   public:
 
-
-
     virtual QString filePath() const = 0;
 
   signals:
@@ -117,10 +116,6 @@ class QgsExternalStorageStoredContent : QgsExternalStorageOperation
 %TypeHeaderCode
 #include "qgsexternalstorage.h"
 %End
-  public:
-
-
-
   signals:
 
     void stored();

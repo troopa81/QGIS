@@ -18,8 +18,8 @@
 
 #include "qgis_core.h"
 #include "qgis_sip.h"
-#include "qgstaskmanager.h"
 
+#include <QObject>
 #include <QString>
 #include <QUrl>
 
@@ -85,6 +85,8 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
       Canceled, //!< Operation has been canceled
     };
 
+    virtual ~QgsExternalStorageOperation() = default;
+
     /**
      * Returns status of fetched content
      */
@@ -97,7 +99,7 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
 
   public slots:
 
-    virtual void cancel() = 0;
+    virtual void cancel() {};
 
   signals:
 
@@ -121,12 +123,6 @@ class CORE_EXPORT QgsExternalStorageFetchedContent : public QgsExternalStorageOp
 
   public:
 
-    /* // TODO really necessary ? */
-    /* QgsExternalStorageFetchedContent() = default; */
-
-    /* // TODO really necessary ? */
-    /* ~QgsExternalStorageFetchedContent() = default; */
-
     // TODO doc
     virtual QString filePath() const = 0;
 
@@ -139,14 +135,6 @@ class CORE_EXPORT QgsExternalStorageFetchedContent : public QgsExternalStorageOp
 class CORE_EXPORT QgsExternalStorageStoredContent : public QgsExternalStorageOperation
 {
     Q_OBJECT
-
-  public:
-
-    /* // TODO really necessary ? */
-    /* QgsExternalStorageFetchedContent() = default; */
-
-    /* // TODO really necessary ? */
-    /* ~QgsExternalStorageFetchedContent() = default; */
 
   signals:
 
