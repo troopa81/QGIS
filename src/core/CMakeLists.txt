@@ -111,6 +111,7 @@ set(QGIS_CORE_SRCS
 
   externalstorage/qgsexternalstorage.cpp
   externalstorage/qgsexternalstorageregistry.cpp
+  externalstorage/qgssimplecopyexternalstorage.cpp
   externalstorage/qgswebdavexternalstorage.cpp
 
   layertree/qgscolorramplegendnode.cpp
@@ -1677,6 +1678,8 @@ set(QGIS_CORE_PRIVATE_HDRS
   qgsspatialindexkdbush_p.h
 
   editform/qgseditformconfig_p.h
+
+  externalstorage/qgssimplecopyexternalstorage_p.h
   externalstorage/qgswebdavexternalstorage_p.h
 
   proj/qgscoordinatereferencesystem_p.h
