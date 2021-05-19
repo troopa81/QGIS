@@ -38,6 +38,7 @@ class TestPyQgsExternalStorageWebDAV(TestPyQgsExternalStorageBase, unittest.Test
 
     storageType = "WebDAV"
     url = "http://localhost:8080/webdav_tests"
+    badUrl = "http://nothinghere/"
 
     @classmethod
     def setUpClass(cls):

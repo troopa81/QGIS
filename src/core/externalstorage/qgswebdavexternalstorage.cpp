@@ -36,11 +36,9 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
   connect( mUploadTask, &QgsNetworkContentFetcherTask::errorOccurred, [ = ]( QNetworkReply::NetworkError code, const QString & errorMsg )
   {
     Q_UNUSED( code );
-    mStatus = Failed;
-    mErrorString = errorMsg;
 
     // TODO do we map some error code to some enum error code or not?
-    emit errorOccurred( mErrorString );
+    reportError( errorMsg );
   } );
 
   connect( mUploadTask, &QgsTask::taskCompleted, this, [ = ]
@@ -92,9 +90,7 @@ void QgsWebDAVExternalStorageFetchedContent::onFetched()
   }
   else
   {
-    mStatus = Failed;
-    mErrorString = mFetchedContent->errorString();
-    emit errorOccurred( mErrorString );
+    reportError( mFetchedContent->errorString() );
   }
 }
 
