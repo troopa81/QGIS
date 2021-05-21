@@ -47,6 +47,11 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
     emit stored();
   } );
 
+  connect( mUploadTask, &QgsTask::progressChanged, this, [ = ]( double progress )
+  {
+    emit progressChanged( progress );
+  } );
+
   mStatus = OnGoing;
 }
 
