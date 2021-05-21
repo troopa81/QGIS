@@ -19,10 +19,10 @@
 #include "qgsnetworkcontentfetchertask.h"
 #include "qgsapplication.h"
 
+#include <algorithm>
+
 #include <QFile>
 #include <QPointer>
-
-// TODO remove
 #include <QFileInfo>
 #include <QDir>
 
@@ -34,14 +34,16 @@ QgsCopyFileTask::QgsCopyFileTask( const QString &source, const QString &destinat
 
 bool QgsCopyFileTask::run()
 {
-  if ( !QFileInfo::exists( mSource ) )
+  QFile fileSource( mSource );
+  if ( !fileSource.exists() )
   {
     mErrorString = tr( "Source file '%1' does not exist" ).arg( mSource );
     return false;
   }
 
   // TODO WebDAV overwrite the file if it exists alreadu, we need the same behavior (a boolean option)
-  if ( QFileInfo::exists( mDestination ) )
+  QFile fileDestination( mDestination );
+  if ( fileDestination.exists() )
   {
     mErrorString = tr( "Destination file '%1' already exist" ).arg( mDestination );
     return false;
@@ -54,11 +56,41 @@ bool QgsCopyFileTask::run()
     return false;
   }
 
-  if ( !QFile::copy( mSource, mDestination ) )
+  fileSource.open( QIODevice::ReadOnly );
+  fileDestination.open( QIODevice::WriteOnly );
+
+  const int size = fileSource.size();
+  const int chunkSize = std::clamp( size / 100, 1024, 1024 * 1024 );
+
+  int bytesRead = 0;
+  char data[chunkSize];
+  while ( true )
   {
-    mErrorString = tr( "Fail to copy '%1' to '%2'" ).arg( mSource, mDestination );
-    return false;
+    const int len = fileSource.read( data, chunkSize );
+    if ( len == -1 )
+    {
+      mErrorString = tr( "Fail reading from '%1'" ).arg( mSource );
+      return false;
+    }
+
+    // finish reading
+    if ( !len )
+      break;
+
+    if ( fileDestination.write( data, len ) != len )
+    {
+      mErrorString = tr( "Fail writing to '%1'" ).arg( mDestination );
+      return false;
+    }
+
+    bytesRead += len;
+    setProgress( static_cast<double>( bytesRead ) / size );
   }
+
+  setProgress( 100 );
+
+  fileSource.close();
+  fileDestination.close();
 
   return true;
 }
@@ -86,6 +118,11 @@ QgsSimpleCopyExternalStorageStoredContent::QgsSimpleCopyExternalStorageStoredCon
   connect( mCopyTask, &QgsTask::taskTerminated, this, [ = ]
   {
     reportError( mCopyTask->errorString() );
+  } );
+
+  connect( mCopyTask, &QgsTask::progressChanged, this, [ = ]( double progress )
+  {
+    emit progressChanged( progress );
   } );
 
   mStatus = OnGoing;
