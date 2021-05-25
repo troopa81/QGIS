@@ -62,6 +62,7 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     Q_PROPERTY( StorageMode storageMode READ storageMode WRITE setStorageMode )
     Q_PROPERTY( RelativeStorage relativeStorage READ relativeStorage WRITE setRelativeStorage )
     Q_PROPERTY( QFileDialog::Options options READ options WRITE setOptions )
+    Q_PROPERTY( QString auth READ storageAuthConfigId WRITE setStorageAuthConfigId )
 
   public:
 
@@ -115,9 +116,11 @@ class GUI_EXPORT QgsFileWidget : public QWidget
 
     /**
      * Set \a storageType storage type unique identifier as defined in QgsExternalStorageRegistry or
-     * null QString if there is no storage defined, only file selection.
+     * null QString if there is no storage defined.
+     * If no external storage has been defined, QgsFileWidget will only update file path according to
+     * selected files.
      * \see storageType
-     * \since QGIS 3.20
+     * \since QGIS 3.22
      */
     void setStorageType( const QString &storageType );
 
@@ -125,35 +128,59 @@ class GUI_EXPORT QgsFileWidget : public QWidget
      * Get storage type unique identifier as defined in QgsExternalStorageRegistry.
      * Returns null QString if there is no storage defined, only file selection.
      * \see setStorageType
-     * \since QGIS 3.20
+     * \since QGIS 3.22
      */
     QString storageType() const;
 
-    // TODO doc
+    /**
+     * Returns external storage used to store selected file names, nullptr if none have been defined.
+     * If no external storage has been defined, QgsFileWidget will only update file path according to
+     * selected files.
+     * \see setStorageType
+     * \since QGIS 3.22
+     */
     QgsExternalStorage *externalStorage() const;
 
     /**
-     * Sets the authentication configuration ID for current storage
-     * TODO complete doc
-     * TODO property
+     * Sets the authentication configuration ID to be used for the current external storage (if
+     * defined)
+     * \since QGIS 3.22
      */
     void setStorageAuthConfigId( const QString &authCfg );
 
-    // TODO doc
+    /**
+     * Returns the authentication configuration ID used for the current external storage (if defined)
+     * \since QGIS 3.22
+     */
     const QString &storageAuthConfigId() const;
 
-    // TODO doc
-    // TODO miss the property?
+    /**
+     *
+     * TODO doc
+     * TODO miss the property?
+     * \since 3.22
+     */
     void setStorageUrlExpression( const QString &urlExpression );
 
-    // TODO doc
+    /**
+     *  TODO doc
+     * \since 3.22
+     */
     QgsExpression *storageUrlExpression() const;
 
     // TODO doc set expression context used for storage url expression evaluation
     // TODO miss the property?
+
+    /**
+     * \since 3.22
+     */
     void setExpressionContext( const QgsExpressionContext &context );
 
     // TODO doc return expression context used for storage url expression evaluation
+
+    /**
+     * \since 3.22
+     */
     const QgsExpressionContext &expressionContext() const;
 
     //! returns the open file dialog title

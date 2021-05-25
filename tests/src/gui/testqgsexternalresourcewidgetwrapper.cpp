@@ -137,9 +137,9 @@ class QgsTestExternalStorage : public QgsExternalStorage
 
     QString type() const override { return QStringLiteral( "test" ); }
 
-    QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
+    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const override
     {
-      Q_UNUSED( url );
+      Q_UNUSED( uri );
       Q_UNUSED( authcfg );
       Q_UNUSED( filePath );
 
@@ -147,12 +147,11 @@ class QgsTestExternalStorage : public QgsExternalStorage
       return sStoreContent;
     }
 
-    QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) override
+    QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authcfg = QString() ) const override
     {
-      Q_UNUSED( url );
       Q_UNUSED( authcfg );
 
-      sFetchContent = new QgsTestExternalStorageFetchedContent( url.toString().endsWith( QStringLiteral( "cached.txt" ) ) );
+      sFetchContent = new QgsTestExternalStorageFetchedContent( uri.endsWith( QStringLiteral( "cached.txt" ) ) );
 
       return sFetchContent;
     }

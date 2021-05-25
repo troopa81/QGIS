@@ -161,13 +161,16 @@ class GUI_EXPORT QgsExternalResourceWidget : public QWidget
     QString storageType() const;
 
     /**
-     * Sets the authentication configuration ID for current storage
-     * TODO complete doc (cf QgsFileWidget)
-     * TODO property
+     * Sets the authentication configuration ID to be used for the current external storage (if
+     * defined)
+     * \since QGIS 3.22
      */
     void setStorageAuthConfigId( const QString &authCfg );
 
-    // TODO doc
+    /**
+     * Returns the authentication configuration ID used for the current external storage (if defined)
+     * \since QGIS 3.22
+     */
     const QString &storageAuthConfigId() const;
 
     /**
