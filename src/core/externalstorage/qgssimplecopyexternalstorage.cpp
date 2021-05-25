@@ -100,12 +100,12 @@ const QString &QgsCopyFileTask::errorString() const
   return mErrorString;
 }
 
-QgsSimpleCopyExternalStorageStoredContent::QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg )
+QgsSimpleCopyExternalStorageStoredContent::QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg )
 {
   // TODO Can it be possible to need authcfg to copy on a filesystem protected by a login/mdp
   Q_UNUSED( authcfg );
 
-  mCopyTask = new QgsCopyFileTask( filePath, url.toString() );
+  mCopyTask = new QgsCopyFileTask( filePath, uri );
 
   QgsApplication::instance()->taskManager()->addTask( mCopyTask );
 
@@ -167,17 +167,15 @@ QString QgsSimpleCopyExternalStorage::type() const
   return QStringLiteral( "SimpleCopy" );
 };
 
-QgsExternalStorageStoredContent *QgsSimpleCopyExternalStorage::store( const QString &filePath, const QUrl &url, const QString &authcfg )
+QgsExternalStorageStoredContent *QgsSimpleCopyExternalStorage::store( const QString &filePath, const QString &uri, const QString &authcfg ) const
 {
-  // TODO who delete the object
-  return new QgsSimpleCopyExternalStorageStoredContent( filePath, url, authcfg );
+  return new QgsSimpleCopyExternalStorageStoredContent( filePath, uri, authcfg );
 };
 
-QgsExternalStorageFetchedContent *QgsSimpleCopyExternalStorage::fetch( const QUrl &url, const QString &authConfig )
+QgsExternalStorageFetchedContent *QgsSimpleCopyExternalStorage::fetch( const QString &uri, const QString &authConfig ) const
 {
   // TODO Can it be possible to need authcfg to read from a filesystem protected by a login/mdp
   Q_UNUSED( authConfig );
 
-  // TODO this object should be deleted by us, client or networkContentfetcherregistry?
-  return new QgsSimpleCopyExternalStorageFetchedContent( url.toString() );
+  return new QgsSimpleCopyExternalStorageFetchedContent( uri );
 }
