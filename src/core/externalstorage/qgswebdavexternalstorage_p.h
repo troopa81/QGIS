@@ -41,19 +41,24 @@ class CORE_EXPORT QgsWebDAVExternalStorage : public QgsExternalStorage
 
     QString type() const override;
 
-    QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override;
+    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const override;
 
-    QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authConfig = QString() ) override;
+    QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authConfig = QString() ) const override;
 };
 
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Class for WebDAV stored content
+ *
+ * \since QGIS 3.22
+ */
 class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredContent
 {
-  Q_OBJECT
+    Q_OBJECT
 
   public:
 
-    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg = QString() );
+    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg = QString() );
 
     void cancel() override;
 
@@ -62,10 +67,15 @@ class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredCo
     QPointer<QgsNetworkContentFetcherTask> mUploadTask;
 };
 
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Class for WebDAV fetched content
+ *
+ * \since QGIS 3.22
+ */
 class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedContent
 {
-  Q_OBJECT
+    Q_OBJECT
 
   public:
 
