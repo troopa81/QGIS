@@ -92,18 +92,18 @@ class QgsTestExternalStorage : public QgsExternalStorage
 
     QString type() const override { return QStringLiteral( "test" ); }
 
-    QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override
+    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const override
     {
       Q_UNUSED( filePath );
-      Q_UNUSED( url );
+      Q_UNUSED( uri );
       Q_UNUSED( authcfg );
       sCurrentStoredContent = new QgsTestExternalStorageStoredContent();
       return sCurrentStoredContent;
     }
 
-    QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) override
+    QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authcfg = QString() ) const override
     {
-      Q_UNUSED( url );
+      Q_UNUSED( uri );
       Q_UNUSED( authcfg );
       return nullptr;
     }

@@ -157,12 +157,18 @@ Returns null QString if there is no storage defined, only file selection.
 
     void setStorageAuthConfigId( const QString &authCfg );
 %Docstring
-Sets the authentication configuration ID for current storage
-TODO complete doc (cf :py:class:`QgsFileWidget`)
-TODO property
+Sets the authentication configuration ID to be used for the current external storage (if
+defined)
+
+.. versionadded:: 3.22
 %End
 
     const QString &storageAuthConfigId() const;
+%Docstring
+Returns the authentication configuration ID used for the current external storage (if defined)
+
+.. versionadded:: 3.22
+%End
 
     void setMessageBar( QgsMessageBar *messageBar );
 %Docstring
