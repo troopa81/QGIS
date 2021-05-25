@@ -22,9 +22,9 @@
 #include <QPointer>
 
 
-QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg )
+QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg )
 {
-  mUploadTask = new QgsNetworkContentFetcherTask( url, authcfg );
+  mUploadTask = new QgsNetworkContentFetcherTask( QUrl( uri ), authcfg );
   mUploadTask->setMode( "PUT" );
 
   QFile *f = new QFile( filePath );
@@ -109,16 +109,14 @@ QString QgsWebDAVExternalStorage::type() const
   return QStringLiteral( "WebDAV" );
 };
 
-QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::store( const QString &filePath, const QUrl &url, const QString &authcfg )
+QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::store( const QString &filePath, const QString &uri, const QString &authcfg ) const
 {
-  // TODO who delete the object
-  return new QgsWebDAVExternalStorageStoredContent( filePath, url, authcfg );
+  return new QgsWebDAVExternalStorageStoredContent( filePath, uri, authcfg );
 };
 
-QgsExternalStorageFetchedContent *QgsWebDAVExternalStorage::fetch( const QUrl &url, const QString &authConfig )
+QgsExternalStorageFetchedContent *QgsWebDAVExternalStorage::fetch( const QString &uri, const QString &authConfig ) const
 {
-  QgsFetchedContent *fetchedContent = QgsApplication::instance()->networkContentFetcherRegistry()->fetch( url.toString(), QgsNetworkContentFetcherRegistry::DownloadLater, authConfig );
+  QgsFetchedContent *fetchedContent = QgsApplication::instance()->networkContentFetcherRegistry()->fetch( uri, QgsNetworkContentFetcherRegistry::DownloadLater, authConfig );
 
-  // TODO this object should be deleted by us, client or networkContentfetcherregistry?
   return new QgsWebDAVExternalStorageFetchedContent( fetchedContent );
 }
