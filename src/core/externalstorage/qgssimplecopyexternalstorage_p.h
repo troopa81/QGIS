@@ -26,9 +26,11 @@
 ///@cond PRIVATE
 #define SIP_NO_FILE
 
+
 /**
  * \ingroup core
- * \brief External storage implementation that does a simple filesystem copy when storing
+ * \brief External storage implementation which simply copy the given resource
+ * on a given directory file path.
  *
  * \since QGIS 3.22
  */
@@ -38,9 +40,9 @@ class CORE_EXPORT QgsSimpleCopyExternalStorage : public QgsExternalStorage
 
     QString type() const override;
 
-    QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) override;
+    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const override;
 
-    QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authConfig = QString() ) override;
+    QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authConfig = QString() ) const override;
 };
 
 // TODO doc
@@ -63,14 +65,19 @@ class QgsCopyFileTask : public QgsTask
     QString mErrorString;
 };
 
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Class for Simple copy stored content
+ *
+ * \since QGIS 3.22
+ */
 class QgsSimpleCopyExternalStorageStoredContent  : public QgsExternalStorageStoredContent
 {
     Q_OBJECT
 
   public:
 
-    QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QUrl &url, const QString &authcfg = QString() );
+    QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg = QString() );
 
     void cancel() override;
 
@@ -80,7 +87,12 @@ class QgsSimpleCopyExternalStorageStoredContent  : public QgsExternalStorageStor
 
 };
 
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Class for Simple copy fetched content
+ *
+ * \since QGIS 3.22
+ */
 class QgsSimpleCopyExternalStorageFetchedContent : public QgsExternalStorageFetchedContent
 {
     Q_OBJECT
