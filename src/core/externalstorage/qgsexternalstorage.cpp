@@ -21,3 +21,13 @@ void QgsExternalStorageOperation::reportError( const QString &errorMsg )
   mErrorString = errorMsg;
   emit errorOccurred( mErrorString );
 }
+
+QgsExternalStorageOperation::ContentStatus QgsExternalStorageOperation::status() const
+{
+  return mStatus;
+}
+
+const QString &QgsExternalStorageOperation::errorString() const
+{
+  return mErrorString;
+};

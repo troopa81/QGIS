@@ -30,7 +30,7 @@ class QgsExternalStorage;
  *
  * This is a singleton that should be accessed through QgsApplication::externalStorageRegistry().
  *
- * \since QGIS 3.20
+ * \since QGIS 3.22
  */
 class CORE_EXPORT QgsExternalStorageRegistry
 {

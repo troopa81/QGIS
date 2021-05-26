@@ -17,7 +17,7 @@ Registry of external storage backends used by :py:class:`QgsExternalResourceWidg
 
 This is a singleton that should be accessed through :py:func:`QgsApplication.externalStorageRegistry()`.
 
-.. versionadded:: 3.20
+.. versionadded:: 3.22
 %End
 
 %TypeHeaderCode

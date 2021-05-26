@@ -100,7 +100,7 @@ class TestPyQgsExternalStorageBase():
         f = self.getNewFile(b"New content")
 
         # store
-        storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
+        storedContent = self.storage.store(f.name, self.url + "/" + os.path.basename(f.name), self.auth_config.id())
         self.assertTrue(storedContent)
         self.assertEqual(storedContent.status(), QgsExternalStorageOperation.OnGoing)
 
@@ -116,7 +116,7 @@ class TestPyQgsExternalStorageBase():
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Finished)
 
         # fetch
-        fetchedContent = self.storage.fetch(QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
+        fetchedContent = self.storage.fetch(self.url + "/" + os.path.basename(f.name), self.auth_config.id())
         self.assertTrue(fetchedContent)
 
         # Some external storage (SimpleCopy) doesn't actually need to retrieve the resource
@@ -141,7 +141,7 @@ class TestPyQgsExternalStorageBase():
         self.assertEqual(os.path.splitext(fetchedContent.filePath())[1], '.txt')
 
         # fetch again, should be cached
-        fetchedContent = self.storage.fetch(QUrl(self.url + "/" + os.path.basename(f.name)), self.auth_config.id())
+        fetchedContent = self.storage.fetch(self.url + "/" + os.path.basename(f.name), self.auth_config.id())
         self.assertTrue(fetchedContent)
         self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.Finished)
 
@@ -151,7 +151,7 @@ class TestPyQgsExternalStorageBase():
         self.assertEqual(os.path.splitext(fetchedContent.filePath())[1], '.txt')
 
         # fetch bad url
-        fetchedContent = self.storage.fetch(QUrl(self.url + "/error"), self.auth_config.id())
+        fetchedContent = self.storage.fetch(self.url + "/error", self.auth_config.id())
         self.assertTrue(fetchedContent)
 
         # Some external storage (SimpleCopy) doesn't actually need to retrieve the resource
@@ -178,7 +178,7 @@ class TestPyQgsExternalStorageBase():
         """
         f = self.getNewFile(b"New content")
 
-        storedContent = self.storage.store(f.name, QUrl(self.badUrl + os.path.basename(f.name)), self.auth_config.id())
+        storedContent = self.storage.store(f.name, self.badUrl + os.path.basename(f.name), self.auth_config.id())
         self.assertTrue(storedContent)
 
         spyStored = QSignalSpy(storedContent.stored)
@@ -202,7 +202,7 @@ class TestPyQgsExternalStorageBase():
         """
 
         f = self.getNewFile(b"New content")
-        storedContent = self.storage.store(f.name, QUrl(self.url + "/" + os.path.basename(f.name)))
+        storedContent = self.storage.store(f.name, self.url + "/" + os.path.basename(f.name))
         self.assertTrue(storedContent)
 
         spyStored = QSignalSpy(storedContent.stored)

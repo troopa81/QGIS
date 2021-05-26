@@ -21,7 +21,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QUrl>
 
 class QgsExternalStorageFetchedContent;
 class QgsExternalStorageStoredContent;
@@ -31,16 +30,15 @@ class QgsExternalStorageStoredContent;
  * \brief Abstract interface for external storage - to be implemented by various backends
  * and registered in QgsExternalStorageRegistry.
  *
- * \since QGIS 3.20
+ * \since QGIS 3.22
  */
 class CORE_EXPORT QgsExternalStorage
 {
   public:
 
-    /* #ifndef SIP_RUN */
-    /*     typedef std::function< void ( const QString & ) > ErrorCallback; */
-    /* #endif */
-
+    /**
+     * Destructor
+     */
     virtual ~QgsExternalStorage() = default;
 
     /**
@@ -49,25 +47,42 @@ class CORE_EXPORT QgsExternalStorage
     virtual QString type() const = 0;
 
     /**
-     * Store file \a filePath to the \a url for this project external storage
-     * Returns asynchronous task to store file. Signal QgsTask::taskCompleted() will be emmitted
-     * whenever the upload is complete
-     * TODO complete doc for auth
-     * TODO const ?
-     * TODO QUrl or QString ( QString is more general in case of Postgres LargeObject for instance)
-     * TODO rename en store()
+     * Store file \a filePath to the \a uri for this project external storage.
+     * Storing process is run in background.
+     * Returns a QgsExternalStorageStoredContent to follow the status of the stored resource.
+     *
+     * After using this method, user should check if the returned content is not already finished
+     * (storing could be instantaneous, if file has already been stored for instance) and then wait
+     * for QgsExternalStorageStoredContent::stored(), QgsExternalStorageStoredContent::errorOccurred() or
+     * QgsExternalStorageStoredContent::canceled() signals.
+     *
+     * It's possible to give \a authcfg authentification configuration id in case its needed.
+     *
+     * Caller takes ownership of the returned symbol.
      */
-    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QUrl &url, const QString &authcfg = QString() ) = 0;
+    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const = 0 SIP_FACTORY;
 
     /**
-     * TODO Complete documentation
-     * TODO const ?
-     * TODO QUrl or QString ( QString is more general in case of Postgres LargeObject for instance)
+     * Fetch file from \a uri for this project external storage.
+     * Fetching process is run in background.
+     * Returns a QgsExternalStorageFetchedContent to follow the status of the fetched resource.
+     *
+     * After using this method, user should check if the returned content is not already finished
+     * (fetching could be instantaneous, if file has already been fetched and cached for instance)
+     * and then wait for QgsExternalStorageStoredContent::fetched(), QgsExternalStorageStoredContent::errorOccurred() or
+     * QgsExternalStorageStoredContent::canceled() signals.
+     *
+     * It's possible to give \a authcfg authentification configuration id in case its needed.
      */
-    virtual QgsExternalStorageFetchedContent *fetch( const QUrl &url, const QString &authcfg = QString() ) = 0;
+    virtual QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authcfg = QString() ) const = 0 SIP_FACTORY;
 };
 
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Base class for QgsExternalStorage stored and fetched content
+ *
+ * \since QGIS 3.22
+ */
 class CORE_EXPORT QgsExternalStorageOperation : public QObject
 {
     Q_OBJECT
@@ -77,41 +92,53 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
     //! Status of fetched content
     enum ContentStatus
     {
-      NotStarted, //!< No operation started
+      NotStarted, //!< Operation has not started yet
       OnGoing, //!< Operation in progress
       Finished, //!< Operation is finished and successful
       Failed, //!< Operation has failed
       Canceled, //!< Operation has been canceled
     };
 
-    virtual ~QgsExternalStorageOperation() = default;
-
     /**
-     * Returns status of fetched content
+     * Returns status of operation
      */
-    ContentStatus status() const {return mStatus;}
+    ContentStatus status() const;
 
     /**
      * Returns the potential error textual description if an error occured and status() returns Failed
      */
-    const QString &errorString() const {return mErrorString;};
+    const QString &errorString() const;
 
   public slots:
 
+    /**
+     * Cancel the operation
+     */
     virtual void cancel() {};
 
   signals:
 
-    void errorOccurred( const QString & );
+    /**
+     * The signal is emitted when an error occurred. \a errorString is a textual description of the error
+     */
+    void errorOccurred( const QString &errorString );
 
+    /**
+     * The signal is emitted whenever the operation estimated progression value \a progress has changed.
+     * \a progress value is between 0 and 100.
+     */
     void progressChanged( double progress );
 
+    /**
+     * The signal is emitted when the operation has been canceled
+     */
     void canceled();
 
   protected:
 
     /**
-     * Update content according to given \a error message content
+     * Update content according to given \a errorMsg error message
+     * Inherited classes should call this method whenever they meet an error.
      */
     void reportError( const QString &errorMsg );
 
@@ -119,29 +146,46 @@ class CORE_EXPORT QgsExternalStorageOperation : public QObject
     QString mErrorString;
 };
 
-
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Class for QgsExternalStorage fetched content
+ *
+ * \since QGIS 3.22
+ */
 class CORE_EXPORT QgsExternalStorageFetchedContent : public QgsExternalStorageOperation
 {
     Q_OBJECT
 
   public:
 
-    // TODO doc
+    /**
+     * Return fetched resource file path
+     */
     virtual QString filePath() const = 0;
 
   signals:
 
+    /**
+     * The signal is emitted when the resource has successfully been fetched
+     */
     void fetched();
 };
 
-// TODO doc
+/**
+ * \ingroup core
+ * \brief Class for QgsExternalStorage stored content
+ *
+ * \since QGIS 3.22
+ */
 class CORE_EXPORT QgsExternalStorageStoredContent : public QgsExternalStorageOperation
 {
     Q_OBJECT
 
   signals:
 
+    /**
+     * The signal is emitted when the resource has successfully been stored
+     */
     void stored();
 };
 
