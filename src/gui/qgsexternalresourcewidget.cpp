@@ -303,7 +303,7 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
 {
   QString resolvedPath;
 
-  if ( path.isEmpty() )
+  if ( path.isEmpty() || path == QgsApplication::nullRepresentation() )
   {
     clearContent();
   }
