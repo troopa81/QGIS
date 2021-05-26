@@ -345,7 +345,7 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   // ----------------------------------------------------
   // load url
   // ----------------------------------------------------
-  ww.mQgsWidget->loadDocument( QStringLiteral( "/home/test/myfile.txt" ) );
+  ww.setValues( QStringLiteral( "/home/test/myfile.txt" ), QVariantList() );
 
   // content still null, fetching in progress...
   QVERIFY( !ww.mQgsWidget->mPixmapLabel->isVisible() );
@@ -391,7 +391,7 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   // ----------------------------------------------------
   // load a cached url
   // ----------------------------------------------------
-  ww.mQgsWidget->loadDocument( QStringLiteral( "/home/test/cached.txt" ) );
+  ww.setValues( QStringLiteral( "/home/test/cached.txt" ), QVariantList() );
 
   // cached, no fetching, content is OK
   QVERIFY( !ww.mQgsWidget->mLoadingLabel->isVisible() );
@@ -427,7 +427,7 @@ void TestQgsExternalResourceWidgetWrapper::testLoadExternalDocument()
   // ----------------------------------------------------
   // load an error url
   // ----------------------------------------------------
-  ww.mQgsWidget->loadDocument( QStringLiteral( "/home/test/error.txt" ) );
+  ww.setValues( QStringLiteral( "/home/test/error.txt" ), QVariantList() );
 
   // still no error, fetching in progress...
   if ( documentType == QgsExternalResourceWidget::Image )
