@@ -40,9 +40,9 @@ class CORE_EXPORT QgsSimpleCopyExternalStorage : public QgsExternalStorage
 
     QString type() const override;
 
-    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const override;
+    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &url, const QString &authcfg = QString() ) const override;
 
-    QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authConfig = QString() ) const override;
+    QgsExternalStorageFetchedContent *fetch( const QString &url, const QString &authConfig = QString() ) const override;
 };
 
 // TODO doc
@@ -57,6 +57,12 @@ class QgsCopyFileTask : public QgsTask
     bool run() override;
 
     const QString &errorString() const;
+
+    /**
+     * It could be different from the original one. If original destination was a directory
+     * the returned destination is now the absolute file path of the copied file
+     */
+    const QString &destination() const;
 
   private:
 
@@ -77,14 +83,16 @@ class QgsSimpleCopyExternalStorageStoredContent  : public QgsExternalStorageStor
 
   public:
 
-    QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg = QString() );
+    QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QString &url, const QString &authcfg = QString() );
 
     void cancel() override;
+
+    QString url() const override;
 
   private:
 
     QPointer<QgsCopyFileTask> mCopyTask;
-
+    QString mUrl;
 };
 
 /**
