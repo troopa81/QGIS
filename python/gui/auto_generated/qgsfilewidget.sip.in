@@ -291,6 +291,12 @@ Returns message bar used to report messages
 .. versionadded:: 3.22
 %End
 
+    static QgsExpressionContextScope *createFileWidgetScope();
+%Docstring
+Creates and Returns an expression context scope specific to QgsFileWidget
+It defines the variable containing the user selected file name
+%End
+
   signals:
 
     void fileChanged( const QString &path );

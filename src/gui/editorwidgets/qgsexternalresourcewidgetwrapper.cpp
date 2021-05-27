@@ -162,10 +162,14 @@ void QgsExternalResourceWidgetWrapper::initWidget( QWidget *editor )
     mQgsWidget->fileWidget()->setStorageMode( QgsFileWidget::GetFile );
 
     QVariantMap cfg = config();
+    mPropertyCollection.loadVariant( cfg.value( QStringLiteral( "PropertyCollection" ) ), propertyDefinitions() );
 
     mQgsWidget->setStorageType( cfg.value( QStringLiteral( "StorageType" ) ).toString() );
     mQgsWidget->setStorageAuthConfigId( cfg.value( QStringLiteral( "StorageAuthConfigId" ) ).toString() );
-    mQgsWidget->fileWidget()->setStorageUrlExpression( cfg.value( QStringLiteral( "StorageUrlExpression" ) ).toString() );
+
+    mQgsWidget->fileWidget()->setStorageUrlExpression( mPropertyCollection.isActive( QgsWidgetWrapper::StorageUrl ) ?
+        mPropertyCollection.property( QgsWidgetWrapper::StorageUrl ).asExpression() :
+        QgsExpression::quotedValue( cfg.value( QStringLiteral( "StorageUrl" ) ).toString() ) );
 
     updateFileWidgetExpressionContext();
 
@@ -178,7 +182,6 @@ void QgsExternalResourceWidgetWrapper::initWidget( QWidget *editor )
       mQgsWidget->fileWidget()->setFullUrl( cfg.value( QStringLiteral( "FullUrl" ) ).toBool() );
     }
 
-    mPropertyCollection.loadVariant( cfg.value( QStringLiteral( "PropertyCollection" ) ), propertyDefinitions() );
     if ( !mPropertyCollection.isActive( QgsWidgetWrapper::RootPath ) )
     {
       mQgsWidget->setDefaultRoot( cfg.value( QStringLiteral( "DefaultRoot" ) ).toString() );

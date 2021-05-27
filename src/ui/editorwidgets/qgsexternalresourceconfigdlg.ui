@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>481</width>
-    <height>690</height>
+    <height>803</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,7 +47,7 @@
         <x>0</x>
         <y>0</y>
         <width>467</width>
-        <height>832</height>
+        <height>835</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -74,21 +74,20 @@
             <item>
              <widget class="QLabel" name="label_5">
               <property name="text">
-               <string>Url</string>
+               <string>Store URL</string>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="mStorageUrl"/>
             </item>
             <item>
              <widget class="QLineEdit" name="mStorageUrlExpression"/>
             </item>
             <item>
-             <widget class="QToolButton" name="mEditStorageUrlExpression">
-              <property name="layoutDirection">
-               <enum>Qt::RightToLeft</enum>
-              </property>
-              <property name="icon">
-               <iconset>
-                <normaloff>:/images/themes/default/mIconExpression.svg</normaloff>:/images/themes/default/mIconExpression.svg</iconset>
+             <widget class="QgsPropertyOverrideButton" name="mStorageUrlPropertyOverrideButton">
+              <property name="text">
+               <string>…</string>
               </property>
              </widget>
             </item>
@@ -566,15 +565,15 @@
    <header>qgsspinbox.h</header>
   </customwidget>
   <customwidget>
-   <class>QgsAuthSettingsWidget</class>
-   <extends>QWidget</extends>
-   <header>auth/qgsauthsettingswidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>QgsScrollArea</class>
    <extends>QScrollArea</extends>
    <header>qgsscrollarea.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>QgsAuthSettingsWidget</class>
+   <extends>QWidget</extends>
+   <header>auth/qgsauthsettingswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
@@ -603,7 +602,7 @@
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="mStorageButtonGroup"/>
   <buttongroup name="mRelativeButtonGroup"/>
+  <buttongroup name="mStorageButtonGroup"/>
  </buttongroups>
 </ui>

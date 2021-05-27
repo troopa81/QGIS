@@ -284,6 +284,12 @@ class GUI_EXPORT QgsFileWidget : public QWidget
      */
     QgsMessageBar *messageBar() const;
 
+    /**
+     * Creates and Returns an expression context scope specific to QgsFileWidget
+     * It defines the variable containing the user selected file name
+     */
+    static QgsExpressionContextScope *createFileWidgetScope();
+
   signals:
 
     /**

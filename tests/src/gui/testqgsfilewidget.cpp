@@ -56,6 +56,8 @@ class TestQgsFileWidget: public QObject
     void testStoringSeveralFilesCancel_data();
     void testStoringSeveralFilesCancel();
     void testStoringChangeFeature();
+    void testStoringBadExpression_data();
+    void testStoringBadExpression();
 };
 
 class QgsTestExternalStorageStoredContent : public QgsExternalStorageStoredContent
@@ -407,7 +409,7 @@ void TestQgsFileWidget::testStoring()
   QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
 
   w.setStorageType( "test" );
-  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@selected_file_name)" );
 
   // start edit mode
   w.setUseLink( useLink );
@@ -455,13 +457,7 @@ void TestQgsFileWidget::testStoring()
   else
     QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/test/myfile" ) );
 
-  // TODO test bad expression
-
-
   // TODO test also cancel or error (on one or multiple files), url should not be updated (or partially)
-
-
-  // TODO test also fetch
 
 
   // TEST error with one url
@@ -489,7 +485,7 @@ void TestQgsFileWidget::testStoringSeveralFiles()
   QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
 
   w.setStorageType( "test" );
-  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@selected_file_name)" );
 
   // start edit mode
   w.setUseLink( useLink );
@@ -587,7 +583,7 @@ void TestQgsFileWidget::testStoringSeveralFilesError()
   QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
 
   w.setStorageType( "test" );
-  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@selected_file_name)" );
   w.setMessageBar( &messageBar );
 
   // start edit mode
@@ -688,7 +684,7 @@ void TestQgsFileWidget::testStoringSeveralFilesCancel()
   QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
 
   w.setStorageType( "test" );
-  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@user_file_name)" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@selected_file_name)" );
 
   // start edit mode
   w.setUseLink( useLink );
@@ -809,7 +805,59 @@ void TestQgsFileWidget::testStoringChangeFeature()
   QCOMPARE( w.mLineEdit->text(), QStringLiteral( "http://test.url.com/val2" ) );
 }
 
+void TestQgsFileWidget::testStoringBadExpression_data()
+{
+  QTest::addColumn<bool>( "useLink" );
 
+  QTest::newRow( "use link" ) << true;
+  QTest::newRow( "don't use link" ) << false;
+}
+
+void TestQgsFileWidget::testStoringBadExpression()
+{
+  // test widget when an external storage is used and the given expression if incorrect
+
+  QFETCH( bool, useLink );
+
+  QgsFileWidget w;
+  w.show();
+
+  QIcon editIcon = QgsApplication::getThemeIcon( QStringLiteral( "/mActionToggleEditing.svg" ) );
+
+  w.setStorageType( "test" );
+  w.setStorageUrlExpression( "'http://test.url.com/test/' || file_name(@not_existing_variable)" );
+
+  // start edit mode
+  w.setUseLink( useLink );
+  w.setReadOnly( false );
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  w.setSelectedFileNames( QStringList() << QStringLiteral( "myfile" ) );
+
+  QVERIFY( !QgsTestExternalStorage::sCurrentStoredContent );
+
+  QVERIFY( useLink == w.mLinkLabel->isVisible() );
+  QVERIFY( useLink == w.mLinkEditButton->isVisible() );
+  if ( useLink ) QCOMPARE( w.mLinkEditButton->icon(), editIcon );
+  QVERIFY( useLink != w.mLineEdit->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isVisible() );
+  QVERIFY( w.mFileWidgetButton->isEnabled() );
+  QVERIFY( !w.mProgressLabel->isVisible() );
+  QVERIFY( !w.mProgressBar->isVisible() );
+  QVERIFY( !w.mCancelButton->isVisible() );
+
+  // link is not updated
+  QVERIFY( w.mLinkLabel->text().isEmpty() );
+}
 
 QGSTEST_MAIN( TestQgsFileWidget )
 #include "testqgsfilewidget.moc"

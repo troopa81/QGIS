@@ -44,7 +44,11 @@ QgsExternalResourceConfigDlg::QgsExternalResourceConfigDlg( QgsVectorLayer *vl, 
     mStorageType->addItem( tr( "Store with %1" ).arg( storage->type() ), storage->type() );
   }
 
-  connect( mEditStorageUrlExpression, &QToolButton::clicked, this, &QgsExternalResourceConfigDlg::editStorageUrlExpression );
+  initializeDataDefinedButton( mStorageUrlPropertyOverrideButton, QgsEditorWidgetWrapper::StorageUrl );
+  mStorageUrlPropertyOverrideButton->registerVisibleWidget( mStorageUrlExpression );
+  mStorageUrlPropertyOverrideButton->registerExpressionWidget( mStorageUrlExpression );
+  mStorageUrlPropertyOverrideButton->registerVisibleWidget( mStorageUrl, false );
+  mStorageUrlPropertyOverrideButton->registerExpressionContextGenerator( this );
 
   // By default, uncheck some options
   mUseLink->setChecked( false );
@@ -153,7 +157,8 @@ QVariantMap QgsExternalResourceConfigDlg::config()
 
   cfg.insert( QStringLiteral( "StorageType" ), mStorageType->currentData() );
   cfg.insert( QStringLiteral( "StorageAuthConfigId" ), mAuthSettingsProtocol->configId() );
-  cfg.insert( QStringLiteral( "StorageUrlExpression" ), mStorageUrlExpression->text() );
+  if ( !mStorageUrl->text().isEmpty() )
+    cfg.insert( QStringLiteral( "StorageUrl" ), mStorageUrl->text() );
 
   cfg.insert( QStringLiteral( "FileWidget" ), mFileWidgetGroupBox->isChecked() );
   cfg.insert( QStringLiteral( "FileWidgetButton" ), mFileWidgetButtonGroupBox->isChecked() );
@@ -202,7 +207,7 @@ void QgsExternalResourceConfigDlg::setConfig( const QVariantMap &config )
   }
 
   mAuthSettingsProtocol->setConfigId( config.value( QStringLiteral( "StorageAuthConfigId" ) ).toString() );
-  mStorageUrlExpression->setText( config.value( QStringLiteral( "StorageUrlExpression" ) ).toString() );
+  mStorageUrl->setText( config.value( QStringLiteral( "StorageUrl" ) ).toString() );
 
   if ( config.contains( QStringLiteral( "FileWidget" ) ) )
   {
@@ -271,29 +276,17 @@ void QgsExternalResourceConfigDlg::setConfig( const QVariantMap &config )
   }
 }
 
-void QgsExternalResourceConfigDlg::editStorageUrlExpression()
+QgsExpressionContext QgsExternalResourceConfigDlg::createExpressionContext() const
 {
-  Q_ASSERT( layer() );
-
-  QgsExpressionContext context( QgsExpressionContextUtils::globalProjectLayerScopes( layer() ) );
+  QgsExpressionContext context = QgsEditorConfigWidget::createExpressionContext();
   context << QgsExpressionContextUtils::formScope( );
   context << QgsExpressionContextUtils::parentFormScope( );
 
-  // TODO add and highlight selectedFileName, eventually added function?
-  // context.setHighlightedFunctions( QStringList() << QStringLiteral( "current_value" ) << QStringLiteral( "current_parent_value" ) );
-  // context.setHighlightedVariables( QStringList() << QStringLiteral( "current_geometry" )
-  //                                  << QStringLiteral( "current_feature" )
-  //                                  << QStringLiteral( "form_mode" )
-  //                                  << QStringLiteral( "current_parent_geometry" )
-  //                                  << QStringLiteral( "current_parent_feature" ) );
+  QgsExpressionContextScope *fileWidgetScope = QgsFileWidget::createFileWidgetScope();
+  context << fileWidgetScope;
 
-  QgsExpressionBuilderDialog dlg( layer(), mStorageUrlExpression->text(), this, QStringLiteral( "generic" ), context );
-  dlg.setWindowTitle( tr( "Edit Storage Url Expression" ) );
-
-  if ( dlg.exec() == QDialog::Accepted )
-  {
-    mStorageUrlExpression->setText( dlg.expressionBuilder()->expressionText() );
-  }
+  context.setHighlightedVariables( fileWidgetScope->variableNames() );
+  return context;
 }
 
 void QgsExternalResourceConfigDlg::changeStorageType( int storageType )
