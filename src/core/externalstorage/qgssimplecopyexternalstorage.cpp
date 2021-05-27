@@ -41,6 +41,11 @@ bool QgsCopyFileTask::run()
     return false;
   }
 
+  if ( QFileInfo( mDestination ).isDir() )
+  {
+    mDestination = QDir( mDestination ).absoluteFilePath( QFileInfo( fileSource ).fileName() );
+  }
+
   // TODO WebDAV overwrite the file if it exists alreadu, we need the same behavior (a boolean option)
   QFile fileDestination( mDestination );
   if ( fileDestination.exists() )
@@ -100,17 +105,23 @@ const QString &QgsCopyFileTask::errorString() const
   return mErrorString;
 }
 
-QgsSimpleCopyExternalStorageStoredContent::QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg )
+const QString &QgsCopyFileTask::destination() const
+{
+  return mDestination;
+}
+
+QgsSimpleCopyExternalStorageStoredContent::QgsSimpleCopyExternalStorageStoredContent( const QString &filePath, const QString &url, const QString &authcfg )
 {
   // TODO Can it be possible to need authcfg to copy on a filesystem protected by a login/mdp
   Q_UNUSED( authcfg );
 
-  mCopyTask = new QgsCopyFileTask( filePath, uri );
+  mCopyTask = new QgsCopyFileTask( filePath, url );
 
   QgsApplication::instance()->taskManager()->addTask( mCopyTask );
 
   connect( mCopyTask, &QgsTask::taskCompleted, this, [ = ]
   {
+    mUrl = mCopyTask->destination();
     mStatus = Finished;
     emit stored();
   } );
@@ -143,6 +154,11 @@ void QgsSimpleCopyExternalStorageStoredContent::cancel()
   mCopyTask->cancel();
 }
 
+QString QgsSimpleCopyExternalStorageStoredContent::url() const
+{
+  return mUrl;
+}
+
 QgsSimpleCopyExternalStorageFetchedContent::QgsSimpleCopyExternalStorageFetchedContent( const QString &filePath )
 {
   // no fetching process, we read directly from its location
@@ -167,15 +183,15 @@ QString QgsSimpleCopyExternalStorage::type() const
   return QStringLiteral( "SimpleCopy" );
 };
 
-QgsExternalStorageStoredContent *QgsSimpleCopyExternalStorage::store( const QString &filePath, const QString &uri, const QString &authcfg ) const
+QgsExternalStorageStoredContent *QgsSimpleCopyExternalStorage::store( const QString &filePath, const QString &url, const QString &authcfg ) const
 {
-  return new QgsSimpleCopyExternalStorageStoredContent( filePath, uri, authcfg );
+  return new QgsSimpleCopyExternalStorageStoredContent( filePath, url, authcfg );
 };
 
-QgsExternalStorageFetchedContent *QgsSimpleCopyExternalStorage::fetch( const QString &uri, const QString &authConfig ) const
+QgsExternalStorageFetchedContent *QgsSimpleCopyExternalStorage::fetch( const QString &url, const QString &authConfig ) const
 {
   // TODO Can it be possible to need authcfg to read from a filesystem protected by a login/mdp
   Q_UNUSED( authConfig );
 
-  return new QgsSimpleCopyExternalStorageFetchedContent( uri );
+  return new QgsSimpleCopyExternalStorageFetchedContent( url );
 }
