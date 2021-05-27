@@ -41,9 +41,9 @@ class CORE_EXPORT QgsWebDAVExternalStorage : public QgsExternalStorage
 
     QString type() const override;
 
-    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const override;
+    QgsExternalStorageStoredContent *store( const QString &filePath, const QString &url, const QString &authcfg = QString() ) const override;
 
-    QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authConfig = QString() ) const override;
+    QgsExternalStorageFetchedContent *fetch( const QString &url, const QString &authConfig = QString() ) const override;
 };
 
 /**
@@ -58,13 +58,16 @@ class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredCo
 
   public:
 
-    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg = QString() );
+    QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &url, const QString &authcfg = QString() );
 
     void cancel() override;
+
+    QString url() const override;
 
   private:
 
     QPointer<QgsNetworkContentFetcherTask> mUploadTask;
+    QString mUrl;
 };
 
 /**
