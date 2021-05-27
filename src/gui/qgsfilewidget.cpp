@@ -181,6 +181,12 @@ QgsExpression *QgsFileWidget::storageUrlExpression() const
   return mStorageUrlExpression.get();
 }
 
+QString QgsFileWidget::storageUrlExpressionString() const
+{
+  return mStorageUrlExpression ? mStorageUrlExpression->expression() : QString();
+}
+
+
 void QgsFileWidget::setExpressionContext( const QgsExpressionContext &context )
 {
   mScope = nullptr; // deleted by old context when we override it with the new one

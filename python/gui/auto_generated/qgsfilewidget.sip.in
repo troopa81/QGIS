@@ -124,30 +124,50 @@ Returns the authentication configuration ID used for the current external storag
 
     void setStorageUrlExpression( const QString &urlExpression );
 %Docstring
+Set ``urlExpression`` expression, which once evaluated, provide the URL used to store selected
+documents. This is used only if an external storage has been defined
 
-TODO doc
-TODO miss the property?
+.. seealso:: :py:func:`setStorageType`
+
+.. versionadded:: 3.22
+%End
+
+    QString storageUrlExpressionString() const;
+%Docstring
+Returns the original, unmodified expression string, which once evaluated, provide the
+URL used to store selected documents. This is used only if an external storage has been defined.
+Returns null if no expression has been set.
+
+.. seealso:: :py:func:`setStorageUrlExpression`
 
 .. versionadded:: 3.22
 %End
 
     QgsExpression *storageUrlExpression() const;
 %Docstring
-TODO doc
+Returns expression, which once evaluated, provide the URL used to store selected
+documents. This is used only if an external storage has been defined.
+Returns null if no expression has been set.
+
+.. seealso:: :py:func:`setStorageUrlExpression`
 
 .. versionadded:: 3.22
 %End
-
 
     void setExpressionContext( const QgsExpressionContext &context );
 %Docstring
+Set expression context to be used when for storage URL expression evaluation
+
+.. seealso:: :py:func:`setStorageUrlExpression`
 
 .. versionadded:: 3.22
 %End
 
-
     const QgsExpressionContext &expressionContext() const;
 %Docstring
+Returns expression context used for storage url expression evaluation
+
+.. seealso:: :py:func:`storageUrlExpression`
 
 .. versionadded:: 3.22
 %End
