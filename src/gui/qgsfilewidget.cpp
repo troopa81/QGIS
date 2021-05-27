@@ -37,7 +37,7 @@
 #include "qgsexternalstorageregistry.h"
 #include "qgsmessagebar.h"
 
-#define FILENAME_VARIABLE "user_file_name"
+#define FILENAME_VARIABLE "selected_file_name"
 
 QgsFileWidget::QgsFileWidget( QWidget *parent )
   : QWidget( parent )
@@ -193,9 +193,17 @@ void QgsFileWidget::addFileWidgetScope()
   if ( !mExternalStorage || mScope )
     return;
 
-  mScope = new QgsExpressionContextScope( QObject::tr( "FileWidget" ) );
-  mScope->setVariable( QStringLiteral( FILENAME_VARIABLE ), QString() );
+  mScope = createFileWidgetScope();
   mExpressionContext << mScope;
+}
+
+QgsExpressionContextScope *QgsFileWidget::createFileWidgetScope()
+{
+  QgsExpressionContextScope *scope = new QgsExpressionContextScope( QObject::tr( "FileWidget" ) );
+  scope->addVariable( QgsExpressionContextScope::StaticVariable(
+                        QStringLiteral( FILENAME_VARIABLE ),
+                        QString(), true, false, tr( "User selected absolute filepath" ) ) );
+  return scope;
 }
 
 const QgsExpressionContext &QgsFileWidget::expressionContext() const
@@ -476,11 +484,14 @@ void QgsFileWidget::setSelectedFileNames( QStringList fileNames )
   {
     if ( mExternalStorage )
     {
-      // TODO do a function for the external storage part
-
       if ( !mStorageUrlExpression->prepare( &mExpressionContext ) )
       {
-        // TODO sure this is the best way to print errors ? what happen if several files
+        if ( messageBar() )
+        {
+          messageBar()->pushWarning( tr( "Storing External resource" ),
+                                     tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
+        }
+
         QgsDebugMsg( tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
         return;
       }
@@ -533,6 +544,10 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
       messageBar()->pushWarning( tr( "Storing External resource" ),
                                  tr( "Storage URL expression is invalid : %1" ).arg( mStorageUrlExpression->evalErrorString() ) );
     }
+
+    mStoreInProgress = false;
+    updateLayout();
+
     return;
   }
 
