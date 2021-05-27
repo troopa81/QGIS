@@ -562,8 +562,6 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
   connect( storedContent, &QgsExternalStorageStoredContent::progressChanged, mProgressBar, &QProgressBar::setValue );
   connect( mCancelButton, &QToolButton::clicked, storedContent, &QgsExternalStorageStoredContent::cancel );
 
-  storedUrls << url.toString();
-
   auto onStoreFinished = [ = ]
   {
     mStoreInProgress = false;
@@ -579,16 +577,19 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
     if ( storedContent->status() != QgsExternalStorageOperation::Finished )
       return;
 
+    QStringList newStoredUrls = storedUrls;
+    newStoredUrls << storedContent->url();
+
     // every thing has been stored, we update filepath
     if ( fileNames.isEmpty() )
     {
-      if ( storedUrls.size() > 1 )
-        setFilePath( QStringLiteral( "\"%1\"" ).arg( storedUrls.join( QLatin1String( "\" \"" ) ) ) );
+      if ( newStoredUrls.size() > 1 )
+        setFilePath( QStringLiteral( "\"%1\"" ).arg( newStoredUrls.join( QLatin1String( "\" \"" ) ) ) );
       else
-        setFilePath( storedUrls.first( ) );
+        setFilePath( newStoredUrls.first( ) );
     }
     else
-      storeExternalFiles( fileNames, storedUrls );
+      storeExternalFiles( fileNames, newStoredUrls );
   };
 
   connect( storedContent, &QgsExternalStorageStoredContent::stored, onStoreFinished );
