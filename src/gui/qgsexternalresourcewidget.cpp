@@ -301,15 +301,13 @@ void QgsExternalResourceWidget::clearContent()
 
 void QgsExternalResourceWidget::loadDocument( const QString &path )
 {
-  QString resolvedPath;
-
   if ( path.isEmpty() || path == QgsApplication::nullRepresentation() )
   {
     clearContent();
   }
   else if ( mDocumentViewerContent != NoContent )
   {
-    resolvedPath = resolvePath( path );
+    const QString resolvedPath = resolvePath( path );
 
     if ( mFileWidget->externalStorage() )
     {

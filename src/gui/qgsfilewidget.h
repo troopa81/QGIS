@@ -63,6 +63,7 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     Q_PROPERTY( RelativeStorage relativeStorage READ relativeStorage WRITE setRelativeStorage )
     Q_PROPERTY( QFileDialog::Options options READ options WRITE setOptions )
     Q_PROPERTY( QString auth READ storageAuthConfigId WRITE setStorageAuthConfigId )
+    Q_PROPERTY( QString storageUrlExpression READ storageUrlExpressionString WRITE setStorageUrlExpression )
 
   public:
 
@@ -155,30 +156,41 @@ class GUI_EXPORT QgsFileWidget : public QWidget
     const QString &storageAuthConfigId() const;
 
     /**
-     *
-     * TODO doc
-     * TODO miss the property?
+     * Set \a urlExpression expression, which once evaluated, provide the URL used to store selected
+     * documents. This is used only if an external storage has been defined
+     * \see setStorageType(), externalStorage()
      * \since 3.22
      */
     void setStorageUrlExpression( const QString &urlExpression );
 
     /**
-     *  TODO doc
+     * Returns the original, unmodified expression string, which once evaluated, provide the
+     * URL used to store selected documents. This is used only if an external storage has been defined.
+     * Returns null if no expression has been set.
+     * \see setStorageUrlExpression()
+     * \since 3.22
+     */
+    QString storageUrlExpressionString() const;
+
+    /**
+     * Returns expression, which once evaluated, provide the URL used to store selected
+     * documents. This is used only if an external storage has been defined.
+     * Returns null if no expression has been set.
+     * \see setStorageUrlExpression()
      * \since 3.22
      */
     QgsExpression *storageUrlExpression() const;
 
-    // TODO doc set expression context used for storage url expression evaluation
-    // TODO miss the property?
-
     /**
+     * Set expression context to be used when for storage URL expression evaluation
+     * \see setStorageUrlExpression
      * \since 3.22
      */
     void setExpressionContext( const QgsExpressionContext &context );
 
-    // TODO doc return expression context used for storage url expression evaluation
-
     /**
+     * Returns expression context used for storage url expression evaluation
+     * \see storageUrlExpression
      * \since 3.22
      */
     const QgsExpressionContext &expressionContext() const;
