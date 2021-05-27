@@ -100,7 +100,8 @@ class TestPyQgsExternalStorageBase():
         f = self.getNewFile(b"New content")
 
         # store
-        storedContent = self.storage.store(f.name, self.url + "/" + os.path.basename(f.name), self.auth_config.id())
+        url = self.url + "/" + os.path.basename(f.name)
+        storedContent = self.storage.store(f.name, url, self.auth_config.id())
         self.assertTrue(storedContent)
         self.assertEqual(storedContent.status(), QgsExternalStorageOperation.OnGoing)
 
@@ -112,6 +113,7 @@ class TestPyQgsExternalStorageBase():
         loop.exec()
 
         self.assertEqual(len(spyErrorOccurred), 0)
+        self.assertEqual(storedContent.url(), url)
         self.assertFalse(storedContent.errorString())
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Finished)
 
@@ -190,6 +192,7 @@ class TestPyQgsExternalStorageBase():
 
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
         self.assertTrue(storedContent.errorString())
+        self.assertFalse(storedContent.url())
 
         QCoreApplication.processEvents()
 
@@ -214,8 +217,61 @@ class TestPyQgsExternalStorageBase():
 
         self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Failed)
         self.assertTrue(storedContent.errorString())
+        self.assertFalse(storedContent.url())
 
         QCoreApplication.processEvents()
 
         self.assertEqual(len(spyStored), 0)
         self.assertEqual(len(spyCanceled), 0)
+
+    def testStoreWithoutFileName(self):
+        """
+        Test file storing and fetching
+        """
+
+        f = self.getNewFile(b"New content")
+
+        # store
+        storedContent = self.storage.store(f.name, self.url + "/", self.auth_config.id())
+        self.assertTrue(storedContent)
+        self.assertEqual(storedContent.status(), QgsExternalStorageOperation.OnGoing)
+
+        spyErrorOccurred = QSignalSpy(storedContent.errorOccurred)
+        spyProgressChanged = QSignalSpy(storedContent.progressChanged)
+
+        loop = QEventLoop()
+        storedContent.stored.connect(loop.quit)
+        storedContent.errorOccurred.connect(loop.quit)
+        loop.exec()
+
+        self.assertEqual(len(spyErrorOccurred), 0)
+        self.assertFalse(storedContent.errorString())
+        self.assertEqual(storedContent.url(), self.url + "/" + os.path.basename(f.name))
+        self.assertEqual(storedContent.status(), QgsExternalStorageFetchedContent.Finished)
+        self.assertTrue(len(spyProgressChanged) > 0)
+        self.assertEqual(spyProgressChanged[-1][0], 100)
+
+        # fetch
+        fetchedContent = self.storage.fetch(self.url + "/" + os.path.basename(f.name), self.auth_config.id())
+        self.assertTrue(fetchedContent)
+
+        # Some external storage (SimpleCopy) doesn't actually need to retrieve the resource
+        self.assertTrue(fetchedContent.status() == QgsExternalStorageFetchedContent.Finished or
+                        fetchedContent.status() == QgsExternalStorageFetchedContent.OnGoing)
+
+        if (fetchedContent.status() == QgsExternalStorageFetchedContent.OnGoing):
+
+            spyErrorOccurred = QSignalSpy(fetchedContent.errorOccurred)
+
+            loop = QEventLoop()
+            fetchedContent.fetched.connect(loop.quit)
+            fetchedContent.errorOccurred.connect(loop.quit)
+            loop.exec()
+
+            self.assertEqual(len(spyErrorOccurred), 0)
+
+        self.assertEqual(fetchedContent.status(), QgsExternalStorageFetchedContent.Finished)
+        self.assertFalse(fetchedContent.errorString())
+        self.assertTrue(fetchedContent.filePath())
+        self.checkContent(fetchedContent.filePath(), b"New content")
+        self.assertEqual(os.path.splitext(fetchedContent.filePath())[1], '.txt')

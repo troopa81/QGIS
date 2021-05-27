@@ -47,7 +47,7 @@ class CORE_EXPORT QgsExternalStorage
     virtual QString type() const = 0;
 
     /**
-     * Store file \a filePath to the \a uri for this project external storage.
+     * Store file \a filePath to the \a url for this project external storage.
      * Storing process is run in background.
      * Returns a QgsExternalStorageStoredContent to follow the status of the stored resource.
      *
@@ -60,10 +60,10 @@ class CORE_EXPORT QgsExternalStorage
      *
      * Caller takes ownership of the returned symbol.
      */
-    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const = 0 SIP_FACTORY;
+    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QString &url, const QString &authcfg = QString() ) const = 0 SIP_FACTORY;
 
     /**
-     * Fetch file from \a uri for this project external storage.
+     * Fetch file from \a url for this project external storage.
      * Fetching process is run in background.
      * Returns a QgsExternalStorageFetchedContent to follow the status of the fetched resource.
      *
@@ -74,7 +74,7 @@ class CORE_EXPORT QgsExternalStorage
      *
      * It's possible to give \a authcfg authentification configuration id in case its needed.
      */
-    virtual QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authcfg = QString() ) const = 0 SIP_FACTORY;
+    virtual QgsExternalStorageFetchedContent *fetch( const QString &url, const QString &authcfg = QString() ) const = 0 SIP_FACTORY;
 };
 
 /**
@@ -180,6 +180,13 @@ class CORE_EXPORT QgsExternalStorageFetchedContent : public QgsExternalStorageOp
 class CORE_EXPORT QgsExternalStorageStoredContent : public QgsExternalStorageOperation
 {
     Q_OBJECT
+
+  public:
+
+    /**
+     * Return stored resource URL
+     */
+    virtual QString url() const = 0;
 
   signals:
 

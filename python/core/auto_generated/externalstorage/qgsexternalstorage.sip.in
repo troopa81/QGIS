@@ -31,9 +31,9 @@ and registered in :py:class:`QgsExternalStorageRegistry`.
 Unique identifier of the external storage type.
 %End
 
-    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QString &uri, const QString &authcfg = QString() ) const = 0 /Factory/;
+    virtual QgsExternalStorageStoredContent *store( const QString &filePath, const QString &url, const QString &authcfg = QString() ) const = 0 /Factory/;
 %Docstring
-Store file ``filePath`` to the ``uri`` for this project external storage.
+Store file ``filePath`` to the ``url`` for this project external storage.
 Storing process is run in background.
 Returns a :py:class:`QgsExternalStorageStoredContent` to follow the status of the stored resource.
 
@@ -47,9 +47,9 @@ It's possible to give ``authcfg`` authentification configuration id in case its 
 Caller takes ownership of the returned symbol.
 %End
 
-    virtual QgsExternalStorageFetchedContent *fetch( const QString &uri, const QString &authcfg = QString() ) const = 0 /Factory/;
+    virtual QgsExternalStorageFetchedContent *fetch( const QString &url, const QString &authcfg = QString() ) const = 0 /Factory/;
 %Docstring
-Fetch file from ``uri`` for this project external storage.
+Fetch file from ``url`` for this project external storage.
 Fetching process is run in background.
 Returns a :py:class:`QgsExternalStorageFetchedContent` to follow the status of the fetched resource.
 
@@ -165,6 +165,13 @@ Class for :py:class:`QgsExternalStorage` stored content
 %TypeHeaderCode
 #include "qgsexternalstorage.h"
 %End
+  public:
+
+    virtual QString url() const = 0;
+%Docstring
+Return stored resource URL
+%End
+
   signals:
 
     void stored();
