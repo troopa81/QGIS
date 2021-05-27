@@ -20,11 +20,16 @@
 
 #include <QFile>
 #include <QPointer>
+#include <QFileInfo>
 
 
-QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &uri, const QString &authcfg )
+QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &url, const QString &authcfg )
 {
-  mUploadTask = new QgsNetworkContentFetcherTask( QUrl( uri ), authcfg );
+  QString storageUrl = url;
+  if ( storageUrl.endsWith( "/" ) )
+    storageUrl.append( QFileInfo( filePath ).fileName() );
+
+  mUploadTask = new QgsNetworkContentFetcherTask( QUrl( storageUrl ), authcfg );
   mUploadTask->setMode( "PUT" );
 
   QFile *f = new QFile( filePath );
@@ -43,6 +48,7 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
 
   connect( mUploadTask, &QgsTask::taskCompleted, this, [ = ]
   {
+    mUrl = storageUrl;
     mStatus = Finished;
     emit stored();
   } );
@@ -68,6 +74,12 @@ void QgsWebDAVExternalStorageStoredContent::cancel()
 
   mUploadTask->cancel();
 }
+
+QString QgsWebDAVExternalStorageStoredContent::url() const
+{
+  return mUrl;
+}
+
 
 QgsWebDAVExternalStorageFetchedContent::QgsWebDAVExternalStorageFetchedContent( QgsFetchedContent *fetchedContent )
   : mFetchedContent( fetchedContent )
@@ -109,14 +121,14 @@ QString QgsWebDAVExternalStorage::type() const
   return QStringLiteral( "WebDAV" );
 };
 
-QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::store( const QString &filePath, const QString &uri, const QString &authcfg ) const
+QgsExternalStorageStoredContent *QgsWebDAVExternalStorage::store( const QString &filePath, const QString &url, const QString &authcfg ) const
 {
-  return new QgsWebDAVExternalStorageStoredContent( filePath, uri, authcfg );
+  return new QgsWebDAVExternalStorageStoredContent( filePath, url, authcfg );
 };
 
-QgsExternalStorageFetchedContent *QgsWebDAVExternalStorage::fetch( const QString &uri, const QString &authConfig ) const
+QgsExternalStorageFetchedContent *QgsWebDAVExternalStorage::fetch( const QString &url, const QString &authConfig ) const
 {
-  QgsFetchedContent *fetchedContent = QgsApplication::instance()->networkContentFetcherRegistry()->fetch( uri, QgsNetworkContentFetcherRegistry::DownloadLater, authConfig );
+  QgsFetchedContent *fetchedContent = QgsApplication::instance()->networkContentFetcherRegistry()->fetch( url, QgsNetworkContentFetcherRegistry::DownloadLater, authConfig );
 
   return new QgsWebDAVExternalStorageFetchedContent( fetchedContent );
 }
