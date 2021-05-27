@@ -247,10 +247,12 @@ void TestQgsExternalResourceWidgetWrapper::testUrlStorageExpression()
 
   QVariantMap config;
   config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
-  config.insert( QStringLiteral( "StorageUrlExpression" ),
-                 "@myurl || @layer_name || '/' || \"type\" || '/' "
-                 "|| attribute( @current_feature, 'type' ) "
-                 "|| '/' || $id || '/test'" );
+  QgsPropertyCollection propertyCollection;
+  propertyCollection.setProperty( QgsWidgetWrapper::StorageUrl, QgsProperty::fromExpression(
+                                    "@myurl || @layer_name || '/' || \"type\" || '/' "
+                                    "|| attribute( @current_feature, 'type' ) "
+                                    "|| '/' || $id || '/test'", true ) );
+  config.insert( QStringLiteral( "PropertyCollection" ), propertyCollection.toVariant( QgsWidgetWrapper::propertyDefinitions() ) );
   ww.setConfig( config );
 
   QgsFeature feat = vl->getFeature( 1 );
@@ -581,8 +583,12 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocument()
   QVariantMap config;
   config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
   config.insert( QStringLiteral( "DocumentViewer" ), documentType );
-  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/' "
-                 " || file_name(@user_file_name)" );
+
+  QgsPropertyCollection propertyCollection;
+  propertyCollection.setProperty( QgsWidgetWrapper::StorageUrl, QgsProperty::fromExpression(
+                                    "'http://mytest.com/' || $id || '/' "
+                                    " || file_name(@selected_file_name)", true ) );
+  config.insert( QStringLiteral( "PropertyCollection" ), propertyCollection.toVariant( QgsWidgetWrapper::propertyDefinitions() ) );
   ww.setConfig( config );
 
   QgsFeature feat = vl->getFeature( 1 );
@@ -682,8 +688,11 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocumentError()
   QVariantMap config;
   config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
   config.insert( QStringLiteral( "DocumentViewer" ), documentType );
-  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/' "
-                 " || file_name(@user_file_name)" );
+  QgsPropertyCollection propertyCollection;
+  propertyCollection.setProperty( QgsWidgetWrapper::StorageUrl, QgsProperty::fromExpression(
+                                    "'http://mytest.com/' || $id || '/' "
+                                    " || file_name(@selected_file_name)", true ) );
+  config.insert( QStringLiteral( "PropertyCollection" ), propertyCollection.toVariant( QgsWidgetWrapper::propertyDefinitions() ) );
   ww.setConfig( config );
 
   QgsFeature feat = vl->getFeature( 1 );
@@ -790,8 +799,11 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocumentCancel()
   QVariantMap config;
   config.insert( QStringLiteral( "StorageType" ), QStringLiteral( "test" ) );
   config.insert( QStringLiteral( "DocumentViewer" ), documentType );
-  config.insert( QStringLiteral( "StorageUrlExpression" ), "'http://mytest.com/' || $id || '/' "
-                 " || file_name(@user_file_name)" );
+  QgsPropertyCollection propertyCollection;
+  propertyCollection.setProperty( QgsWidgetWrapper::StorageUrl, QgsProperty::fromExpression(
+                                    "'http://mytest.com/' || $id || '/' "
+                                    " || file_name(@selected_file_name)", true ) );
+  config.insert( QStringLiteral( "PropertyCollection" ), propertyCollection.toVariant( QgsWidgetWrapper::propertyDefinitions() ) );
   ww.setConfig( config );
 
   QgsFeature feat = vl->getFeature( 1 );
@@ -875,7 +887,6 @@ void TestQgsExternalResourceWidgetWrapper::testStoreExternalDocumentCancel()
   delete widget;
   delete messageBar;
 }
-
 
 QGSTEST_MAIN( TestQgsExternalResourceWidgetWrapper )
 #include "testqgsexternalresourcewidgetwrapper.moc"
