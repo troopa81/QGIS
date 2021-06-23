@@ -126,6 +126,8 @@ set(QGIS_CORE_SRCS
   effects/qgsshadoweffect.cpp
   effects/qgstransformeffect.cpp
 
+  externalstorage/qgsexternalstorage.cpp
+  externalstorage/qgsexternalstorageregistry.cpp
   layertree/qgscolorramplegendnode.cpp
   layertree/qgscolorramplegendnodesettings.cpp
   layertree/qgslayertreegroup.cpp
@@ -1201,6 +1203,9 @@ set(QGIS_CORE_HDRS
   editform/qgsattributeeditorhtmlelement.h
   editform/qgsattributeeditorqmlelement.h
 
+  externalstorage/qgsexternalstorage.h
+  externalstorage/qgsexternalstorageregistry.h
+
   effects/qgsblureffect.h
   effects/qgscoloreffect.h
   effects/qgseffectstack.h
@@ -1916,6 +1921,7 @@ target_include_directories(qgis_core PUBLIC
   editform
   effects
   expression
+  externalstorage
   fieldformatter
   geometry
   geocms
