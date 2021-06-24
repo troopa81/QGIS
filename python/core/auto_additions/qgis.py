@@ -475,3 +475,11 @@ QgsSymbolLayerUtils.NoMarker.__doc__ = "No marker"
 Qgis.VertexMarkerType.__doc__ = 'Editing vertex markers, used for showing vertices during a edit operation.\n\n.. versionadded:: 3.22\n\n' + '* ``SemiTransparentCircle``: ' + Qgis.VertexMarkerType.SemiTransparentCircle.__doc__ + '\n' + '* ``Cross``: ' + Qgis.VertexMarkerType.Cross.__doc__ + '\n' + '* ``NoMarker``: ' + Qgis.VertexMarkerType.NoMarker.__doc__
 # --
 Qgis.VertexMarkerType.baseClass = Qgis
+Qgis.ContentStatus.NotStarted.__doc__ = "Content fetching/storing has not started yet"
+Qgis.ContentStatus.OnGoing.__doc__ = "Content fetching/storing is in progress"
+Qgis.ContentStatus.Finished.__doc__ = "Content fetching/storing is finished and successful"
+Qgis.ContentStatus.Failed.__doc__ = "Content fetching/storing has failed"
+Qgis.ContentStatus.Canceled.__doc__ = "Content fetching/storing has been canceled"
+Qgis.ContentStatus.__doc__ = 'Status for fetched or stored content\n\n.. versionadded:: 3.22\n\n' + '* ``NotStarted``: ' + Qgis.ContentStatus.NotStarted.__doc__ + '\n' + '* ``OnGoing``: ' + Qgis.ContentStatus.OnGoing.__doc__ + '\n' + '* ``Finished``: ' + Qgis.ContentStatus.Finished.__doc__ + '\n' + '* ``Failed``: ' + Qgis.ContentStatus.Failed.__doc__ + '\n' + '* ``Canceled``: ' + Qgis.ContentStatus.Canceled.__doc__
+# --
+Qgis.ContentStatus.baseClass = Qgis
