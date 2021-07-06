@@ -568,13 +568,13 @@ void QgsFileWidget::storeExternalFiles( QStringList fileNames, QStringList store
     updateLayout();
     storedContent->deleteLater();
 
-    if ( storedContent->status() == QgsExternalStorageOperation::Failed && messageBar() )
+    if ( storedContent->status() == Qgis::ContentStatus::Failed && messageBar() )
     {
       messageBar()->pushWarning( tr( "Storing External resource" ),
                                  tr( "Storing file '%1' to url '%2' has failed : %3" ).arg( filePath, url.toString(), storedContent->errorString() ) );
     }
 
-    if ( storedContent->status() != QgsExternalStorageOperation::Finished )
+    if ( storedContent->status() != Qgis::ContentStatus::Finished )
       return;
 
     QStringList newStoredUrls = storedUrls;

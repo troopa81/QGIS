@@ -74,20 +74,20 @@ class QgsTestExternalStorageStoredContent : public QgsExternalStorageStoredConte
 
     void cancel() override
     {
-      mStatus = Canceled;
+      mStatus = Qgis::ContentStatus::Canceled;
       emit canceled();
     };
 
     void error()
     {
-      mStatus = Failed;
+      mStatus = Qgis::ContentStatus::Failed;
       mErrorString = QStringLiteral( "error" );
       emit errorOccurred( mErrorString );
     }
 
     void finish()
     {
-      mStatus = Finished;
+      mStatus = Qgis::ContentStatus::Finished;
       emit stored();
     }
 

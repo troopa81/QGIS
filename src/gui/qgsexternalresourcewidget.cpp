@@ -315,7 +315,7 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
 
       auto onFetchFinished = [ = ]
       {
-        if ( content->status() == QgsExternalStorageFetchedContent::Failed )
+        if ( content->status() == Qgis::ContentStatus::Failed )
         {
           mWebView->setVisible( false );
           mPixmapLabel->setVisible( false );
@@ -329,7 +329,7 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
                                        tr( "Error while fetching external resource '%1' : %2" ).arg( path, content->errorString() ) );
           }
         }
-        else if ( content->status() == QgsExternalStorageFetchedContent::Finished )
+        else if ( content->status() == Qgis::ContentStatus::Finished )
         {
           const QString filePath = mDocumentViewerContent == Web
                                    ? QString( "file://%1" ).arg( content->filePath() )
@@ -342,7 +342,7 @@ void QgsExternalResourceWidget::loadDocument( const QString &path )
       };
 
 
-      if ( content->status() == QgsExternalStorageFetchedContent::OnGoing )
+      if ( content->status() == Qgis::ContentStatus::OnGoing )
       {
         mWebView->setVisible( false );
         mPixmapLabel->setVisible( false );

@@ -77,9 +77,9 @@ class QgsTestExternalStorageFetchedContent
     QgsTestExternalStorageFetchedContent( bool cached ): QgsExternalStorageFetchedContent()
     {
       if ( cached )
-        mStatus = Finished;
+        mStatus = Qgis::ContentStatus::Finished;
       else
-        mStatus = OnGoing;
+        mStatus = Qgis::ContentStatus::OnGoing;
     }
 
     virtual QString filePath() const override
@@ -89,13 +89,13 @@ class QgsTestExternalStorageFetchedContent
 
     void emitFetched()
     {
-      mStatus = Finished;
+      mStatus = Qgis::ContentStatus::Finished;
       emit fetched();
     }
 
     void emitErrorOccurred()
     {
-      mStatus = Failed;
+      mStatus = Qgis::ContentStatus::Failed;
       mErrorString = QStringLiteral( "an error" );
       emit errorOccurred( mErrorString );
     }
@@ -118,20 +118,20 @@ class QgsTestExternalStorageStoredContent
 
     void emitStored()
     {
-      mStatus = Finished;
+      mStatus = Qgis::ContentStatus::Finished;
       emit stored();
     }
 
     void emitErrorOccurred()
     {
-      mStatus = Failed;
+      mStatus = Qgis::ContentStatus::Failed;
       mErrorString = "an error";
       emit errorOccurred( mErrorString );
     }
 
     void cancel() override
     {
-      mStatus = Canceled;
+      mStatus = Qgis::ContentStatus::Canceled;
       emit canceled();
     };
 
