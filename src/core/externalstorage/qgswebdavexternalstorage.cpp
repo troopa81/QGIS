@@ -49,7 +49,7 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
   connect( mUploadTask, &QgsTask::taskCompleted, this, [ = ]
   {
     mUrl = storageUrl;
-    mStatus = Finished;
+    mStatus = Qgis::ContentStatus::Finished;
     emit stored();
   } );
 
@@ -58,7 +58,7 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
     emit progressChanged( progress );
   } );
 
-  mStatus = OnGoing;
+  mStatus = Qgis::ContentStatus::OnGoing;
 }
 
 void QgsWebDAVExternalStorageStoredContent::cancel()
@@ -68,7 +68,7 @@ void QgsWebDAVExternalStorageStoredContent::cancel()
 
   connect( mUploadTask, &QgsTask::taskTerminated, this, [ = ]
   {
-    mStatus = Canceled;
+    mStatus = Qgis::ContentStatus::Canceled;
     emit canceled();
   } );
 
@@ -85,12 +85,12 @@ QgsWebDAVExternalStorageFetchedContent::QgsWebDAVExternalStorageFetchedContent( 
   : mFetchedContent( fetchedContent )
 {
   connect( mFetchedContent, &QgsFetchedContent::fetched, this, &QgsWebDAVExternalStorageFetchedContent::onFetched );
-  mStatus = OnGoing;
+  mStatus = Qgis::ContentStatus::OnGoing;
   mFetchedContent->download();
 
   // could be already fetched/cached
   if ( mFetchedContent->status() == QgsFetchedContent::Finished )
-    mStatus = Finished;
+    mStatus = Qgis::ContentStatus::Finished;
 }
 
 QString QgsWebDAVExternalStorageFetchedContent::filePath() const
@@ -102,7 +102,7 @@ void QgsWebDAVExternalStorageFetchedContent::onFetched()
 {
   if ( mFetchedContent->status() == QgsFetchedContent::Finished )
   {
-    mStatus = Finished;
+    mStatus = Qgis::ContentStatus::Finished;
     emit fetched();
   }
   else
