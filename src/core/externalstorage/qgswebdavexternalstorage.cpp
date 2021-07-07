@@ -16,12 +16,58 @@
 #include "qgswebdavexternalstorage_p.h"
 
 #include "qgsnetworkcontentfetcherregistry.h"
+#include "qgsblockingnetworkrequest.h"
+#include "qgsnetworkaccessmanager.h"
 #include "qgsapplication.h"
 
 #include <QFile>
 #include <QPointer>
 #include <QFileInfo>
 
+QgsWebDAVExternalStorageStoreTask::QgsWebDAVExternalStorageStoreTask( const QUrl &url, const QString &filePath, const QString &authCfg )
+  : QgsTask( tr( "Storing %1" ).arg( QFileInfo( filePath ).baseName() ) )
+  , mUrl( url )
+  , mFilePath( filePath )
+  , mAuthCfg( authCfg )
+  , mFeedback( new QgsFeedback( this ) )
+{
+}
+
+bool QgsWebDAVExternalStorageStoreTask::run()
+{
+  QgsBlockingNetworkRequest request;
+  request.setAuthCfg( mAuthCfg );
+
+  QNetworkRequest req( mUrl );
+  QgsSetRequestInitiatorClass( req, QStringLiteral( "QgsWebDAVExternalStorageStoreTask" ) );
+
+  QFile *f = new QFile( mFilePath );
+  f->open( QIODevice::ReadOnly );
+
+  connect( &request, &QgsBlockingNetworkRequest::downloadProgress, this, [ = ]( qint64 bytesReceived, qint64 bytesTotal )
+  {
+    if ( !isCanceled() && bytesTotal > 0 )
+    {
+      const int progress = ( bytesReceived * 100 ) / bytesTotal;
+      setProgress( progress );
+    }
+  } );
+
+  QgsBlockingNetworkRequest::ErrorCode err = request.put( req, f, mFeedback );
+
+  if ( err != QgsBlockingNetworkRequest::NoError )
+  {
+    emit errorOccurred( request.errorMessage() );
+  }
+
+  return err == QgsBlockingNetworkRequest::NoError;
+}
+
+void QgsWebDAVExternalStorageStoreTask::cancel()
+{
+  mFeedback->cancel();
+  QgsTask::cancel();
+}
 
 QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( const QString &filePath, const QString &url, const QString &authcfg )
 {
@@ -29,20 +75,13 @@ QgsWebDAVExternalStorageStoredContent::QgsWebDAVExternalStorageStoredContent( co
   if ( storageUrl.endsWith( "/" ) )
     storageUrl.append( QFileInfo( filePath ).fileName() );
 
-  mUploadTask = new QgsNetworkContentFetcherTask( QUrl( storageUrl ), authcfg );
-  mUploadTask->setMode( "PUT" );
 
-  QFile *f = new QFile( filePath );
-  f->open( QIODevice::ReadOnly );
-  mUploadTask->setContent( f );
+  mUploadTask = new QgsWebDAVExternalStorageStoreTask( storageUrl, filePath, authcfg );
 
   QgsApplication::instance()->taskManager()->addTask( mUploadTask );
 
-  connect( mUploadTask, &QgsNetworkContentFetcherTask::errorOccurred, [ = ]( QNetworkReply::NetworkError code, const QString & errorMsg )
+  connect( mUploadTask, &QgsWebDAVExternalStorageStoreTask::errorOccurred, [ = ]( const QString & errorMsg )
   {
-    Q_UNUSED( code );
-
-    // TODO do we map some error code to some enum error code or not?
     reportError( errorMsg );
   } );
 

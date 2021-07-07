@@ -18,12 +18,13 @@
 
 #include "qgis_core.h"
 #include "qgis_sip.h"
+#include "qgstaskmanager.h"
 
 #include "externalstorage/qgsexternalstorage.h"
 
 #include <QPointer>
 
-class QgsNetworkContentFetcherTask;
+class QgsWebDAVExternalStorageStoreTask;
 class QgsFetchedContent;
 
 ///@cond PRIVATE
@@ -66,7 +67,7 @@ class QgsWebDAVExternalStorageStoredContent  : public QgsExternalStorageStoredCo
 
   private:
 
-    QPointer<QgsNetworkContentFetcherTask> mUploadTask;
+    QPointer<QgsWebDAVExternalStorageStoreTask> mUploadTask;
     QString mUrl;
 };
 
@@ -96,6 +97,38 @@ class QgsWebDAVExternalStorageFetchedContent : public QgsExternalStorageFetchedC
 
     QgsFetchedContent *mFetchedContent = nullptr;
 };
+
+
+/**
+ * \ingroup core
+ * \brief Task to store a file to a given WebDAV url
+ *
+ * \since QGIS 3.22
+ */
+class QgsWebDAVExternalStorageStoreTask : public QgsTask
+{
+    Q_OBJECT
+
+  public:
+
+    QgsWebDAVExternalStorageStoreTask( const QUrl &url, const QString &filePath, const QString &authCfg );
+
+    bool run() override;
+
+    void cancel() override;
+
+  signals:
+
+    void errorOccurred( const QString &errorMsg );
+
+  private:
+
+    const QUrl mUrl;
+    const QString mFilePath;
+    const QString mAuthCfg;
+    QgsFeedback *mFeedback = nullptr;
+};
+
 
 
 #endif // QGSWEBDAVEXTERNALSTORAGE_H
