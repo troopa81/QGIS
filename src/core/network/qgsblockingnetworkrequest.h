@@ -103,6 +103,14 @@ class CORE_EXPORT QgsBlockingNetworkRequest : public QObject
      * can be retrieved by calling errorMessage().
      *
      * \see get()
+     * \since 3.22
+     */
+    ErrorCode post( QNetworkRequest &request, QIODevice *data, bool forceRefresh = false, QgsFeedback *feedback = nullptr );
+
+    /**
+     * This is an overloaded function.
+     *
+     * Performs a "post" operation on the specified \a request, using the given \a data.
      */
     ErrorCode post( QNetworkRequest &request, const QByteArray &data, bool forceRefresh = false, QgsFeedback *feedback = nullptr );
 
@@ -143,6 +151,14 @@ class CORE_EXPORT QgsBlockingNetworkRequest : public QObject
      * If an error was encountered then a specific ErrorCode will be returned, and a detailed error message
      * can be retrieved by calling errorMessage().
      *
+     * \since 3.22
+     */
+    ErrorCode put( QNetworkRequest &request, QIODevice *data, QgsFeedback *feedback = nullptr );
+
+    /**
+     * This is an overloaded function.
+     *
+     * Performs a "put" operation on the specified \a request, using the given \a data.
      * \since 3.18
      */
     ErrorCode put( QNetworkRequest &request, const QByteArray &data, QgsFeedback *feedback = nullptr );
@@ -227,7 +243,9 @@ class CORE_EXPORT QgsBlockingNetworkRequest : public QObject
     QNetworkReply *mReply = nullptr;
 
     Method mMethod = Get;
-    QByteArray mPayloadData;
+
+    //! payload data used in PUT/POST request
+    QIODevice *mPayloadData;
 
     //! Authentication configuration ID
     QString mAuthCfg;

@@ -27,6 +27,7 @@
 #include <QWaitCondition>
 #include <QNetworkCacheMetaData>
 #include <QAuthenticator>
+#include <QBuffer>
 
 QgsBlockingNetworkRequest::QgsBlockingNetworkRequest()
 {
@@ -61,6 +62,14 @@ QgsBlockingNetworkRequest::ErrorCode QgsBlockingNetworkRequest::get( QNetworkReq
 
 QgsBlockingNetworkRequest::ErrorCode QgsBlockingNetworkRequest::post( QNetworkRequest &request, const QByteArray &data, bool forceRefresh, QgsFeedback *feedback )
 {
+  QByteArray ldata( data );
+  QBuffer buffer( &ldata );
+  buffer.open( QIODevice::ReadOnly );
+  return post( request, &buffer, forceRefresh, feedback );
+}
+
+QgsBlockingNetworkRequest::ErrorCode QgsBlockingNetworkRequest::post( QNetworkRequest &request, QIODevice *data, bool forceRefresh, QgsFeedback *feedback )
+{
   mPayloadData = data;
   return doRequest( Post, request, forceRefresh, feedback );
 }
@@ -71,6 +80,14 @@ QgsBlockingNetworkRequest::ErrorCode QgsBlockingNetworkRequest::head( QNetworkRe
 }
 
 QgsBlockingNetworkRequest::ErrorCode QgsBlockingNetworkRequest::put( QNetworkRequest &request, const QByteArray &data, QgsFeedback *feedback )
+{
+  QByteArray ldata( data );
+  QBuffer buffer( &ldata );
+  buffer.open( QIODevice::ReadOnly );
+  return put( request, &buffer, feedback );
+}
+
+QgsBlockingNetworkRequest::ErrorCode QgsBlockingNetworkRequest::put( QNetworkRequest &request, QIODevice *data, QgsFeedback *feedback )
 {
   mPayloadData = data;
   return doRequest( Put, request, true, feedback );
