@@ -32,6 +32,12 @@
 #include <QSettings>
 #include <QUrl>
 
+#include <cstring>
+
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QTextCodec>
+#endif
+
 #include "ogr_api.h"
 
 #include <limits>
@@ -268,10 +274,6 @@ QgsCoordinateReferenceSystem QgsGml::crs() const
   return crs;
 }
 
-
-
-
-
 QgsGmlStreamingParser::QgsGmlStreamingParser( const QString &typeName,
     const QString &geometryAttribute,
     const QgsFields &fields,
@@ -444,11 +446,53 @@ bool QgsGmlStreamingParser::processData( const QByteArray &data, bool atEnd )
   return true;
 }
 
-bool QgsGmlStreamingParser::processData( const QByteArray &data, bool atEnd, QString &errorMsg )
+bool QgsGmlStreamingParser::processData( const QByteArray &pdata, bool atEnd, QString &errorMsg )
 {
+  QTextCodec *codec1 = QTextCodec::codecForName( "windows-1252" );
+
+  QString strData = codec1->toUnicode( pdata );
+  strData.replace( "ISO-8859-15", "UTF-8" );
+
+  QByteArray data = strData.toUtf8();
+
+  qDebug() << "coucou" << QString( "ca fera 10€!" );
+//  qDebug() << "coucouFromCodec" << codec1->toUnicode( codec1->fromUnicode( QString( "ca fera 10€!") ) );
+  qDebug() << "coucouFromUnicode" << codec1->fromUnicode( QString( "ca fera 10€!" ) );
+
+  qDebug() << "coucouData" << QString( "ca fera 10€!" ).toUtf8();
+
+  // TODO il faudrait lire avec une regexp l'encoding pour aller le chercher dans Qt,
+  // le remplacer dans la chaine de caractère, ne le faire que s'il y a une erreur d'encodage,
+  // et faire un reset eventuel si ça casse le parser
+
+
+  // if ( pdata.contains("passagers dans le VL") )
+  // {
+  //   qDebug() << "strData=" << strData;
+  //   qDebug() << "pdata=" << pdata;
+  //   qDebug() << "data=" << data;
+  // }
+
+//   QByteArray newData( data );
+
+//   QDomDocument dom;
+//   dom.setContent( newData ); // gets XML encoding
+//   newData.clear();
+
+//   QTextStream stream( &newData );
+// #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+//   stream.setCodec( QTextCodec::codecForName( "UTF-8" ) );
+// #endif
+//   dom.save( stream, 4, QDomNode::EncodingFromTextStream );
+
   if ( XML_Parse( mParser, data.data(), data.size(), atEnd ) == 0 )
   {
     XML_Error errorCode = XML_GetErrorCode( mParser );
+
+    // if ( errCode == XML_ERROR_UNKNOWN_ENCODING )
+    // {
+    // }
+
     errorMsg = QObject::tr( "Error: %1 on line %2, column %3" )
                .arg( XML_ErrorString( errorCode ) )
                .arg( XML_GetCurrentLineNumber( mParser ) )
