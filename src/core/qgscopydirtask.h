@@ -1,7 +1,7 @@
 /***************************************************************************
-  qgscopyfiletask.h
+  qgscopydirtask.h
   --------------------------------------
-  Date                 : March 2021
+  Date                 : August 2021
   Copyright            : (C) 2021 by Julien Cabieces
   Email                : julien dot cabieces at oslandia dot com
  ***************************************************************************
@@ -13,27 +13,31 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef QGSCOPYFILETASK_H
-#define QGSCOPYFILETASK_H
+#ifndef QGSCOPYDIRTASK_H
+#define QGSCOPYDIRTASK_H
 
 #include "qgstaskmanager.h"
 
+class QgsCopyFileTask;
+
 /**
  * \ingroup core
- * \brief Task to copy a file on disk
+ * \brief Task to copy a dir on disk
  *
  * \since QGIS 3.22
  */
-class CORE_EXPORT QgsCopyFileTask : public QgsTask
+class CORE_EXPORT QgsCopyDirTask : public QgsTask
 {
     Q_OBJECT
 
   public:
 
     /**
-     * Creates a task that copy \a source file to \a destination
+     * Creates a task that copy \a source directory file to \a destination
+     * The whole directory is copied into the destination directory, not only the files
+     * contained inside the directory
      */
-    QgsCopyFileTask( const QString &source, const QString &destination );
+    QgsCopyDirTask( const QString &source, const QString &destination );
 
     bool run() override;
 
@@ -42,17 +46,15 @@ class CORE_EXPORT QgsCopyFileTask : public QgsTask
      */
     QString errorString() const;
 
-    /**
-     * It could be different from the original one. If original destination was a directory
-     * the returned destination is now the absolute file path of the copied file
-     */
-    QString destination() const;
+    void cancel() override;
 
   private:
 
     QString mSource;
     QString mDestination;
     QString mErrorString;
+    std::unique_ptr<QgsCopyFileTask> mCopyFileTask;
+    QMutex mCopyFileTaskMutex;
 };
 
-#endif // QGSCOPYFILETASK_H
+#endif // QGSSIMPLECOPYEXTERNALSTORAGE_H

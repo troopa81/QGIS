@@ -63,6 +63,9 @@ bool QgsCopyFileTask::run()
   std::vector<char> data( chunkSize );
   while ( true )
   {
+    if ( isCanceled() )
+      return false;
+
     const int len = fileSource.read( data.data(), chunkSize );
     if ( len == -1 )
     {
@@ -92,12 +95,12 @@ bool QgsCopyFileTask::run()
   return true;
 }
 
-const QString &QgsCopyFileTask::errorString() const
+QString QgsCopyFileTask::errorString() const
 {
   return mErrorString;
 }
 
-const QString &QgsCopyFileTask::destination() const
+QString QgsCopyFileTask::destination() const
 {
   return mDestination;
 }

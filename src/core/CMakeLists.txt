@@ -327,6 +327,7 @@ set(QGIS_CORE_SRCS
   qgscoordinateformatter.cpp
   qgscoordinateutils.cpp
   qgscopyfiletask.cpp
+  qgscopydirtask.cpp
   qgscplhttpfetchoverrider.cpp
   qgscredentials.cpp
   qgsdartmeasurement.cpp
@@ -946,6 +947,7 @@ set(QGIS_CORE_HDRS
   qgscoordinateformatter.h
   qgscoordinateutils.h
   qgscopyfiletask.h
+  qgscopydirtask.h
   qgscredentials.h
   qgsdartmeasurement.h
   qgsdatabaseschemamodel.h

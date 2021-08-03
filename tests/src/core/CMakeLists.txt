@@ -41,6 +41,7 @@ set(TESTS
  testqgscoordinatereferencesystemregistry.cpp
  testqgscoordinatetransform.cpp
  testqgscopyfiletask.cpp
+ testqgscopydirtask.cpp
  testqgscredentials.cpp
  testqgscurve.cpp
  testqgsdatadefinedsizelegend.cpp
