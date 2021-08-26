@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - feat_dms_connexion_new
     paths:
     - 'src/**'
     - 'external/**'
@@ -46,29 +47,6 @@ jobs:
             with-quick: ON
             patch-qt-3d: true
             LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
-
-          - distro-version: '21.04'
-            qt-version: 5
-            run-tests: false
-            docker-tag-suffix: _21.04
-            with-qt6: OFF
-            with-qt5: ON
-            with-3d: OFF
-            with-quick: ON
-            patch-qt-3d: false
-            LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
-
-          - distro-version: '34'
-            qt-version: 6
-            run-tests: true
-            docker-tag-suffix: ''
-            with-qt6: ON
-            with-qt5: OFF
-            with-3d: OFF
-            with-quick: OFF
-            patch-qt-3d: false
-            LD_PRELOAD: ''
-
 
       fail-fast: false
 
@@ -291,19 +269,8 @@ jobs:
       matrix:
         distro-version: [20.04]
         qt-version: [5]
-        test-batch: [ALL_BUT_PROVIDERS, POSTGRES, HANA]
+        test-batch: [ALL_BUT_PROVIDERS]
         docker-target: [binary-only]
-
-        include:
-          - distro-version: 20.04
-            qt-version: 5
-            test-batch: ORACLE
-            docker-target: binary-for-oracle
-
-          - distro-version: '34'
-            qt-version: 6
-            test-batch: ALL_BUT_PROVIDERS
-            docker-target: single
 
       fail-fast: false
 
