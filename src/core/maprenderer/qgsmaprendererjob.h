@@ -153,16 +153,17 @@ class LayerRenderJob
     //! Mask image, needed during the first pass if a mask is defined
     QImage *maskImage = nullptr;
 
-    QPainterPath maskPainterPath;
-
-    //! qpicture for first pass vector rendering
-    QPicture *imgPic;
-
     /**
      * Pointer to the first pass job, needed during the second pass
      * to access first pass painter and image.
      */
     LayerRenderJob *firstPassJob = nullptr;
+
+    // TODO doc
+    QPainterPath maskPainterPath;
+
+    //! qpicture for first pass vector rendering
+    QPicture *imgPic = nullptr;
 
     /**
      * Pointer to first pass jobs that carry a mask image, needed during the second pass.

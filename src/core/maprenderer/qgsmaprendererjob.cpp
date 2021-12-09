@@ -81,7 +81,14 @@ LayerRenderJob &LayerRenderJob::operator=( LayerRenderJob &&other )
   firstPassJob = other.firstPassJob;
   other.firstPassJob = nullptr;
 
+  maskPainterPath = other.maskPainterPath;
+
+  imgPic = other.imgPic;
+  other.imgPic = nullptr;
+
   maskJobs = other.maskJobs;
+  symbolLayerPic = other.symbolLayerPic;
+  isSymbolLayerMasked = other.isSymbolLayerMasked;
 
   return *this;
 }
@@ -97,7 +104,10 @@ LayerRenderJob::LayerRenderJob( LayerRenderJob &&other )
   , estimatedRenderingTime( other.estimatedRenderingTime )
   , errors( other.errors )
   , layerId( other.layerId )
+  , maskPainterPath( other.maskPainterPath )
   , maskJobs( other.maskJobs )
+  , symbolLayerPic( other.symbolLayerPic )
+  , isSymbolLayerMasked( other.isSymbolLayerMasked )
 {
   mContext = std::move( other.mContext );
 
@@ -112,6 +122,9 @@ LayerRenderJob::LayerRenderJob( LayerRenderJob &&other )
 
   firstPassJob = other.firstPassJob;
   other.firstPassJob = nullptr;
+
+  imgPic = other.imgPic;
+  other.imgPic = nullptr;
 }
 
 bool LayerRenderJob::imageCanBeComposed() const
@@ -704,7 +717,7 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
   // for them in the first pass job
   for ( LayerRenderJob &job : firstPassJobs )
   {
-    if ( job.img == nullptr && mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) == false )
+    if ( job.img == nullptr && !mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) )
     {
       job.context()->setPainter( allocateImageAndPainter( job.layerId, job.img ) );
     }
@@ -799,7 +812,7 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
       job2.context()->setFeedback( job2.renderer->feedback() );
     }
 
-    if ( mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) == false )
+    if ( !mapSettings().testFlag( Qgis::MapSettingsFlag::ForceVectorOutput ) )
     {
       // Modify the render context so that symbol layers get disabled as needed.
       // The map renderer stores a reference to the context, so we can modify it even after the map renderer creation (what we need here)
