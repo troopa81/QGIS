@@ -225,6 +225,20 @@ effect if the paint effect is used in a :py:class:`QgsEffectStack`.
 .. seealso:: :py:func:`drawMode`
 %End
 
+    virtual QRectF boundingRect( const QRectF &rect, const QgsRenderContext &context ) const;
+%Docstring
+Returns the bounding rect required for drawing the effect. This method can be used
+to expand the bounding rect of a source picture to account for offset or blurring
+effects.
+
+:param rect: original source bounding rect
+:param context: destination render context
+
+:return: modified bounding rect
+
+.. seealso:: :py:func:`sourceAsImage`
+%End
+
   protected:
 
 
@@ -289,20 +303,6 @@ render context.
 :param context: destination render context
 
 :return: point offset for image top left corner
-
-.. seealso:: :py:func:`sourceAsImage`
-%End
-
-    virtual QRectF boundingRect( const QRectF &rect, const QgsRenderContext &context ) const;
-%Docstring
-Returns the bounding rect required for drawing the effect. This method can be used
-to expand the bounding rect of a source picture to account for offset or blurring
-effects.
-
-:param rect: original source bounding rect
-:param context: destination render context
-
-:return: modified bounding rect
 
 .. seealso:: :py:func:`sourceAsImage`
 %End
@@ -451,7 +451,6 @@ Sets the effect to be painted
   private:
     const QgsEffectPainter &operator=( const QgsEffectPainter & );
 };
-
 
 /************************************************************************
  * This file has been generated automatically from                      *

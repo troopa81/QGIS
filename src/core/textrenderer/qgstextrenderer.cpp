@@ -544,10 +544,19 @@ void QgsTextRenderer::drawMask( QgsRenderContext &context, const QgsTextRenderer
 
   if ( !context.isGuiPreview() )
   {
-    //Save painter path for label selective masking
+    // Save painter path for label selective masking later clipping
     QPainterPathStroker stroker( pen );
     path = stroker.createStroke( path );
     path = p->combinedTransform().map( path );
+
+    // if an effect has been defined, we need to use effect bounding box as clipping path
+    if ( mask.paintEffect() && mask.paintEffect()->enabled() )
+    {
+      const QRectF boundingRect = mask.paintEffect()->boundingRect( path.boundingRect(), context );
+      path.clear();
+      path.addRect( boundingRect );
+    }
+
     context.addToMaskLabelPainterPath( context.currentMaskId(), path );
   }
   p->restore();
@@ -2121,4 +2130,3 @@ double QgsTextRenderer::calculateScaleFactorForFormat( const QgsRenderContext &c
   else
     return 1.0;
 }
-

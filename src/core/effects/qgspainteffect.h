@@ -219,6 +219,17 @@ class CORE_EXPORT QgsPaintEffect SIP_NODEFAULTCTORS
      */
     void setDrawMode( DrawMode drawMode );
 
+    /**
+     * Returns the bounding rect required for drawing the effect. This method can be used
+     * to expand the bounding rect of a source picture to account for offset or blurring
+     * effects.
+     * \param rect original source bounding rect
+     * \param context destination render context
+     * \returns modified bounding rect
+     * \see sourceAsImage
+     */
+    virtual QRectF boundingRect( const QRectF &rect, const QgsRenderContext &context ) const;
+
   protected:
 
     bool mEnabled = true;
@@ -273,17 +284,6 @@ class CORE_EXPORT QgsPaintEffect SIP_NODEFAULTCTORS
      * \see sourceAsImage
      */
     QPointF imageOffset( const QgsRenderContext &context ) const;
-
-    /**
-     * Returns the bounding rect required for drawing the effect. This method can be used
-     * to expand the bounding rect of a source picture to account for offset or blurring
-     * effects.
-     * \param rect original source bounding rect
-     * \param context destination render context
-     * \returns modified bounding rect
-     * \see sourceAsImage
-     */
-    virtual QRectF boundingRect( const QRectF &rect, const QgsRenderContext &context ) const;
 
     /**
      * Applies a workaround to a QPainter to avoid an issue with incorrect scaling
@@ -442,4 +442,3 @@ class CORE_EXPORT QgsEffectPainter
 };
 
 #endif // QGSPAINTEFFECT_H
-
