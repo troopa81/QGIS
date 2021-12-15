@@ -462,6 +462,8 @@ void QgsTextRenderer::drawMask( QgsRenderContext &context, const QgsTextRenderer
   if ( ! p )
     return;
 
+  p->save();
+
   double penSize = mask.sizeUnit() == QgsUnitTypes::RenderPercentage
                    ? context.convertToPainterUnits( format.size(), format.sizeUnit(), format.sizeMapUnitScale() ) * mask.size() / 100
                    : context.convertToPainterUnits( mask.size(), mask.sizeUnit(), mask.sizeMapUnitScale() );
