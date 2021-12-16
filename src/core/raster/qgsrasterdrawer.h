@@ -51,8 +51,10 @@ class CORE_EXPORT QgsRasterDrawer
      * \param viewPort viewport to render
      * \param qgsMapToPixel map to pixel converter
      * \param feedback optional raster feedback object for cancellation/preview. Added in QGIS 3.0.
+     * \param deviceDpi For some painter device, we need to set the actual real device dpi (e.g. QPicture where dpi is set
+     * arbitrary to 96). Added in QGIS 3.24
      */
-    void draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsMapToPixel *qgsMapToPixel, QgsRasterBlockFeedback *feedback = nullptr );
+    void draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsMapToPixel *qgsMapToPixel, QgsRasterBlockFeedback *feedback = nullptr, double deviceDpi = -1 );
 
   protected:
 
@@ -64,9 +66,11 @@ class CORE_EXPORT QgsRasterDrawer
      * \param topLeftCol Left position relative to left border of viewport
      * \param topLeftRow Top position relative to top border of viewport
      * \param mapToPixel map to device coordinate transformation info
+     * \param deviceDpi For some painter device, we need to set the actual real device dpi (e.g. QPicture where dpi is set
+     * arbitrary to 96). Added in QGIS 3.24
      * \note not available in Python bindings
      */
-    void drawImage( QPainter *p, QgsRasterViewPort *viewPort, const QImage &img, int topLeftCol, int topLeftRow, const QgsMapToPixel *mapToPixel = nullptr ) const SIP_SKIP;
+    void drawImage( QPainter *p, QgsRasterViewPort *viewPort, const QImage &img, int topLeftCol, int topLeftRow, const QgsMapToPixel *mapToPixel = nullptr, double deviceDpi = -1 ) const SIP_SKIP;
 
   private:
     QgsRasterIterator *mIterator = nullptr;

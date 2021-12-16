@@ -345,7 +345,7 @@ bool QgsRasterLayerRenderer::render()
   // Drawer to pipe?
   QgsRasterIterator iterator( mPipe->last() );
   QgsRasterDrawer drawer( &iterator, renderContext()->dpiTarget() );
-  drawer.draw( renderContext()->painter(), mRasterViewPort, &renderContext()->mapToPixel(), mFeedback );
+  drawer.draw( renderContext()->painter(), mRasterViewPort, &renderContext()->mapToPixel(), mFeedback, renderContext()->scaleFactor() * 25.4 );
 
   if ( restoreOldResamplingStage )
   {

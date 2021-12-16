@@ -29,7 +29,7 @@ The QgsRasterDrawer constructor.
 :param dpiTarget: the target ``dpi`` (dots per inch) to be taken into consideration when rendering
 %End
 
-    void draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsMapToPixel *qgsMapToPixel, QgsRasterBlockFeedback *feedback = 0 );
+    void draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsMapToPixel *qgsMapToPixel, QgsRasterBlockFeedback *feedback = 0, double deviceDpi = -1 );
 %Docstring
 Draws raster data.
 
@@ -37,6 +37,8 @@ Draws raster data.
 :param viewPort: viewport to render
 :param qgsMapToPixel: map to pixel converter
 :param feedback: optional raster feedback object for cancellation/preview. Added in QGIS 3.0.
+:param deviceDpi: For some painter device, we need to set the actual real device dpi (e.g. QPicture where dpi is set
+                  arbitrary to 96). Added in QGIS 3.24
 %End
 
   protected:

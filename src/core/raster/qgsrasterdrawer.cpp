@@ -35,7 +35,7 @@ QgsRasterDrawer::QgsRasterDrawer( QgsRasterIterator *iterator, double dpiTarget 
 {
 }
 
-void QgsRasterDrawer::draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsMapToPixel *qgsMapToPixel, QgsRasterBlockFeedback *feedback )
+void QgsRasterDrawer::draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsMapToPixel *qgsMapToPixel, QgsRasterBlockFeedback *feedback, double deviceDpi )
 {
   QgsDebugMsgLevel( QStringLiteral( "Entered" ), 4 );
   if ( !p || !mIterator || !viewPort || !qgsMapToPixel )
@@ -102,7 +102,7 @@ void QgsRasterDrawer::draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsM
       p->setCompositionMode( QPainter::CompositionMode_Source );
     }
 
-    drawImage( p, viewPort, img, topLeftCol, topLeftRow, qgsMapToPixel );
+    drawImage( p, viewPort, img, topLeftCol, topLeftRow, qgsMapToPixel, deviceDpi );
 
     if ( feedback && feedback->renderPartialOutput() )
     {
@@ -117,14 +117,16 @@ void QgsRasterDrawer::draw( QPainter *p, QgsRasterViewPort *viewPort, const QgsM
   }
 }
 
-void QgsRasterDrawer::drawImage( QPainter *p, QgsRasterViewPort *viewPort, const QImage &img, int topLeftCol, int topLeftRow, const QgsMapToPixel *qgsMapToPixel ) const
+void QgsRasterDrawer::drawImage( QPainter *p, QgsRasterViewPort *viewPort, const QImage &img, int topLeftCol, int topLeftRow, const QgsMapToPixel *qgsMapToPixel, double deviceDpi ) const
 {
   if ( !p || !viewPort )
   {
     return;
   }
 
-  const double dpiScaleFactor = mDpiTarget >= 0.0 ? mDpiTarget / p->device()->logicalDpiX() : 1.0;
+  const double dpi = deviceDpi != -1 ? deviceDpi : p->device()->logicalDpiX();
+  const double dpiScaleFactor = mDpiTarget >= 0.0 ? mDpiTarget / dpi : 1.0;
+
   //top left position in device coords
   const QPoint tlPoint = QPoint( viewPort->mTopLeftPoint.x() + std::floor( topLeftCol / dpiScaleFactor ), viewPort->mTopLeftPoint.y() + std::floor( topLeftRow / dpiScaleFactor ) );
 
@@ -173,4 +175,3 @@ void QgsRasterDrawer::drawImage( QPainter *p, QgsRasterViewPort *viewPort, const
   p->drawRoundedRect( br, rad, rad );
 #endif
 }
-
