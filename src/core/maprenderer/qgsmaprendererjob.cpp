@@ -1217,6 +1217,8 @@ void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPa
         //If the mask have some transparency : masked elements of the first pass will appear here
         QPainter tempPainter;
         QImage firstPassMasked( maskImage->width(), maskImage->height(), QImage::Format_ARGB32 );
+        firstPassMasked.setDotsPerMeterX( maskImage->dotsPerMeterX() );
+        firstPassMasked.setDotsPerMeterY( maskImage->dotsPerMeterY() );
         firstPassMasked.fill( QColor( 0, 0, 0, 0 ) );
         tempPainter.begin( &firstPassMasked );
         tempPainter.setClipPath( mergedMasks );
