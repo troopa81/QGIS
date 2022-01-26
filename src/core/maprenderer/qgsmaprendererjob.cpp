@@ -48,6 +48,33 @@
 #include "qgsvectorlayerrenderer.h"
 #include "qgsrendereditemresults.h"
 
+Q_GUI_EXPORT extern int qt_defaultDpiX();
+
+void drawPicture( const QPicture *pic, const QString &filePath )
+{
+  QImage image( pic->width(), pic->height(), QImage::Format_ARGB32 );
+  image.fill( 0 );
+  QPainter painter;
+
+  painter.begin( &image );
+  painter.drawPicture( 0, 0, *pic );
+  painter.end();
+
+  image.save( filePath );
+}
+
+void drawPainterPath( const QPainterPath &painterPath, int width, int height, const QString &filePath )
+{
+  qDebug() << "drawPainterPath w=" << width << "h=" << height;
+
+  QImage finalMaskImage( width, height, QImage::Format_ARGB32 );
+  finalMaskImage.fill( QColor( 0, 0, 0, 0 ) );
+  QPainter mypainter;
+  mypainter.begin( &finalMaskImage );
+  mypainter.drawPath( painterPath );
+  mypainter.end();
+  finalMaskImage.save( filePath );
+}
 
 ///@cond PRIVATE
 
@@ -820,21 +847,7 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
     }
     else
     {
-      QList< QPair<QgsSymbolLayerId, const QgsSymbolLayer *> > slList = QgsSymbolLayerUtils::listSymbolLayers( mapRenderer->featureRenderer() );
-
-      for ( QPair<QgsSymbolLayerId, const QgsSymbolLayer *> &slId : slList )
-      {
-        QPicture *slPic = nullptr;
-        QPainter *slPainter = allocatePictureAndPainter( slPic );
-
-        job2.symbolLayerPic.append( QPair<const QgsSymbolLayer *, QPicture *>( slId.second, slPic ) );
-        job2.context()->addPainterForSymbolLayer( slId.second, slPainter );
-
-        if ( symbolList.find( slId.first ) != symbolList.end() )
-        {
-          job2.isSymbolLayerMasked.insert( slId.second );
-        }
-      }
+      job2.context()->setDisabledSymbolLayers( QgsSymbolLayerUtils::toSymbolLayerPointers( mapRenderer->featureRenderer(), symbolList ) );
     }
   }
 
@@ -1201,31 +1214,26 @@ void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPa
         //Masking is done with clipping so our final clip path is actually the full image
         //minus the path of the masking symbols
         QPainterPath finalMask;
-        if ( hasClipping )
-        {
-          finalMask = clipPath;
-        }
-        else
-        {
-          finalMask.addRect( 0, 0, job.context()->painter()->device()->width(),
-                             job.context()->painter()->device()->height() );
-        }
+        finalMask.addRect( 0, 0, job.context()->painter()->device()->width(),
+                           job.context()->painter()->device()->height() );
         finalMask = finalMask.subtracted( mergedMasks );
 
-        //Draw the first pass image and compose it with the rasterized masks
-        //If the masks are fully opaque : the result should be a completely transparent image
-        //If the mask have some transparency : masked elements of the first pass will appear here
-        QPainter tempPainter;
-        QImage firstPassMasked( maskImage->width(), maskImage->height(), QImage::Format_ARGB32 );
-        firstPassMasked.setDotsPerMeterX( maskImage->dotsPerMeterX() );
-        firstPassMasked.setDotsPerMeterY( maskImage->dotsPerMeterY() );
-        firstPassMasked.fill( QColor( 0, 0, 0, 0 ) );
-        tempPainter.begin( &firstPassMasked );
-        tempPainter.setClipPath( mergedMasks );
-        tempPainter.drawPicture( 0, 0, *job.firstPassJob->imgPic );
-        tempPainter.setCompositionMode( QPainter::CompositionMode_DestinationOut );
-        tempPainter.drawImage( 0, 0, *maskImage );
-        tempPainter.end();
+        // qDebug() << "finalMask.fillRule()=" << finalMask.fillRule()
+        //          << "mergedMasks.fillRule()=" << mergedMasks.fillRule();
+
+
+        // if ( job.layerId.startsWith( "lines" ) )
+        // {
+        //   drawPicture( job.firstPassJob->imgPic, "/tmp/smask/1pass_picture.png" );
+        //   drawPainterPath( finalMask, job.context()->painter()->device()->width(),
+        //                    job.context()->painter()->device()->height(),
+        //                    "/tmp/smask/finalMask.png" );
+        //   drawPainterPath( mergedMasks, job.context()->painter()->device()->width(),
+        //                    job.context()->painter()->device()->height(),
+        //                    "/tmp/smask/mergedMasks.png" );
+
+        //   drawPicture( job.imgPic, "/tmp/smask/2pass_picture.png" );
+        // }
 
         //Combine the results in the first pass painter / qpicture
         QPainter *painter1 = job.firstPassJob->context()->painter();
@@ -1233,40 +1241,55 @@ void QgsMapRendererJob::composeSecondPass( std::vector<LayerRenderJob> &secondPa
         *job.firstPassJob->imgPic = QPicture();
         painter1->begin( job.firstPassJob->imgPic );
 
-        for ( QPair<const QgsSymbolLayer *, QPicture *> &elem : job.symbolLayerPic )
+        // no clipping painter path, meaning that effects are involved, so we rasterize the rendering
+        // in order to correctly apply effect
+        if ( mergedMasks.isEmpty() )
         {
-          if ( job.isSymbolLayerMasked.find( elem.first ) != job.isSymbolLayerMasked.end() )
-          {
-            painter1->setClipping( true );
-            painter1->setClipPath( finalMask );
-            painter1->drawPicture( 0, 0, *elem.second );
-          }
-          else
-          {
-            if ( hasClipping )
-            {
-              painter1->setClipPath( clipPath );
-            }
-            else
-            {
-              painter1->setClipping( false );
-            }
-            painter1->drawPicture( 0, 0, *elem.second );
-          }
-        }
+          //Draw the first pass image and compose it with the rasterized masks
+          //If the masks are fully opaque : the result should be a completely transparent image
+          //If the mask have some transparency : masked elements of the first pass will appear here
+          QPainter tempPainter;
+          QImage firstPassMasked( maskImage->width(), maskImage->height(), QImage::Format_ARGB32 );
+          firstPassMasked.fill( QColor( 0, 0, 0, 0 ) );
+          tempPainter.begin( &firstPassMasked );
+          tempPainter.drawPicture( 0, 0, firstJobPic );
+          tempPainter.setCompositionMode( QPainter::CompositionMode_DestinationOut );
+          tempPainter.drawImage( 0, 0, *maskImage );
+          tempPainter.setCompositionMode( QPainter::CompositionMode_DestinationOver );
+          tempPainter.drawPicture( 0, 0, *job.imgPic );
+          tempPainter.end();
 
-        //First the rasterized alpha blended first pass (containing only what is under the mask if not opaque)
-        if ( hasClipping )
-        {
-          painter1->setClipPath( clipPath );
+          // if ( job.layerId.startsWith( "points" ) )
+          // {
+          //   qDebug() << "mask dpmX=" << maskImage->dotsPerMeterX()
+          //            << "mask dpmY=" << maskImage->dotsPerMeterY();
+
+          //   firstPassMasked.save( "/tmp/smask/firstPassMasked.png" );
+          //   qDebug() << "dpmX=" << firstPassMasked.dotsPerMeterX()
+          //            << "dpmY=" << firstPassMasked.dotsPerMeterY();
+
+
+          // }
+
+          painter1->setClipping( false );
+          painter1->drawImage( 0, 0, firstPassMasked );
+          painter1->end();
+
+          // drawPicture( job.firstPassJob->imgPic, "/tmp/smask/final_before_picture.png" );
         }
+        // no effects in involed, we can keep it full vector
         else
         {
-          painter1->setClipping( false );
-        }
-        painter1->drawImage( 0, 0, firstPassMasked );
+          // Draw first pass outstide mask
+          painter1->setClipPath( finalMask );
+          painter1->drawPicture( 0, 0, firstJobPic );
 
-        painter1->end();
+          // Draw 2nd pass inside mask
+          painter1->setClipPath( mergedMasks );
+          painter1->drawPicture( 0, 0, *job.imgPic );
+
+          painter1->end();
+        }
       }
     }
   }

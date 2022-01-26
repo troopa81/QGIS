@@ -513,6 +513,10 @@ void QgsTextRenderer::drawMask( QgsRenderContext &context, const QgsTextRenderer
   pen.setWidthF( penSize * scaleFactor );
   pen.setJoinStyle( mask.joinStyle() );
 
+
+  // TODO we don't need to render if we are in forcevectoroutput (available from QgsRenderContext
+  // and there is no effect (available from mask)
+
   QgsScopedQPainterState painterState( p );
   context.setPainterFlagsUsingContext( p );
 
@@ -544,23 +548,18 @@ void QgsTextRenderer::drawMask( QgsRenderContext &context, const QgsTextRenderer
 
   }
 
-  if ( !context.isGuiPreview() )
+  if ( !context.isGuiPreview() && !( mask.paintEffect() && mask.paintEffect()->enabled() ) )
   {
     // Save painter path for label selective masking later clipping
+    // We don't save when effect is involved because in this case we rasterize complety the layer
+    // rendering
     QPainterPathStroker stroker( pen );
     path = stroker.createStroke( path );
     path = p->combinedTransform().map( path );
 
-    // if an effect has been defined, we need to use effect bounding box as clipping path
-    if ( mask.paintEffect() && mask.paintEffect()->enabled() )
-    {
-      const QRectF boundingRect = mask.paintEffect()->boundingRect( path.boundingRect(), context );
-      path.clear();
-      path.addRect( boundingRect );
-    }
-
     context.addToMaskLabelPainterPath( context.currentMaskId(), path );
   }
+
   p->restore();
 }
 

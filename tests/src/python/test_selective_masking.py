@@ -778,8 +778,12 @@ class TestSelectiveMasking(unittest.TestCase):
         label_settings = self.polys_layer.labeling().settings()
         fmt = label_settings.format()
         # enable a mask
+
+        print("fontSize={}".format(fmt.font().pointSize()))
+        fmt.font().setPointSize(2)
+
         fmt.mask().setEnabled(True)
-        fmt.mask().setSize(4.0)
+        fmt.mask().setSize(1.0)
         # and mask other symbol layers underneath
         fmt.mask().setMaskedSymbolLayers([
             # the black part of roads
@@ -788,17 +792,17 @@ class TestSelectiveMasking(unittest.TestCase):
             QgsSymbolLayerReference(self.points_layer.id(), QgsSymbolLayerId("B52", 0)),
             QgsSymbolLayerReference(self.points_layer.id(), QgsSymbolLayerId("Jet", 0))])
 
-        # add an outer glow effect to the mask
-        blur = QgsOuterGlowEffect.create({"enabled": "1",
-                                          "blur_level": "6.445",
-                                          "blur_unit": "MM",
-                                          "opacity": "1",
-                                          "spread": "0.6",
-                                          "spread_unit": "MM",
-                                          "color1": "0,0,255,255",
-                                          "draw_mode": "2"
-                                          })
-        fmt.mask().setPaintEffect(blur)
+        # # add an outer glow effect to the mask
+        # blur = QgsOuterGlowEffect.create({"enabled": "1",
+        #                                   "blur_level": "3.445",
+        #                                   "blur_unit": "MM",
+        #                                   "opacity": "1",
+        #                                   "spread": "0.06",
+        #                                   "spread_unit": "MM",
+        #                                   "color1": "0,0,255,255",
+        #                                   "draw_mode": "2"
+        #                                   })
+        # fmt.mask().setPaintEffect(blur)
 
         label_settings.setFormat(fmt)
         self.polys_layer.labeling().setSettings(label_settings)
@@ -816,15 +820,22 @@ class TestSelectiveMasking(unittest.TestCase):
         map.setExtent(self.lines_layer.extent())
         map.setLayers([self.points_layer, self.lines_layer, self.polys_layer])
 
-        settings = QgsLayoutExporter.SvgExportSettings()
+        settings = QgsLayoutExporter.PdfExportSettings()
         exporter = QgsLayoutExporter(layout)
-        tmp = getTempfilePath('png')
-        exporter.exportToSvg(tmp, settings)
+        # tmp = getTempfilePath('pdf')
+        tmp = "/tmp/smask/layout_export.pdf"
+        exporter.exportToPdf(tmp, settings)
 
-        expected_file = os.path.join(unitTestDataPath(), "control_images/selective_masking/layout_export_svg/layout_export.svg")
+        # expected_file = os.path.join(unitTestDataPath(), "control_images/selective_masking/layout_export_svg/layout_export.svg")
 
-        ok, errorMsg = xml_compare(ET.parse(expected_file).getroot(), ET.parse(tmp).getroot())
-        self.assertTrue(ok, errorMsg)
+        # ok, errorMsg = xml_compare(ET.parse(expected_file).getroot(), ET.parse(tmp).getroot())
+        # self.assertTrue(ok, "Actual and expected file are different : {}\n- Actual: {}\n- Expected: {}".format(errorMsg,tmp, expected_file))
+
+        # self.map_settings.setExtent(self.lines_layer.extent())
+
+        # self.map_settings.setFlag(Qgis.MapSettingsFlag.ForceVectorOutput, True)
+        # img, t = renderMapToImageWithTime(self.map_settings, parallel=False, cache=False)
+        # img.save("/tmp/smask/render_vector.png")
 
     def test_different_dpi_target(self):
         """Test with raster layer and a target dpi"""
