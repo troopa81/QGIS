@@ -26,7 +26,7 @@ cmake -GNinja \
  -DPYTHON_LIBRARY=/usr/lib64/libpython3.9.so.1.0 \
  -DENABLE_TESTING=ON \
  -DWITH_PYSIDE=ON \
- -DWITH_QT6=OFF \
+ -DWITH_QT6=ON \
  -DWITH_EPT=OFF \
  -DWITH_QUICK=OFF \
  -DWITH_3D=OFF \
