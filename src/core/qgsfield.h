@@ -118,6 +118,8 @@ class CORE_EXPORT QgsField
      */
     QgsField( const QgsField &other );
 
+    QVariant testVariant( QVariant::Type type ){return QVariant(type);}
+
     /**
      * Assignment operator
      */

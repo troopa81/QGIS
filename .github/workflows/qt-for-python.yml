@@ -1,0 +1,101 @@
+name: 😱 Qt for Python
+
+on:
+  push:
+    branches:
+      - master
+      - release-**
+      - qt-for-python-qt5
+    paths:
+    - 'src/**'
+    - 'tests/**'
+    - 'CMakeLists.txt'
+    - '.github/workflows/**'
+    - '.ci/**'
+    - '.docker/**'
+    - 'qt-for-python/**'
+  pull_request:
+    branches:
+      - master
+      - release-**
+    paths:
+    - 'src/**'
+    - 'tests/**'
+    - 'CMakeLists.txt'
+    - '.github/workflows/**'
+    - '.ci/**'
+    - '.docker/**'
+    - 'qt-for-python/**'
+    - 'cmake'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Prepare build cache for branch/tag
+        # use a fork of actions/cache@v2 to upload cache even when the build or test failed
+        uses: pat-s/always-upload-cache@v2.1.3
+        #        if: github.event_name != 'pull_request'
+        with:
+          path: /home/runner/QGIS/.ccache
+          # The branch or tag ref that triggered the workflow run. For branches this in the format refs/heads/<branch_name>, and for tags it is refs/tags/<tag_name>
+          key: qt4python-ccache-${{ github.sha }}
+          restore-keys: |
+            qt4python-ccache-
+
+      - name: Build Docker Container with Build Environment
+        id: docker-build
+        uses: whoan/docker-build-with-cache-action@v5
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          image_name: qgis3-qt6-build-deps
+          dockerfile: .docker/qgis3-build-deps-qt-for-python-fedora.dockerfile
+          push_git_tag: true
+          push_image_and_stages: on:push
+          pull_image_and_stages: ${{ github.event_name != 'workflow_dispatch' }}
+
+      - name: Run build
+        run: |
+          docker run --name qgis_container \
+            -v /home/runner/QGIS/.ccache:/root/.ccache \
+            -v $(pwd):/usr/src/qgis \
+            ${DOCKER_IMAGE} /usr/src/qgis/.docker/docker-qgis-build-qt-for-python.sh
+        env:
+          DOCKER_IMAGE: ${{ steps.docker-build.outputs.FULL_IMAGE_NAME }}
+          
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          
+      - name: Push docker
+        run: |
+          docker cp $(pwd) qgis_container:/usr/src/qgis-qt-for-python
+          docker commit qgis_container qgis_image
+          docker tag qgis_image opengisch/qgis-qt-for-python:${{ github.run_number }}
+          docker tag qgis_image opengisch/qgis-qt-for-python:latest
+          docker push opengisch/qgis-qt-for-python:${{ github.run_number }}
+          docker push opengisch/qgis-qt-for-python:latest
+
+      - name: Run tests
+        run: |
+          docker run -w /usr/src/qgis/build-pyside2 qgis_image xvfb-run ctest -R PyQgs --output-on-failure
+
+#      - name: Setup tmate session
+#        if: failure()
+#        uses: mxschmitt/action-tmate@v3
+#        timeout-minutes: 180
+#        with:
+#          limit-access-to-actor: true
+#
+#
+#      - name: Create Pull Request
+#        if: ${{ always() }}
+#        uses: peter-evans/create-pull-request@v3

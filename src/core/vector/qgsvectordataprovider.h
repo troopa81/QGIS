@@ -101,9 +101,7 @@ class CORE_EXPORT QgsVectorDataProvider : public QgsDataProvider, public QgsFeat
     Q_DECLARE_FLAGS( Capabilities, Capability )
 
     //! Bitmask of all provider's editing capabilities
-    static const int EditingCapabilities = AddFeatures | DeleteFeatures |
-                                           ChangeAttributeValues | ChangeGeometries | AddAttributes | DeleteAttributes |
-                                           RenameAttributes;
+    static const int EditingCapabilities;
 
     /**
      * Constructor for a vector data provider.

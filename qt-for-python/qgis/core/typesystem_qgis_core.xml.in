@@ -1,0 +1,370 @@
+<?xml version="1.0"?>
+<!-- The package name -->
+
+<typesystem package="core">
+    <!-- Pre-defined typesystem that contains types used by our class.
+        PySide has one typesystem for each module, so here we use only the
+        Widgets typesystem because it already includes gui and core
+        typesystems -->
+    <load-typesystem name="typesystem_core.xml" generate="no"/>
+    <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_xml.xml" generate="no"/>
+    <!--<load-typesystem name="typesystem_widgets.xml" generate="no"/>-->
+
+    <!-- This is used in a public virtual pure function.
+         We need to declare it otherwise shiboken will ignore the
+         function and will fail to create a wrapper -->
+    <!--<primitive-type name="DropAreaWithCentralFrame"/>-->
+
+    <!-- Export our public enums and flags -->
+    <!--<enum-type name="Location"/>-->
+
+    <!-- Export our classes
+         For classes we can use two types:
+            object-type: class that does not have a copy-constructor
+                         and cannot be passed as value to functions;
+            value-type: class that can be passed as value for functions
+
+         Here we only use 'object-type' since all our classes are
+         derived from QWidget.
+     -->
+
+    <!-- DockWidgetBase contains an internal enum, so we declare it
+         inside of the object-type -->
+
+    <enum-type name="QgsMapLayerType"/>
+
+<!--
+    <typedef-type name="QgsFeatureList" source="QList&lt;QgsFeature&gt;" />
+-->
+
+    <value-type name="QgsFields">
+      <enum-type name="FieldOrigin"/>
+        <add-function signature="__mgetitem__">
+            <inject-code class="target" position="beginning">
+<![CDATA[
+    PythonToCppFunc pythonToCpp {};
+    if ( PyLong_Check(_key) )
+    {
+      const long long _i = PyLong_AsLongLong(_key);
+      const int len = %CPPSELF.size();
+      if (_i < -len || _i >= len)
+      {
+        PyErr_SetString(PyExc_IndexError, "index out of bounds");
+        return 0;
+      }
+
+      // Handle negative indices (e.g. if list has 3 items, [-1] should equal to [2])
+      const int idx = ( ( _i % len ) + len ) % len;
+
+      PyObject *pyResult = Shiboken::Conversions::copyToPython(reinterpret_cast<SbkObjectType *>(SbkcoreTypes[SBK_QGSFIELD_IDX]), &%CPPSELF.operator[](idx));
+      if (PyErr_Occurred() || !pyResult)
+      {
+        Py_XDECREF(pyResult);
+      }
+
+      return pyResult;
+    }
+    else if ( ( pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible( SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], ( _key ) ) ) )
+    {
+      ::QString keyName;
+      pythonToCpp(_key, &keyName);
+
+      const int fieldIdx = cppSelf->indexFromName( keyName );
+      if ( fieldIdx == -1 )
+      {
+        PyErr_SetString( PyExc_KeyError, keyName.toLatin1() ); 
+        return nullptr;
+      }
+
+      PyObject *pyResult = Shiboken::Conversions::copyToPython( reinterpret_cast<SbkObjectType *>( SbkcoreTypes[SBK_QGSFIELD_IDX] ), &cppSelf->operator[]( fieldIdx ) );
+      if ( PyErr_Occurred() || !pyResult )
+      {
+        Py_XDECREF(pyResult);
+      }
+
+      return pyResult;
+    }
+#if 0 // NICE TO HAVE TODO
+    else
+    {
+      PyObject* keyRepr = PyObject_Repr( _key );
+      const char* s = PyUnicode_AsUTF8( keyRepr );
+      PyErr_SetString( PyExc_KeyError, s );
+      Py_XDECREF( keyRepr );
+    }
+#endif
+]]>
+            </inject-code>
+        </add-function>
+
+        <modify-function signature="at(int) const">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    if ( cppArg0 < 0 || cppArg0 >= cppSelf->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( cppArg0 ) );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+        
+        <modify-function signature="remove(int)">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    if ( cppArg0 < 0 || cppArg0 >= cppSelf->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( cppArg0 ) );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+
+        <modify-function signature="field(int) const">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    if ( cppArg0 < 0 || cppArg0 >= cppSelf->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( cppArg0 ) );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+
+        <modify-function signature="fieldOrigin(int) const">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    if ( cppArg0 < 0 || cppArg0 >= cppSelf->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( cppArg0 ) );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+
+        <modify-function signature="fieldOriginIndex(int) const">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    if ( cppArg0 < 0 || cppArg0 >= cppSelf->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( cppArg0 ) );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+
+
+        <modify-function signature="iconForField(int, bool) const">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    if ( cppArg0 < 0 || cppArg0 >= cppSelf->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( cppArg0 ) );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+
+        <modify-function signature="field(QString) const">
+          <inject-code class="target" position="beginning">
+<![CDATA[
+    const int fieldIdx = cppSelf->indexFromName( cppArg0 );
+    if ( fieldIdx == -1 )
+    {
+      PyErr_SetString( PyExc_KeyError, cppArg0.toUtf8() );
+      return {};
+    }
+]]>
+          </inject-code>
+        </modify-function>
+    </value-type>
+    <object-type name="QgsProject">
+      <enum-type name="ReadFlag" flags="ReadFlags"/>
+      <enum-type name="FileFormat"/>
+      <modify-function signature="attachedFile(const QString &amp;) const" remove="all"/>
+      <modify-function signature="attachedFiles() const" remove="all"/>
+      <modify-function signature="collectAttachedFiles(QMap&lt;QString,QString&gt; &amp;)" remove="all"/>
+    </object-type>
+
+
+    <object-type name="QgsApplication">
+      <modify-function signature="QgsApplication(int&amp;,char**,bool,const QString&amp;,const QString&amp;)">
+        <modify-argument index="0">
+          <remove-argument/>
+        </modify-argument>
+        <modify-argument index="1">
+          <replace-type modified-type="QStringList"/>
+        </modify-argument>
+        <modify-argument index="2">
+          <replace-default-expression with="false"/> 
+        </modify-argument>
+        <modify-argument index="3">
+          <replace-default-expression with="QString()"/> 
+        </modify-argument>
+        <modify-argument index="4">
+          <replace-default-expression with="desktop"/> 
+        </modify-argument>
+        <inject-code class='target' position='beginning'>
+<![CDATA[
+          char **xx;
+          int x = 0;
+          QString appName = QStringLiteral( "QGIS" );
+          QString platform = QStringLiteral( "desktop" );
+          %0 = new QgsApplicationWrapper(x, xx, false, appName, platform);
+]]>
+        </inject-code>
+      </modify-function>
+    </object-type>
+    <object-type name="QgsWkbTypes" >
+        <enum-type name="GeometryType"/>
+        <enum-type name="Type"/>
+    </object-type>
+
+    <object-type name="QgsUnitTypes">
+      <enum-type name="UnitType"/>
+      <enum-type name="DistanceUnit"/>
+      <enum-type name="DistanceUnitType"/>
+      <enum-type name="AreaUnit"/>
+      <enum-type name="VolumeUnit"/>
+      <enum-type name="AngleUnit"/>
+      <enum-type name="TemporalUnit"/>
+      <enum-type name="RenderUnit"/>
+      <enum-type name="LayoutUnit"/>
+      <enum-type name="LayoutUnitType"/>
+      <enum-type name="SystemOfMeasurement"/>
+    </object-type>
+
+    <value-type name="QgsFieldConstraints">
+      <enum-type name="Constraint" flags="Constraints"/>
+      <enum-type name="ConstraintOrigin"/>
+      <enum-type name="ConstraintStrength"/>
+    </value-type>
+
+    <value-type name="QgsCoordinateReferenceSystem">
+      <enum-type name="CrsType"/>
+      <enum-type name="Format"/>
+      <enum-type name="IdentifierType"/>
+      <enum-type name="WktVariant"/>
+    </value-type>
+
+    <value-type name="QgsField">
+      <enum-type name="ConfigurationFlag" flags="ConfigurationFlags"/>
+      <modify-function signature="convertCompatible(QVariant &amp;,QString *)const">
+        <modify-argument index="2">
+          <remove-argument/>
+        </modify-argument>
+
+        <inject-code class="target" position="beginning">
+<![CDATA[
+    bool isSuccess;
+    QString errorMessage;
+
+    %BEGIN_ALLOW_THREADS
+    try
+    {
+      isSuccess = cppSelf->convertCompatible( %1, &errorMessage );
+    }
+    catch ( ... )
+    {
+      Py_BLOCK_THREADS
+      PyErr_SetString( PyExc_RuntimeError, "Unknown error occurred" );
+      return nullptr;
+    }
+
+    %END_ALLOW_THREADS
+
+    if ( !isSuccess )
+    {
+      PyErr_SetString( PyExc_ValueError,
+                       ( QLatin1String( "Value could not be converted to field type " ) + QMetaType::typeName( cppSelf->type() ) + QLatin1String( ": " ) + errorMessage ).toUtf8().constData() );
+      return nullptr;
+    }
+    else
+    {
+      return Shiboken::Conversions::copyToPython(SbkPySide2_QtCoreTypeConverters[SBK_QVARIANT_IDX], &%1);
+    }
+]]>
+        </inject-code>
+      </modify-function>
+    </value-type>
+
+
+@TYPESYSTEM_CONTENT@
+
+
+    <object-type name="QgsAbstractFeatureSource">
+    </object-type>
+
+    <object-type name="QgsMapLayer">
+      <enum-type name="StyleCategory" flags="StyleCategories"/>
+      <enum-type name="PropertyType"/>
+      <enum-type name="LayerFlag"/>
+      <enum-type name="ReadFlag"/>
+      <modify-function signature="dataProvider() const" remove="all"/>
+    </object-type>
+
+    <object-type name="QgsVectorLayer">
+    </object-type>
+
+    <object-type name="QgsRasterLayer">
+    </object-type>
+
+    <object-type name="QgsRasterBlockFeedback">
+    </object-type>
+
+    <object-type name="QgsVectorDataProvider">
+      <enum-type name="Capability"/>
+    </object-type>
+
+    <object-type name="QgsRasterDataProvider">
+    </object-type>
+
+    <object-type name="Qgis">
+      <enum-type name="DataType"/>
+    </object-type>
+
+    <value-type name="QgsExpressionContextScope">
+    </value-type>
+
+    <object-type name="QgsFeatureSink">
+      <enum-type name="Flag" flags="Flags"/>
+      <enum-type name="SinkFlag" flags="SinkFlags"/>
+    </object-type>
+
+    <value-type name="QgsGeometry">
+      <enum-type name="OperationResult"/>
+      <enum-type name="ValidityFlag"/>
+      <enum-type name="BufferSide"/>
+      <enum-type name="EndCapStyle"/>
+      <enum-type name="JoinStyle"/>
+      <enum-type name="ValidationMethod"/>
+        <add-function signature="__repr__" return-type="PyObject*">
+            <inject-code class="target" position="beginning">
+<![CDATA[
+    QString str;
+    if ( %CPPSELF->isNull() )
+      str = QStringLiteral( "<QgsGeometry: null>" );
+    else
+    {
+      QString wkt = %CPPSELF->asWkt();
+      if ( wkt.length() > 1000 )
+        wkt = wkt.left( 1000 ) + QStringLiteral( "..." );
+      str = QStringLiteral( "<QgsGeometry: %1>" ).arg( wkt );
+    }
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() ); 
+]]>
+            </inject-code>
+        </add-function>
+    </value-type>
+<!--
+    <value-type name="QgsInterval">
+    </value-type>
+-->
+
+</typesystem>

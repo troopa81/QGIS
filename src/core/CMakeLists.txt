@@ -2255,12 +2255,7 @@ target_include_directories(qgis_core SYSTEM PUBLIC
   ${EXIV2_INCLUDE_DIR}
 )
 
-if (WITH_SPATIALITE)
-  target_include_directories(qgis_core SYSTEM PUBLIC
-    ${SPATIALITE_INCLUDE_DIR}
-  )
-endif()
-
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/geometry> 
 target_include_directories(qgis_core PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}

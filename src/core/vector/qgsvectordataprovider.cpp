@@ -36,6 +36,9 @@
 #include "qgsthreadingutils.h"
 #include <mutex>
 
+const int QgsVectorDataProvider::EditingCapabilities = AddFeatures | DeleteFeatures |
+                                           ChangeAttributeValues | ChangeGeometries | AddAttributes | DeleteAttributes |
+                                           RenameAttributes;
 QgsVectorDataProvider::QgsVectorDataProvider( const QString &uri, const ProviderOptions &options,
     QgsDataProvider::ReadFlags flags )
   : QgsDataProvider( uri, options, flags )

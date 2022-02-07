@@ -982,7 +982,7 @@ set(QGIS_INSTALL_SYS_LIBS TRUE CACHE BOOL "If set to TRUE install all required s
 #############################################################
 # Python
 
-set(MIN_PYTHON_VERSION "3.7")
+set(MIN_QGIS_PYTHON_VERSION "3.7")
 set(Python_FIND_FRAMEWORK "LAST")
 
 
@@ -995,6 +995,17 @@ endif()
 message("-- Found Python executable: ${Python_EXECUTABLE} (version ${Python_VERSION})")
 message("-- Python library: ${Python_LIBRARIES}")
 message("-- Python site-packages: ${Python_SITEARCH}")
+
+set (WITH_PYSIDE FALSE CACHE BOOL "Enable (experimental) PySide support")
+if (WITH_PYSIDE)
+  if (WITH_BINDINGS)
+    message(FATAL_ERROR "Cannot enable WITH_PYSIDE and WITH_BINDINGS together")
+  endif()
+  set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/qt-for-python)
+  set(QGIS_PYTHON_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIRECTORY}/qgis)
+  add_subdirectory(qt-for-python)
+  add_subdirectory(python/testing)
+endif()
 
 if (WITH_CORE AND WITH_BINDINGS)
   set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/python)

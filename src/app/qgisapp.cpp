@@ -5458,7 +5458,8 @@ void QgisApp::about()
     versionString += QLatin1String( "</tr><tr>" );
 
     // Python version
-    versionString += QStringLiteral( "<td>%1</td><td colspan=\"3\">%2</td>" ).arg( tr( "Python version" ), PYTHON_VERSION );
+    const QString pythonVersion{ QGIS_PYTHON_VERSION };
+    versionString += QStringLiteral( "<td>%1</td><td colspan=\"3\">%2</td>" ).arg( tr( "Python version" ), QGIS_PYTHON_VERSION );
     versionString += QLatin1String( "</tr><tr>" );
 
     // GDAL version
