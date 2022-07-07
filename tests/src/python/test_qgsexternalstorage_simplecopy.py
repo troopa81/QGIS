@@ -56,6 +56,9 @@ class TestPyQgsExternalStorageSimpleCopy(TestPyQgsExternalStorageBase, unittest.
         """Override this one because there is authentication for SimpleCopy external storage"""
         pass
 
+    def testMessy(self):
+        self.assertTrue(False)
+
 
 if __name__ == '__main__':
     unittest.main()
