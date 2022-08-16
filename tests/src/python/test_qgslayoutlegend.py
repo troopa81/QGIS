@@ -715,7 +715,7 @@ class TestQgsLayoutItemLegend(unittest.TestCase, LayoutItemTestCase):
         legend2 = QgsLayoutItemLegend(layout)
         legend2.setTitle("Legend")
         legend2.attemptSetSceneRect(QRectF(120, 120, 80, 80))
-        legend2.setFrameEnabled(True)
+        legend2.setFrameEnabled(False)
         legend2.setFrameStrokeWidth(QgsLayoutMeasurement(2))
         legend2.setBackgroundColor(QColor(200, 200, 200))
         legend2.setTitle('')

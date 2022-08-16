@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - test_ci_html_report
     paths:
     - 'src/**'
     - 'external/**'
@@ -49,21 +50,6 @@ jobs:
             with-grass7: OFF
             with-grass8: OFF
             # LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
-            experimental: false
-
-          - distro-version: '36'
-            qt-version: 6
-            run-tests: true
-            docker-tag-suffix: ''
-            with-qt6: ON
-            with-qt5: OFF
-            with-3d: OFF
-            with-quick: OFF
-            with-clazy: OFF
-            patch-qt-3d: false
-            with-grass7: OFF
-            with-grass8: OFF
-            LD_PRELOAD: ''
             experimental: false
 
 
@@ -396,4 +382,3 @@ jobs:
         with:
           name: test-results
           path: qgis_test_report
-
