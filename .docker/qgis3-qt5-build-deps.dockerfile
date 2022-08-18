@@ -19,6 +19,7 @@ RUN  apt-get update \
     apt-transport-https \
     ca-certificates \
     clazy \
+    clang-tidy \
     cmake \
     curl \
     dh-python \
