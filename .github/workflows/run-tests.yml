@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - clang_tidy
     paths:
     - 'src/**'
     - 'external/**'
@@ -396,4 +397,3 @@ jobs:
         with:
           name: test-results
           path: qgis_test_report
-
