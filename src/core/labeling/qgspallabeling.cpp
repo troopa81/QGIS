@@ -2262,7 +2262,7 @@ std::unique_ptr<QgsLabelFeature> QgsPalLayerSettings::registerFeatureWithDetails
     if ( divNum && ( mFeatsRegPal == static_cast< int >( mFeatsSendingToPal / divNum ) ) )
     {
       mFeatsSendingToPal += 1;
-      if ( divNum &&  mFeatsSendingToPal % divNum )
+      if ( mFeatsSendingToPal % divNum )
       {
         return nullptr;
       }
