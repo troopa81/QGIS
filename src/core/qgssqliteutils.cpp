@@ -242,7 +242,7 @@ long long QgsSqliteUtils::nextSequenceValue( sqlite3 *connection, const QString 
     }
   }
 
-  dsPtr.release();
+  dsPtr.release(); // NOLINT(bugprone-unused-return-value) : dsPtr has no ownership on connection
   return result;
 }
 

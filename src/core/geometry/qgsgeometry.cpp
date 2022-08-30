@@ -1475,14 +1475,14 @@ QVector<QgsGeometry> QgsGeometry::coerceToType( const QgsWkbTypes::Type type, do
         {
           std::unique_ptr< QgsCurvePolygon > cp = std::make_unique< QgsCurvePolygon >();
           cp->setExteriorRing( curve );
-          exterior.release();
+          exterior.release(); // NOLINT(bugprone-unused-return-value) : cp takes ownership of curve (exterior pointer) above
           gc->addGeometry( cp.release() );
         }
         else
         {
           std::unique_ptr< QgsPolygon > p = std::make_unique< QgsPolygon  >();
           p->setExteriorRing( qgsgeometry_cast< QgsLineString * >( curve ) );
-          exterior.release();
+          exterior.release(); // NOLINT(bugprone-unused-return-value) : cp takes ownership of curve (exterior pointer) above
           gc->addGeometry( p.release() );
         }
       }

@@ -108,7 +108,7 @@ QVariantList QgsOgrProviderResultIterator::nextRowInternal()
     {
       // Release the resources
       GDALDatasetReleaseResultSet( mHDS.get(), mOgrLayer );
-      mHDS.release();
+      mHDS.reset();
     }
   }
   return row;

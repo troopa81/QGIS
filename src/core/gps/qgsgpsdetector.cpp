@@ -170,6 +170,9 @@ void QgsGpsDetector::connDestroyed( QObject *obj )
   // WTF? This whole class needs re-writing...
   if ( obj == mConn.get() )
   {
+    // Silence bugprone-unused-return-value because object is already destroyed, we just need
+    // to clear the pointer (QPointer may be more appropriated)
+    // NOLINTNEXTLINE(bugprone-unused-return-value)
     mConn.release();
   }
 }
