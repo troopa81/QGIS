@@ -278,7 +278,7 @@ jobs:
           --env WITH_CLAZY=OFF \
           --env WITH_COMPILE_COMMANDS=ON \
           qgis3-build-deps \
-          /bin/bash -c "/root/QGIS/.docker/docker-qgis-configure.sh;cd /root/QGIS/;clang-tidy ${filtered[@]} -p=./build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss""
+          /bin/bash -c "/root/QGIS/.docker/docker-qgis-configure.sh;cd /root/QGIS/;ls build;clang-tidy ${filtered[@]} -p=./build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss""
 
       # - name: Run clang-tidy on PR files
       #   run: |
