@@ -39,6 +39,7 @@
 
 QgsFeatureIterator QgsVectorLayerUtils::getValuesIterator( const QgsVectorLayer *layer, const QString &fieldOrExpression, bool &ok, bool selectedOnly )
 {
+
   std::unique_ptr<QgsExpression> expression;
   QgsExpressionContext context;
 
