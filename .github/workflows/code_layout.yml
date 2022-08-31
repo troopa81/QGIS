@@ -233,6 +233,12 @@ jobs:
         run: |
           sudo apt install -y clang-tidy
 
+      - uses: trilom/file-changes-action@v1.2.4
+        id: changed_files
+        with:
+          output: ' '
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run clang-tidy on PR files
         run: |
-          git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} .
+          echo ${{ steps.changed_files.outputs.files_modified }} ${{ steps.changed_files.outputs.files_added }}
