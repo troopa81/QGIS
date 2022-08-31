@@ -260,6 +260,9 @@ jobs:
 
       - name: Configure QGIS
         run: |
+          files=(${{ steps.changed_files.outputs.files_modified }} ${{ steps.changed_files.outputs.files_added }})
+          for file in ${files[@]}; do [[ $file =~ .*\.(cpp|h)$ ]] && filtered+=("$file"); done
+
           docker run -t --name qgis_container \
           -v $(pwd):/root/QGIS \
           -v /home/runner/QGIS/.ccache:/root/.ccache \
@@ -275,19 +278,19 @@ jobs:
           --env WITH_CLAZY=OFF \
           --env WITH_COMPILE_COMMANDS=ON \
           qgis3-build-deps \
-          /root/QGIS/.docker/docker-qgis-configure.sh
+          /bin/bash -c "/root/QGIS/.docker/docker-qgis-configure.sh;cd /root/QGIS/;clang-tidy ${filtered[@]} -p=./build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss""
 
-      - name: Run clang-tidy on PR files
-        run: |
-          files=(${{ steps.changed_files.outputs.files_modified }} ${{ steps.changed_files.outputs.files_added }})
-          for file in ${files[@]}; do [[ $file =~ .*\.(cpp|h)$ ]] && filtered+=("$file"); done
+      # - name: Run clang-tidy on PR files
+      #   run: |
+      #     files=(${{ steps.changed_files.outputs.files_modified }} ${{ steps.changed_files.outputs.files_added }})
+      #     for file in ${files[@]}; do [[ $file =~ .*\.(cpp|h)$ ]] && filtered+=("$file"); done
 
-          echo "here: $PWD"
-          ls ./build
+      #     echo "here: $PWD"
+      #     ls ./build
 
-          #clang-tidy ${filtered[@]} -p=./build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss"
+      #     #clang-tidy ${filtered[@]} -p=./build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss"
 
-          #echo "result: $?"
+      #     #echo "result: $?"
 
       - name: Archive compile_command
         uses: actions/upload-artifact@v3
