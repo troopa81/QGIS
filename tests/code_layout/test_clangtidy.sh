@@ -2,4 +2,4 @@
 
 ls build
 
-clang-tidy -p=build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss" ${filtered[@]}
+clang-tidy -p=build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss" src/core/vector/qgsvectorlayerutils.cpp
