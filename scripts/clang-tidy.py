@@ -37,13 +37,13 @@ if not len(sources):
 command = ["clang-tidy", "-p={}".format(build_dir),
            "-checks=bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss"] + sources
 
-# Even with line-filter there is no way some time to get rid of some non user code
-# See issue https://bugs.llvm.org/show_bug.cgi?id=38484
-
 with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1,
                       universal_newlines=True) as p:
+    filtered = False
     for line in p.stdout:
         if re.search(": warning:", line):
+            # Even with line-filter there is sometime no way to get rid of some non user code warnings
+            # See issue https://bugs.llvm.org/show_bug.cgi?id=38484
             filtered = not line.startswith(src_dir)
 
         if filtered:
