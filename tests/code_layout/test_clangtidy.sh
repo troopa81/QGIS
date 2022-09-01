@@ -13,3 +13,8 @@ for i in ${filtered[@]}; do echo test1: $i; done
 cd /root/QGIS/
 
 clang-tidy -p=build -checks="bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss" ${filtered[@]}
+
+
+# Even with line-filter there is no way some time to get rid of some non user code
+# See issue https://bugs.llvm.org/show_bug.cgi?id=38484
+# So we remove them manually
