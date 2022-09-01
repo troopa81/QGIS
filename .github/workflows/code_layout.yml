@@ -275,7 +275,7 @@ jobs:
           --env WITH_CLAZY=OFF \
           --env WITH_COMPILE_COMMANDS=ON \
           qgis3-build-deps \
-          /bin/bash -c "/root/QGIS/.docker/docker-qgis-configure.sh;/root/QGIS/scripts/clang-tidy.py --build ${CTEST_BUILD_DIR} --src_dir ${CTEST_SOURCE_DIR} ${{ steps.changed_files.outputs.files_modified }} ${{ steps.changed_files.outputs.files_added }}"
+          /root/QGIS/.docker/docker-qgis-clangtidy.sh ${{ steps.changed_files.outputs.files_modified }} ${{ steps.changed_files.outputs.files_added }}
 
       # - name: Run clang-tidy on PR files
       #   run: |
