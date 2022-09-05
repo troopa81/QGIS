@@ -71,7 +71,7 @@ QgsGeometry::QgsGeometry()
 QgsGeometry::~QgsGeometry()
 {
   if ( !d->ref.deref() )
-    delete d;
+    delete d; // NOLINT(clang-analyzer-cplusplus.NewDelete)
 }
 
 QgsGeometry::QgsGeometry( QgsAbstractGeometry *geom )
