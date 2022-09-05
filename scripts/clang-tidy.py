@@ -7,6 +7,8 @@ import re
 import sys
 import argparse
 import os
+import colorama
+from colorama import Fore, Style
 
 parser = argparse.ArgumentParser(description='Start clang-tidy on source files')
 parser.add_argument('sources', metavar='source', type=str, nargs='+',
@@ -40,8 +42,15 @@ command = ["clang-tidy", "-p={}".format(build_dir),
 with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1,
                       universal_newlines=True) as p:
     filtered = False
+    error_types = {}
     for line in p.stdout:
-        if re.search(": warning:", line):
+        result = re.search("(.*): warning:(.*)\[(.*)\]$", line)
+        if result:
+
+            where, error_msg, error_type = result.groups()
+
+            error_types[error_type] = error_types.get(error_type, 0) + 1
+
             # Even with line-filter there is sometime no way to get rid of some non user code warnings
             # See issue https://bugs.llvm.org/show_bug.cgi?id=38484
             filtered = not line.startswith(src_dir)
@@ -49,4 +58,17 @@ with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, b
         if filtered:
             continue
 
-        print(line, end='')
+        if result:
+            print(f"{Style.BRIGHT}{where}: {Fore.RED}warning{Style.RESET_ALL}:{error_msg} {Fore.YELLOW}[{error_type}]{Style.RESET_ALL}")
+        else:
+            print(line, end='')
+
+
+if len(error_types):
+    print("\n\nReported warnings:")
+    for error_type, count in error_types.items():
+        print(f" - {Fore.YELLOW}{error_type:<50}{Style.RESET_ALL}: {count}")
+else:
+    print("No errors")
+
+exit(len(error_types))
