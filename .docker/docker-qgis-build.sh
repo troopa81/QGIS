@@ -115,7 +115,6 @@ cmake \
  -DCXX_EXTRA_FLAGS="${CLANG_WARNINGS}" \
  -DWERROR=TRUE \
  -DWITH_CLAZY=${WITH_CLAZY} \
- -DWITH_CLANG_TIDY=TRUE \
  ${CMAKE_EXTRA_ARGS[*]} ..
 echo "::endgroup::"
 

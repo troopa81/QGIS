@@ -5,8 +5,6 @@ set -e
 CTEST_SOURCE_DIR=${CTEST_SOURCE_DIR-/root/QGIS}
 CTEST_BUILD_DIR=${CTEST_BUILD_DIR-/root/QGIS/build}
 
-
-echo "Configure !!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 ##############
 # Setup ccache
 ##############
@@ -72,9 +70,6 @@ if [[ "${WITH_COMPILE_COMMANDS}" == "ON" ]]; then
   CMAKE_EXTRA_ARGS+=(
     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
   )
-
-
-  echo "Coucou!!!!!!!!!!!!!!!!!!!!!"
 fi
 
 if [[ ${WITH_GRASS7} == "ON" || ${WITH_GRASS8} == "ON" ]]; then
@@ -82,8 +77,6 @@ if [[ ${WITH_GRASS7} == "ON" || ${WITH_GRASS8} == "ON" ]]; then
     "-DGRASS_PREFIX$( grass --config version | cut -b 1 )=$( grass --config path )"
   )
 fi
-
-echo "---------------- CMAKE_EXTRA_ARGS ${CMAKE_EXTRA_ARGS[*]}"
 
 cmake \
  -GNinja \
