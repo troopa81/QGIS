@@ -420,7 +420,7 @@ QLinkedList<PointSet *> PointSet::splitPolygons( PointSet *inputShape, double la
         fx = cx + dx;
         fy = cy - dy;
 
-        if ( seg_length < EPSILON || std::fabs( ( b = GeomFunction::cross_product( ex, ey, fx, fy, x[retainedPt], y[retainedPt] ) / ( seg_length ) ) ) > ( seg_length / 2 ) )   // retainedPt is not fronting i->j
+        if ( seg_length < EPSILON || std::fabs( ( GeomFunction::cross_product( ex, ey, fx, fy, x[retainedPt], y[retainedPt] ) / ( seg_length ) ) ) > ( seg_length / 2 ) )   // retainedPt is not fronting i->j
         {
           if ( ( ex = GeomFunction::dist_euc2d_sq( x[i], y[i], x[retainedPt], y[retainedPt] ) ) < ( ey = GeomFunction::dist_euc2d_sq( x[j], y[j], x[retainedPt], y[retainedPt] ) ) )
           {
@@ -877,7 +877,7 @@ double PointSet::minDistanceToPoint( double px, double py, double *rx, double *r
 
     if ( type != GEOS_POLYGON )
     {
-      extRing = mGeos;
+      extRing = mGeos; // NOLINT
 #if GEOS_VERSION_MAJOR>3 || GEOS_VERSION_MINOR>=9
       preparedExtRing = preparedGeom();
 #endif

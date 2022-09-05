@@ -1681,7 +1681,7 @@ void QgsTextRenderer::drawTextInternalHorizontal( QgsRenderContext &context, con
       }
     }
 
-    double yMultiLineOffset = ascentOffset;
+    double yMultiLineOffset = ascentOffset; // NOLINT
     switch ( mode )
     {
       case Label:
@@ -2110,4 +2110,3 @@ double QgsTextRenderer::calculateScaleFactorForFormat( const QgsRenderContext &c
   else
     return 1.0;
 }
-

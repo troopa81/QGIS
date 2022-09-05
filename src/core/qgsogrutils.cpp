@@ -1869,7 +1869,6 @@ void QgsOgrUtils::ogrFieldTypeToQVariantType( OGRFieldType ogrType, OGRFieldSubT
       if ( ogrSubType == OFSTBoolean )
       {
         variantType = QVariant::Bool;
-        ogrSubType = OFSTBoolean;
       }
       else
         variantType = QVariant::Int;
@@ -1898,7 +1897,6 @@ void QgsOgrUtils::ogrFieldTypeToQVariantType( OGRFieldType ogrType, OGRFieldSubT
     case OFTWideString:
       if ( ogrSubType == OFSTJSON )
       {
-        ogrSubType = OFSTJSON;
         variantType = QVariant::Map;
         variantSubType = QVariant::String;
       }

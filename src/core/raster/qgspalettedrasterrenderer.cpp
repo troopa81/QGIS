@@ -146,8 +146,6 @@ QgsRasterBlock *QgsPalettedRasterRenderer::block( int, QgsRectangle  const &exte
     return outputBlock.release();
   }
 
-  double currentOpacity = mOpacity;
-
   //rendering is faster without considering user-defined transparency
   const bool hasTransparency = usesTransparency();
 
@@ -200,7 +198,7 @@ QgsRasterBlock *QgsPalettedRasterRenderer::block( int, QgsRectangle  const &exte
     }
     else
     {
-      currentOpacity = mOpacity;
+      double currentOpacity = mOpacity;
       if ( mRasterTransparency )
       {
         currentOpacity = mRasterTransparency->alphaValue( value, mOpacity * 255 ) / 255.0;

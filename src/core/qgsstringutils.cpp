@@ -529,7 +529,6 @@ QString QgsStringUtils::insertLinks( const QString &string, bool *foundLinks )
   static thread_local QRegularExpression protoRegEx( QStringLiteral( "^(?:f|ht)tps?://|file://" ) );
   static thread_local QRegularExpression emailRegEx( QStringLiteral( "([\\w._%+-]+@[\\w.-]+\\.[A-Za-z]+)" ) );
 
-  int offset = 0;
   bool found = false;
   QRegularExpressionMatch match = urlRegEx.match( converted );
   while ( match.hasMatch() )
@@ -543,11 +542,10 @@ QString QgsStringUtils::insertLinks( const QString &string, bool *foundLinks )
     }
     QString anchor = QStringLiteral( "<a href=\"%1\">%2</a>" ).arg( protoUrl.toHtmlEscaped(), url.toHtmlEscaped() );
     converted.replace( match.capturedStart( 1 ), url.length(), anchor );
-    offset = match.capturedStart( 1 ) + anchor.length();
+    const int offset = match.capturedStart( 1 ) + anchor.length();
     match = urlRegEx.match( converted, offset );
   }
 
-  offset = 0;
   match = emailRegEx.match( converted );
   while ( match.hasMatch() )
   {
@@ -555,7 +553,7 @@ QString QgsStringUtils::insertLinks( const QString &string, bool *foundLinks )
     QString email = match.captured( 1 );
     QString anchor = QStringLiteral( "<a href=\"mailto:%1\">%1</a>" ).arg( email.toHtmlEscaped() );
     converted.replace( match.capturedStart( 1 ), email.length(), anchor );
-    offset = match.capturedStart( 1 ) + anchor.length();
+    const int offset = match.capturedStart( 1 ) + anchor.length();
     match = emailRegEx.match( converted, offset );
   }
 
@@ -636,7 +634,7 @@ QString QgsStringUtils::wordWrap( const QString &string, const int length, const
       continue;
     }
     strCurrent = 0;
-    strHit = 0;
+    strHit = 0; // NOLINT
     lastHit = 0;
 
     while ( strCurrent < strLength )

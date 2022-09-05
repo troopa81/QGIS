@@ -557,25 +557,13 @@ void QgsMeshStreamField::addTrace( QPoint startPixel )
           y2 = y1 + ( 1 + x1 ) * Vy / fabs( Vx ) ;
 
         if ( x2 >= 1 )
-        {
           x2 = 1;
-          incX = +1;
-        }
         if ( x2 <= -1 )
-        {
           x2 = -1;
-          incX = -1;
-        }
         if ( y2 >= 1 )
-        {
           y2 = 1;
-          incY = +1;
-        }
         if ( y2 <= -1 )
-        {
           y2 = -1;
-          incY = -1;
-        }
       }
 
       //calculate distance

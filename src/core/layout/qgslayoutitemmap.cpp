@@ -2675,13 +2675,11 @@ void QgsLayoutItemMap::updateAtlasFeature()
     else if ( mAtlasScalingMode == Predefined )
     {
       // choose one of the predefined scales
-      double newWidth = originalExtent.width();
-      double newHeight = originalExtent.height();
       for ( int i = 0; i < scales.size(); i++ )
       {
         double ratio = scales[i] / originalScale;
-        newWidth = originalExtent.width() * ratio;
-        newHeight = originalExtent.height() * ratio;
+        const double newWidth = originalExtent.width() * ratio;
+        const double newHeight = originalExtent.height() * ratio;
 
         // compute new extent, centered on feature
         double xMin = geomCenterX - newWidth / 2.0;

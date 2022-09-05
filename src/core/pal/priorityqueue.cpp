@@ -157,8 +157,6 @@ void PriorityQueue::sort()
   int pi = 2;
   while ( size > pi ) pi *= 2;
 
-  i = pi / 2 - 2;
-
   for ( i = size - 1; i >= 0; i-- )
     downheap( i );
 

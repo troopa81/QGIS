@@ -1409,7 +1409,6 @@ std::size_t FeaturePart::createCurvedCandidatesAlongLine( std::vector< std::uniq
     expanded = mapShape->clone();
     expanded->extendLineByDistance( overrun, overrun, mLF->overrunSmoothDistance() );
     mapShape = expanded.get();
-    shapeLength += 2 * overrun;
   }
 
   QgsLabeling::LinePlacementFlags flags = mLF->arrangementFlags();

@@ -1233,8 +1233,6 @@ void QgsLayoutItemMapGrid::drawCoordinateAnnotation( QgsRenderContext &context, 
   const double textHeight = ( extension ? ( QgsTextRenderer::textHeight( context, mAnnotationFormat, QChar(), true ) )
                               : ( QgsTextRenderer::textHeight( context, mAnnotationFormat, '0', false ) ) ) / context.convertToPainterUnits( 1, QgsUnitTypes::RenderMillimeters );
 
-  double xpos = annot.position.x();
-  double ypos = annot.position.y();
   QPointF anchor = QPointF();
   int rotation = 0;
 
@@ -1270,8 +1268,8 @@ void QgsLayoutItemMapGrid::drawCoordinateAnnotation( QgsRenderContext &context, 
   }
 
   const QVector2D pos = annot.position + f * vector;
-  xpos = pos.x();
-  ypos = pos.y();
+  double xpos = pos.x();
+  double ypos = pos.y();
 
   const bool outside = ( anotPos == QgsLayoutItemMapGrid::OutsideMapFrame );
 

@@ -494,9 +494,6 @@ int QgsLegendRenderer::setColumns( QList<LegendComponentGroup> &componentGroups 
   double averageSpaceAboveGroups = 0;
   if ( componentGroups.size() > targetNumberColumns )
     averageSpaceAboveGroups = totalSpaceAboveGroups / ( componentGroups.size() );
-  // Correct the totalHeight using the number of columns because the first item
-  // in each column does not get any space above it
-  totalHeight -= targetNumberColumns * averageSpaceAboveGroups;
 
   for ( int i = 0; i < componentGroups.size(); i++ )
   {
@@ -973,4 +970,3 @@ void QgsLegendRenderer::drawLegend( QgsRenderContext &context )
 {
   paintAndDetermineSize( context );
 }
-

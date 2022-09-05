@@ -612,10 +612,9 @@ QString QgsMeshLayerUtils::formatTime( double hours, const QDateTime &referenceT
       const int seconds = static_cast<int>( hours * 3600.0 );
       int m = seconds / 60;
       const int s = seconds % 60;
-      int h = m / 60;
       m = m % 60;
       const int d = totalHours / 24;
-      h = totalHours % 24;
+      const int h = totalHours % 24;
       ret = QStringLiteral( "%1 d %2:%3:%4" ).
             arg( d ).
             arg( h, 2, 10, QLatin1Char( '0' ) ).

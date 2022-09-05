@@ -689,8 +689,11 @@ bool QgsAuxiliaryStorage::deleteTable( const QgsDataSourceUri &ogrUri )
       QString sql = QStringLiteral( "DROP TABLE %1" ).arg( uri.table() );
       rc = exec( sql, database.get() );
 
-      sql = QStringLiteral( "VACUUM" );
-      rc = exec( sql, database.get() );
+      if ( rc )
+      {
+        sql = QStringLiteral( "VACUUM" );
+        rc = exec( sql, database.get() );
+      }
     }
   }
 

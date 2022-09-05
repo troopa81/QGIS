@@ -659,7 +659,6 @@ void QgsCompoundCurve::addVertex( const QgsPoint &pt )
     {
       line->addVertex( lastCurve->endPoint() );
     }
-    lastCurve = line;
   }
   else //create new QgsLineString* with point in it
   {
