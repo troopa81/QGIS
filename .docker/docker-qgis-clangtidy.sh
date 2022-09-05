@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+sudo apt install -y \
+     clang-tidy \
+     python3-colorama
+
 /root/QGIS/.docker/docker-qgis-configure.sh
 
 cd ${CTEST_SOURCE_DIR}
