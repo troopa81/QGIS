@@ -36,32 +36,37 @@ if not len(sources):
     print("No sources to check!")
     exit(0)
 
-command = ["clang-tidy", "-p={}".format(build_dir),
-           "-checks=bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss"] + sources
+base_command = ["clang-tidy", "-p={}".format(build_dir),
+                "-checks=bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-narrowing-conversions,-bugprone-virtual-near-miss"]
 
-with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1,
-                      universal_newlines=True) as p:
-    filtered = False
-    error_types = {}
-    for line in p.stdout:
-        result = re.search("(.*): warning:(.*)\[(.*)\]$", line)
-        if result:
+# Don't give all sources at once to clang-tidy, otherwise it will print errors only when everything is finished
+error_types = {}
+for source in sources:
 
-            where, error_msg, error_type = result.groups()
+    command = base_command + [source]
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1,
+                          universal_newlines=True) as p:
+        filtered = False
+        for line in p.stdout:
+            result = re.search("(.*): warning:(.*)\[(.*)\]$", line)
+            if result:
 
-            error_types[error_type] = error_types.get(error_type, 0) + 1
+                where, error_msg, error_type = result.groups()
 
-            # Even with line-filter there is sometime no way to get rid of some non user code warnings
-            # See issue https://bugs.llvm.org/show_bug.cgi?id=38484
-            filtered = not line.startswith(src_dir)
+                # Even with line-filter there is sometime no way to get rid of some non user code warnings
+                # See issue https://bugs.llvm.org/show_bug.cgi?id=38484
+                filtered = not line.startswith(src_dir)
 
-        if filtered:
-            continue
+                if not filtered:
+                    error_types[error_type] = error_types.get(error_type, 0) + 1
 
-        if result:
-            print(f"{Style.BRIGHT}{where}: {Fore.RED}warning{Style.RESET_ALL}:{error_msg} {Fore.YELLOW}[{error_type}]{Style.RESET_ALL}")
-        else:
-            print(line, end='')
+            if filtered:
+                continue
+
+            if result:
+                print(f"{Style.BRIGHT}{where}: {Fore.RED}warning{Style.RESET_ALL}:{error_msg} {Fore.YELLOW}[{error_type}]{Style.RESET_ALL}")
+            else:
+                print(line, end='')
 
 
 if len(error_types):
