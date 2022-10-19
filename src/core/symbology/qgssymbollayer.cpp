@@ -38,6 +38,7 @@
 #include <QPainter>
 #include <QPointF>
 #include <QPolygonF>
+#include <QUuid>
 
 QgsPropertiesDefinition QgsSymbolLayer::sPropertyDefinitions;
 
@@ -236,6 +237,7 @@ void QgsSymbolLayer::setPaintEffect( QgsPaintEffect *effect )
 QgsSymbolLayer::QgsSymbolLayer( Qgis::SymbolType type, bool locked )
   : mType( type )
   , mLocked( locked )
+  , mId( QUuid::createUuid().toString() )
 {
 }
 
@@ -917,7 +919,7 @@ void QgsSymbolLayer::prepareMasks( const QgsSymbolRenderContext &context )
   mClipPath.clear();
 
   const QgsRenderContext &renderContext = context.renderContext();
-  const QList<QPainterPath> clipPaths = renderContext.symbolLayerClipPaths( this );
+  const QList<QPainterPath> clipPaths = renderContext.symbolLayerClipPaths( id() );
   if ( !clipPaths.isEmpty() )
   {
     QPainterPath mergedPaths;
@@ -934,4 +936,14 @@ void QgsSymbolLayer::prepareMasks( const QgsSymbolRenderContext &context )
       mClipPath = mClipPath.subtracted( mergedPaths );
     }
   }
+}
+
+void QgsSymbolLayer::setId( const QString &id )
+{
+  mId = id;
+}
+
+const QString &QgsSymbolLayer::id() const
+{
+  return mId;
 }

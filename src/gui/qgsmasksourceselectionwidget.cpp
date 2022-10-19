@@ -37,20 +37,9 @@ static void expandAll( QTreeWidgetItem *item )
   item->setExpanded( true );
 }
 
-void printSymbolLayerId( const QgsSymbolLayerId &lid )
-{
-  std::cout << lid.symbolKey().toLocal8Bit().constData() << "/";
-  QVector<int> path = lid.symbolLayerIndexPath();
-  for ( int i = 0; i < path.size(); i++ )
-  {
-    std::cout << path[i] << "/";
-  }
-}
-
 void printSymbolLayerRef( const QgsSymbolLayerReference &ref )
 {
-  std::cout << ref.layerId().toLocal8Bit().constData() << "/";
-  printSymbolLayerId( ref.symbolLayerId() );
+  std::cout << ref.layerId().toLocal8Bit().constData() << "/" << ref.symbolLayerIdV2().toLocal8Bit().constData();
 }
 
 QgsMaskSourceSelectionWidget::QgsMaskSourceSelectionWidget( QWidget *parent )
@@ -116,7 +105,7 @@ void QgsMaskSourceSelectionWidget::update()
           if ( ( sl->layerType() == "MaskMarker" ) ||
                ( subSymbol && visitSymbol( slItem.get(), identifier, subSymbol, indexPath ) ) )
           {
-            const QgsSymbolLayerReference ref( mLayer->id(), QgsSymbolLayerId( mCurrentIdentifier + identifier, indexPath ) );
+            const QgsSymbolLayerReference ref( mLayer->id(), sl->id() );
             mItems[ref] = slItem.get();
             rootItem->addChild( slItem.release() );
             ret = true;
@@ -183,7 +172,7 @@ void QgsMaskSourceSelectionWidget::update()
             slItem->setFlags( slItem->flags() | Qt::ItemIsUserCheckable );
             slItem->setCheckState( 0, Qt::Unchecked );
             mLayerItem->addChild( slItem );
-            mItems[QgsSymbolLayerReference( "__labels__" + mLayer->id(), { currentRule, 0 } )] = slItem;
+            mItems[QgsSymbolLayerReference( "__labels__" + mLayer->id(), currentRule )] = slItem;
           }
         }
         return true;
@@ -240,7 +229,7 @@ QList<QgsMaskSourceSelectionWidget::MaskSource> QgsMaskSourceSelectionWidget::se
       QgsMaskSourceSelectionWidget::MaskSource source;
       source.isLabeling = ref.layerId().startsWith( "__labels__" );
       source.layerId = source.isLabeling ? ref.layerId().mid( 10 ) : ref.layerId();
-      source.symbolLayerId = ref.symbolLayerId();
+      source.symbolLayerId = ref.symbolLayerIdV2();
       sel.append( source );
     }
   }
@@ -266,4 +255,3 @@ void QgsMaskSourceSelectionWidget::setSelection( const QList<QgsMaskSourceSelect
     }
   }
 }
-
