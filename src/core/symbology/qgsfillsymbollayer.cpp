@@ -2630,14 +2630,16 @@ bool QgsLinePatternFillSymbolLayer::hasDataDefinedProperties() const
   return false;
 }
 
-void QgsLinePatternFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext & )
+void QgsLinePatternFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext &context )
 {
   // deliberately don't pass this on to subsymbol here
+  installMasks( context, true );
 }
 
-void QgsLinePatternFillSymbolLayer::stopFeatureRender( const QgsFeature &, QgsRenderContext & )
+void QgsLinePatternFillSymbolLayer::stopFeatureRender( const QgsFeature &, QgsRenderContext &context )
 {
   // deliberately don't pass this on to subsymbol here
+  removeMasks( context, true );
 }
 
 QImage QgsLinePatternFillSymbolLayer::toTiledPatternImage() const
@@ -3095,6 +3097,7 @@ void QgsLinePatternFillSymbolLayer::applyPattern( const QgsSymbolRenderContext &
   lineRenderContext.setForceVectorOutput( false );
   lineRenderContext.setExpressionContext( context.renderContext().expressionContext() );
   lineRenderContext.setFlag( Qgis::RenderContextFlag::RenderingSubSymbol );
+  lineRenderContext.setDisabledSymbolLayersV2( context.renderContext().disabledSymbolLayersV2() );
 
   fillLineSymbol->startRender( lineRenderContext, context.fields() );
 
@@ -3938,18 +3941,20 @@ void QgsPointPatternFillSymbolLayer::stopRender( QgsSymbolRenderContext &context
   }
 }
 
-void QgsPointPatternFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext & )
+void QgsPointPatternFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext &context )
 {
   // The base class version passes this on to the subsymbol, but we deliberately don't do that here.
   // Otherwise generators used in the subsymbol will only render a single point per feature (they
   // have logic to only render once per paired call to startFeatureRender/stopFeatureRender).
+  installMasks( context, true );
 }
 
-void QgsPointPatternFillSymbolLayer::stopFeatureRender( const QgsFeature &, QgsRenderContext & )
+void QgsPointPatternFillSymbolLayer::stopFeatureRender( const QgsFeature &, QgsRenderContext &context )
 {
   // The base class version passes this on to the subsymbol, but we deliberately don't do that here.
   // Otherwise generators used in the subsymbol will only render a single point per feature (they
   // have logic to only render once per paired call to startFeatureRender/stopFeatureRender).
+  removeMasks( context, true );
 }
 
 void QgsPointPatternFillSymbolLayer::renderPolygon( const QPolygonF &points, const QVector<QPolygonF> *rings, QgsSymbolRenderContext &context )
@@ -4788,8 +4793,10 @@ void QgsCentroidFillSymbolLayer::renderPolygon( const QPolygonF &points, const Q
   }
 }
 
-void QgsCentroidFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext & )
+void QgsCentroidFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext &context )
 {
+  installMasks( context, true );
+
   mRenderingFeature = true;
   mCurrentParts.clear();
 }
@@ -4804,6 +4811,8 @@ void QgsCentroidFillSymbolLayer::stopFeatureRender( const QgsFeature &feature, Q
   render( context, mCurrentParts, feature, false );
   mFeatureSymbolOpacity = 1;
   mMarker->setOpacity( prevOpacity );
+
+  removeMasks( context, true );
 }
 
 void QgsCentroidFillSymbolLayer::render( QgsRenderContext &context, const QVector<QgsCentroidFillSymbolLayer::Part> &parts, const QgsFeature &feature, bool selected )
@@ -5763,4 +5772,3 @@ QgsMapUnitScale QgsRandomMarkerFillSymbolLayer::mapUnitScale() const
   }
   return QgsMapUnitScale();
 }
-
