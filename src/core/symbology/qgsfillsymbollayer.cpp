@@ -5709,8 +5709,10 @@ void QgsRandomMarkerFillSymbolLayer::setDensityArea( double area )
   mDensityArea = area;
 }
 
-void QgsRandomMarkerFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext & )
+void QgsRandomMarkerFillSymbolLayer::startFeatureRender( const QgsFeature &, QgsRenderContext &context )
 {
+  installMasks( context, true );
+
   mRenderingFeature = true;
   mCurrentParts.clear();
 }
@@ -5726,6 +5728,8 @@ void QgsRandomMarkerFillSymbolLayer::stopFeatureRender( const QgsFeature &featur
 
   mFeatureSymbolOpacity = 1;
   mMarker->setOpacity( prevOpacity );
+
+  removeMasks( context, true );
 }
 
 
