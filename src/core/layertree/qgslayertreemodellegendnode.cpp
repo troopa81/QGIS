@@ -662,12 +662,16 @@ QSizeF QgsSymbolLegendNode::drawSymbol( const QgsLegendSettings &settings, ItemC
   if ( QgsMarkerSymbol *markerSymbol = dynamic_cast<QgsMarkerSymbol *>( s ) )
   {
     const double size = markerSymbol->size( *context ) / context->scaleFactor();
-    height = size;
-    width = size;
+    if ( !qgsDoubleNear( size, 0 ) )
+    {
+      height = size;
+      width = size;
+    }
   }
 
-  const std::unique_ptr<QgsSymbol> minMaxSizeSymbol( QgsSymbolLayerUtils::restrictedSizeSymbol( s, minSymbolSize, maxSymbolSize, context, width, height ) );
-  if ( minMaxSizeSymbol )
+  bool ok = false;
+  const std::unique_ptr<QgsSymbol> minMaxSizeSymbol( QgsSymbolLayerUtils::restrictedSizeSymbol( s, minSymbolSize, maxSymbolSize, context, width, height, &ok ) );
+  if ( ok && minMaxSizeSymbol )
   {
     s = minMaxSizeSymbol.get();
   }
