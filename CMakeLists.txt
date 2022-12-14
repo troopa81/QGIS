@@ -19,6 +19,8 @@ endif()
 # don't relink it only the shared object changes
 set(CMAKE_LINK_DEPENDS_NO_SHARED ON)
 
+
+
 #############################################################
 # Project and version
 set(CPACK_PACKAGE_VERSION_MAJOR "3")
@@ -27,6 +29,9 @@ set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(COMPLETE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
 set(RELEASE_NAME "Master")
 project(qgis VERSION ${COMPLETE_VERSION})
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 
 if (APPLE)
   set(QGIS_APP_NAME "QGIS")
@@ -623,7 +628,7 @@ if (PEDANTIC)
     endif()
 
     # disable warnings
-    set(_warnings "${_warnings} /wd4091 ")  # 'typedef': ignored on left of '' when no variable is declared (occurs in MS DbgHelp.h header)
+    set(_warnings "${_warning} /wd4091 ")  # 'typedef': ignored on left of '' when no variable is declared (occurs in MS DbgHelp.h header)
     set(_warnings "${_warnings} /wd4100 ")  # unused formal parameters
     set(_warnings "${_warnings} /wd4127 ")  # constant conditional expressions (used in Qt template classes)
     set(_warnings "${_warnings} /wd4190 ")  # 'identifier' has C-linkage specified, but returns UDT 'identifier2' which is incompatible with C
@@ -986,7 +991,7 @@ set(MIN_QGIS_PYTHON_VERSION "3.7")
 set(Python_FIND_FRAMEWORK "LAST")
 
 
-if (WITH_BINDINGS)
+if (WITH_BINDINGS OR WITH_PYSIDE)
   find_package(Python ${MIN_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
 else()
   find_package(Python ${MIN_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter)

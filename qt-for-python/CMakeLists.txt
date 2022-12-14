@@ -40,20 +40,9 @@ foreach(pyfile ${PY_FILES})
   PY_COMPILE(pyutils "${QGIS_PYTHON_OUTPUT_DIRECTORY}/${pyfile}")
 endforeach(pyfile)
 
-
-
-
-
-if (WITH_QT6)
-    find_package(Shiboken6 REQUIRED)
-    find_package(PySide6 ${Qt5Widgets_VERSION} EXACT REQUIRED)
-    include(PySide6ModuleBuild)
-    set(PYSIDE_MAJOR_VERSION "6")
-else()
-    find_package(Shiboken2 REQUIRED)
-    find_package(PySide2 ${Qt5Widgets_VERSION} EXACT REQUIRED)
-    include(PySide2ModuleBuild)
-    set(PYSIDE_MAJOR_VERSION "2")
-endif()
+find_package(Shiboken6 REQUIRED)
+find_package(PySide6 ${Qt6Widgets_VERSION} EXACT REQUIRED)
+include(PySide6ModuleBuild)
+set(PYSIDE_MAJOR_VERSION "6")
 
 add_subdirectory(qgis)

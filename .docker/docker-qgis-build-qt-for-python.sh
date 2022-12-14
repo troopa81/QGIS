@@ -13,20 +13,21 @@ ccache -M 2.0G
 # export CCACHE_LOGFILE=/tmp/cache.debug
 ccache -z
 
-mkdir -p /usr/src/qgis/build-pyside2
-cd /usr/src/qgis/build-pyside2 || exit 1
+mkdir -p /usr/src/qgis/build-pyside6
+cd /usr/src/qgis/build-pyside6 || exit 1
 
 CLANG_WARNINGS="-Wrange-loop-construct"
 
 export CC=/usr/lib/ccache/clang
 export CXX=/usr/lib/ccache/clang++
 
+ln -s /usr/bin/ninja /usr/bin/ninja-build
 
 cmake -GNinja \
- -DPYTHON_LIBRARY=/usr/lib64/libpython3.9.so.1.0 \
+ -DPYTHON_LIBRARY=/usr/lib64/libpython3.10.so.1.0 \
  -DENABLE_TESTING=ON \
  -DWITH_PYSIDE=ON \
- -DWITH_QT6=ON \
+ -DBUILD_WITH_QT6=ON \
  -DWITH_EPT=OFF \
  -DWITH_QUICK=OFF \
  -DWITH_3D=OFF \

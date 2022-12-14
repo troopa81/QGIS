@@ -1,7 +1,9 @@
-FROM fedora:34 as single
+ARG DISTRO_VERSION=37
+
+FROM fedora:${DISTRO_VERSION} as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
 
-RUN dnf -y install \
+RUN dnf -y --refresh install \
     bison \
     ccache \
     clang \
@@ -10,14 +12,24 @@ RUN dnf -y install \
     expat-devel \
     fcgi-devel \
     flex \
+    git \
     gdal-devel \
     geos-devel \
+    gpsbabel \
+    grass \
+    grass-devel \
     gsl-devel \
     libpq-devel \
     libspatialite-devel \
+    libxml2-devel \
     libzip-devel \
     libzstd-devel \
+    netcdf-devel \
     ninja-build \
+    ocl-icd-devel \
+    PDAL \
+    PDAL-libs \
+    PDAL-devel \
     proj-devel \
     protobuf-devel \
     protobuf-lite-devel \
@@ -28,10 +40,13 @@ RUN dnf -y install \
     qt6-qtdeclarative-devel \
     qt6-qttools-static \
     qt6-qtsvg-devel \
+    qt6-qtpositioning-devel \
+    qt6-qtdeclarative-devel \
     qt6-qt5compat-devel \
     spatialindex-devel \
     sqlite-devel \
     unzip \
+    unixODBC-devel \
     xorg-x11-server-Xvfb \
     util-linux \
     wget \
@@ -44,12 +59,7 @@ RUN dnf -y install \
     kernel-devel \
     ninja-build \
     patch \
-    dos2unix \
-    python3-shiboken6 \
-    python3-shiboken6-devel \
-    python3-pyside6 \
-    python3-pyside6-devel \
-    pyside6-tools
+    dos2unix
 
 RUN cd /usr/src \
   && wget https://github.com/KDE/qca/archive/refs/heads/master.zip \
@@ -80,11 +90,24 @@ RUN cd /usr/src \
 
 
 RUN cd /usr/src \
-  && wget https://www.riverbankcomputing.com/static/Downloads/QScintilla/2.13.0/QScintilla_src-2.13.0.zip \
-  && unzip QScintilla_src-2.13.0.zip \
-  && rm QScintilla_src-2.13.0.zip \
-  && cd QScintilla_src-2.13.0 \
+  && wget https://www.riverbankcomputing.com/static/Downloads/QScintilla/2.13.3/QScintilla_src-2.13.3.zip \
+  && unzip QScintilla_src-2.13.3.zip \
+  && rm QScintilla_src-2.13.3.zip \
+  && cd QScintilla_src-2.13.3 \
   && qmake6 src/qscintilla.pro \
   && make -j4 \
   && make install
 
+#RUN pip install --index-url=http://download.qt.io/official_releases/QtForPython/ --trusted-host download.qt.io shiboken6 pyside6 shiboken6_generator
+
+ENV PATH="/usr/local/bin:${PATH}"
+
+RUN dnf install -y libxslt-devel
+
+RUN dnf -y install git python-setuptools python3-packaging clang-devel llvm-devel
+WORKDIR /usr
+#RUN git clone https://code.qt.io/pyside/pyside-setup && cd pyside-setup && git checkout 6.3
+#RUN wget https://codereview.qt-project.org/changes/pyside%2Fpyside-setup~395307/revisions/1/archive?format=tar
+#RUN mv archive?format=tar pyside.tar.gz && tar tzf pyside
+#WORKDIR /usr/pyside-setup
+#RUN python3 setup.py build --qtpaths=/usr/lib64/qt6/bin/qtpaths --parallel=8
