@@ -1,5 +1,5 @@
 
-ARG DISTRO_VERSION=22.04
+ARG DISTRO_VERSION=20.04
 
 FROM      ubuntu:${DISTRO_VERSION}
 MAINTAINER Denis Rouzaud <denis@opengis.ch>
@@ -20,8 +20,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libaio1 \
     libexiv2-27 \
     libfcgi0ldbl \
-    libgsl27 \
-    libprotobuf-lite23 \
     libspatialindex6 \
     libsqlite3-mod-spatialite \
     lighttpd \
@@ -125,6 +123,12 @@ RUN mkdir -p /usr/pyside-setup/build/qfp-py3.10-qt6.4.1-64bit-release/install/li
     ln -s dist-packages site-packages
 #RUN python3 setup.py build --qtpaths=${Qt6_DIR}/bin/qtpaths --parallel=8 --internal-build-type=shiboken6
 #RUN python3 setup.py build --qtpaths=${Qt6_DIR}/bin/qtpaths --parallel=8 --internal-build-type=shiboken6-generator
+RUN pip install -r requirements.txt
+RUN wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+RUN apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
+RUN apt-get update
+RUN apt-get install -y cmake
+
 RUN python3 setup.py build --qtpaths=${Qt6_DIR}/bin/qtpaths --parallel=8
 RUN python3 setup.py install --qtpaths=${Qt6_DIR}/bin/qtpaths --parallel=8 --verbose-build
 
