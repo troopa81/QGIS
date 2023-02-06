@@ -966,7 +966,7 @@ void QgsSymbolLayer::setId( const QString &id )
   mId = id;
 }
 
-const QString &QgsSymbolLayer::id() const
+QString QgsSymbolLayer::id() const
 {
   return mId;
 }
