@@ -156,7 +156,7 @@ class CORE_EXPORT QgsRenderContext : public QgsTemporalRangeObject
      * \since QGIS 3.12
      * \deprecated since QGIS 3.30 and replaced with setDisabledSymbolLayersV2
      */
-    Q_DECL_DEPRECATED void setDisabledSymbolLayers( const QSet<const QgsSymbolLayer *> &symbolLayers );
+    Q_DECL_DEPRECATED void setDisabledSymbolLayers( const QSet<const QgsSymbolLayer *> &symbolLayers ) SIP_DEPRECATED;
 
     /**
      * When rendering a map layer in a second pass (for selective masking),
