@@ -190,7 +190,7 @@ class CORE_EXPORT QgsRenderContext : public QgsTemporalRangeObject
      * \see isSymbolLayerEnabled()
      * \since QGIS 3.30
      */
-    const QSet<QString> &disabledSymbolLayersV2() const;
+    QSet<QString> disabledSymbolLayersV2() const;
 
     /**
      * When rendering a map layer in a second pass (for selective masking),
