@@ -732,7 +732,7 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
         if ( !layerJobMapping.contains( sourceLayerId ) )
           continue;
 
-        for ( QString symbolLayerId : mit.value().symbolLayerIds )
+        for ( const QString &symbolLayerId : mit.value().symbolLayerIds )
           slRefs.insert( QgsSymbolLayerReference( sourceLayerId, symbolLayerId ) );
 
         hasEffects |= mit.value().hasEffects;
