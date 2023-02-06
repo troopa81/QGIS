@@ -16,8 +16,8 @@ import os
 import subprocess
 
 import qgis  # NOQA
-from qgis.PyQt.QtCore import QDir, QRectF, QSize, Qt
-from qgis.PyQt.QtGui import QColor, QImage, QPainter
+from qgis.PyQt.QtCore import QDir, QRectF, QSize, Qt, QUrl
+from qgis.PyQt.QtGui import QColor, QImage, QPainter, QDesktopServices
 from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
@@ -46,6 +46,7 @@ from qgis.core import (
     QgsSymbolLayerUtils,
     QgsUnitTypes,
     QgsWkbTypes,
+    QgsFontUtils
 )
 from qgis.testing import start_app, unittest
 
@@ -181,9 +182,6 @@ class TestSelectiveMasking(unittest.TestCase):
         - parallel rendering, with cache (rendered two times)
         - sequential rendering, with cache (rendered two times)
         """
-
-        return True
-
         for do_parallel in [False, True]:
             for use_cache in [False, True]:
                 print("=== parallel", do_parallel, "cache", use_cache)
@@ -1177,9 +1175,18 @@ class TestSelectiveMasking(unittest.TestCase):
         layer = QgsProject.instance().mapLayersByName('line_pattern_fill')[0]
         self.assertTrue(layer)
 
+        self.assertTrue(len(layer.labeling().subProviders()), 1)
+        settings = layer.labeling().settings()
+        fmt = settings.format()
+        fmt.setFont(QgsFontUtils.getStandardTestFont("Bold"))
+        fmt.setSize(30)
+        fmt.setSizeUnit(QgsUnitTypes.RenderPoints)
+        settings.setFormat(fmt)
+        layer.labeling().setSettings(settings)
+
         map_settings = QgsMapSettings()
         crs = QgsCoordinateReferenceSystem('epsg:4326')
-        extent = QgsRectangle(-0.972, -1.966, 1.58, 1.806)
+        extent = QgsRectangle(0, -1, 0.5, 0.8)
         map_settings.setBackgroundColor(QColor(152, 219, 249))
         map_settings.setOutputSize(QSize(420, 280))
         map_settings.setOutputDpi(72)
@@ -1200,6 +1207,15 @@ class TestSelectiveMasking(unittest.TestCase):
 
         layer = QgsProject.instance().mapLayersByName('line_pattern_fill')[0]
         self.assertTrue(layer)
+
+        self.assertTrue(len(layer.labeling().subProviders()), 1)
+        settings = layer.labeling().settings()
+        fmt = settings.format()
+        fmt.setFont(QgsFontUtils.getStandardTestFont("Bold"))
+        fmt.setSize(9)
+        fmt.setSizeUnit(QgsUnitTypes.RenderPoints)
+        settings.setFormat(fmt)
+        layer.labeling().setSettings(settings)
 
         map_settings = QgsMapSettings()
         crs = QgsCoordinateReferenceSystem('epsg:4326')
@@ -1223,6 +1239,15 @@ class TestSelectiveMasking(unittest.TestCase):
 
         layer = QgsProject.instance().mapLayersByName('point_pattern_fill')[0]
         self.assertTrue(layer)
+
+        self.assertTrue(len(layer.labeling().subProviders()), 1)
+        settings = layer.labeling().settings()
+        fmt = settings.format()
+        fmt.setFont(QgsFontUtils.getStandardTestFont("Bold"))
+        fmt.setSize(9)
+        fmt.setSizeUnit(QgsUnitTypes.RenderPoints)
+        settings.setFormat(fmt)
+        layer.labeling().setSettings(settings)
 
         map_settings = QgsMapSettings()
         crs = QgsCoordinateReferenceSystem('epsg:4326')
@@ -1248,6 +1273,15 @@ class TestSelectiveMasking(unittest.TestCase):
         layer = QgsProject.instance().mapLayersByName('centroid_fill')[0]
         self.assertTrue(layer)
 
+        self.assertTrue(len(layer.labeling().subProviders()), 1)
+        settings = layer.labeling().settings()
+        fmt = settings.format()
+        fmt.setFont(QgsFontUtils.getStandardTestFont("Bold"))
+        fmt.setSize(9)
+        fmt.setSizeUnit(QgsUnitTypes.RenderPoints)
+        settings.setFormat(fmt)
+        layer.labeling().setSettings(settings)
+
         map_settings = QgsMapSettings()
         crs = QgsCoordinateReferenceSystem('epsg:4326')
         extent = QgsRectangle(-1.0073971192118132, -0.7875782447946843, 0.87882587741257345, 0.51640826470600099)
@@ -1270,6 +1304,15 @@ class TestSelectiveMasking(unittest.TestCase):
 
         layer = QgsProject.instance().mapLayersByName('random_generator_fill')[0]
         self.assertTrue(layer)
+
+        self.assertTrue(len(layer.labeling().subProviders()), 1)
+        settings = layer.labeling().settings()
+        fmt = settings.format()
+        fmt.setFont(QgsFontUtils.getStandardTestFont("Bold"))
+        fmt.setSize(9)
+        fmt.setSizeUnit(QgsUnitTypes.RenderPoints)
+        settings.setFormat(fmt)
+        layer.labeling().setSettings(settings)
 
         map_settings = QgsMapSettings()
         crs = QgsCoordinateReferenceSystem('epsg:4326')
