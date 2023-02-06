@@ -953,8 +953,7 @@ void QgsSymbolLayer::removeMasks( QgsRenderContext &context, bool recursive )
     context.painter()->restore();
   }
 
-  QgsSymbol *lSubSymbol = recursive ? subSymbol() : nullptr;
-  if ( lSubSymbol )
+  if ( QgsSymbol *lSubSymbol = recursive ? subSymbol() : nullptr )
   {
     for ( QgsSymbolLayer *sl : lSubSymbol->symbolLayers() )
       sl->removeMasks( context, true );
