@@ -939,8 +939,7 @@ void QgsSymbolLayer::installMasks( QgsRenderContext &context, bool recursive )
     context.painter()->setClipPath( mClipPath, Qt::IntersectClip );
   }
 
-  QgsSymbol *lSubSymbol = recursive ? subSymbol() : nullptr;
-  if ( lSubSymbol )
+  if ( QgsSymbol *lSubSymbol = recursive ? subSymbol() : nullptr )
   {
     for ( QgsSymbolLayer *sl : lSubSymbol->symbolLayers() )
       sl->installMasks( context, true );
