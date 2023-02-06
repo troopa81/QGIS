@@ -35,7 +35,7 @@ QgsSymbolLayerReferenceList stringToSymbolLayerReferenceList( const QString &str
   if ( str.isEmpty() )
     return lst;
 
-  if ( str.contains( "," ) )
+  if ( str.contains( ',' ) )
   {
     // TODO QGIS 4 : remove this if branch, keep only else part
     Q_NOWARN_DEPRECATED_PUSH
