@@ -20,6 +20,7 @@ from qgis.core import (
     QgsGeometry,
     QgsLegendPatchShape,
     QgsLimitedRandomColorRamp,
+    QgsLinePatternFillSymbolLayer,
     QgsLineSymbol,
     QgsMarkerSymbol,
     QgsPalLayerSettings,

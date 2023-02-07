@@ -16,7 +16,7 @@ import os
 import subprocess
 
 import qgis  # NOQA
-from qgis.PyQt.QtCore import QDir, QRectF, QSize, Qt, QUrl
+from qgis.PyQt.QtCore import QDir, QRectF, QSize, Qt, QUrl, QUuid
 from qgis.PyQt.QtGui import QColor, QImage, QPainter, QDesktopServices
 from qgis.core import (
     Qgis,
@@ -36,6 +36,7 @@ from qgis.core import (
     QgsOuterGlowEffect,
     QgsPalLayerSettings,
     QgsProject,
+    QgsProjectFileTransform,
     QgsProperty,
     QgsRectangle,
     QgsRenderChecker,
@@ -316,7 +317,7 @@ class TestSelectiveMasking(unittest.TestCase):
         self.assertEqual([slRef.symbolLayerId() for slRef in self.polys_layer.labeling().settings().format().mask().maskedSymbolLayers()],
                          [slRef.symbolLayerId() for slRef in oldMaskRefs])
 
-        QgsSymbolLayerUtils.fixOldSymbolLayerReferences(QgsProject.instance().mapLayers())
+        QgsProjectFileTransform.fixOldSymbolLayerReferences(QgsProject.instance().mapLayers())
 
         self.assertEqual([QUuid(slRef.symbolLayerIdV2()).isNull() for slRef in self.polys_layer.labeling().settings().format().mask().maskedSymbolLayers()],
                          [False, False, False])
@@ -345,7 +346,7 @@ class TestSelectiveMasking(unittest.TestCase):
         self.assertEqual([slRef.symbolLayerId() for slRef in self.points_layer.renderer().symbol().symbolLayers()[1].masks()],
                          [slRef.symbolLayerId() for slRef in oldMaskRefs])
 
-        QgsSymbolLayerUtils.fixOldSymbolLayerReferences(QgsProject.instance().mapLayers())
+        QgsProjectFileTransform.fixOldSymbolLayerReferences(QgsProject.instance().mapLayers())
 
         self.assertEqual([QUuid(slRef.symbolLayerIdV2()).isNull() for slRef in self.points_layer.renderer().symbol().symbolLayers()[1].masks()],
                          [False])
