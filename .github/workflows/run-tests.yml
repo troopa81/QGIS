@@ -399,6 +399,15 @@ jobs:
           mkdir -p /tmp/minio_tests/test_bucket && chmod -R 777 /tmp/minio_tests
           docker-compose -f .docker/$DOCKERFILE run qgis-deps /root/QGIS/.docker/docker-qgis-test.sh $TEST_BATCH
 
+      - name: Debug artefact issue
+        run: |
+          echo "---------- pwd"
+          sudo pwd
+          echo "---------- ls -l"
+          sudo ls -l
+          echo "---------- ls -l /home/runner/work/QGIS/QGIS/qgis_test_report/"
+          sudo ls -l  /home/runner/work/QGIS/QGIS/qgis_test_report/
+
       - name: Archive test results report
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
