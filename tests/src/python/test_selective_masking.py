@@ -13,6 +13,7 @@ __author__ = 'Hugo Mercier / Oslandia'
 __date__ = '28/06/2019'
 
 import os
+import shutil
 import subprocess
 
 import qgis  # NOQA
@@ -237,6 +238,8 @@ class TestSelectiveMasking(unittest.TestCase):
         exporter.exportToPdf(result_filename, settings)
         self.assertTrue(os.path.exists(result_filename))
 
+        print(result_filename)
+
         # Generate a readable PDF file so we count raster in it
         result_txt = getTempfilePath("txt")
         subprocess.run(["qpdf", "--qdf", "--object-streams=disable", result_filename, result_txt])
@@ -254,6 +257,10 @@ class TestSelectiveMasking(unittest.TestCase):
         subprocess.run(["pdftoppm", result_filename,
                         os.path.splitext(image_result_filename)[0],
                         "-png", "-r", "300", "-singlefile"])
+
+        print(image_result_filename)
+
+        shutil.copy2(result_filename, "/root/QGIS/qgis_test_report/")
 
         self.checker.setControlName(control_name)
         self.checker.setRenderedImage(image_result_filename)
