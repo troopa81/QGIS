@@ -43,9 +43,9 @@ jobs:
             docker-tag-suffix: ''
             with-qt6: OFF
             with-qt5: ON
-            with-3d: ON
-            with-quick: ON
-            with-clazy: ON
+            with-3d: OFF
+            with-quick: OFF
+            with-clazy: OFF
             with-grass7: OFF
             with-grass8: OFF
             with-compile-commands: ON
@@ -274,29 +274,29 @@ jobs:
 
     strategy:
       matrix:
-        qt-version: [5, 6]
-        test-batch: [ALL_BUT_PROVIDERS, POSTGRES, HANA]
+        qt-version: [5]
+        test-batch: [ALL_BUT_PROVIDERS]
 
         include:
           - qt-version: 5
             distro-version: 22.04
             docker-target: binary-only
 
-          - qt-version: 6
-            distro-version: 36
-            docker-target: single
+          # - qt-version: 6
+          #   distro-version: 36
+          #   docker-target: single
 
-          - qt-version: 5
-            distro-version: 22.04
-            test-batch: ORACLE
-            docker-target: binary-for-oracle
+          # - qt-version: 5
+          #   distro-version: 22.04
+          #   test-batch: ORACLE
+          #   docker-target: binary-for-oracle
 
-        exclude:
-          - qt-version: 6
-            test-batch: HANA
+        # exclude:
+        #   - qt-version: 6
+        #     test-batch: HANA
 
-          - qt-version: 6
-            test-batch: POSTGRES
+        #   - qt-version: 6
+        #     test-batch: POSTGRES
 
       fail-fast: false
 

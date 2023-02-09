@@ -260,6 +260,9 @@ class TestSelectiveMasking(unittest.TestCase):
 
         print(image_result_filename)
 
+        if not os.path.exists("/root/QGIS/qgis_test_report/"):
+            os.makedirs("/root/QGIS/qgis_test_report/")
+
         shutil.copy2(result_filename, "/root/QGIS/qgis_test_report/")
 
         self.checker.setControlName(control_name)

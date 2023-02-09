@@ -278,7 +278,7 @@ echo "::group::Print disk space before running tests"
 df -h
 echo "::endgroup::"
 
-python3 ${SRCDIR}/.ci/ctest2ci.py xvfb-run ctest -V $CTEST_OPTIONS -E "${EXCLUDE_TESTS}" -S ${SRCDIR}/.ci/config_test.ctest --output-on-failure
+python3 ${SRCDIR}/.ci/ctest2ci.py xvfb-run ctest -R PyQgsSelectiveMasking -V $CTEST_OPTIONS -E "${EXCLUDE_TESTS}" -S ${SRCDIR}/.ci/config_test.ctest --output-on-failure
 
 echo "::group::Print disk space after running tests"
 df -h
