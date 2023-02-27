@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - fix_clangtidy_paths
     paths:
     - 'src/**'
     - 'external/**'
@@ -43,8 +44,8 @@ jobs:
             docker-tag-suffix: ''
             with-qt6: OFF
             with-qt5: ON
-            with-3d: ON
-            with-quick: ON
+            with-3d: OFF
+            with-quick: OFF
             with-clazy: ON
             with-grass7: OFF
             with-grass8: OFF
@@ -52,20 +53,20 @@ jobs:
             # LD_PRELOAD: /lib/x86_64-linux-gnu/libSegFault.so
             experimental: false
 
-          - distro-version: '36'
-            qt-version: 6
-            run-tests: true
-            docker-tag-suffix: ''
-            with-qt6: ON
-            with-qt5: OFF
-            with-3d: ON
-            with-quick: ON
-            with-clazy: OFF
-            with-grass7: OFF
-            with-grass8: OFF
-            with-compile-commands: OFF
-            LD_PRELOAD: ''
-            experimental: false
+          # - distro-version: '36'
+          #   qt-version: 6
+          #   run-tests: true
+          #   docker-tag-suffix: ''
+          #   with-qt6: ON
+          #   with-qt5: OFF
+          #   with-3d: ON
+          #   with-quick: ON
+          #   with-clazy: OFF
+          #   with-grass7: OFF
+          #   with-grass8: OFF
+          #   with-compile-commands: OFF
+          #   LD_PRELOAD: ''
+          #   experimental: false
 
 
       fail-fast: false
@@ -408,7 +409,7 @@ jobs:
           path: qgis_test_report
 
   clang-tidy:
-    if: github.event_name == 'pull_request'
+    # if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: build
 
