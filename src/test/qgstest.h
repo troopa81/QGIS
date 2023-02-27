@@ -107,7 +107,7 @@
 
 // Start your PostgreSQL-backend connection requiring test with this macro
 #define QGSTEST_NEED_PGTEST_DB() \
-  if ( getenv( "QGIS_PGTEST_DB_SKIP" ) ) \
+  if ( getenv( "QGIS_PGTEST_DB_SKIP2" ) ) \
     QSKIP( "Test disabled due to QGIS_PGTEST_DB_SKIP env variable being set" );
 
 /**

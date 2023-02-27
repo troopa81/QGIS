@@ -12,9 +12,11 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+
 #include "qgstest.h"
 #include "qgsconfig.h"
 #include <QObject>
+
 
 #include <qgspostgresconn.h>
 #include <qgsfields.h>
@@ -161,6 +163,7 @@ class TestQgsPostgresConn: public QObject
 #ifdef ENABLE_PGTEST
     void supportedLayers()
     {
+      QGSTEST_NEED_PGTEST_DB();
       QGSTEST_NEED_PGTEST_DB();
 
       QgsPostgresConn *conn = getConnection();
