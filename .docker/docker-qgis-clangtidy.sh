@@ -34,6 +34,10 @@ echo "::group::Download clang-tidy-diff"
 curl -XGET https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-14.0.6/clang-tools-extra/clang-tidy/tool/clang-tidy-diff.py -o clang-tidy-diff.py
 echo "::endgroup::"
 
+echo "::group::Debug git diff"
+git diff -U0 HEAD^ | cat
+echo "::endgroup::"
+
 echo "${bold}Run clang-tidy on modifications...${endbold}"
 CLANG_TIDY_CHECKS=$(cat tests/code_layout/clangtidy_checks.txt | grep -ve "^#" | grep -ve "^$" | tr -d '\n')
 git diff -U0 HEAD^ | python3 clang-tidy-diff.py -p1 -path=${CTEST_BUILD_DIR} -use-color -checks="$CLANG_TIDY_CHECKS" | tee clang-tidy.log
