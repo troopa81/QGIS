@@ -1184,7 +1184,6 @@ void QgsBookmarksItemGuiProvider::populateContextMenu( QgsDataItem *item, QMenu 
                                     QMessageBox::Yes | QMessageBox::No, QMessageBox::No ) != QMessageBox::Yes )
           return;
 
-        int i = 0;
         for ( const QString &g : groups )
         {
           const QList<QgsBookmark> matching = manager->bookmarksByGroup( g );
@@ -1192,7 +1191,6 @@ void QgsBookmarksItemGuiProvider::populateContextMenu( QgsDataItem *item, QMenu 
           {
             manager->removeBookmark( bookmark.id() );
           }
-          i++;
         }
       }
     } );

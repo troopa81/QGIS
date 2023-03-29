@@ -214,10 +214,12 @@ QVector<QgsRayCastingUtils::RayHit> QgsVectorLayerChunkedEntity::rayIntersection
 {
   Q_UNUSED( context )
   QgsDebugMsgLevel( QStringLiteral( "Ray cast on vector layer" ), 2 );
+#ifdef QGISDEBUG
   int nodeUsed = 0;
   int nodesAll = 0;
   int hits = 0;
   int ignoredGeometries = 0;
+#endif
   QVector<QgsRayCastingUtils::RayHit> result;
 
   float minDist = -1;
@@ -227,12 +229,16 @@ QVector<QgsRayCastingUtils::RayHit> QgsVectorLayerChunkedEntity::rayIntersection
 
   for ( QgsChunkNode *node : activeNodes )
   {
+#ifdef QGISDEBUG
     nodesAll++;
+#endif
     if ( node->entity() &&
          ( minDist < 0 || node->bbox().distanceFromPoint( ray.origin() ) < minDist ) &&
          QgsRayCastingUtils::rayBoxIntersection( ray, node->bbox() ) )
     {
+#ifdef QGISDEBUG
       nodeUsed++;
+#endif
       const QList<Qt3DRender::QGeometryRenderer *> rendLst = node->entity()->findChildren<Qt3DRender::QGeometryRenderer *>();
       for ( const auto &rend : rendLst )
       {
@@ -240,14 +246,18 @@ QVector<QgsRayCastingUtils::RayHit> QgsVectorLayerChunkedEntity::rayIntersection
         QgsTessellatedPolygonGeometry *polygonGeom = qobject_cast<QgsTessellatedPolygonGeometry *>( geom );
         if ( !polygonGeom )
         {
+#ifdef QGISDEBUG
           ignoredGeometries++;
+#endif
           continue; // other QGeometry types are not supported for now
         }
 
         QVector3D nodeIntPoint;
         if ( polygonGeom->rayIntersection( ray, transformMatrix, nodeIntPoint, fid ) )
         {
+#ifdef QGISDEBUG
           hits++;
+#endif
           float dist = ( ray.origin() - nodeIntPoint ).length();
           if ( minDist < 0 || dist < minDist )
           {
