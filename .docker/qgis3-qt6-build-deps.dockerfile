@@ -38,6 +38,8 @@ RUN dnf -y --refresh install \
     python3-devel \
     python3-pyqt6 \
     python3-pyqt6-devel \
+    python3-qscintilla-qt6 \
+    python3-qscintilla-qt6-devel \
     python3-termcolor \
     PyQt-builder \
     qt6-qt3d-devel \
