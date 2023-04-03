@@ -40,6 +40,11 @@ from qgis.testing import start_app, unittest
 
 from utilities import getTestFont, unitTestDataPath
 
+# TODO QGIS 4.0: Fix code if PyQt6
+from qgis.PyQt.QtCore import QT_VERSION
+if (QT_VERSION >= 0x060000):
+    Qt.AlignRight = Qt.AlignmentFlag.AlignRight
+
 start_app()
 TEST_DATA_DIR = unitTestDataPath()
 

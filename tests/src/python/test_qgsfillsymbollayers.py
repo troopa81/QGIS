@@ -24,6 +24,11 @@ from qgis.core import (
 )
 from qgis.testing import unittest
 
+# TODO QGIS 4.0: remove
+from qgis.PyQt.QtCore import QT_VERSION
+if (QT_VERSION >= 0x060000):
+    QImage.Format_RGB32 = QImage.Format.Format_RGB32
+
 
 class TestQgsFillSymbolLayers(unittest.TestCase):
 
