@@ -34,7 +34,7 @@ class QgsProxyProgressTask;
  * \note This is not considered stable API and may change in future QGIS versions.
  * \since QGIS 3.26
  */
-class GUI_EXPORT QgsProcessingBatchAlgorithmDialogBase : public QgsProcessingAlgorithmDialogBase
+class GUI_EXPORT QgsProcessingBatchAlgorithmDialogBase : public QgsProcessingAlgorithmDialogBase SIP_ABSTRACT
 {
     Q_OBJECT
 
@@ -68,7 +68,7 @@ class GUI_EXPORT QgsProcessingBatchAlgorithmDialogBase : public QgsProcessingAlg
      * Starts the batch execution, where the \a parameters list dictates the parameters for each component
      * step of the batch.
      */
-    void execute( const QList< QVariantMap > &parameters );
+    void execute( const QList< QVariantMap > &parameters ) SIP_SKIP;
 
     /**
      * Creates a new Processing context.
@@ -90,7 +90,7 @@ class GUI_EXPORT QgsProcessingBatchAlgorithmDialogBase : public QgsProcessingAlg
     /**
      * Creates a summary table of the results of a batch execution.
      */
-    virtual void createSummaryTable( const QList< QVariantMap > &results, const QList< QVariantMap > &errors ) = 0;
+    virtual void createSummaryTable( const QList< QVariantMap > &results, const QList< QVariantMap > &errors ) = 0 SIP_SKIP;
 
   private slots:
 
