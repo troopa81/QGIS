@@ -34,9 +34,15 @@ from qgis.PyQt.QtWidgets import (
     QFileDialog,
     QMessageBox,
     QToolButton,
-    QMenu,
-    QAction
+    QMenu
 )
+
+# TODO QGIS 4.0: Fix code if PyQt6
+from qgis.PyQt.QtCore import QT_VERSION
+if (QT_VERSION >= 0x060000):
+    from qgis.PyQt.QtGui import QAction
+else:
+    from qgis.PyQt.QtWidgets import QAction
 
 # adding to this list? also update the HistoryDialog.py executeAlgorithm imports!!
 
