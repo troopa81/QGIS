@@ -116,13 +116,13 @@ class CORE_EXPORT QgsDataItem : public QObject
      * Create children. Children are not expected to have parent set.
      * \warning This method MUST BE THREAD SAFE.
     */
-    virtual QVector<QgsDataItem *> createChildren() SIP_TRANSFERBACK;
+    virtual QList<QgsDataItem *> createChildren() SIP_TRANSFERBACK;
 #ifdef SIP_RUN
     SIP_VIRTUAL_CATCHER_CODE
     PyObject *sipResObj = sipCallMethod( 0, sipMethod, "" );
     // H = Convert a Python object to a mapped type instance.
     // 5 = 1 (disallows the conversion of Py_None to NULL) + 4 (returns a copy of the C/C++ instance)
-    sipIsErr = !sipResObj || sipParseResult( 0, sipMethod, sipResObj, "H5", sipType_QVector_0101QgsDataItem, &sipRes ) < 0;
+    sipIsErr = !sipResObj || sipParseResult( 0, sipMethod, sipResObj, "H5", sipType_QList_0101QgsDataItem, &sipRes ) < 0;
     if ( !sipIsErr )
     {
       for ( QgsDataItem *item : sipRes )
@@ -317,7 +317,7 @@ class CORE_EXPORT QgsDataItem : public QObject
     // static methods
 
     // Find child index in vector of items using '==' operator
-    static int findItem( QVector<QgsDataItem *> items, QgsDataItem *item );
+    static int findItem( QList<QgsDataItem *> items, QgsDataItem *item );
 
     // members
 
@@ -334,7 +334,7 @@ class CORE_EXPORT QgsDataItem : public QObject
      * It does not add itself to parents children (mChildren)
     */
     void setParent( QgsDataItem *parent );
-    QVector<QgsDataItem *> children() const { return mChildren; }
+    QList<QgsDataItem *> children() const { return mChildren; }
     virtual QIcon icon();
 
     /**
@@ -407,7 +407,7 @@ class CORE_EXPORT QgsDataItem : public QObject
     QString toolTip() const { return mToolTip; }
 
     // deleteLater() items and clear the vector
-    static void deleteLater( QVector<QgsDataItem *> &items );
+    static void deleteLater( QList<QgsDataItem *> &items );
 
     //! Move object and all its descendants to thread
     void moveToThread( QThread *targetThread );
@@ -424,12 +424,12 @@ class CORE_EXPORT QgsDataItem : public QObject
     virtual QgsAbstractDatabaseProviderConnection *databaseConnection() const SIP_FACTORY;
 
   protected:
-    virtual void populate( const QVector<QgsDataItem *> &children );
+    virtual void populate( const QList<QgsDataItem *> &children );
 
     /**
      * Refresh the items from a specified list of child items.
      */
-    virtual void refresh( const QVector<QgsDataItem *> &children );
+    virtual void refresh( const QList<QgsDataItem *> &children );
 
     /**
      * The item is scheduled to be deleted. E.g. if deleteLater() is called when
@@ -444,7 +444,7 @@ class CORE_EXPORT QgsDataItem : public QObject
     Qgis::BrowserItemType mType;
     Qgis::BrowserItemCapabilities mCapabilities = Qgis::BrowserItemCapability::NoCapabilities;
     QgsDataItem *mParent = nullptr;
-    QVector<QgsDataItem *> mChildren; // easier to have it always
+    QList<QgsDataItem *> mChildren; // easier to have it always
     Qgis::BrowserItemState mState = Qgis::BrowserItemState::NotPopulated;
     QString mName;
     QString mProviderKey;
@@ -555,5 +555,3 @@ class CORE_EXPORT QgsErrorItem : public QgsDataItem
 };
 
 #endif // QGSDATAITEM_H
-
-

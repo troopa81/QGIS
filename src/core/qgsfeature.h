@@ -170,7 +170,7 @@ class CORE_EXPORT QgsFeature
       sipCpp->deleteAttribute( fieldIdx );
     % End
 
-    long __hash__() const;
+    Py_hash_t __hash__() const;
     % MethodCode
     sipRes = qHash( *sipCpp );
     % End
@@ -254,7 +254,6 @@ class CORE_EXPORT QgsFeature
      */
     QgsAttributes attributes() const;
 
-#ifndef SIP_RUN
 
     /**
      * Returns the feature's attributes as a map of field name to value.
@@ -266,20 +265,7 @@ class CORE_EXPORT QgsFeature
      * \since QGIS 3.22.2
      */
     QVariantMap attributeMap() const;
-#else
-
-    /**
-     * Returns the feature's attributes as a map of field name to value.
-     *
-     * \note The fields definition must be associated with the feature using setFields() before this method can be used.
-     *
-     * \throws ValueError if the field definition is unset or the size of the fields does not match the size of the feature's attributes()
-     *
-     * \see attributes()
-     * \see setAttributes()
-     * \since QGIS 3.22.2
-     */
-    SIP_PYOBJECT attributeMap() const SIP_TYPEHINT( Dict[str, Optional[object]] );
+#ifdef SIP_RUN
     % MethodCode
     const int fieldSize = sipCpp->fields().size();
     const int attributeSize = sipCpp->attributes().size();
@@ -295,8 +281,7 @@ class CORE_EXPORT QgsFeature
     }
     else
     {
-      QVariantMap *v = new QVariantMap( sipCpp->attributeMap() );
-      sipRes = sipConvertFromNewType( v, sipType_QVariantMap, Py_None );
+      sipRes = new QVariantMap( sipCpp->attributeMap() );
     }
     % End
 #endif

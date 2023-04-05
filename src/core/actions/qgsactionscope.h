@@ -124,7 +124,7 @@ class CORE_EXPORT QgsActionScope
      */
     bool isValid() const;
 #ifdef SIP_RUN
-    long __hash__();
+    Py_hash_t __hash__();
     % MethodCode
     sipRes = qHash( *sipCpp );
     % End

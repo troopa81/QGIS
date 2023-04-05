@@ -1441,6 +1441,7 @@ class CORE_EXPORT QgsVectorLayer : public QgsMapLayer, public QgsExpressionConte
      */
     Q_DECL_DEPRECATED Qgis::GeometryOperationResult addPart( const QList<QgsPointXY> &ring ) SIP_DEPRECATED;
 
+#ifndef SIP_RUN
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 
     /**
@@ -1464,6 +1465,7 @@ class CORE_EXPORT QgsVectorLayer : public QgsMapLayer, public QgsExpressionConte
      * \deprecated since QGIS 3.12 - will be removed in QGIS 4.0. Use the variant which accepts QgsPoint objects instead of QgsPointXY.
      */
     Q_DECL_DEPRECATED Qgis::GeometryOperationResult addPart( const QVector<QgsPointXY> &ring ) SIP_PYNAME( addPartV2 ) SIP_DEPRECATED;
+#endif
 #endif
 
     /**

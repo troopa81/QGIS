@@ -77,7 +77,7 @@ class CORE_EXPORT QgsTextBlock
     /**
      * Returns the number of fragments in the block.
      */
-    int size() const;
+    int size() const SIP_LEN;
 
     /**
      * Applies a \a capitalization style to the block's text.
@@ -85,13 +85,6 @@ class CORE_EXPORT QgsTextBlock
      * \since QGIS 3.16
      */
     void applyCapitalization( Qgis::Capitalization capitalization );
-
-#ifdef SIP_RUN
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->size();
-    % End
-#endif
 
 #ifndef SIP_RUN
 
@@ -126,7 +119,7 @@ class CORE_EXPORT QgsTextBlock
     QgsTextFragment &operator[]( int index ) SIP_FACTORY;
 #ifdef SIP_RUN
     % MethodCode
-    SIP_SSIZE_T idx = sipConvertFromSequenceIndex( a0, sipCpp->size() );
+    Py_ssize_t idx = sipConvertFromSequenceIndex( a0, sipCpp->size() );
     if ( idx < 0 )
       sipIsErr = 1;
     else

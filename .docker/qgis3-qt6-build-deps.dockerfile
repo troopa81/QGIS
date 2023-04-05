@@ -1,4 +1,5 @@
-ARG DISTRO_VERSION=36
+# we need 38 to have Qt/PyQt 6.4.2 which have less issues
+ARG DISTRO_VERSION=38
 
 FROM fedora:${DISTRO_VERSION} as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
@@ -35,7 +36,10 @@ RUN dnf -y --refresh install \
     protobuf-devel \
     protobuf-lite-devel \
     python3-devel \
+    python3-pyqt6 \
+    python3-pyqt6-devel \
     python3-termcolor \
+    PyQt-builder \
     qt6-qt3d-devel \
     qt6-qtbase-devel \
     qt6-qtbase-private-devel \
@@ -47,6 +51,7 @@ RUN dnf -y --refresh install \
     qt6-qtdeclarative-devel \
     qt6-qt5compat-devel \
     qt6-qtmultimedia-devel \
+    sip6 \
     spatialindex-devel \
     sqlite-devel \
     unzip \
@@ -101,6 +106,11 @@ RUN cd /usr/src \
   && qmake6 src/qscintilla.pro \
   && make -j4 \
   && make install
+
+# SIP 6.5.0 is crashing right now so we update to a later pip version
+# Please remove this when SIP will be updated and stable in fedora
+RUN pip install --index-url https://www.riverbankcomputing.com/pypi/simple/ --no-deps --pre --upgrade sip \
+  && pip install tomli ply
 
 # Oracle : client side
 RUN curl https://download.oracle.com/otn_software/linux/instantclient/199000/instantclient-basic-linux.x64-19.9.0.0.0dbru.zip > instantclient-basic-linux.x64-19.9.0.0.0dbru.zip

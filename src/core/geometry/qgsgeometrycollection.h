@@ -55,20 +55,12 @@ class CORE_EXPORT QgsGeometryCollection: public QgsAbstractGeometry
     /**
      * Returns the number of geometries within the collection.
      */
-    int numGeometries() const SIP_HOLDGIL
+    int numGeometries() const SIP_HOLDGIL SIP_LEN
     {
       return mGeometries.size();
     }
 
 #ifdef SIP_RUN
-
-    /**
-     * Returns the number of geometries within the collection.
-     */
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->numGeometries();
-    % End
 
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;

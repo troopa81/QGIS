@@ -135,7 +135,7 @@ class CORE_EXPORT QgsProfilePoint
     sipRes = PyUnicode_FromString( str.toUtf8().constData() );
     % End
 
-    int __len__();
+    Py_ssize_t __len__();
     % MethodCode
     sipRes = 2;
     % End

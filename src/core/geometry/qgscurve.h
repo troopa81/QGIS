@@ -121,13 +121,6 @@ class CORE_EXPORT QgsCurve: public QgsAbstractGeometry SIP_ABSTRACT
     virtual int numPoints() const = 0;
 
 #ifdef SIP_RUN
-    int __len__() const;
-    % Docstring
-    Returns the number of points in the curve.
-    % End
-    % MethodCode
-    sipRes = sipCpp->numPoints();
-    % End
 
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;

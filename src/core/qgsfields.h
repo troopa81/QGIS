@@ -147,14 +147,9 @@ class CORE_EXPORT  QgsFields
     bool isEmpty() const;
 
     //! Returns number of items
-    int count() const;
+    int count() const SIP_LEN;
 
 #ifdef SIP_RUN
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->count();
-    % End
-
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;
     % MethodCode
@@ -187,7 +182,7 @@ class CORE_EXPORT  QgsFields
     QgsField &operator[]( int i ) SIP_FACTORY;
 #ifdef SIP_RUN
     % MethodCode
-    SIP_SSIZE_T idx = sipConvertFromSequenceIndex( a0, sipCpp->count() );
+    Py_ssize_t idx = sipConvertFromSequenceIndex( a0, sipCpp->count() );
     if ( idx < 0 )
       sipIsErr = 1;
     else

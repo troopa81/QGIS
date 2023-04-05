@@ -2748,122 +2748,122 @@ class CORE_EXPORT QgsGeometry
                          double epsilon = 4 * std::numeric_limits<double>::epsilon() );
 #else
 
-    /**
-     * Compares two geometry objects for equality within a specified tolerance.
-     * The objects can be of type QgsPolylineXY, QgsPolygonXYor QgsMultiPolygon.
-     * The 2 types should match.
-     * \param p1 first geometry object
-     * \param p2 second geometry object
-     * \param epsilon maximum difference for coordinates between the objects
-     * \returns TRUE if objects are
-     *
-     * - polylines and have the same number of points and all
-     *   points are equal within the specified tolerance
-     * - polygons and have the same number of points and all
-     *   points are equal within the specified tolerance
-     * - multipolygons and  have the same number of polygons, the polygons have the same number
-     *   of rings, and each ring has the same number of points and all points are equal
-     *   within the specified tolerance
-     *
-     * \since QGIS 2.9
-     */
-    static bool compare( PyObject *obj1, PyObject *obj2, double epsilon = 4 * std::numeric_limits<double>::epsilon() );
-    % MethodCode
-    {
-      sipRes = false;
-      int state0;
-      int state1;
-      int sipIsErr = 0;
+    // /**
+    //  * Compares two geometry objects for equality within a specified tolerance.
+    //  * The objects can be of type QgsPolylineXY, QgsPolygonXYor QgsMultiPolygon.
+    //  * The 2 types should match.
+    //  * \param p1 first geometry object
+    //  * \param p2 second geometry object
+    //  * \param epsilon maximum difference for coordinates between the objects
+    //  * \returns TRUE if objects are
+    //  *
+    //  * - polylines and have the same number of points and all
+    //  *   points are equal within the specified tolerance
+    //  * - polygons and have the same number of points and all
+    //  *   points are equal within the specified tolerance
+    //  * - multipolygons and  have the same number of polygons, the polygons have the same number
+    //  *   of rings, and each ring has the same number of points and all points are equal
+    //  *   within the specified tolerance
+    //  *
+    //  * \since QGIS 2.9
+    //  */
+    // static bool compare( PyObject *obj1, PyObject *obj2, double epsilon = 4 * std::numeric_limits<double>::epsilon() );
+    // % MethodCode
+    // {
+    //   sipRes = false;
+    //   int state0;
+    //   int state1;
+    //   int sipIsErr = 0;
 
-      if ( PyList_Check( a0 ) && PyList_Check( a1 ) &&
-           PyList_GET_SIZE( a0 ) && PyList_GET_SIZE( a1 ) )
-      {
-        PyObject *o0 = PyList_GetItem( a0, 0 );
-        PyObject *o1 = PyList_GetItem( a1, 0 );
-        if ( o0 && o1 )
-        {
-          // compare polyline - polyline
-          if ( sipCanConvertToType( o0, sipType_QgsPointXY, SIP_NOT_NONE ) &&
-               sipCanConvertToType( o1, sipType_QgsPointXY, SIP_NOT_NONE ) &&
-               sipCanConvertToType( a0, sipType_QVector_0100QgsPointXY, SIP_NOT_NONE ) &&
-               sipCanConvertToType( a1, sipType_QVector_0100QgsPointXY, SIP_NOT_NONE ) )
-          {
-            QgsPolylineXY *p0;
-            QgsPolylineXY *p1;
-            p0 = reinterpret_cast<QgsPolylineXY *>( sipConvertToType( a0, sipType_QVector_0100QgsPointXY, 0, SIP_NOT_NONE, &state0, &sipIsErr ) );
-            p1 = reinterpret_cast<QgsPolylineXY *>( sipConvertToType( a1, sipType_QVector_0100QgsPointXY, 0, SIP_NOT_NONE, &state1, &sipIsErr ) );
-            if ( sipIsErr )
-            {
-              sipReleaseType( p0, sipType_QVector_0100QgsPointXY, state0 );
-              sipReleaseType( p1, sipType_QVector_0100QgsPointXY, state1 );
-            }
-            else
-            {
-              sipRes = QgsGeometry::compare( *p0, *p1, a2 );
-            }
-          }
-          else if ( PyList_Check( o0 ) && PyList_Check( o1 ) &&
-                    PyList_GET_SIZE( o0 ) && PyList_GET_SIZE( o1 ) )
-          {
-            PyObject *oo0 = PyList_GetItem( o0, 0 );
-            PyObject *oo1 = PyList_GetItem( o1, 0 );
-            if ( oo0 && oo1 )
-            {
-              // compare polygon - polygon
-              if ( sipCanConvertToType( oo0, sipType_QgsPointXY, SIP_NOT_NONE ) &&
-                   sipCanConvertToType( oo1, sipType_QgsPointXY, SIP_NOT_NONE ) &&
-                   sipCanConvertToType( a0, sipType_QVector_0600QVector_0100QgsPointXY, SIP_NOT_NONE ) &&
-                   sipCanConvertToType( a1, sipType_QVector_0600QVector_0100QgsPointXY, SIP_NOT_NONE ) )
-              {
-                QgsPolygonXY *p0;
-                QgsPolygonXY *p1;
-                p0 = reinterpret_cast<QgsPolygonXY *>( sipConvertToType( a0, sipType_QVector_0600QVector_0100QgsPointXY, 0, SIP_NOT_NONE, &state0, &sipIsErr ) );
-                p1 = reinterpret_cast<QgsPolygonXY *>( sipConvertToType( a1, sipType_QVector_0600QVector_0100QgsPointXY, 0, SIP_NOT_NONE, &state1, &sipIsErr ) );
-                if ( sipIsErr )
-                {
-                  sipReleaseType( p0, sipType_QVector_0600QVector_0100QgsPointXY, state0 );
-                  sipReleaseType( p1, sipType_QVector_0600QVector_0100QgsPointXY, state1 );
-                }
-                else
-                {
-                  sipRes = QgsGeometry::compare( *p0, *p1, a2 );
-                }
-              }
-              else if ( PyList_Check( oo0 ) && PyList_Check( oo1 ) &&
-                        PyList_GET_SIZE( oo0 ) && PyList_GET_SIZE( oo1 ) )
-              {
-                PyObject *ooo0 = PyList_GetItem( oo0, 0 );
-                PyObject *ooo1 = PyList_GetItem( oo1, 0 );
-                if ( ooo0 && ooo1 )
-                {
-                  // compare multipolygon - multipolygon
-                  if ( sipCanConvertToType( ooo0, sipType_QgsPointXY, SIP_NOT_NONE ) &&
-                       sipCanConvertToType( ooo1, sipType_QgsPointXY, SIP_NOT_NONE ) &&
-                       sipCanConvertToType( a0, sipType_QVector_0600QVector_0600QVector_0100QgsPointXY, SIP_NOT_NONE ) &&
-                       sipCanConvertToType( a1, sipType_QVector_0600QVector_0600QVector_0100QgsPointXY, SIP_NOT_NONE ) )
-                  {
-                    QgsMultiPolygonXY *p0;
-                    QgsMultiPolygonXY *p1;
-                    p0 = reinterpret_cast<QgsMultiPolygonXY *>( sipConvertToType( a0, sipType_QVector_0600QVector_0600QVector_0100QgsPointXY, 0, SIP_NOT_NONE, &state0, &sipIsErr ) );
-                    p1 = reinterpret_cast<QgsMultiPolygonXY *>( sipConvertToType( a1, sipType_QVector_0600QVector_0600QVector_0100QgsPointXY, 0, SIP_NOT_NONE, &state1, &sipIsErr ) );
-                    if ( sipIsErr )
-                    {
-                      sipReleaseType( p0, sipType_QVector_0600QVector_0600QVector_0100QgsPointXY, state0 );
-                      sipReleaseType( p1, sipType_QVector_0600QVector_0600QVector_0100QgsPointXY, state1 );
-                    }
-                    else
-                    {
-                      sipRes = QgsGeometry::compare( *p0, *p1, a2 );
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    % End
+    //   if ( PyList_Check( a0 ) && PyList_Check( a1 ) &&
+    //        PyList_GET_SIZE( a0 ) && PyList_GET_SIZE( a1 ) )
+    //   {
+    //     PyObject *o0 = PyList_GetItem( a0, 0 );
+    //     PyObject *o1 = PyList_GetItem( a1, 0 );
+    //     if ( o0 && o1 )
+    //     {
+    //       // compare polyline - polyline
+    //       if ( sipCanConvertToType( o0, sipType_QgsPointXY, SIP_NOT_NONE ) &&
+    //            sipCanConvertToType( o1, sipType_QgsPointXY, SIP_NOT_NONE ) &&
+    //            sipCanConvertToType( a0, sipType_QList_0100QgsPointXY, SIP_NOT_NONE ) &&
+    //            sipCanConvertToType( a1, sipType_QList_0100QgsPointXY, SIP_NOT_NONE ) )
+    //       {
+    //         QgsPolylineXY *p0;
+    //         QgsPolylineXY *p1;
+    //         p0 = reinterpret_cast<QgsPolylineXY *>( sipConvertToType( a0, sipType_QList_0100QgsPointXY, 0, SIP_NOT_NONE, &state0, &sipIsErr ) );
+    //         p1 = reinterpret_cast<QgsPolylineXY *>( sipConvertToType( a1, sipType_QList_0100QgsPointXY, 0, SIP_NOT_NONE, &state1, &sipIsErr ) );
+    //         if ( sipIsErr )
+    //         {
+    //           sipReleaseType( p0, sipType_QList_0100QgsPointXY, state0 );
+    //           sipReleaseType( p1, sipType_QList_0100QgsPointXY, state1 );
+    //         }
+    //         else
+    //         {
+    //           sipRes = QgsGeometry::compare( *p0, *p1, a2 );
+    //         }
+    //       }
+    //       else if ( PyList_Check( o0 ) && PyList_Check( o1 ) &&
+    //                 PyList_GET_SIZE( o0 ) && PyList_GET_SIZE( o1 ) )
+    //       {
+    //         PyObject *oo0 = PyList_GetItem( o0, 0 );
+    //         PyObject *oo1 = PyList_GetItem( o1, 0 );
+    //         if ( oo0 && oo1 )
+    //         {
+    //           // compare polygon - polygon
+    //           if ( sipCanConvertToType( oo0, sipType_QgsPointXY, SIP_NOT_NONE ) &&
+    //                sipCanConvertToType( oo1, sipType_QgsPointXY, SIP_NOT_NONE ) &&
+    //                sipCanConvertToType( a0, sipType_QList_0600QList_0100QgsPointXY, SIP_NOT_NONE ) &&
+    //                sipCanConvertToType( a1, sipType_QList_0600QList_0100QgsPointXY, SIP_NOT_NONE ) )
+    //           {
+    //             QgsPolygonXY *p0;
+    //             QgsPolygonXY *p1;
+    //             p0 = reinterpret_cast<QgsPolygonXY *>( sipConvertToType( a0, sipType_QList_0600QList_0100QgsPointXY, 0, SIP_NOT_NONE, &state0, &sipIsErr ) );
+    //             p1 = reinterpret_cast<QgsPolygonXY *>( sipConvertToType( a1, sipType_QList_0600QList_0100QgsPointXY, 0, SIP_NOT_NONE, &state1, &sipIsErr ) );
+    //             if ( sipIsErr )
+    //             {
+    //               sipReleaseType( p0, sipType_QList_0600QList_0100QgsPointXY, state0 );
+    //               sipReleaseType( p1, sipType_QList_0600QList_0100QgsPointXY, state1 );
+    //             }
+    //             else
+    //             {
+    //               sipRes = QgsGeometry::compare( *p0, *p1, a2 );
+    //             }
+    //           }
+    //           else if ( PyList_Check( oo0 ) && PyList_Check( oo1 ) &&
+    //                     PyList_GET_SIZE( oo0 ) && PyList_GET_SIZE( oo1 ) )
+    //           {
+    //             PyObject *ooo0 = PyList_GetItem( oo0, 0 );
+    //             PyObject *ooo1 = PyList_GetItem( oo1, 0 );
+    //             if ( ooo0 && ooo1 )
+    //             {
+    //               // compare multipolygon - multipolygon
+    //               if ( sipCanConvertToType( ooo0, sipType_QgsPointXY, SIP_NOT_NONE ) &&
+    //                    sipCanConvertToType( ooo1, sipType_QgsPointXY, SIP_NOT_NONE ) &&
+    //                    sipCanConvertToType( a0, sipType_QList_0600QList_0600QList_0100QgsPointXY, SIP_NOT_NONE ) &&
+    //                    sipCanConvertToType( a1, sipType_QList_0600QList_0600QList_0100QgsPointXY, SIP_NOT_NONE ) )
+    //               {
+    //                 QgsMultiPolygonXY *p0;
+    //                 QgsMultiPolygonXY *p1;
+    //                 p0 = reinterpret_cast<QgsMultiPolygonXY *>( sipConvertToType( a0, sipType_QList_0600QList_0600QList_0100QgsPointXY, 0, SIP_NOT_NONE, &state0, &sipIsErr ) );
+    //                 p1 = reinterpret_cast<QgsMultiPolygonXY *>( sipConvertToType( a1, sipType_QList_0600QList_0600QList_0100QgsPointXY, 0, SIP_NOT_NONE, &state1, &sipIsErr ) );
+    //                 if ( sipIsErr )
+    //                 {
+    //                   sipReleaseType( p0, sipType_QList_0600QList_0600QList_0100QgsPointXY, state0 );
+    //                   sipReleaseType( p1, sipType_QList_0600QList_0600QList_0100QgsPointXY, state1 );
+    //                 }
+    //                 else
+    //                 {
+    //                   sipRes = QgsGeometry::compare( *p0, *p1, a2 );
+    //                 }
+    //               }
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+    // % End
 #endif
 
     /**

@@ -166,6 +166,11 @@
 #define SIP_HOLDGIL
 
 /*
+ * https://www.riverbankcomputing.com/static/Docs/sip/annotations.html#function-annotation-__len__
+ */
+#define SIP_LEN
+
+/*
  * Will insert a `%Feature feature` directive in sip files
  */
 #define SIP_FEATURE(feature)

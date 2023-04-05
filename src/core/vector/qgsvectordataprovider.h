@@ -680,12 +680,15 @@ class CORE_EXPORT QgsVectorDataProvider : public QgsDataProvider, public QgsFeat
      */
     void setNativeTypes( const QList<QgsVectorDataProvider::NativeType> &nativeTypes );
 
+#ifndef SIP_RUN
+
     /**
      * Gets this providers encoding
      *
      * \since QGIS 3.0
      */
     QTextCodec *textEncoding() const;
+#endif
 
   private:
     mutable bool mCacheMinMaxDirty = true;

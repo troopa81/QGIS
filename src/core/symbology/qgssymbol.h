@@ -212,17 +212,9 @@ class CORE_EXPORT QgsSymbol
      * \see symbolLayer
      * \since QGIS 2.7
      */
-    int symbolLayerCount() const { return mLayers.count(); }
+    int symbolLayerCount() const SIP_LEN { return mLayers.count(); }
 
 #ifdef SIP_RUN
-
-    /**
-     * Returns the number of symbol layers contained in the symbol.
-     */
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->symbolLayerCount();
-    % End
 
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;

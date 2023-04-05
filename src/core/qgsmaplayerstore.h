@@ -48,7 +48,7 @@ class CORE_EXPORT QgsMapLayerStore : public QObject
     /**
      * Returns the number of layers contained in the store.
      */
-    int count() const;
+    int count() const SIP_LEN;
 
     /**
      * Returns the number of valid layers contained in the store.
@@ -57,14 +57,6 @@ class CORE_EXPORT QgsMapLayerStore : public QObject
     int validCount() const;
 
 #ifdef SIP_RUN
-
-    /**
-     * Returns the number of layers contained in the store.
-     */
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->count();
-    % End
 
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;

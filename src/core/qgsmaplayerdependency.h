@@ -77,7 +77,7 @@ class CORE_EXPORT QgsMapLayerDependency
 
 #ifdef SIP_RUN
     //! hash operator
-    long __hash__() const;
+    Py_hash_t __hash__() const;
     % MethodCode
     sipRes = qHash( *sipCpp );
     % End

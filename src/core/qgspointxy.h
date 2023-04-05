@@ -354,7 +354,7 @@ class CORE_EXPORT QgsPointXY
     sipRes = PyUnicode_FromString( str.toUtf8().constData() );
     % End
 
-    int __len__();
+    Py_ssize_t __len__();
     % MethodCode
     sipRes = 2;
     % End
@@ -377,7 +377,7 @@ class CORE_EXPORT QgsPointXY
     }
     % End
 
-    long __hash__() const;
+    Py_hash_t __hash__() const;
     % MethodCode
     sipRes = qHash( *sipCpp );
     % End

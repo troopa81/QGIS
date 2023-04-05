@@ -68,7 +68,7 @@ class QgsField;
 
   for ( int i = 0; i < PyList_GET_SIZE( sipPy ); ++i )
   {
-    *qlist << ( QgsSearchWidgetWrapper::FilterFlag )SIPLong_AsLong( PyList_GET_ITEM( sipPy, i ) );
+    *qlist << ( QgsSearchWidgetWrapper::FilterFlag )PyLong_AsLong( PyList_GET_ITEM( sipPy, i ) );
   }
 
   *sipCppPtr = qlist;

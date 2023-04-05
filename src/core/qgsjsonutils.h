@@ -302,6 +302,8 @@ class CORE_EXPORT QgsJsonUtils
 
   public:
 
+#ifndef SIP_RUN
+
     /**
      * Attempts to parse a GeoJSON \a string to a collection of features.
      * It is possible to specify \a fields to parse specific fields, if not provided, no fields will be included.
@@ -320,6 +322,8 @@ class CORE_EXPORT QgsJsonUtils
      * \note this function is a wrapper around QgsOgrUtils::stringToFields()
      */
     static QgsFields stringToFields( const QString &string, QTextCodec *encoding = nullptr );
+
+#endif
 
     /**
      * Encodes a value to a JSON string representation, adding appropriate quotations and escaping

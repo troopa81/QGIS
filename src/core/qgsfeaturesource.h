@@ -85,15 +85,6 @@ class CORE_EXPORT QgsFeatureSource
 
 #ifdef SIP_RUN
 
-    /**
-     * Returns the number of features contained in the source, or -1
-     * if the feature count is unknown.
-     */
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->featureCount();
-    % End
-
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;
     % MethodCode
@@ -105,7 +96,7 @@ class CORE_EXPORT QgsFeatureSource
      * Returns the number of features contained in the source, or -1
      * if the feature count is unknown.
      */
-    virtual long long featureCount() const = 0;
+    virtual long long featureCount() const = 0 SIP_LEN;
 
     /**
      * Determines if there are any features available in the source.

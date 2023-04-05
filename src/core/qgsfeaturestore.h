@@ -68,17 +68,9 @@ class CORE_EXPORT QgsFeatureStore : public QgsFeatureSink
     /**
      * Returns the number of features contained in the store.
      */
-    int count() const { return mFeatures.size(); }
+    int count() const SIP_LEN { return mFeatures.size(); }
 
 #ifdef SIP_RUN
-
-    /**
-     * Returns the number of features contained in the store.
-     */
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->count();
-    % End
 
     //! Ensures that bool(obj) returns TRUE (otherwise __len__() would be used)
     int __bool__() const;
@@ -160,7 +152,7 @@ typedef QVector<QgsFeatureStore> QgsFeatureStoreList;
     if ( !PyList_Check( sipPy ) )
       return 0;
 
-    for ( SIP_SSIZE_T i = 0; i < PyList_GET_SIZE( sipPy ); ++i )
+    for ( Py_ssize_t i = 0; i < PyList_GET_SIZE( sipPy ); ++i )
       if ( !sipCanConvertToType( PyList_GET_ITEM( sipPy, i ), sipType_QgsFeatureStore, SIP_NOT_NONE ) )
         return 0;
 
@@ -168,10 +160,10 @@ typedef QVector<QgsFeatureStore> QgsFeatureStoreList;
   }
 
   QgsFeatureStoreList *qv = new QgsFeatureStoreList;
-  SIP_SSIZE_T listSize = PyList_GET_SIZE( sipPy );
+  Py_ssize_t listSize = PyList_GET_SIZE( sipPy );
   qv->reserve( listSize );
 
-  for ( SIP_SSIZE_T i = 0; i < listSize; ++i )
+  for ( Py_ssize_t i = 0; i < listSize; ++i )
   {
     PyObject *obj = PyList_GET_ITEM( sipPy, i );
     int state;

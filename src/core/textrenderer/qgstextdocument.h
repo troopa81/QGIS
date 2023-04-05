@@ -113,7 +113,7 @@ class CORE_EXPORT QgsTextDocument
     QgsTextBlock &operator[]( int index ) SIP_FACTORY;
 #ifdef SIP_RUN
     % MethodCode
-    SIP_SSIZE_T idx = sipConvertFromSequenceIndex( a0, sipCpp->size() );
+    Py_ssize_t idx = sipConvertFromSequenceIndex( a0, sipCpp->size() );
     if ( idx < 0 )
       sipIsErr = 1;
     else
@@ -124,14 +124,7 @@ class CORE_EXPORT QgsTextDocument
     /**
      * Returns the number of blocks in the document.
      */
-    int size() const;
-
-#ifdef SIP_RUN
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->size();
-    % End
-#endif
+    int size() const SIP_LEN;
 
     /**
      * Returns a list of plain text lines of text representing the document.

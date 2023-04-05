@@ -102,14 +102,7 @@ class CORE_EXPORT QgsAttributeTableConfig
      *
      * \since QGIS 3.22
      */
-    int size() const;
-
-#ifdef SIP_RUN
-    int __len__() const;
-    % MethodCode
-    sipRes = sipCpp->size();
-    % End
-#endif
+    int size() const SIP_LEN;
 
     /**
      * Maps a visible column index to its original column index.
