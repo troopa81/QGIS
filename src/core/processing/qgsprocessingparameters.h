@@ -461,7 +461,7 @@ class CORE_EXPORT QgsProcessingParameterDefinition
   public:
 
     //! Parameter flags
-    enum Flag
+    enum Flag : int
     {
       FlagAdvanced = 1 << 1, //!< Parameter is an advanced parameter which should be hidden from users by default
       FlagHidden = 1 << 2, //!< Parameter is hidden and should not be shown to users
@@ -4456,5 +4456,3 @@ class CORE_EXPORT QgsProcessingParameterPointCloudDestination : public QgsProces
 // clazy:excludeall=qstring-allocations
 
 #endif // QGSPROCESSINGPARAMETERS_H
-
-
