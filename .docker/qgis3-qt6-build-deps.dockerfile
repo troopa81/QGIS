@@ -110,11 +110,6 @@ RUN cd /usr/src \
   && make -j4 \
   && make install
 
-# SIP 6.5.0 is crashing right now so we update to a later pip version
-# Please remove this when SIP will be updated and stable in fedora
-RUN pip install --index-url https://www.riverbankcomputing.com/pypi/simple/ --no-deps --pre --upgrade sip \
-  && pip install tomli ply
-
 # Oracle : client side
 RUN curl https://download.oracle.com/otn_software/linux/instantclient/199000/instantclient-basic-linux.x64-19.9.0.0.0dbru.zip > instantclient-basic-linux.x64-19.9.0.0.0dbru.zip
 RUN curl https://download.oracle.com/otn_software/linux/instantclient/199000/instantclient-sdk-linux.x64-19.9.0.0.0dbru.zip > instantclient-sdk-linux.x64-19.9.0.0.0dbru.zip
