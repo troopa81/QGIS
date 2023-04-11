@@ -90,7 +90,7 @@ if [[ ${BUILD_WITH_QT6} = "ON" ]]; then
 #######
 echo "${bold}Generale sip files...${endbold}"
 echo "::group::generate_sip_files"
-../scripts/sipify_all.sh --qt6
+../scripts/sipify_all.sh
 echo "::endgroup::"
 
 fi
