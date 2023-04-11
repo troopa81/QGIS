@@ -28,6 +28,12 @@ from qgis.testing import start_app, unittest
 
 from utilities import unitTestDataPath
 
+# TODO QGIS 4.0: Fix code if PyQt6
+from qgis.PyQt.QtCore import QT_VERSION
+if (QT_VERSION >= 0x060000):
+    from qgis.PyQt.QtCore import QMetaType
+    QVariant.String = QMetaType.Type.QString
+
 start_app()
 TEST_DATA_DIR = unitTestDataPath()
 
