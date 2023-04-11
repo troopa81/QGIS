@@ -29,12 +29,12 @@ use constant PREPEND_CODE_MAKE_PRIVATE => 42;
 # read arguments
 my $debug = 0;
 my $sip_output = '';
+my $is_qt6 = 1;
 my $python_output = '';
-my $is_qt6 = 0;
 #my $SUPPORT_TEMPLATE_DOCSTRING = 0;
 #die("usage: $0 [-debug] [-template-doc] headerfile\n") unless GetOptions ("debug" => \$debug, "template-doc" => \$SUPPORT_TEMPLATE_DOCSTRING) && @ARGV == 1;
-die("usage: $0 [-debug] [-qt6] [-sip_output FILE] [-python_output FILE] headerfile\n")
-  unless GetOptions ("debug" => \$debug, "sip_output=s" => \$sip_output, "python_output=s" => \$python_output, "qt6" => \$is_qt6) && @ARGV == 1;
+die("usage: $0 [-debug] [-sip_output FILE] [-python_output FILE] headerfile\n")
+  unless GetOptions ("debug" => \$debug, "sip_output=s" => \$sip_output, "python_output=s" => \$python_output) && @ARGV == 1;
 my $headerfile = $ARGV[0];
 
 # read file
@@ -57,7 +57,6 @@ my @DECLARED_CLASSES = ();
 my @EXPORTED = (0);
 my $MULTILINE_DEFINITION = MULTILINE_NO;
 my $ACTUAL_CLASS = '';
-my $ACTUAL_STRUCT = '';
 my $PYTHON_SIGNATURE = '';
 
 my $INDENT = '';
@@ -832,9 +831,14 @@ while ($LINE_IDX < $LINE_COUNT){
             dbg_info("Q_ENUM/Q_FLAG $enum_helper");
             if ($python_output ne ''){
                 if ($enum_helper ne ''){
-                    if ($is_flag != 1){
-                      push @OUTPUT_PYTHON, "$enum_helper\n";
-                    }
+                  push @OUTPUT_PYTHON, "$enum_helper\n";
+
+                  if ($is_flag == 1){
+                    # SIP seems to introduce the flags in the module rather than in the class itself
+                    # as a dirty hack, inject directly in module, hopefully we don't have flags with the same name....
+                    # push @OUTPUT_PYTHON, "if (QT_VERSION < 0x060000):\n";
+                    push @OUTPUT_PYTHON, "$2 = $ACTUAL_CLASS  # dirty hack since SIP seems to introduce the flags in module\n";
+                  }
                 }
             }
         }
@@ -1085,7 +1089,8 @@ while ($LINE_IDX < $LINE_COUNT){
         # In PyQt6 Flags are mapped to Python enum flag and the plural doesn't exist anymore
         # https://www.riverbankcomputing.com/static/Docs/PyQt6/pyqt5_differences.html
         # So we mock it to avoid API break
-        push @OUTPUT_PYTHON, "$ACTUAL_CLASS.$+{flags_name} = lambda flags=0 : $ACTUAL_CLASS.$+{flag_name}(flags)\n";
+        push @OUTPUT_PYTHON, "if (QT_VERSION >= 0x060000):\n";
+        push @OUTPUT_PYTHON, "\t$ACTUAL_CLASS.$+{flags_name} = lambda flags=0 : $ACTUAL_CLASS.$+{flag_name}(flags)\n";
     }
 
     # Enum declaration
@@ -1183,7 +1188,8 @@ while ($LINE_IDX < $LINE_COUNT){
                             }
                         }
                     }
-                    elsif ( $is_qt6 eq 1 and $enum_member ne "" )
+
+                    if ( $enum_member ne "" )
                     {
                       my $basename = join( ".", @CLASS_AND_STRUCT );
                       if ( $basename ne "" ){
@@ -1191,7 +1197,8 @@ while ($LINE_IDX < $LINE_COUNT){
 
                         # With PyQt6, you have to specify the scope to access the enum: https://www.riverbankcomputing.com/static/Docs/PyQt5/gotchas.html#enums
                         # so we mock
-                        push @OUTPUT_PYTHON, "$basename.$enum_member = $basename.$enum_qualname.$enum_member\n";
+                        push @OUTPUT_PYTHON, "if (QT_VERSION >= 0x060000):\n";
+                        push @OUTPUT_PYTHON, "\t$basename.$enum_member = $basename.$enum_qualname.$enum_member\n";
                       }
                     }
                     $enum_decl = fix_annotations($enum_decl);
