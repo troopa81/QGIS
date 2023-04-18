@@ -22,7 +22,7 @@ list(GET Python3_LIBRARIES 0 PYTHON_LIBRARY_FILENAME)
 get_filename_component(PYTHON_LIBRARY_FILENAME ${PYTHON_LIBRARY_FILENAME} NAME)
 
 execute_process(
-    COMMAND ${Python3_EXECUTABLE} -c "if True:
+    COMMAND ${Python_EXECUTABLE} -c "if True:
        import os, sys
        try:
         import PySide6.QtCore as QtCore
@@ -38,7 +38,7 @@ execute_process(
 if(PYSIDE6_BASEDIR)
     set(PYSIDE_BASEDIR ${PYSIDE6_BASEDIR} CACHE PATH "Top level install of PySide6" FORCE)
     execute_process(
-        COMMAND ${Python3_EXECUTABLE} -c "if True:
+        COMMAND ${Python_EXECUTABLE} -c "if True:
            import os
            import PySide6.QtCore as QtCore
            print(os.path.basename(QtCore.__file__).split('.', 1)[1])
@@ -48,7 +48,7 @@ if(PYSIDE6_BASEDIR)
     )
 
     execute_process(
-        COMMAND ${Python3_EXECUTABLE} -c "if True:
+        COMMAND ${Python_EXECUTABLE} -c "if True:
            import os
            import PySide6.QtCore as QtCore
            print(';'.join(map(str, QtCore.__version_info__)))
@@ -123,6 +123,7 @@ if(PYSIDE6_FOUND)
         ${PYSIDE_INCLUDE_DIR}/QtCore/
         ${PYSIDE_INCLUDE_DIR}/QtGui/
         ${PYSIDE_INCLUDE_DIR}/QtWidgets/
+        ${PYSIDE_INCLUDE_DIR}/QtXml/
         ${Python3_INCLUDE_DIRS}
     )
 endif()

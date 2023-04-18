@@ -33,7 +33,7 @@ if(NOT SHIBOKEN_GENERATOR_BASEDIR)
   message(FATAL_ERROR "The shiboken6_generator module could not be imported. Make sure you have it installed by checking the output of \"pip${Python_VERSION_MAJOR}.${Python_VERSION_MINOR} list\"")
 endif()
 execute_process(
-    COMMAND ${Python3_EXECUTABLE} -c "if True:
+    COMMAND ${Python_EXECUTABLE} -c "if True:
         import os
         try:
             import shiboken6
@@ -48,7 +48,7 @@ if(NOT SHIBOKEN_BASEDIR)
   message(FATAL_ERROR "The shiboken6 module could not be imported. Make sure you have it installed by checking the output of \"pip${Python3_VERSION_MAJOR}.${Python3_VERSION_MINOR} list\"")
 endif()
 execute_process(
-    COMMAND ${Python3_EXECUTABLE} -c "if True:
+    COMMAND ${Python_EXECUTABLE} -c "if True:
         import os
         import shiboken6
         print(';'.join(filter(None, map(str, shiboken6.__version_info__))))

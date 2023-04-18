@@ -115,14 +115,25 @@ set(pyqgis_core_target_include_directories
 
 
 # Libraries necessary to link the target for the command 'target_link_libraries'
-set(pyqgis_core_target_link_libraries
+if (BUILD_WITH_QT6)
+  set(pyqgis_core_target_link_libraries
+    qgis_core
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Xml
+    ${Python_LIBRARIES}
+  )
+else()
+  set(pyqgis_core_target_link_libraries
     qgis_core
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
     Qt5::Xml
     ${Python_LIBRARIES}
-)
+  )
+endif()
 
 # Dependencies - changes on these files should trigger new bindings
 set(pyqgis_core_DEPENDS
@@ -169,11 +180,11 @@ CREATE_PYTHON_BINDINGS(
     ${QGIS_PYTHON_OUTPUT_DIRECTORY}/core
 )
 
-add_dependencies(pyqgis_core pyqgis)
+add_dependencies(pycore pyqgis)
 
 set(PY_FILES __init__.py)
 foreach(pyfile ${PY_FILES})
-  add_custom_command(TARGET pyqgis_core
+  add_custom_command(TARGET pycore
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${QGIS_PYTHON_OUTPUT_DIRECTORY}/core"
     COMMAND ${CMAKE_COMMAND} -E copy ${pyfile} "${QGIS_PYTHON_OUTPUT_DIRECTORY}/core"
