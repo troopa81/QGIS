@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - upgrade_to_fedora_38
     paths:
     - 'src/**'
     - 'external/**'
@@ -299,7 +300,7 @@ jobs:
             docker-target: binary-only
 
           - qt-version: 6
-            distro-version: 36
+            distro-version: 38
             docker-target: single
 
           - qt-version: 5
