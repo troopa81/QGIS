@@ -32,7 +32,6 @@
     <!-- DockWidgetBase contains an internal enum, so we declare it
          inside of the object-type -->
 
-    <enum-type name="QgsMapLayerType"/>
 
 <!--
     <typedef-type name="QgsFeatureList" source="QList&lt;QgsFeature&gt;" />
@@ -185,8 +184,6 @@
         </modify-function>
     </value-type>
     <object-type name="QgsProject">
-      <enum-type name="ReadFlag" flags="ReadFlags"/>
-      <enum-type name="FileFormat"/>
       <modify-function signature="attachedFile(const QString &amp;) const" remove="all"/>
       <modify-function signature="attachedFiles() const" remove="all"/>
       <modify-function signature="collectAttachedFiles(QMap&lt;QString,QString&gt; &amp;)" remove="all"/>
@@ -222,22 +219,9 @@
       </modify-function>
     </object-type>
     <object-type name="QgsWkbTypes" >
-        <enum-type name="GeometryType"/>
-        <enum-type name="Type"/>
     </object-type>
 
     <object-type name="QgsUnitTypes">
-      <enum-type name="UnitType"/>
-      <enum-type name="DistanceUnit"/>
-      <enum-type name="DistanceUnitType"/>
-      <enum-type name="AreaUnit"/>
-      <enum-type name="VolumeUnit"/>
-      <enum-type name="AngleUnit"/>
-      <enum-type name="TemporalUnit"/>
-      <enum-type name="RenderUnit"/>
-      <enum-type name="LayoutUnit"/>
-      <enum-type name="LayoutUnitType"/>
-      <enum-type name="SystemOfMeasurement"/>
     </object-type>
 
     <value-type name="QgsFieldConstraints">
@@ -248,7 +232,6 @@
 
     <value-type name="QgsCoordinateReferenceSystem">
       <enum-type name="CrsType"/>
-      <enum-type name="Format"/>
       <enum-type name="IdentifierType"/>
       <enum-type name="WktVariant"/>
     </value-type>
@@ -326,7 +309,33 @@
     </object-type>
 
     <object-type name="Qgis">
+      <enum-type name="UnitType"/>
+      <enum-type name="DistanceUnit"/>
+      <enum-type name="DistanceUnitType"/>
+      <enum-type name="AreaUnit"/>
+      <enum-type name="VolumeUnit"/>
+      <enum-type name="AngleUnit"/>
+      <enum-type name="TemporalUnit"/>
+      <enum-type name="RenderUnit"/>
+      <enum-type name="LayoutUnit"/>
+      <enum-type name="LayoutUnitType"/>
+      <enum-type name="SystemOfMeasurement"/>
+
       <enum-type name="DataType"/>
+      <enum-type name="GeometryOperationResult"/>
+      <enum-type name="GeometryValidityFlag"/>
+      <enum-type name="BufferSide"/>
+      <enum-type name="EndCapStyle"/>
+      <enum-type name="JoinStyle"/>
+      <enum-type name="GeometryValidationEngine"/>
+      <enum-type name="CrsDefinitionFormat"/>
+
+      <enum-type name="ProjectReadFlag" flags="ProjectReadFlags"/>
+      <enum-type name="ProjectFileFormat"/>
+      <enum-type name="LayerType"/>
+      <enum-type name="GeometryType"/>
+      <enum-type name="WkbType"/>
+
     </object-type>
 
     <value-type name="QgsExpressionContextScope">
@@ -338,12 +347,6 @@
     </object-type>
 
     <value-type name="QgsGeometry">
-      <enum-type name="OperationResult"/>
-      <enum-type name="ValidityFlag"/>
-      <enum-type name="BufferSide"/>
-      <enum-type name="EndCapStyle"/>
-      <enum-type name="JoinStyle"/>
-      <enum-type name="ValidationMethod"/>
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
 <![CDATA[
