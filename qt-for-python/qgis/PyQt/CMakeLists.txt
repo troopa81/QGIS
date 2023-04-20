@@ -26,7 +26,11 @@ add_custom_target(pyqtcompat ALL)
 add_dependencies(pyqtcompat pyutils)
 
 # this might be used to allow building with PySide6
-set(PYSIDE_PREFIX PyQt5)
+if (BUILD_WITH_QT6)
+  set(PYSIDE_PREFIX PyQt6)
+else()
+  set(PYSIDE_PREFIX PyQt5)
+endif()
 
 foreach(pyfile ${PYQT_COMPAT_FILES})
   get_filename_component(_dir ${pyfile} PATH)
