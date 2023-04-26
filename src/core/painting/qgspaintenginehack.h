@@ -14,6 +14,10 @@
  *                                                                         *
  ***************************************************************************/
 
+
+#ifndef QGSPAINTENGINEHACK_H
+#define QGSPAINTENGINEHACK_H
+
 #include <QPaintEngine>
 
 #include "qgis_core.h"
@@ -31,3 +35,5 @@ class CORE_EXPORT QgsPaintEngineHack : public QPaintEngine
     void fixFlags();
     static void fixEngineFlags( QPaintEngine *engine );
 };
+
+#endif // QGSPAINTENGINEHACK_H
