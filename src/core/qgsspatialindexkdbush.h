@@ -75,7 +75,9 @@ class CORE_EXPORT QgsSpatialIndexKDBush
      *
      * Any non-single point features encountered during iteration will be ignored and not included in the index.
      */
+#ifndef PYSIDE_GENERATOR
     explicit QgsSpatialIndexKDBush( const QgsFeatureSource &source, QgsFeedback *feedback = nullptr );
+#endif
 
 #ifndef SIP_RUN
 

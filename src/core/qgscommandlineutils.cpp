@@ -65,7 +65,7 @@ QString QgsCommandLineUtils::allVersions( )
   }
 
   // Python version
-  versionString += QStringLiteral( "Python version %1\n" ).arg( PYTHON_VERSION );
+  // versionString += QStringLiteral( "Python version %1\n" ).arg( PYTHON_VERSION );
 
   // GDAL version
   const QString gdalVersionCompiled { GDAL_RELEASE_NAME };

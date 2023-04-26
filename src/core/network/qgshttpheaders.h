@@ -23,6 +23,9 @@
 
 #include <QMap>
 #include <QVariant>
+#ifdef PYSIDE_GENERATOR
+#include <QUrlQuery>
+#endif
 
 #include "qgis_core.h"
 #include "qgis_sip.h"
