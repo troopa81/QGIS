@@ -8,6 +8,8 @@
 
 
 
+
+
 class QgsPaintEngineHack : QPaintEngine
 {
 %Docstring(signature="appended")
@@ -26,6 +28,7 @@ Hack to workaround Qt #5114 by disabling PatternTransform
     void fixFlags();
     static void fixEngineFlags( QPaintEngine *engine );
 };
+
 /************************************************************************
  * This file has been generated automatically from                      *
  *                                                                      *
