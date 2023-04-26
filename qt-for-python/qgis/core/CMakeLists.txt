@@ -164,7 +164,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     PROPERTIES COMPILE_FLAGS "-Wno-missing-field-initializers -Wno-cast-function-type -Wno-unused-parameter")
 endif()
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/qgis_core_global.h.in ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/qgis_core_global.h ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/typesystem_qgis_core.xml.in ${CMAKE_CURRENT_BINARY_DIR}/typesystem_qgis_core.xml)
 
 CREATE_PYTHON_BINDINGS(
