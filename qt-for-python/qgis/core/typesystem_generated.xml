@@ -1089,7 +1089,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgsdatumtransform.h:42 -->
     <object-type name="QgsDatumTransform">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgsdatumtransform.h:52 -->
-        <object-type name="TransformPair"/>
+        <value-type name="TransformPair"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgsdatumtransform.h:93 -->
         <object-type name="TransformInfo"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgsdatumtransform.h:132 -->
@@ -1222,9 +1222,9 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfields.h:59 -->
         <!--object-type name="Field"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfields.h:473 -->
-        <object-type name="iterator"/>
+        <!--object-type name="iterator"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfields.h:509 -->
-        <value-type name="const_iterator"/>
+        <!--value-type name="const_iterator"/-->
         <enum-type name="FieldOrigin"/>
         <modify-function signature="operator=(const QgsFields&amp;)" remove="true"/>
     </value-type>
@@ -1323,7 +1323,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsvertexid.h:30 -->
     <object-type name="QgsVertexId"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:110 -->
-    <object-type name="QgsGeometryParameters"/>
+    <value-type name="QgsGeometryParameters"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:163 -->
     <value-type name="QgsGeometry">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:2493 -->
@@ -1379,7 +1379,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:82 -->
     <object-type name="HelpVariant"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:109 -->
-    <object-type name="Help"/>
+    <value-type name="Help"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:187 -->
     <value-type name="QgsExpression">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:196 -->
@@ -1523,10 +1523,10 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojecttranslator.h:30 -->
     <object-type name="QgsProjectTranslator"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:34 -->
-    <object-type name="QgsReadWriteContext">
+    <value-type name="QgsReadWriteContext">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:42 -->
         <object-type name="ReadWriteMessage"/>
-    </object-type>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:178 -->
     <object-type name="QgsReadWriteContextCategoryPopper"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgshttpheaders.h:41 -->
@@ -1544,9 +1544,9 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:67 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:107 -->
-        <object-type name="ProviderOptions"/>
+        <value-type name="ProviderOptions"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:542 -->
-        <object-type name="PreviewContext"/>
+        <!--object-type name="PreviewContext"/-->
         <enum-type name="DataCapability"/>
         <enum-type name="ProviderProperty"/>
         <enum-type name="ReadFlag"/>
@@ -1605,7 +1605,7 @@
         <enum-type name="Capability"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapunitscale.h:36 -->
-    <object-type name="QgsMapUnitScale"/>
+    <value-type name="QgsMapUnitScale"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsstringutils.h:38 -->
     <object-type name="QgsStringReplacement"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsstringutils.h:115 -->
@@ -1640,10 +1640,10 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextformat.h:662 -->
 
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsproperty.h:45 -->
-    <object-type name="QgsPropertyDefinition">
+    <value-type name="QgsPropertyDefinition">
         <enum-type name="StandardPropertyTemplate"/>
         <enum-type name="DataType"/>
-    </object-type>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsproperty.h:229 -->
     <value-type name="QgsProperty">
         <enum-type name="Type"/>
@@ -1796,7 +1796,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:43 -->
     <object-type name="QgsRasterAttributeTable">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:55 -->
-        <object-type name="UsageInformation"/>
+        <value-type name="UsageInformation"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:89 -->
         <object-type name="Field"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:119 -->
@@ -2026,7 +2026,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterlayer.h:79 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterlayer.h:114 -->
-        <object-type name="LayerOptions"/>
+        <value-type name="LayerOptions"/>
         <modify-function signature="refreshContrastEnhancement(const QgsRectangle&amp;)" remove="true"/>
         <modify-function signature="refreshRendererIfNeeded(QgsRasterRenderer*,const QgsRectangle&amp;)" remove="true"/>
     </object-type>
@@ -2047,9 +2047,9 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsaggregatecalculator.h:44 -->
     <object-type name="QgsAggregateCalculator">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsaggregatecalculator.h:53 -->
-        <object-type name="AggregateInfo"/>
+        <value-type name="AggregateInfo"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsaggregatecalculator.h:94 -->
-        <object-type name="AggregateParameters"/>
+        <value-type name="AggregateParameters"/>
         <enum-type name="Aggregate"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrelationcontext.h:31 -->
@@ -2367,7 +2367,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayer.h:400 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayer.h:421 -->
-        <object-type name="LayerOptions"/>
+        <value-type name="LayerOptions"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayer.h:534 -->
         <object-type name="DeleteContext"/>
         <modify-function signature="dataProvider()" remove="true"/>
@@ -2388,12 +2388,12 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:52 -->
     <object-type name="QgsVectorLayerFeatureSource">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:108 -->
-        <object-type name="JoinLayerSource"/>
+        <value-type name="JoinLayerSource"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:157 -->
     <object-type name="QgsVectorLayerFeatureIterator">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:176 -->
-        <object-type name="FetchJoinInfo"/>
+        <value-type name="FetchJoinInfo"/>
         <modify-function signature="setInterruptionChecker(QgsFeedback*)" remove="true"/>
         <modify-function signature="rewindEditBuffer()" remove="true"/>
         <modify-function signature="prepareJoin(int)" remove="true"/>
@@ -2664,9 +2664,10 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingconfig.h:37 -->
     <object-type name="QgsSnappingConfig">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingconfig.h:107 -->
-        <object-type name="IndividualLayerSettings"/>
+        <value-type name="IndividualLayerSettings"/>
         <enum-type name="SnappingType"/>
         <enum-type name="ScaleDependencyMode"/>
+        <modify-function signature="individualLayerSettings()" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectversion.h:32 -->
     <object-type name="QgsProjectVersion"/>
@@ -2714,7 +2715,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:69 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:76 -->
-        <object-type name="SensorData"/>
+        <value-type name="SensorData"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:218 -->
 
@@ -2734,7 +2735,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapthemecollection.h:46 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapthemecollection.h:58 -->
-        <object-type name="MapThemeLayerRecord"/>
+        <value-type name="MapThemeLayerRecord"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapthemecollection.h:121 -->
         <object-type name="MapThemeRecord">
             <modify-function signature="validLayerRecords()" remove="true"/>
@@ -2898,7 +2899,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgsprojectionfactors.h:30 -->
     <object-type name="QgsProjectionFactors"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgsprojoperation.h:30 -->
-    <object-type name="QgsProjOperation"/>
+    <value-type name="QgsProjOperation"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmessageoutput.h:43 -->
     <object-type name="QgsMessageOutput">
         <enum-type name="MessageType"/>
@@ -2916,9 +2917,9 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaskidprovider.h:39 -->
     <object-type name="QgsMaskIdProvider"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:52 -->
-    <object-type name="LayerRenderJob"/>
+    <!--object-type name="LayerRenderJob"/-->
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:207 -->
-    <object-type name="LabelRenderJob"/>
+    <!--object-type name="LabelRenderJob"/-->
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:283 -->
     <object-type name="QgsMapRendererJob">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:285 -->
@@ -3251,13 +3252,13 @@
         <enum-type name="ParseMode"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthconfig.h:41 -->
-    <object-type name="QgsAuthMethodConfig"/>
+    <value-type name="QgsAuthMethodConfig"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthconfig.h:210 -->
     <object-type name="QgsPkiBundle"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthconfig.h:279 -->
     <object-type name="QgsPkiConfigBundle"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthconfig.h:392 -->
-    <object-type name="QgsAuthConfigSslServer"/>
+    <value-type name="QgsAuthConfigSslServer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthcertutils.h:40 -->
     <object-type name="QgsAuthCertUtils">
         <enum-type name="CaCertSource"/>
@@ -4231,7 +4232,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodel.h:462 -->
         <object-type name="LayerLegendTree"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodel.h:476 -->
-        <object-type name="LayerLegendData"/>
+        <value-type name="LayerLegendData"/>
         <enum-type name="Flag"/>
         <modify-function signature="createTemporaryRenderContext()" remove="true"/>
         <modify-function signature="tryBuildLegendTree(const QList&amp;)" remove="true"/>
@@ -4691,7 +4692,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturestore.h:201 -->
 
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerstyle.h:42 -->
-    <object-type name="QgsMapLayerStyle"/>
+    <value-type name="QgsMapLayerStyle"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerstyle.h:81 -->
     <object-type name="QgsMapLayerStyleOverride"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsregistry.h:38 -->
@@ -5287,7 +5288,7 @@
         <modify-function signature="loadSubIndex(int)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:39 -->
-    <object-type name="QgsPointCloudAttributeStatistics"/>
+    <value-type name="QgsPointCloudAttributeStatistics"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:61 -->
     <object-type name="QgsPointCloudStatistics"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayer.h:45 -->
@@ -5862,7 +5863,7 @@
         <modify-function signature="progress(int,bool&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerutils.h:31 -->
-    <object-type name="QgsMaskedLayer"/>
+    <value-type name="QgsMaskedLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerutils.h:52 -->
     <object-type name="QgsVectorLayerUtils">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerutils.h:63 -->
@@ -5948,7 +5949,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingcontext.h:45 -->
     <object-type name="QgsProcessingContext">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingcontext.h:263 -->
-        <object-type name="LayerDetails"/>
+        <value-type name="LayerDetails"/>
         <enum-type name="Flag"/>
         <enum-type name="LogLevel"/>
         <enum-type name="ProcessArgumentFlag"/>
@@ -5962,7 +5963,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingalgorithm.h:52 -->
     <object-type name="QgsProcessingAlgorithm">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingalgorithm.h:336 -->
-        <object-type name="VectorProperties"/>
+        <value-type name="VectorProperties"/>
         <enum-type name="Flag"/>
         <enum-type name="PropertyAvailability"/>
     </object-type>
@@ -6014,9 +6015,9 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelcomment.h:33 -->
     <object-type name="QgsProcessingModelComment"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodeloutput.h:34 -->
-    <object-type name="QgsProcessingModelOutput">
+    <value-type name="QgsProcessingModelOutput">
         <modify-function signature="comment()" remove="true"/>
-    </object-type>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelchilddependency.h:33 -->
     <object-type name="QgsProcessingModelChildDependency"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelchilddependency.h:92 -->
@@ -6026,15 +6027,15 @@
         <modify-function signature="comment()" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelparameter.h:34 -->
-    <object-type name="QgsProcessingModelParameter">
+    <value-type name="QgsProcessingModelParameter">
         <modify-function signature="comment()" remove="true"/>
-    </object-type>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelgroupbox.h:33 -->
     <object-type name="QgsProcessingModelGroupBox"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelalgorithm.h:38 -->
     <object-type name="QgsProcessingModelAlgorithm">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelalgorithm.h:432 -->
-        <object-type name="VariableDefinition"/>
+        <value-type name="VariableDefinition"/>
         <enum-type name="InternalVersion"/>
         <modify-function signature="helpContent()" remove="true"/>
     </object-type>
