@@ -1832,7 +1832,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasteriterator.h:34 -->
     <object-type name="QgsRasterIterator">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasteriterator.h:174 -->
-        <object-type name="RasterPartInfo"/>
+        <!--object-type name="RasterPartInfo"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstemporalproperty.h:35 -->
     <object-type name="QgsTemporalProperty">
@@ -1922,7 +1922,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:56 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:334 -->
-        <object-type name="SubTask"/>
+        <!--object-type name="SubTask"/-->
         <enum-type name="TaskStatus"/>
         <enum-type name="Flag"/>
         <enum-type name="SubTaskDependency"/>
@@ -1934,7 +1934,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:409 -->
         <object-type name="TaskDefinition"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:593 -->
-        <object-type name="TaskInfo"/>
+        <!--object-type name="TaskInfo"/-->
         <modify-function signature="dependencies(long)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterfilewriter.h:39 -->
@@ -2145,7 +2145,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsvectorfilewriter.h:778 -->
         <object-type name="DriverDetails"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsvectorfilewriter.h:957 -->
-        <object-type name="PreparedWriterDetails"/>
+        <!--object-type name="PreparedWriterDetails"/-->
         <enum-type name="OptionType"/>
         <enum-type name="WriterError"/>
         <enum-type name="SymbologyExport"/>
@@ -2262,14 +2262,14 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstranslationcontext.h:35 -->
     <object-type name="QgsTranslationContext">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstranslationcontext.h:41 -->
-        <object-type name="TranslatableObject"/>
+        <!--object-type name="TranslatableObject"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:94 -->
     <object-type name="QgsApplication">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:145 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:1143 -->
-        <object-type name="ApplicationMembers"/>
+        <!--object-type name="ApplicationMembers"/-->
         <enum-type name="StyleSheetType"/>
         <enum-type name="Cursor"/>
         <enum-type name="endian_t"/>
@@ -2517,7 +2517,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpressioncontextutils.h:46 -->
     <object-type name="QgsExpressionContextUtils">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpressioncontextutils.h:342 -->
-        <object-type name="GetLayerVisibility"/>
+        <!--object-type name="GetLayerVisibility"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpressioncontextutils.h:364 -->
     <object-type name="LoadLayerFunction"/>
@@ -3006,7 +3006,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprenderercache.h:49 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprenderercache.h:183 -->
-        <object-type name="CacheParameters"/>
+        <!--object-type name="CacheParameters"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgspythonrunner.h:32 -->
     <object-type name="QgsPythonRunner"/>
@@ -3099,7 +3099,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/locator/qgslocatormodel.h:44 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/locator/qgslocatormodel.h:102 -->
-        <object-type name="Entry"/>
+        <!--object-type name="Entry"/-->
         <enum-type name="Role"/>
         <enum-type name="ColumnCount"/>
     </object-type>
@@ -3822,7 +3822,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnewsfeedparser.h:46 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnewsfeedparser.h:70 -->
-        <object-type name="Entry"/>
+        <!--object-type name="Entry"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnewsfeedmodel.h:33 -->
     <object-type name="QgsNewsFeedModel">
@@ -3989,11 +3989,11 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapgrid.h:143 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapgrid.h:1023 -->
-        <object-type name="GridExtension"/>
+        <!--object-type name="GridExtension"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapgrid.h:1065 -->
-        <object-type name="GridLineAnnotation"/>
+        <!--object-type name="GridLineAnnotation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapgrid.h:1077 -->
-        <object-type name="GridLine"/>
+        <!--object-type name="GridLine"/-->
         <enum-type name="GridUnit"/>
         <enum-type name="GridStyle"/>
         <enum-type name="DisplayMode"/>
@@ -4285,7 +4285,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemattributetable.h:36 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemattributetable.h:363 -->
-        <object-type name="Cell"/>
+        <!--object-type name="Cell"/-->
         <enum-type name="ContentSource"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgsreportsectionlayout.h:34 -->
@@ -4539,9 +4539,9 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:96 -->
     <object-type name="QgsMeshEditRefineFaces">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:108 -->
-        <object-type name="FaceRefinement"/>
+        <!--object-type name="FaceRefinement"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:117 -->
-        <object-type name="BorderFace"/>
+        <!--object-type name="BorderFace"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:162 -->
     <object-type name="QgsMeshTransformVerticesByExpression"/>
@@ -4565,7 +4565,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmesheditor.h:69 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmesheditor.h:328 -->
-        <object-type name="Edit"/>
+        <!--object-type name="Edit"/-->
         <modify-function signature="QgsMeshEditor(QgsMesh*,QgsTriangularMesh*,QObject*)" remove="true"/>
         <modify-function signature="resetTriangularMesh(QgsTriangularMesh*)" remove="true"/>
         <modify-function signature="faceCanBeAddedWithNewVertices(const QList&amp;,const QList&amp;)" remove="true"/>
@@ -4766,7 +4766,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextrenderer.h:41 -->
     <object-type name="QgsTextRenderer">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextrenderer.h:313 -->
-        <object-type name="Component"/>
+        <!--object-type name="Component"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextdocumentmetrics.h:41 -->
     <object-type name="QgsTextDocumentMetrics"/>
@@ -4969,9 +4969,9 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmergedfeaturerenderer.h:40 -->
     <object-type name="QgsMergedFeatureRenderer">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmergedfeaturerenderer.h:135 -->
-        <object-type name="CombinedFeature"/>
+        <!--object-type name="CombinedFeature"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmergedfeaturerenderer.h:160 -->
-        <object-type name="FeatureDecoration"/>
+        <!--object-type name="FeatureDecoration"/-->
         <enum-type name="GeometryOperation"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsellipsesymbollayer.h:31 -->
@@ -5087,12 +5087,12 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:2232 -->
     <object-type name="QgsRandomMarkerFillSymbolLayer">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:2391 -->
-        <object-type name="Part"/>
+        <!--object-type name="Part"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:2419 -->
     <object-type name="QgsCentroidFillSymbolLayer">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:2524 -->
-        <object-type name="Part"/>
+        <!--object-type name="Part"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsinvertedpolygonrenderer.h:42 -->
     <object-type name="QgsInvertedPolygonRenderer"/>
@@ -5156,11 +5156,11 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslegendrenderer.h:46 -->
     <object-type name="QgsLegendRenderer">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslegendrenderer.h:130 -->
-        <object-type name="LegendComponent"/>
+        <!--object-type name="LegendComponent"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslegendrenderer.h:182 -->
-        <object-type name="LegendComponentGroup"/>
+        <!--object-type name="LegendComponentGroup"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslegendrenderer.h:205 -->
-        <object-type name="ColumnContext"/>
+        <!--object-type name="ColumnContext"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsbearingutils.h:34 -->
     <object-type name="QgsBearingUtils"/>
@@ -5183,25 +5183,25 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:122 -->
         <object-type name="DistanceTransformProperties"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:222 -->
-        <object-type name="ImageBlock"/>
+        <!--object-type name="ImageBlock"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:306 -->
-        <object-type name="GrayscalePixelOperation"/>
+        <!--object-type name="GrayscalePixelOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:323 -->
-        <object-type name="BrightnessContrastPixelOperation"/>
+        <!--object-type name="BrightnessContrastPixelOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:339 -->
-        <object-type name="HueSaturationPixelOperation"/>
+        <!--object-type name="HueSaturationPixelOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:364 -->
-        <object-type name="MultiplyOpacityPixelOperation"/>
+        <!--object-type name="MultiplyOpacityPixelOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:377 -->
-        <object-type name="ConvertToArrayPixelOperation"/>
+        <!--object-type name="ConvertToArrayPixelOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:395 -->
-        <object-type name="ShadeFromArrayOperation"/>
+        <!--object-type name="ShadeFromArrayOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:422 -->
-        <object-type name="StackBlurLineOperation"/>
+        <!--object-type name="StackBlurLineOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:481 -->
-        <object-type name="GaussianBlurOperation"/>
+        <!--object-type name="GaussianBlurOperation"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsimageoperation.h:512 -->
-        <object-type name="FlipLineOperation"/>
+        <!--object-type name="FlipLineOperation"/-->
         <enum-type name="GrayscaleMode"/>
         <enum-type name="FlipType"/>
         <enum-type name="LineOperationDirection"/>
@@ -5272,7 +5272,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudattribute.h:141 -->
     <object-type name="QgsPointCloudAttributeCollection">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudattribute.h:198 -->
-        <object-type name="CachedAttributeData"/>
+        <!--object-type name="CachedAttributeData"/-->
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudblock.h:38 -->
     <object-type name="QgsPointCloudBlock"/>
@@ -5303,11 +5303,11 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayerexporter.h:44 -->
     <object-type name="QgsPointCloudLayerExporter">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayerexporter.h:285 -->
-        <object-type name="ExporterBase"/>
+        <!--object-type name="ExporterBase"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayerexporter.h:298 -->
-        <object-type name="ExporterMemory"/>
+        <!--object-type name="ExporterMemory"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayerexporter.h:311 -->
-        <object-type name="ExporterVector"/>
+        <!--object-type name="ExporterVector"/-->
         <enum-type name="ExportFormat"/>
         <modify-function signature="supportedFormats()" remove="true"/>
         <modify-function signature="getOgrDriverName(QgsPointCloudLayerExporter::ExportFormat)" remove="true"/>
@@ -5454,9 +5454,9 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsofflineediting.h:37 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsofflineediting.h:161 -->
-        <object-type name="AttributeValueChange"/>
+        <!--object-type name="AttributeValueChange"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsofflineediting.h:170 -->
-        <object-type name="GeometryChange"/>
+        <!--object-type name="GeometryChange"/-->
         <enum-type name="ProgressMode"/>
         <enum-type name="ContainerType"/>
     </object-type>
@@ -5503,7 +5503,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilerenderer.h:61 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilerenderer.h:201 -->
-        <object-type name="ProfileJob"/>
+        <!--object-type name="ProfileJob"/-->
         <!--enum-type name="enum_59"/>
         <enum-type name="enum_60"/-->
     </object-type>
@@ -5743,7 +5743,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaphittest.h:158 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaphittest.h:193 -->
-        <object-type name="PreparedLayerData"/>
+        <!--object-type name="PreparedLayerData"/-->
         <modify-function signature="results()" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/externalstorage/qgsexternalstorageregistry.h:36 -->
@@ -5858,7 +5858,7 @@
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayercache.h:48 -->
         <!--object-type name="QPrivateSignal"/-->
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayercache.h:57 -->
-        <object-type name="QgsCachedFeature"/>
+        <!--object-type name="QgsCachedFeature"/-->
         <modify-function signature="progress(int,bool&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerutils.h:31 -->
