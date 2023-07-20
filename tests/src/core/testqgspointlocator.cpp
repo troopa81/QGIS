@@ -13,6 +13,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qgsmaprenderersequentialjob.h"
 #include "qgstest.h"
 #include <QObject>
 #include <QString>
@@ -515,6 +516,47 @@ class TestQgsPointLocator : public QObject
       QCOMPARE( m.point(), QgsPointXY( 1, 1 ) );
       QCOMPARE( m.distance(), std::sqrt( 2.0 ) );
       QCOMPARE( m.vertexIndex(), 2 );
+    }
+
+    void testPerformanceNoRendering()
+    {
+      QgsVectorLayer layer( QStringLiteral( "dbname='osm' host=127.0.0.1 port=5432 sslmode=disable key='osm_id' srid=3857 type=Polygon checkPrimaryKeyUnicity='1' table=\"public\".\"planet_osm_polygon\" (way)'" ),
+                            QStringLiteral( "polys" ), QStringLiteral( "postgres" ) );
+      QgsProject::instance()->addMapLayer( &layer );
+
+      QgsPointLocator loc( &layer );
+
+      QElapsedTimer t;
+      t.start();
+      loc.init();
+      qDebug() << "loc.init()=" << t.elapsed() << "ms";
+    }
+
+    void testPerformanceWithRendering()
+    {
+      QgsVectorLayer *layer = new QgsVectorLayer( QStringLiteral( "dbname='osm' host=127.0.0.1 port=5432 sslmode=disable key='osm_id' srid=3857 type=Polygon checkPrimaryKeyUnicity='1' table=\"public\".\"planet_osm_polygon\" (way)'" ),
+          QStringLiteral( "polys" ), QStringLiteral( "postgres" ) );
+      QgsProject::instance()->addMapLayer( layer );
+
+      const QSize size( 640, 480 );
+      QgsMapSettings mapSettings;
+      mapSettings.setOutputSize( size );
+      mapSettings.setExtent( layer->extent() );
+      mapSettings.setLayers( QList<QgsMapLayer *>() << layer );
+      mapSettings.setOutputDpi( 96 );
+
+      QgsMapRendererSequentialJob job( mapSettings );
+      job.start();
+      job.waitForFinished();
+
+      QgsPointLocator loc( layer );
+
+      QElapsedTimer t;
+      t.start();
+      loc.init();
+      qDebug() << "loc.init()=" << t.elapsed() << "ms";
+
+      QgsProject::instance()->removeMapLayer( layer->id() );
     }
 
 };
