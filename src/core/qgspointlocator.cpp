@@ -15,6 +15,7 @@
 
 #include "qgspointlocator.h"
 
+#include "qgsfeatureid.h"
 #include "qgsfeatureiterator.h"
 #include "qgsgeometry.h"
 #include "qgsvectorlayer.h"
@@ -930,6 +931,11 @@ void QgsPointLocator::setRenderContext( const QgsRenderContext *context )
 
 }
 
+void QgsPointLocator::setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures )
+{
+  mRenderedFeatures = renderedFeatures;
+}
+
 void QgsPointLocator::onInitTaskFinished()
 {
   Q_ASSERT_X( QThread::currentThread() == qApp->thread(), "QgsPointLocator::onInitTaskFinished", "was not called on main thread" );
@@ -1043,9 +1049,67 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
 
   QLinkedList<RTree::Data *> dataList;
   QgsFeature f;
+  int indexedCount = 0;
 
   QgsFeatureRequest request;
   request.setNoAttributes();
+
+  // TODO refactor this method and the 2 lambda, this is ugly
+  auto addFeatureToIndex = [&]( QgsFeatureId fid, const QgsGeometry & geometry )
+  {
+    const QgsRectangle bbox = geometry.boundingBox();
+    if ( bbox.isFinite() )
+    {
+      SpatialIndex::Region r( rect2region( bbox ) );
+      dataList << new RTree::Data( 0, nullptr, r, fid );
+
+      auto it = mGeoms.find( fid );
+      if ( it != mGeoms.end() )
+      {
+        delete *it;
+        *it = new QgsGeometry( geometry );
+      }
+      else
+      {
+        mGeoms[fid] = new QgsGeometry( geometry );
+      }
+      ++indexedCount;
+    }
+  };
+
+  auto buildRTree = [&]( const QLinkedList<RTree::Data *> &dataList )
+  {
+    if ( dataList.isEmpty() )
+    {
+      mIsEmptyLayer = true;
+      return; // no features
+    }
+
+    // R-Tree parameters
+    const double fillFactor = 0.7;
+    const unsigned long indexCapacity = 10;
+    const unsigned long leafCapacity = 10;
+    const unsigned long dimension = 2;
+    const RTree::RTreeVariant variant = RTree::RV_RSTAR;
+    SpatialIndex::id_type indexId;
+
+    QgsPointLocator_Stream stream( dataList );
+    mRTree.reset( RTree::createAndBulkLoadNewRTree( RTree::BLM_STR, stream, *mStorage, fillFactor, indexCapacity,
+                  leafCapacity, dimension, variant, indexId ) );
+  };
+
+  // TODO we need to deal with the case where there is no feature
+  if ( !mRenderedFeatures.isEmpty() )
+  {
+    for ( const QgsRenderedFeaturesItemDetails::RenderedFeature &renderedFeature : std::as_const( mRenderedFeatures ) )
+    {
+      addFeatureToIndex( renderedFeature.fid, renderedFeature.geometry );
+    }
+
+    buildRTree( dataList );
+
+    return true;
+  }
 
   if ( mExtent )
   {
@@ -1083,7 +1147,6 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
   }
 
   QgsFeatureIterator fi = mSource->getFeatures( request );
-  int indexedCount = 0;
 
   while ( fi.nextFeature( f ) )
   {
@@ -1116,24 +1179,7 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
       }
     }
 
-    const QgsRectangle bbox = f.geometry().boundingBox();
-    if ( bbox.isFinite() )
-    {
-      SpatialIndex::Region r( rect2region( bbox ) );
-      dataList << new RTree::Data( 0, nullptr, r, f.id() );
-
-      auto it = mGeoms.find( f.id() );
-      if ( it != mGeoms.end() )
-      {
-        delete *it;
-        *it = new QgsGeometry( f.geometry() );
-      }
-      else
-      {
-        mGeoms[f.id()] = new QgsGeometry( f.geometry() );
-      }
-      ++indexedCount;
-    }
+    addFeatureToIndex( f.id(), f.geometry() );
 
     if ( maxFeaturesToIndex != -1 && indexedCount > maxFeaturesToIndex )
     {
@@ -1143,23 +1189,7 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
     }
   }
 
-  // R-Tree parameters
-  const double fillFactor = 0.7;
-  const unsigned long indexCapacity = 10;
-  const unsigned long leafCapacity = 10;
-  const unsigned long dimension = 2;
-  const RTree::RTreeVariant variant = RTree::RV_RSTAR;
-  SpatialIndex::id_type indexId;
-
-  if ( dataList.isEmpty() )
-  {
-    mIsEmptyLayer = true;
-    return true; // no features
-  }
-
-  QgsPointLocator_Stream stream( dataList );
-  mRTree.reset( RTree::createAndBulkLoadNewRTree( RTree::BLM_STR, stream, *mStorage, fillFactor, indexCapacity,
-                leafCapacity, dimension, variant, indexId ) );
+  buildRTree( dataList );
 
   if ( ctx && mRenderer )
   {
@@ -1170,7 +1200,6 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
 
   return true;
 }
-
 
 void QgsPointLocator::destroyIndex()
 {

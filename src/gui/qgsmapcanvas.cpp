@@ -43,6 +43,7 @@ email                : sherman at mrcc.com
 #include <QPropertyAnimation>
 
 #include "qgis.h"
+#include "qgsrenderedfeaturesitemdetails.h"
 #include "qgssettings.h"
 #include "qgsmapcanvasannotationitem.h"
 #include "qgsapplication.h"
@@ -892,6 +893,26 @@ void QgsMapCanvas::rendererJobFinished()
 
     mRenderedItemResults = std::move( renderedItemResults );
     mRenderedItemResultsOutdated = false;
+
+    // TODO not sure to do this here or later
+    // std::as_const ? don't compile why?
+    if ( mSnappingUtils )
+    {
+      for ( const QgsRenderedItemDetails *details : mRenderedItemResults->renderedItems() )
+      {
+        const QgsRenderedFeaturesItemDetails *renderedDetails = dynamic_cast<const QgsRenderedFeaturesItemDetails *>( details );
+        QgsVectorLayer *layer = renderedDetails ? QgsProject::instance()->mapLayer<QgsVectorLayer *>( renderedDetails->layerId() ) : nullptr;
+        if ( layer )
+        {
+          QgsPointLocator *loc = mSnappingUtils->locatorForLayer( layer );
+          loc->setRenderedFeatures( renderedDetails->renderedFeatures() );
+          const QgsRectangle extent = renderedDetails->boundingBox();
+          loc->setExtent( &extent );
+
+          // TODO who's detroying renderedDetails? mRenderedItemResults ?
+        }
+      }
+    }
 
     QImage img = mJob->renderedImage();
 

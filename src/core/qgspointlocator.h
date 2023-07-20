@@ -32,6 +32,7 @@ class QgsVectorLayerFeatureSource;
 #include "qgsvectorlayer.h"
 #include "qgslinestring.h"
 #include "qgspointlocatorinittask.h"
+#include "qgsrenderedfeaturesitemdetails.h"
 #include <memory>
 
 #include <QPointer>
@@ -148,6 +149,13 @@ class CORE_EXPORT QgsPointLocator : public QObject
      * \since QGIS 3.2
      */
     void setRenderContext( const QgsRenderContext *context );
+
+    /**
+     * Set rendered features
+     * TODO complete
+     * \since QGIS TODO
+     */
+    void setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures );
 
     /**
      * The type of a snap result or the filter type for a snap request.
@@ -514,6 +522,7 @@ class CORE_EXPORT QgsPointLocator : public QObject
     QgsFeatureIds mAddedFeatures;
     QgsFeatureIds mDeletedFeatures;
     QPointer<QgsPointLocatorInitTask> mInitTask;
+    QgsRenderedFeaturesItemDetails::RenderedFeatures mRenderedFeatures;
 
     friend class QgsPointLocator_VisitorNearestVertex;
     friend class QgsPointLocator_VisitorNearestCentroid;

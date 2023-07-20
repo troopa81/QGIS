@@ -508,6 +508,7 @@ set(QGIS_CORE_SRCS
   qgspolymorphicrelation.cpp
   qgsrecentstylehandler.cpp
   qgsrelationcontext.cpp
+  qgsrenderedfeaturesitemdetails.cpp
   qgsweakrelation.cpp
   qgsrelationmanager.cpp
   qgsremappingproxyfeaturesink.cpp
@@ -1200,6 +1201,7 @@ set(QGIS_CORE_HDRS
   qgsrelation.h
   qgspolymorphicrelation.h
   qgsrelationcontext.h
+  qgsrenderedfeaturesitemdetails.h
   qgsremappingproxyfeaturesink.h
   qgsweakrelation.h
   qgsrelationmanager.h

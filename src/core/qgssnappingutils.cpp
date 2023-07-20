@@ -485,6 +485,7 @@ void QgsSnappingUtils::prepareIndex( const QList<LayerAndAreaOfInterest> &layers
         loc->setRenderContext( &ctx );
       }
 
+      // Do we need an other strategy IndexRenderedFeatures
       if ( mStrategy == IndexExtent )
       {
         QgsRectangle rect( mMapSettings.visibleExtent() );
@@ -493,6 +494,10 @@ void QgsSnappingUtils::prepareIndex( const QList<LayerAndAreaOfInterest> &layers
       }
       else if ( mStrategy == IndexHybrid )
       {
+        // TODO Remove ? I would say yes. Either you specify an extent (or not) and index everything,
+        // or wait for renderedFeature but this logic seems never ideal
+        // deprecate and map to IndexExtent/Full
+
         // first time the layer is used? - let's set an initial guess about indexing
         if ( !mHybridMaxAreaPerLayer.contains( vl->id() ) )
         {

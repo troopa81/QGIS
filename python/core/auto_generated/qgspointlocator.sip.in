@@ -87,6 +87,13 @@ Configure render context  - if not ``None``, it will use to index only visible f
 .. versionadded:: 3.2
 %End
 
+    void setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures );
+%Docstring
+Set rendered features
+TODO complete
+\since QGIS TODO
+%End
+
     enum Type
     {
       Invalid,

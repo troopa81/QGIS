@@ -16,6 +16,7 @@
 #include "qgsvectorlayerrenderer.h"
 
 
+#include "qgsgeometry.h"
 #include "qgsmessagelog.h"
 #include "qgspallabeling.h"
 #include "qgsrenderer.h"
@@ -40,6 +41,7 @@
 #include "qgsmapclippingutils.h"
 #include "qgsfeaturerenderergenerator.h"
 #include "qgssettingsentryimpl.h"
+#include "qgsrenderedfeaturesitemdetails.h"
 
 #include <QPicture>
 #include <QTimer>
@@ -446,6 +448,7 @@ void QgsVectorLayerRenderer::drawRenderer( QgsFeatureRenderer *renderer, QgsFeat
   }
 
   QgsFeature fet;
+  QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures;
   while ( fit.nextFeature( fet ) )
   {
     try
@@ -480,6 +483,13 @@ void QgsVectorLayerRenderer::drawRenderer( QgsFeatureRenderer *renderer, QgsFeat
       else
       {
         rendered = renderer->willRenderFeature( fet, context );
+      }
+
+      // TODO or mEnableSnappingForInvisibleFeature
+      // do that only if we need snapping
+      if ( rendered )
+      {
+        renderedFeatures << QgsRenderedFeaturesItemDetails::RenderedFeature( fet.id(), fet.geometry() );
       }
 
       // labeling - register feature
@@ -534,6 +544,10 @@ void QgsVectorLayerRenderer::drawRenderer( QgsFeatureRenderer *renderer, QgsFeat
                      .arg( fet.id() ).arg( cse.what() ) );
     }
   }
+
+  std::unique_ptr< QgsRenderedFeaturesItemDetails > details = std::make_unique< QgsRenderedFeaturesItemDetails >( mLayerID, renderedFeatures );
+  details->setBoundingBox( context.extent() );
+  appendRenderedItemDetails( details.release() );
 
   delete context.expressionContext().popScope();
 
@@ -858,4 +872,3 @@ void QgsVectorLayerRenderer::prepareDiagrams( QgsVectorLayer *layer, QSet<QStrin
     }
   }
 }
-
