@@ -799,6 +799,7 @@ void QgsMapCanvas::refreshMap()
   connect( mJob, &QgsMapRendererJob::finished, this, &QgsMapCanvas::rendererJobFinished );
   mJob->setCache( mCache );
   mJob->setLayerRenderingTimeHints( mLastLayerRenderTime );
+  mJob->setRenderedFeaturesLayers( snappingUtils()->snappedLayers() );
 
   mJob->start();
 
@@ -895,9 +896,9 @@ void QgsMapCanvas::rendererJobFinished()
     mRenderedItemResultsOutdated = false;
 
     // TODO not sure to do this here or later
-    // std::as_const ? don't compile why?
     if ( mSnappingUtils )
     {
+      // TODO std::as_const ? don't compile why?
       for ( const QgsRenderedItemDetails *details : mRenderedItemResults->renderedItems() )
       {
         const QgsRenderedFeaturesItemDetails *renderedDetails = dynamic_cast<const QgsRenderedFeaturesItemDetails *>( details );
@@ -908,8 +909,6 @@ void QgsMapCanvas::rendererJobFinished()
           loc->setRenderedFeatures( renderedDetails->renderedFeatures() );
           const QgsRectangle extent = renderedDetails->boundingBox();
           loc->setExtent( &extent );
-
-          // TODO who's detroying renderedDetails? mRenderedItemResults ?
         }
       }
     }

@@ -217,6 +217,11 @@ void QgsMapRendererJob::setLayerRenderingTimeHints( const QHash<QString, int> &h
   mLayerRenderingTimeHints = hints;
 }
 
+void QgsMapRendererJob::setRenderedFeaturesLayers( const QList<QgsVectorLayer *> &layers )
+{
+  mRenderedFeaturesLayers = layers;
+}
+
 const QgsMapSettings &QgsMapRendererJob::mapSettings() const
 {
   return mSettings;
@@ -545,6 +550,9 @@ std::vector<LayerRenderJob> QgsMapRendererJob::prepareJobs( QPainter *painter, Q
     job.context()->setLabelSink( labelSink() );
     job.context()->setCoordinateTransform( ct );
     job.context()->setExtent( r1 );
+
+    if ( vl && mRenderedFeaturesLayers.contains( vl ) )
+      job.context()->setFlag( Qgis::RenderContextFlag::CollectRenderedFeatures, true );
 
     // Also check geographic, see: https://github.com/qgis/QGIS/issues/45200
     if ( !haveExtentInLayerCrs || ( ct.isValid() && ( ct.sourceCrs().isGeographic() != ct.destinationCrs().isGeographic() ) ) )

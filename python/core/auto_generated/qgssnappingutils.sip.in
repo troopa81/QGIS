@@ -94,6 +94,19 @@ Sets current layer so that if mode is SnapCurrentLayer we know which layer to us
 The current layer used if mode is SnapCurrentLayer
 %End
 
+    bool isSnappingActive( QgsVectorLayer *layer ) const;
+%Docstring
+Returns true if snapping is currently active for this ``layer`` at that given \scale
+TODO make layer const, needs to contify things in IndividualLayerSettings
+
+.. versionadded:: 3.34
+%End
+
+    QList<QgsVectorLayer *> snappedLayers() const;
+%Docstring
+Returns layers for which snapping is currently active
+%End
+
 
     enum IndexingStrategy
     {

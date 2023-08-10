@@ -487,7 +487,7 @@ void QgsVectorLayerRenderer::drawRenderer( QgsFeatureRenderer *renderer, QgsFeat
 
       // TODO or mEnableSnappingForInvisibleFeature
       // do that only if we need snapping
-      if ( rendered )
+      if ( context.testFlag( Qgis::RenderContextFlag::CollectRenderedFeatures ) && rendered )
       {
         renderedFeatures << QgsRenderedFeaturesItemDetails::RenderedFeature( fet.id(), fet.geometry() );
       }
@@ -545,9 +545,12 @@ void QgsVectorLayerRenderer::drawRenderer( QgsFeatureRenderer *renderer, QgsFeat
     }
   }
 
-  std::unique_ptr< QgsRenderedFeaturesItemDetails > details = std::make_unique< QgsRenderedFeaturesItemDetails >( mLayerID, renderedFeatures );
-  details->setBoundingBox( context.extent() );
-  appendRenderedItemDetails( details.release() );
+  if ( context.testFlag( Qgis::RenderContextFlag::CollectRenderedFeatures ) )
+  {
+    std::unique_ptr< QgsRenderedFeaturesItemDetails > details = std::make_unique< QgsRenderedFeaturesItemDetails >( mLayerID, renderedFeatures );
+    details->setBoundingBox( context.extent() );
+    appendRenderedItemDetails( details.release() );
+  }
 
   delete context.expressionContext().popScope();
 

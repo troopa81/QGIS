@@ -101,6 +101,18 @@ class CORE_EXPORT QgsSnappingUtils : public QObject
     //! The current layer used if mode is SnapCurrentLayer
     QgsVectorLayer *currentLayer() const { return mCurrentLayer; }
 
+    /**
+     * Returns true if snapping is currently active for this \a layer at that given \scale
+     * TODO make layer const, needs to contify things in IndividualLayerSettings
+     * \since 3.34
+     */
+    bool isSnappingActive( QgsVectorLayer *layer ) const;
+
+    /**
+     * Returns layers for which snapping is currently active
+     */
+    QList<QgsVectorLayer *> snappedLayers() const;
+
     // configuration
 
     enum IndexingStrategy

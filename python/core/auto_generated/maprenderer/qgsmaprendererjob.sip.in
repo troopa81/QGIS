@@ -169,6 +169,15 @@ Returns the total time it took to finish the job (in milliseconds).
 
 
 
+    void setRenderedFeaturesLayers( const QList<QgsVectorLayer *> &layers );
+%Docstring
+Set ``layers`` for which we want to collect rendered features
+TODO try to find a better name...
+TODO add a getter
+
+.. versionadded:: 3.34
+%End
+
     const QgsMapSettings &mapSettings() const;
 %Docstring
 Returns map settings with which this job was started.

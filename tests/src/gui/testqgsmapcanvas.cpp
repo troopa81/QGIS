@@ -26,6 +26,8 @@
 #include "qgsmaptoolpan.h"
 #include "qgscustomdrophandler.h"
 #include "qgsreferencedgeometry.h"
+#include "qgspointlocator.h"
+#include "qgsmapcanvassnappingutils.h"
 
 namespace QTest
 {
@@ -81,6 +83,8 @@ class TestQgsMapCanvas : public QObject
     void testTooltipEvent();
     void testMapLayers();
     void testExtentHistory();
+    void testPerformanceNoRendering();
+    void testPerformanceWithRendering();
 
   private:
     QgsMapCanvas *mCanvas = nullptr;
@@ -638,6 +642,68 @@ void TestQgsMapCanvas::testExtentHistory()
     mCanvas->zoomToPreviousExtent();
     QCOMPARE( mCanvas->extent(), initialExtent );
   }
+}
+
+
+void TestQgsMapCanvas::testPerformanceNoRendering()
+{
+  QgsVectorLayer layer( QStringLiteral( "dbname='osm' host=127.0.0.1 port=5432 sslmode=disable key='osm_id' srid=3857 type=Polygon checkPrimaryKeyUnicity='1' table=\"public\".\"planet_osm_polygon\" (way)'" ),
+                        QStringLiteral( "polys" ), QStringLiteral( "postgres" ) );
+  QgsProject::instance()->addMapLayer( &layer );
+
+  QgsPointLocator loc( &layer );
+
+  QElapsedTimer t;
+  t.start();
+  loc.init();
+  qDebug() << "loc.init()=" << t.elapsed() << "ms";
+  QgsPointLocator::Match center = loc.nearestVertex( layer.extent().center(), 50 );
+  QVERIFY( center.isValid() );
+  QVERIFY( center.hasVertex() );
+  QCOMPARE( center.vertexIndex(), 922 );
+}
+
+void TestQgsMapCanvas::testPerformanceWithRendering()
+{
+  QgsVectorLayer *layer = new QgsVectorLayer( QStringLiteral( "dbname='osm' host=127.0.0.1 port=5432 sslmode=disable key='osm_id' srid=3857 type=Polygon checkPrimaryKeyUnicity='1' table=\"public\".\"planet_osm_polygon\" (way)'" ),
+      QStringLiteral( "polys" ), QStringLiteral( "postgres" ) );
+  QgsProject::instance()->addMapLayer( layer );
+
+  QgsMapCanvasSnappingUtils *snappingUtils = nullptr; // new QgsMapCanvasSnappingUtils( mCanvas, mCanvas );
+  mCanvas->setSnappingUtils( snappingUtils );
+  mCanvas->setLayers( QList<QgsMapLayer *>() << layer );
+  mCanvas->setExtent( layer->extent() );
+
+  QSignalSpy spy( mCanvas, SIGNAL( mapCanvasRefreshed() ) );
+  QEventLoop loop;
+  QTimer timer;
+  QObject::connect( mCanvas, SIGNAL( mapCanvasRefreshed() ), &loop, SLOT( quit() ) );
+  QObject::connect( &timer, SIGNAL( timeout() ), &loop, SLOT( quit() ) );
+
+  // refresh and wait for rendering
+  QElapsedTimer tRendering;
+  tRendering.start();
+  mCanvas->refresh();
+  timer.start( 3000 );
+  loop.exec();
+  qDebug() << "rendering=" << tRendering.elapsed() << "ms";
+  QCOMPARE( spy.count(), 1 );
+  spy.clear();
+
+//  QgsPointLocator *loc = snappingUtils->locatorForLayer( layer );
+  QgsPointLocator *loc = new QgsPointLocator( layer );
+
+  QElapsedTimer t;
+  t.start();
+  loc->init();
+  qDebug() << "loc.init()=" << t.elapsed() << "ms";
+
+  QgsPointLocator::Match center = loc->nearestVertex( layer->extent().center(), 50 );
+  QVERIFY( center.isValid() );
+  QVERIFY( center.hasVertex() );
+  QCOMPARE( center.vertexIndex(), 922 );
+
+  QgsProject::instance()->removeMapLayer( layer->id() );
 }
 
 QGSTEST_MAIN( TestQgsMapCanvas )

@@ -87,11 +87,25 @@ Configure render context  - if not ``None``, it will use to index only visible f
 .. versionadded:: 3.2
 %End
 
-    void setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures );
+    void setUseRenderedFeatures( bool useRenderedFeatures );
 %Docstring
-Set rendered features
-TODO complete
-\since QGIS TODO
+if ``useRenderedFeatures`` is true, then point locator would use the given rendered features to know
+which features is has to index.
+Default to false
+TODO how we describe function list with doxygen
+
+.. seealso:: :py:func:`setRenderedFeatures`
+
+.. versionadded:: 3.34
+%End
+
+    bool useRenderedFeatures() const;
+%Docstring
+Returns true if point locator use given rendered features to know which features is has to index
+
+.. seealso:: :py:func:`setRenderedFeatures`
+
+.. versionadded:: 3.34
 %End
 
     enum Type

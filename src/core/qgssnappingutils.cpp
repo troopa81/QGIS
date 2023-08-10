@@ -271,6 +271,8 @@ QgsPointLocator::Match QgsSnappingUtils::snapToMap( const QgsPointXY &pointMap, 
     return QgsPointLocator::Match();
   }
 
+  // TODO use QgsSnappingConfig isSnappingActive (and test it)
+
   if ( mSnappingConfig.mode() == Qgis::SnappingMode::ActiveLayer )
   {
     if ( !mCurrentLayer || mSnappingConfig.typeFlag().testFlag( Qgis::SnappingType::NoSnap ) )
@@ -485,7 +487,7 @@ void QgsSnappingUtils::prepareIndex( const QList<LayerAndAreaOfInterest> &layers
         loc->setRenderContext( &ctx );
       }
 
-      // Do we need an other strategy IndexRenderedFeatures
+      // TODO Do we need an other strategy IndexRenderedFeatures
       if ( mStrategy == IndexExtent )
       {
         QgsRectangle rect( mMapSettings.visibleExtent() );
@@ -611,6 +613,57 @@ void QgsSnappingUtils::setCurrentLayer( QgsVectorLayer *layer )
 {
   mCurrentLayer = layer;
 }
+
+bool QgsSnappingUtils::isSnappingActive( QgsVectorLayer *layer ) const
+{
+  if ( !layer )
+    return false;
+
+  switch ( mSnappingConfig.mode() )
+  {
+    case Qgis::SnappingMode::ActiveLayer:
+      return layer == mCurrentLayer;
+
+    case Qgis::SnappingMode::AdvancedConfiguration:
+    {
+      const QgsSnappingConfig::IndividualLayerSettings layerSettings = mSnappingConfig.individualLayerSettings( layer );
+
+      //maximum scale is the one with smallest denominator
+      //minimum scale is the one with highest denominator
+      //So : maxscale < range on which snapping is enabled < minscale
+      const bool inRangeGlobal = ( mSnappingConfig.minimumScale() <= 0.0 || mMapSettings.scale() <= mSnappingConfig.minimumScale() )
+                                 && ( mSnappingConfig.maximumScale() <= 0.0 || mMapSettings.scale() >= mSnappingConfig.maximumScale() );
+
+      const bool inRangeLayer = ( layerSettings.minimumScale() <= 0.0 || mMapSettings.scale() <= layerSettings.minimumScale() )
+                                && ( layerSettings.maximumScale() <= 0.0 || mMapSettings.scale() >= layerSettings.maximumScale() );
+
+      //If limit to scale is disabled, snapping activated on all layer
+      //If no per layer config is set use the global one, otherwise use the layer config
+      return ( mSnappingConfig.scaleDependencyMode() == QgsSnappingConfig::Disabled
+               || ( mSnappingConfig.scaleDependencyMode() == QgsSnappingConfig::Global && inRangeGlobal )
+               || ( mSnappingConfig.scaleDependencyMode() == QgsSnappingConfig::PerLayer  && inRangeLayer ) );
+    }
+
+    case Qgis::SnappingMode::AllLayers:
+      return true;
+  }
+}
+
+QList<QgsVectorLayer *> QgsSnappingUtils::snappedLayers() const
+{
+  // TODO this class uses sometimes mMapSettings.layers( true ) or mLayers according to configuration. Is it relevant ?
+  // If yes needs to modify the following line
+  QList<QgsVectorLayer *> layers;
+  for ( QgsMapLayer *layer : mMapSettings.layers( true ) )
+  {
+    QgsVectorLayer *vlayer = qobject_cast<QgsVectorLayer *>( layer );
+    if ( vlayer && isSnappingActive( vlayer ) )
+      layers << vlayer;
+  }
+
+  return layers;
+}
+
 
 QString QgsSnappingUtils::dump()
 {

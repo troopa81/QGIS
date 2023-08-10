@@ -151,11 +151,30 @@ class CORE_EXPORT QgsPointLocator : public QObject
     void setRenderContext( const QgsRenderContext *context );
 
     /**
-     * Set rendered features
-     * TODO complete
-     * \since QGIS TODO
+     * if \a useRenderedFeatures is true, then point locator would use the given rendered features to know
+     * which features is has to index.
+     * Default to false
+     * TODO how we describe function list with doxygen
+     * \see setRenderedFeatures useRenderedFeatures
+     * \since QGIS 3.34 TODO
      */
-    void setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures );
+    void setUseRenderedFeatures( bool useRenderedFeatures );
+
+    /**
+     * Returns true if point locator use given rendered features to know which features is has to index
+     * \see setRenderedFeatures setUseRenderedFeatures
+     * \since QGIS 3.34 TODO
+     */
+    bool useRenderedFeatures() const;
+
+    /**
+     * Set rendered features to know which features point locator has to index
+     * Calling this method will force the use of the rendered features when indexing
+     * \see setUseRenderedFeatures useRenderedFeatures
+     * \since QGIS 3.34 TODO
+     * TODO Uncomment SIP_SKIP
+     */
+    void setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures ); SIP_SKIP
 
     /**
      * The type of a snap result or the filter type for a snap request.
@@ -506,7 +525,7 @@ class CORE_EXPORT QgsPointLocator : public QObject
 
     //! flag whether the layer is currently empty (i.e. mRTree is NULLPTR but it is not necessary to rebuild it)
     bool mIsEmptyLayer = false;
-
+    bool mUseRenderedFeatures = false;
 
     //! R-tree containing spatial index
     QgsCoordinateTransform mTransform;

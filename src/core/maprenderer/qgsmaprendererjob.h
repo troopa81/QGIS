@@ -442,6 +442,14 @@ class CORE_EXPORT QgsMapRendererJob : public QObject SIP_ABSTRACT
     void setLayerRenderingTimeHints( const QHash< QString, int > &hints ) SIP_SKIP;
 
     /**
+     * Set \a layers for which we want to collect rendered features
+     * TODO try to find a better name...
+     * TODO add a getter
+     * \since QGIS 3.34 TODO
+     */
+    void setRenderedFeaturesLayers( const QList<QgsVectorLayer *> &layers );
+
+    /**
      * Returns map settings with which this job was started.
      * \returns A QgsMapSettings instance with render settings
      * \since QGIS 2.8
@@ -511,6 +519,7 @@ class CORE_EXPORT QgsMapRendererJob : public QObject SIP_ABSTRACT
     QgsMapSettings mSettings;
     QElapsedTimer mRenderingStart;
     Errors mErrors;
+    QList<QgsVectorLayer *> mRenderedFeaturesLayers;
 
     QgsMapRendererCache *mCache = nullptr;
 

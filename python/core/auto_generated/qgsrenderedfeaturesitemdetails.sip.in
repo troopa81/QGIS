@@ -1,0 +1,53 @@
+/************************************************************************
+ * This file has been generated automatically from                      *
+ *                                                                      *
+ * src/core/qgsrenderedfeaturesitemdetails.h                            *
+ *                                                                      *
+ * Do not edit manually ! Edit header and run scripts/sipify.pl again   *
+ ************************************************************************/
+
+
+
+
+class QgsRenderedFeaturesItemDetails : QgsRenderedItemDetails
+{
+%Docstring(signature="appended")
+Contains information about rendered features.
+
+.. versionadded:: 3.34
+TODO Shall we prefer :py:class:`QgsRenderedFeatures` because it's mainly a struct of rendered feature used everywhere
+not just a :py:class:`QgsRenderedItemDetails`
+%End
+
+%TypeHeaderCode
+#include "qgsrenderedfeaturesitemdetails.h"
+%End
+  public:
+
+    struct RenderedFeature
+    {
+      RenderedFeature( QgsFeatureId featureId, QgsGeometry geom );
+
+      QgsFeatureId fid;
+      QgsGeometry geometry;
+    };
+
+    typedef QList<RenderedFeature> RenderedFeatures;
+
+    QgsRenderedFeaturesItemDetails( const QString &layerId, RenderedFeatures renderedFeatures );
+%Docstring
+Constructor for QgsRenderedFeaturesItemDetails.
+%End
+
+
+    RenderedFeatures renderedFeatures() const;
+
+};
+
+/************************************************************************
+ * This file has been generated automatically from                      *
+ *                                                                      *
+ * src/core/qgsrenderedfeaturesitemdetails.h                            *
+ *                                                                      *
+ * Do not edit manually ! Edit header and run scripts/sipify.pl again   *
+ ************************************************************************/

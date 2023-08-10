@@ -934,7 +934,19 @@ void QgsPointLocator::setRenderContext( const QgsRenderContext *context )
 void QgsPointLocator::setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures )
 {
   mRenderedFeatures = renderedFeatures;
+  mUseRenderedFeatures = true;
 }
+
+void QgsPointLocator::setUseRenderedFeatures( bool useRenderedFeatures )
+{
+  mUseRenderedFeatures = useRenderedFeatures;
+}
+
+bool QgsPointLocator::useRenderedFeatures() const
+{
+  return mUseRenderedFeatures;
+}
+
 
 void QgsPointLocator::onInitTaskFinished()
 {
@@ -1098,8 +1110,7 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
                   leafCapacity, dimension, variant, indexId ) );
   };
 
-  // TODO we need to deal with the case where there is no feature
-  if ( !mRenderedFeatures.isEmpty() )
+  if ( mUseRenderedFeatures )
   {
     for ( const QgsRenderedFeaturesItemDetails::RenderedFeature &renderedFeature : std::as_const( mRenderedFeatures ) )
     {

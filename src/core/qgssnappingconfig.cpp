@@ -737,8 +737,3 @@ QgsSnappingConfig::ScaleDependencyMode QgsSnappingConfig::scaleDependencyMode() 
 {
   return mScaleDependencyMode;
 }
-
-
-
-
-
