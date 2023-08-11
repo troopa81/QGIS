@@ -113,7 +113,8 @@ Returns layers for which snapping is currently active
       IndexAlwaysFull,
       IndexNeverFull,
       IndexHybrid,
-      IndexExtent
+      IndexExtent,
+      IndexRenderedFeatures,
     };
 
     void setIndexingStrategy( IndexingStrategy strategy );

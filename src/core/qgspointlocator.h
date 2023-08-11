@@ -169,7 +169,6 @@ class CORE_EXPORT QgsPointLocator : public QObject
 
     /**
      * Set rendered features to know which features point locator has to index
-     * Calling this method will force the use of the rendered features when indexing
      * \see setUseRenderedFeatures useRenderedFeatures
      * \since QGIS 3.34 TODO
      * TODO Uncomment SIP_SKIP

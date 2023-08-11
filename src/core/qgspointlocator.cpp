@@ -934,7 +934,6 @@ void QgsPointLocator::setRenderContext( const QgsRenderContext *context )
 void QgsPointLocator::setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures )
 {
   mRenderedFeatures = renderedFeatures;
-  mUseRenderedFeatures = true;
 }
 
 void QgsPointLocator::setUseRenderedFeatures( bool useRenderedFeatures )

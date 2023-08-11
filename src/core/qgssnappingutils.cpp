@@ -487,60 +487,69 @@ void QgsSnappingUtils::prepareIndex( const QList<LayerAndAreaOfInterest> &layers
         loc->setRenderContext( &ctx );
       }
 
-      // TODO Do we need an other strategy IndexRenderedFeatures
-      if ( mStrategy == IndexExtent )
+      switch ( mStrategy )
       {
-        QgsRectangle rect( mMapSettings.visibleExtent() );
-        loc->setExtent( &rect );
-        loc->init( -1, relaxed );
-      }
-      else if ( mStrategy == IndexHybrid )
-      {
-        // TODO Remove ? I would say yes. Either you specify an extent (or not) and index everything,
-        // or wait for renderedFeature but this logic seems never ideal
-        // deprecate and map to IndexExtent/Full
-
-        // first time the layer is used? - let's set an initial guess about indexing
-        if ( !mHybridMaxAreaPerLayer.contains( vl->id() ) )
+        case IndexExtent:
         {
-          long long totalFeatureCount = vl->featureCount();
-          if ( totalFeatureCount < mHybridPerLayerFeatureLimit )
+          QgsRectangle rect( mMapSettings.visibleExtent() );
+          loc->setExtent( &rect );
+          loc->init( -1, relaxed );
+          break;
+        }
+        case IndexHybrid:
+        {
+          // TODO Remove ? I would say yes. Either you specify an extent (or not) and index everything,
+          // or wait for renderedFeature but this logic seems never ideal
+          // deprecate and map to IndexExtent/Full
+
+          // first time the layer is used? - let's set an initial guess about indexing
+          if ( !mHybridMaxAreaPerLayer.contains( vl->id() ) )
           {
-            // index the whole layer
-            mHybridMaxAreaPerLayer[vl->id()] = -1;
+            long long totalFeatureCount = vl->featureCount();
+            if ( totalFeatureCount < mHybridPerLayerFeatureLimit )
+            {
+              // index the whole layer
+              mHybridMaxAreaPerLayer[vl->id()] = -1;
+            }
+            else
+            {
+              // estimate for how big area it probably makes sense to build partial index to not exceed the limit
+              // (we may change the limit later)
+              QgsRectangle layerExtent = mMapSettings.layerExtentToOutputExtent( vl, vl->extent() );
+              double totalArea = layerExtent.width() * layerExtent.height();
+              mHybridMaxAreaPerLayer[vl->id()] = totalArea * mHybridPerLayerFeatureLimit / totalFeatureCount / 4;
+            }
+          }
+
+          double indexReasonableArea = mHybridMaxAreaPerLayer[vl->id()];
+          if ( indexReasonableArea == -1 )
+          {
+            // we can safely index the whole layer
+            loc->init( -1, relaxed );
           }
           else
           {
-            // estimate for how big area it probably makes sense to build partial index to not exceed the limit
-            // (we may change the limit later)
-            QgsRectangle layerExtent = mMapSettings.layerExtentToOutputExtent( vl, vl->extent() );
-            double totalArea = layerExtent.width() * layerExtent.height();
-            mHybridMaxAreaPerLayer[vl->id()] = totalArea * mHybridPerLayerFeatureLimit / totalFeatureCount / 4;
+            // use area as big as we think may fit into our limit
+            QgsPointXY c = entry.second.center();
+            double halfSide = std::sqrt( indexReasonableArea ) / 2;
+            QgsRectangle rect( c.x() - halfSide, c.y() - halfSide,
+                               c.x() + halfSide, c.y() + halfSide );
+            loc->setExtent( &rect );
+
+            // see if it's possible build index for this area
+            loc->init( mHybridPerLayerFeatureLimit, relaxed );
           }
+          break;
         }
+        case IndexRenderedFeatures:
+          loc->setUseRenderedFeatures( true );
+          FALLTHROUGH
 
-        double indexReasonableArea = mHybridMaxAreaPerLayer[vl->id()];
-        if ( indexReasonableArea == -1 )
-        {
-          // we can safely index the whole layer
+        case IndexAlwaysFull:
+        case IndexNeverFull:
           loc->init( -1, relaxed );
-        }
-        else
-        {
-          // use area as big as we think may fit into our limit
-          QgsPointXY c = entry.second.center();
-          double halfSide = std::sqrt( indexReasonableArea ) / 2;
-          QgsRectangle rect( c.x() - halfSide, c.y() - halfSide,
-                             c.x() + halfSide, c.y() + halfSide );
-          loc->setExtent( &rect );
-
-          // see if it's possible build index for this area
-          loc->init( mHybridPerLayerFeatureLimit, relaxed );
-        }
-
+          break;
       }
-      else  // full index strategy
-        loc->init( relaxed );
 
       if ( !relaxed )
         prepareIndexProgress( ++i );

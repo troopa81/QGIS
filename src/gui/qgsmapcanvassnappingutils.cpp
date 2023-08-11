@@ -25,8 +25,9 @@
 QgsMapCanvasSnappingUtils::QgsMapCanvasSnappingUtils( QgsMapCanvas *canvas, QObject *parent )
   : QgsSnappingUtils( parent, QgsSettingsRegistryCore::settingsDigitizingSnapInvisibleFeature->value() )
   , mCanvas( canvas )
-
 {
+  setIndexingStrategy( IndexRenderedFeatures );
+
   connect( canvas, &QgsMapCanvas::extentsChanged, this, &QgsMapCanvasSnappingUtils::canvasMapSettingsChanged );
   connect( canvas, &QgsMapCanvas::destinationCrsChanged, this, &QgsMapCanvasSnappingUtils::canvasMapSettingsChanged );
   connect( canvas, &QgsMapCanvas::layersChanged, this, &QgsMapCanvasSnappingUtils::canvasMapSettingsChanged );

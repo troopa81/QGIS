@@ -799,7 +799,9 @@ void QgsMapCanvas::refreshMap()
   connect( mJob, &QgsMapRendererJob::finished, this, &QgsMapCanvas::rendererJobFinished );
   mJob->setCache( mCache );
   mJob->setLayerRenderingTimeHints( mLastLayerRenderTime );
-  mJob->setRenderedFeaturesLayers( snappingUtils()->snappedLayers() );
+
+  if ( mSnappingUtils && mSnappingUtils->indexingStrategy() == QgsSnappingUtils::IndexRenderedFeatures )
+    mJob->setRenderedFeaturesLayers( snappingUtils()->snappedLayers() );
 
   mJob->start();
 
@@ -896,7 +898,7 @@ void QgsMapCanvas::rendererJobFinished()
     mRenderedItemResultsOutdated = false;
 
     // TODO not sure to do this here or later
-    if ( mSnappingUtils )
+    if ( mSnappingUtils && mSnappingUtils->indexingStrategy() == QgsSnappingUtils::IndexRenderedFeatures )
     {
       // TODO std::as_const ? don't compile why?
       for ( const QgsRenderedItemDetails *details : mRenderedItemResults->renderedItems() )
