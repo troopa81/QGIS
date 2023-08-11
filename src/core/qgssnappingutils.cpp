@@ -90,7 +90,10 @@ QgsPointLocator *QgsSnappingUtils::temporaryLocatorForLayer( QgsVectorLayer *vl,
 
 bool QgsSnappingUtils::isIndexPrepared( QgsPointLocator *loc, const QgsRectangle &areaOfInterest )
 {
-  if ( mStrategy == IndexAlwaysFull && loc->hasIndex() )
+  if ( !loc->hasIndex() )
+    return false;
+
+  if ( mStrategy == IndexAlwaysFull || mStrategy == IndexRenderedFeatures )
     return true;
 
   if ( mStrategy == IndexExtent && loc->hasIndex() && ( !loc->extent() || loc->extent()->intersects( areaOfInterest ) ) )
@@ -718,6 +721,7 @@ QString QgsSnappingUtils::dump()
            .arg( layer.layer->name() )
            .arg( layer.type ).arg( layer.tolerance ).arg( static_cast<int>( layer.unit ) );
 
+    // TODO deal with new IndexRenderedFeatures
     if ( mStrategy == IndexAlwaysFull || mStrategy == IndexHybrid || mStrategy == IndexExtent )
     {
       if ( QgsPointLocator *loc = locatorForLayer( layer.layer ) )
