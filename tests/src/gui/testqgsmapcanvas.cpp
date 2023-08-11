@@ -13,6 +13,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qgssnappingconfig.h"
 #include "qgstest.h"
 #include <QSignalSpy>
 #include <QtMath>
@@ -669,7 +670,11 @@ void TestQgsMapCanvas::testPerformanceWithRendering()
       QStringLiteral( "polys" ), QStringLiteral( "postgres" ) );
   QgsProject::instance()->addMapLayer( layer );
 
-  QgsMapCanvasSnappingUtils *snappingUtils = nullptr; // new QgsMapCanvasSnappingUtils( mCanvas, mCanvas );
+  QgsMapCanvasSnappingUtils *snappingUtils = new QgsMapCanvasSnappingUtils( mCanvas, mCanvas );
+  QgsSnappingConfig snapConfig( QgsProject::instance() );
+  snapConfig.setMode( Qgis::SnappingMode::ActiveLayer );
+  snappingUtils->setCurrentLayer( layer );
+  snappingUtils->setConfig( snapConfig );
   mCanvas->setSnappingUtils( snappingUtils );
   mCanvas->setLayers( QList<QgsMapLayer *>() << layer );
   mCanvas->setExtent( layer->extent() );
@@ -678,7 +683,7 @@ void TestQgsMapCanvas::testPerformanceWithRendering()
   QEventLoop loop;
   QTimer timer;
   QObject::connect( mCanvas, SIGNAL( mapCanvasRefreshed() ), &loop, SLOT( quit() ) );
-  QObject::connect( &timer, SIGNAL( timeout() ), &loop, SLOT( quit() ) );
+  // QObject::connect( &timer, SIGNAL( timeout() ), &loop, SLOT( quit() ) );
 
   // refresh and wait for rendering
   QElapsedTimer tRendering;

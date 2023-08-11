@@ -801,7 +801,7 @@ void QgsMapCanvas::refreshMap()
   mJob->setLayerRenderingTimeHints( mLastLayerRenderTime );
 
   if ( mSnappingUtils && mSnappingUtils->indexingStrategy() == QgsSnappingUtils::IndexRenderedFeatures )
-    mJob->setRenderedFeaturesLayers( snappingUtils()->snappedLayers() );
+    mJob->setRenderedFeaturesLayers( mSnappingUtils->snappedLayers() );
 
   mJob->start();
 
