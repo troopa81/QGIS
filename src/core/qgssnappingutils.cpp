@@ -545,9 +545,6 @@ void QgsSnappingUtils::prepareIndex( const QList<LayerAndAreaOfInterest> &layers
           break;
         }
         case IndexRenderedFeatures:
-          loc->setUseRenderedFeatures( true );
-          FALLTHROUGH
-
         case IndexAlwaysFull:
         case IndexNeverFull:
           loc->init( -1, relaxed );

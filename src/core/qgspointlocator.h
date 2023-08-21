@@ -151,23 +151,6 @@ class CORE_EXPORT QgsPointLocator : public QObject
     void setRenderContext( const QgsRenderContext *context );
 
     /**
-     * if \a useRenderedFeatures is true, then point locator would use the given rendered features to know
-     * which features is has to index.
-     * Default to false
-     * TODO how we describe function list with doxygen
-     * \see setRenderedFeatures useRenderedFeatures
-     * \since QGIS 3.34 TODO
-     */
-    void setUseRenderedFeatures( bool useRenderedFeatures );
-
-    /**
-     * Returns true if point locator use given rendered features to know which features is has to index
-     * \see setRenderedFeatures setUseRenderedFeatures
-     * \since QGIS 3.34 TODO
-     */
-    bool useRenderedFeatures() const;
-
-    /**
      * Set rendered features to know which features point locator has to index
      * \see setUseRenderedFeatures useRenderedFeatures
      * \since QGIS 3.34 TODO
@@ -524,7 +507,7 @@ class CORE_EXPORT QgsPointLocator : public QObject
 
     //! flag whether the layer is currently empty (i.e. mRTree is NULLPTR but it is not necessary to rebuild it)
     bool mIsEmptyLayer = false;
-    bool mUseRenderedFeatures = false;
+    bool mHasRenderedFeatures = false;
 
     //! R-tree containing spatial index
     QgsCoordinateTransform mTransform;

@@ -933,19 +933,9 @@ void QgsPointLocator::setRenderContext( const QgsRenderContext *context )
 
 void QgsPointLocator::setRenderedFeatures( QgsRenderedFeaturesItemDetails::RenderedFeatures renderedFeatures )
 {
+  mHasRenderedFeatures = true;
   mRenderedFeatures = renderedFeatures;
 }
-
-void QgsPointLocator::setUseRenderedFeatures( bool useRenderedFeatures )
-{
-  mUseRenderedFeatures = useRenderedFeatures;
-}
-
-bool QgsPointLocator::useRenderedFeatures() const
-{
-  return mUseRenderedFeatures;
-}
-
 
 void QgsPointLocator::onInitTaskFinished()
 {
@@ -1109,7 +1099,7 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
                   leafCapacity, dimension, variant, indexId ) );
   };
 
-  if ( mUseRenderedFeatures )
+  if ( mHasRenderedFeatures )
   {
     for ( const QgsRenderedFeaturesItemDetails::RenderedFeature &renderedFeature : std::as_const( mRenderedFeatures ) )
     {
@@ -1118,6 +1108,8 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
 
     buildRTree( dataList );
 
+    mRenderedFeatures.clear();
+    mHasRenderedFeatures = false;
     return true;
   }
 

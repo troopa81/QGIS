@@ -673,6 +673,8 @@ void TestQgsMapCanvas::testPerformanceWithRendering()
   QgsMapCanvasSnappingUtils *snappingUtils = new QgsMapCanvasSnappingUtils( mCanvas, mCanvas );
   QgsSnappingConfig snapConfig( QgsProject::instance() );
   snapConfig.setMode( Qgis::SnappingMode::ActiveLayer );
+  snapConfig.setTolerance( 50 );
+  snapConfig.setEnabled( true );
   snappingUtils->setCurrentLayer( layer );
   snappingUtils->setConfig( snapConfig );
   mCanvas->setSnappingUtils( snappingUtils );
@@ -695,15 +697,15 @@ void TestQgsMapCanvas::testPerformanceWithRendering()
   QCOMPARE( spy.count(), 1 );
   spy.clear();
 
-//  QgsPointLocator *loc = snappingUtils->locatorForLayer( layer );
-  QgsPointLocator *loc = new QgsPointLocator( layer );
+  QgsPointLocator *loc = snappingUtils->locatorForLayer( layer );
 
   QElapsedTimer t;
   t.start();
   loc->init();
-  qDebug() << "loc.init()=" << t.elapsed() << "ms";
+  qDebug() << "index build=" << t.elapsed() << "ms";
 
   QgsPointLocator::Match center = loc->nearestVertex( layer->extent().center(), 50 );
+  // QgsPointLocator::Match center = snappingUtils->snapToMap( layer->extent().center() );
   QVERIFY( center.isValid() );
   QVERIFY( center.hasVertex() );
   QCOMPARE( center.vertexIndex(), 922 );
