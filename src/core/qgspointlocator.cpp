@@ -1058,7 +1058,23 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
   // TODO refactor this method and the 2 lambda, this is ugly
   auto addFeatureToIndex = [&]( QgsFeatureId fid, const QgsGeometry & geometry )
   {
-    const QgsRectangle bbox = geometry.boundingBox();
+    QgsGeometry geom = geometry;
+    if ( mTransform.isValid() )
+    {
+      try
+      {
+        geom.transform( mTransform );
+      }
+      catch ( const QgsException &e )
+      {
+        Q_UNUSED( e )
+        // See https://github.com/qgis/QGIS/issues/20749
+        QgsDebugError( QStringLiteral( "could not transform geometry to map, skipping the snap for it (%1)" ).arg( e.what() ) );
+        return;
+      }
+    }
+
+    const QgsRectangle bbox = geom.boundingBox();
     if ( bbox.isFinite() )
     {
       SpatialIndex::Region r( rect2region( bbox ) );
@@ -1068,11 +1084,11 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
       if ( it != mGeoms.end() )
       {
         delete *it;
-        *it = new QgsGeometry( geometry );
+        *it = new QgsGeometry( geom );
       }
       else
       {
-        mGeoms[fid] = new QgsGeometry( geometry );
+        mGeoms[fid] = new QgsGeometry( geom );
       }
       ++indexedCount;
     }
@@ -1160,23 +1176,6 @@ bool QgsPointLocator::rebuildIndex( int maxFeaturesToIndex )
       ctx->expressionContext().setFeature( f );
       if ( !mRenderer->willRenderFeature( f, *ctx ) )
       {
-        continue;
-      }
-    }
-
-    if ( mTransform.isValid() )
-    {
-      try
-      {
-        QgsGeometry transformedGeometry = f.geometry();
-        transformedGeometry.transform( mTransform );
-        f.setGeometry( transformedGeometry );
-      }
-      catch ( const QgsException &e )
-      {
-        Q_UNUSED( e )
-        // See https://github.com/qgis/QGIS/issues/20749
-        QgsDebugError( QStringLiteral( "could not transform geometry to map, skipping the snap for it (%1)" ).arg( e.what() ) );
         continue;
       }
     }
