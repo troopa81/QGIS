@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <typesystem package="core">
-    <!--Auto-generated 2023-08-23T14:19:23-->
+    <!--Auto-generated 2023-08-23T14:38:16-->
     <primitive-type name="int"/>
     <primitive-type name="unsigned"/>
     <primitive-type name="short"/>
@@ -45,6 +45,36 @@
         <modify-function signature="readableConfigurationFlag(QgsField::ConfigurationFlag)" remove="true"/>
         <modify-function signature="convertCompatible(QVariant&amp;,QString*)" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfields.h:44 -->
+    <value-type name="QgsFields">
+        <enum-type name="FieldOrigin"/>
+        <modify-function signature="operator=(const QgsFields&amp;)" remove="true"/>
+        <modify-function signature="remove(int)" remove="true"/>
+        <modify-function signature="operator[](int)" remove="true"/>
+        <modify-function signature="at(int)" remove="true"/>
+        <modify-function signature="field(int)" remove="true"/>
+        <modify-function signature="field(const QString&amp;)" remove="true"/>
+        <modify-function signature="fieldOrigin(int)" remove="true"/>
+        <modify-function signature="fieldOriginIndex(int)" remove="true"/>
+        <modify-function signature="iconForField(int,bool)" remove="true"/>
+        <modify-function signature="constBegin()" remove="true"/>
+        <modify-function signature="constEnd()" remove="true"/>
+        <modify-function signature="begin()" remove="true"/>
+        <modify-function signature="end()" remove="true"/>
+        <modify-function signature="begin()" remove="true"/>
+        <modify-function signature="end()" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsattributes.h:58 -->
+    <object-type name="QgsAttributes">
+        <modify-function signature="QgsAttributes()" remove="true"/>
+        <modify-function signature="QgsAttributes(int)" remove="true"/>
+        <modify-function signature="QgsAttributes(int,const QVariant&amp;)" remove="true"/>
+        <modify-function signature="QgsAttributes(const QVector&amp;)" remove="true"/>
+        <modify-function signature="operator==(const QgsAttributes&amp;)" remove="true"/>
+        <modify-function signature="toMap()" remove="true"/>
+        <modify-function signature="isUnsetValue(int)" remove="true"/>
+        <modify-function signature="operator!=(const QgsAttributes&amp;)" remove="true"/>
+    </object-type>
     <enum-type name="SymbolTable"/>
     <enum-type name="TagTable"/>
     <enum-type name="TagmapTable"/>
