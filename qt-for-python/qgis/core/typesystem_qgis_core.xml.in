@@ -14,6 +14,11 @@
 
     <load-typesystem name="/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/qt-for-python/qgis/core/typesystem_generated.xml" generate="yes"/>
 
+
+
+
+
+
     <!--<load-typesystem name="typesystem_widgets.xml" generate="no"/>-->
 
     <!-- This is used in a public virtual pure function.
@@ -282,6 +287,8 @@
         </inject-code>
       </modify-function>
     </value-type-->
+
+
 
 
 <!-- TYPESYSTEM_CONTENT -->
