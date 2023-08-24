@@ -1074,16 +1074,6 @@ void _FunctionModelItem::setAbstract( bool isAbstract )
   m_isAbstract = isAbstract;
 }
 
-void _FunctionModelItem::setSkipped( bool isSkipped )
-{
-  m_isSkipped = isSkipped;
-}
-
-bool _FunctionModelItem::isSkipped() const
-{
-  return m_isSkipped;
-}
-
 // Qt
 bool _FunctionModelItem::isInvokable() const
 {

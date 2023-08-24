@@ -535,9 +535,6 @@ class _FunctionModelItem: public _MemberModelItem
     // Private, for usage by the clang builder.
     void _determineType();
 
-    void setSkipped( bool isSkipped );
-    bool isSkipped() const;
-
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug( QDebug &d ) const override;
 #endif
@@ -562,7 +559,6 @@ class _FunctionModelItem: public _MemberModelItem
         uint m_isVariadics: 1;
         uint m_isHiddenFriend: 1;
         uint m_isInvokable : 1; // Qt
-        uint m_isSkipped : 1;
       };
       uint m_flags;
     };

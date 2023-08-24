@@ -12,10 +12,8 @@
 
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
-#include <QtCore/QDirIterator>
 #include <QtCore/QHash>
 #include <QtCore/QMap>
-#include <QtCore/QRegularExpression>
 #include <QtCore/QString>
 #include <QtCore/QStack>
 #include <QtCore/QList>
@@ -127,67 +125,6 @@ namespace clang
       explicit BuilderPrivate( BaseVisitor *bv ) : m_baseVisitor( bv ), m_model( new CodeModel )
       {
         m_scopeStack.push( NamespaceModelItem( new _FileModelItem( m_model ) ) );
-
-        // collect #ifndef SIP_RUN
-
-        // TODO fix the path when we get the qgis dir as argument
-        QString dir( QStringLiteral( "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core" ) );
-        QDirIterator it( dir, QStringList() << QStringLiteral( "*.h" ), QDir::Files, QDirIterator::Subdirectories );
-        while ( it.hasNext() )
-        {
-          const QString fileName = it.next();
-          QFile file( fileName );
-          if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
-          {
-            qWarning() << "Error: failed to read file " << fileName;
-            break;
-          }
-
-          QTextStream in( &file );
-          int numLine = 1;
-          int startIfndef = -1;
-          const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
-          const QRegularExpression reEndIf( QStringLiteral( "^\\s*#(endif|else)" ) );
-          const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
-          SkipRanges ranges;
-          int nbIf = 0;
-          while ( !in.atEnd() )
-          {
-            QString line = in.readLine();
-
-            if ( startIfndef >= 0 )
-            {
-              if ( reIf.match( line ).hasMatch() )
-              {
-                nbIf++;
-              }
-
-              if ( reEndIf.match( line ).hasMatch() )
-              {
-                if ( nbIf == 1 )
-                {
-                  ranges << SkipRange( startIfndef, numLine );
-                  startIfndef = -1;
-                }
-
-                nbIf--;
-              }
-            }
-            else
-            {
-              if ( reIfndef.match( line ).hasMatch() )
-              {
-                nbIf++;
-                startIfndef = numLine;
-              }
-            }
-
-            numLine++;
-          }
-
-          if ( !ranges.isEmpty() )
-            mSkipRanges[ fileName ] = ranges;
-        }
       }
       ~BuilderPrivate()
       {
@@ -255,19 +192,11 @@ namespace clang
 
       void setFileName( const CXCursor &cursor, _CodeModelItem *item );
 
-      bool isSkipped( const CXCursor &cursor ) const;
-
       BaseVisitor *m_baseVisitor;
       CodeModel *m_model;
 
-      QMap<QString, QList<unsigned>> m_sipSkip;
-
       QStack<ScopeModelItem> m_scopeStack;
       QStringList m_scope;
-      typedef QPair<int, int> SkipRange;
-      typedef QList<SkipRange> SkipRanges;
-      QMap<QString, SkipRanges> mSkipRanges;
-
       // Store all classes by cursor so that base classes can be found and inner
       // classes can be correctly parented in case of forward-declared inner classes
       // (QMetaObject::Connection)
@@ -296,16 +225,6 @@ namespace clang
   bool BuilderPrivate::addClass( const CXCursor &cursor, CodeModel::ClassType t )
   {
     QString className = getCursorSpelling( cursor );
-
-    QStringList bindedClasses = QStringList()
-                                << QStringLiteral( "QgsAttributes" ) // TODO has to be mapped to a list through using method code
-                                << QStringLiteral( "QgsField" )
-                                << QStringLiteral( "QgsFields" );
-
-    // TODO bind everything
-    if ( !bindedClasses.contains( className ) )
-      return false;
-
     m_currentClass.reset( new _ClassModelItem( m_model, className ) );
     setFileName( cursor, m_currentClass.get() );
     m_currentClass->setClassType( t );
@@ -476,9 +395,6 @@ namespace clang
     result->setStatic( clang_CXXMethod_isStatic( cursor ) != 0 );
     result->setVirtual( clang_CXXMethod_isVirtual( cursor ) != 0 );
     result->setAbstract( clang_CXXMethod_isPureVirtual( cursor ) != 0 );
-
-    result->setSkipped( isSkipped( cursor ) );
-
     return result;
   }
 
@@ -897,30 +813,6 @@ namespace clang
     }
   }
 
-  bool BuilderPrivate::isSkipped( const CXCursor &cursor ) const
-  {
-    SourceLocation loc = getCursorLocation( cursor );
-    QString fileName = getFileName( loc.file );
-    const int line = loc.line;
-
-    // TODO fix the path when we get the qgis dir as argument
-    if ( !fileName.startsWith( QStringLiteral( "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/" ) )
-         || ( m_sipSkip.contains( fileName ) && m_sipSkip[fileName].contains( line ) ) )
-      return true;
-
-    else if ( mSkipRanges.contains( fileName ) )
-    {
-      const SkipRanges ranges = mSkipRanges[fileName];
-      for ( SkipRange range : ranges )
-      {
-        if ( range.first <= line && range.second >= line )
-          return true;
-      }
-    }
-
-    return false;
-  }
-
   Builder::Builder()
   {
     d = new BuilderPrivate( this );
@@ -999,186 +891,7 @@ namespace clang
 
   bool Builder::visitLocation( const QString &fileName, LocationType locationType ) const
   {
-    QStringList sipNoFiles =
-    {
-      u"raster/qgsrasterlayerrenderer.h"_s,
-      u"raster/qgsrasterrendererregistry.h"_s,
-      u"raster/qgsrasterlayerprofilegenerator.h"_s,
-      u"qgsthreadingutils.h"_s,
-      u"pal/palrtree.h"_s,
-      u"pal/geomfunction.h"_s,
-      u"pal/internalexception.h"_s,
-      u"pal/util.h"_s,
-      u"pal/labelposition.h"_s,
-      u"pal/pointset.h"_s,
-      u"pal/palstat.h"_s,
-      u"pal/feature.h"_s,
-      u"pal/pal.h"_s,
-      u"pal/priorityqueue.h"_s,
-      u"pal/layer.h"_s,
-      u"pal/palexception.h"_s,
-      u"pal/costcalculator.h"_s,
-      u"pal/problem.h"_s,
-      u"qgsgenericspatialindex.h"_s,
-      u"browser/qgsfilebaseddataitemprovider.h"_s,
-      u"qgsgrouplayerrenderer.h"_s,
-      u"qgslocalec.h"_s,
-      u"qgsspatialindexkdbush_p.h"_s,
-      u"proj/qgscoordinatetransformcontext_p.h"_s,
-      u"proj/qgscoordinatetransform_p.h"_s,
-      u"maprenderer/qgsmaprendererstagedrenderjob.h"_s,
-      u"qgsmbtiles.h"_s,
-      u"qgseventtracing.h"_s,
-      u"auth/qgsauthmethodregistry.h"_s,
-      u"auth/qgsauthmethodmetadata.h"_s,
-      u"auth/qgsauthcrypto.h"_s,
-      u"qgsfield_p.h"_s,
-      u"qgspointlocatorinittask.h"_s,
-      u"qobjectuniqueptr.h"_s,
-      u"geometry/qgsinternalgeometryengine.h"_s,
-      u"geometry/qgsgeos.h"_s,
-      u"geometry/qgsgeometryeditutils.h"_s,
-      u"geometry/qgsgeometryfactory.h"_s,
-      u"qgstilecache.h"_s,
-      u"qgswebview.h"_s,
-      u"network/qgsrangerequestcache.h"_s,
-      u"network/qgsnetworkdiskcache.h"_s,
-      u"network/qgsnetworkreplyparser.h"_s,
-      u"layout/qgslayoutmultiframeundocommand.h"_s
-      u"layout/qgscompositionconverter.h"_s,
-      u"layout/qgslayoutitemundocommand.h"_s,
-      u"layout/qgslayoutgeopdfexporter.h"_s,
-      u"layout/qgslayoutitemgroupundocommand.h"_s,
-      u"mesh/qgsmeshdatasetgroupstore.h"_s,
-      u"mesh/qgsmeshlayerprofilegenerator.h"_s,
-      u"mesh/qgstopologicalmesh.h"_s,
-      u"mesh/qgsmeshlayerutils.h"_s,
-      u"mesh/qgsmeshlayerrenderer.h"_s,
-      u"mesh/qgsmeshvirtualdatasetgroup.h"_s,
-      u"mesh/qgsmeshcalcnode.h"_s,
-      u"mesh/qgsmeshcalcutils.h"_s,
-      u"mesh/qgstriangularmesh.h"_s,
-      u"mesh/qgsmeshsimplificationsettings.h"_s,
-      u"mesh/qgsmeshvectorrenderer.h"_s,
-      u"qgsfeatureexpressionvaluesgatherer.h"_s,
-      u"qgsindexedfeature.h"_s,
-      u"qgsrelation_p.h"_s,
-      u"qgspolymorphicrelation_p.h"_s,
-      u"settings/qgssettingsentryenumflag.h"_s,
-      u"textrenderer/qgstextmetrics.h"_s,
-      u"textrenderer/qgstextrenderer_p.h"_s,
-      u"expression/qgsexpressionutils.h"_s,
-      u"symbology/qgspainterswapper.h"_s,
-      u"qgswebpage.h"_s,
-      u"qgstiledownloadmanager.h"_s,
-      u"qgssqliteexpressioncompiler.h"_s,
-      u"qgsshapegenerator.h"_s,
-      u"qgis_sip.h"_s,
-      u"qgsgdalutils.h"_s,
-      u"pointcloud/qgspointcloudrequest.h"_s,
-      u"pointcloud/qgspointcloudstatscalculator.h"_s,
-      u"pointcloud/qgspointcloudblockrequest.h"_s,
-      u"pointcloud/qgscopcpointcloudindex.h"_s,
-      u"pointcloud/qgspointcloudlayerprofilegenerator.h"_s,
-      u"pointcloud/qgsremotecopcpointcloudindex.h"_s,
-      u"pointcloud/qgseptpointcloudindex.h"_s,
-      u"pointcloud/qgslazdecoder.h"_s,
-      u"pointcloud/qgspointcloudstatscalculationtask.h"_s,
-      u"pointcloud/qgspointcloudlayerrenderer.h"_s,
-      u"pointcloud/expression/qgspointcloudexpression.h"_s,
-      u"pointcloud/expression/qgspointcloudexpressionnode.h"_s,
-      u"pointcloud/expression/qgspointcloudexpressionnodeimpl.h"_s,
-      u"pointcloud/qgseptpointcloudblockrequest.h"_s,
-      u"pointcloud/qgscopcpointcloudblockrequest.h"_s,
-      u"pointcloud/qgsremoteeptpointcloudindex.h"_s,
-      u"pointcloud/qgspointcloudsubindex.h"_s,
-      u"pointcloud/qgseptdecoder.h"_s,
-      u"pointcloud/qgspointcloudindex.h"_s,
-      u"pointcloud/qgslazinfo.h"_s,
-      u"dxf/qgsdxfpaintengine.h"_s,
-      u"dxf/qgsdxfpaintdevice.h"_s,
-      u"elevation/qgsabstractprofilesurfacegenerator.h"_s,
-      u"vectortile/qgsvectortilemvtencoder.h"_s,
-      u"vectortile/qgsvectortiledataitems.h"_s,
-      u"vectortile/qgsvectortilemvtdecoder.h"_s,
-      u"vectortile/qgsvectortiledataprovider.h"_s,
-      u"vectortile/qgsvectortileconnection.h"_s,
-      u"vectortile/qgsvtpkvectortiledataprovider.h"_s,
-      u"vectortile/qgsarcgisvectortileservicedataprovider.h"_s,
-      u"vectortile/qgsxyzvectortiledataprovider.h"_s,
-      u"vectortile/qgsvectortilemvtutils.h"_s,
-      u"vectortile/qgsvectortileutils.h"_s,
-      u"vectortile/qgsvectortilelayerrenderer.h"_s,
-      u"vectortile/qgsmbtilesvectortiledataprovider.h"_s,
-      u"vectortile/qgsvectortileprovidermetadata.h"_s,
-      u"vectortile/qgsvectortileloader.h"_s,
-      u"qgsconnectionpool.h"_s,
-      u"qgsogrutils.h"_s,
-      u"qgsspatialindexutils.h"_s,
-      u"providers/ogr/qgsgeopackageprojectstorage.h"_s,
-      u"providers/ogr/qgsogrprovidermetadata.h"_s,
-      u"providers/ogr/qgsogrdbconnection.h"_s,
-      u"providers/ogr/qgsogrfeatureiterator.h"_s,
-      u"providers/ogr/qgsogrlayermetadataprovider.h"_s,
-      u"providers/ogr/qgsgeopackagedataitems.h"_s,
-      u"providers/ogr/qgsogrproviderconnection.h"_s,
-      u"providers/ogr/qgsogrexpressioncompiler.h"_s,
-      u"providers/ogr/qgsgeopackageproviderconnection.h"_s,
-      u"providers/ogr/qgsogrprovider.h"_s,
-      u"providers/ogr/qgsogrconnpool.h"_s,
-      u"providers/ogr/qgsgeopackagerasterwriter.h"_s,
-      u"providers/ogr/qgsogrproviderutils.h"_s,
-      u"providers/ogr/qgsogrtransaction.h"_s,
-      u"providers/ogr/qgsgeopackagerasterwritertask.h"_s,
-      u"providers/gdal/qgsgdalprovider.h"_s,
-      u"providers/gdal/qgsgdalproviderbase.h"_s,
-      u"providers/copc/qgscopcprovider.h"_s,
-      u"providers/meshmemory/qgsmeshmemorydataprovider.h"_s,
-      u"providers/ept/qgseptprovider.h"_s,
-      u"providers/vpc/qgsvirtualpointcloudprovider.h"_s,
-      u"providers/memory/qgsmemoryfeatureiterator.h"_s,
-      u"providers/memory/qgsmemoryprovider.h"_s,
-      u"providers/arcgis/qgsarcgisrestquery.h"_s,
-      u"fromencodedcomponenthelper.h"_s,
-      u"qgswebframe.h"_s,
-      u"externalstorage/qgshttpexternalstorage_p.h"_s,
-      u"externalstorage/qgssimplecopyexternalstorage_p.h"_s,
-      u"vector/qgsvectorlayerdiagramprovider.h"_s,
-      u"vector/qgsvectorlayerrenderer.h"_s,
-      u"vector/qgsvectorlayerref.h"_s,
-      u"vector/qgsvectorlayerprofilegenerator.h"_s,
-      u"qgsabstractgeopdfexporter.h"_s,
-      u"processing/qgsprocessingparametertypeimpl.h"_s,
-      u"qgscplhttpfetchoverrider.h"_s,
-      u"qgsopenclutils.h"_s,
-      u"qgsproperty_p.h"_s,
-      u"qgsspatialiteutils.h"_s,
-      u"qgscoordinateutils.h"_s,
-      u"simplify/effectivearea.h"_s,
-      u"labeling/qgslabelsink.h"_s,
-      u"labeling/qgsvectorlayerlabelprovider.h"_s,
-      u"labeling/qgslabelfeature.h"_s,
-      u"labeling/qgstextlabelfeature.h"_s,
-      u"labeling/qgslabelingengine.h"_s,
-      u"qgssqlexpressioncompiler.h"_s,
-      u"annotations/qgsannotationlayerrenderer.h"_s,
-      u"annotations/qgsannotationregistry.h"_s,
-      u"qgsogrproxytextcodec.h"_s,
-      u"qgsexception.h"_s,
-      u"qgsmaplayerref.h"_s
-    };
-
-    QString baseName = fileName;
-    baseName.remove( u"/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/"_s );
-
-    if ( sipNoFiles.contains( baseName ) )
-    {
-      // qDebug() << "--- remove " << fileName;
-      return false;
-    }
-
-    // qDebug() << "fileName=" << fileName << "visit?" << !fileName.contains(u"qgsogrutils.h"_s);
-    return !fileName.contains( u"qgsogrutils.h"_s ) && ( locationType != LocationType::System  || d->visitHeader( fileName ) );
+    return locationType != LocationType::System || d->visitHeader( fileName );
   }
 
   void Builder::setSystemIncludes( const QStringList &systemIncludes )
@@ -1251,18 +964,6 @@ namespace clang
   {
     switch ( cursor.kind )
     {
-      case CXCursor_MacroExpansion:
-      {
-        QString macro = getCursorSpelling( cursor );
-        if ( macro == u"SIP_SKIP" )
-        {
-          // try getCursorRange if on several lines
-          SourceLocation loc = getCursorLocation( cursor );
-          QString fileName = getFileName( loc.file );
-          d->m_sipSkip[fileName].append( loc.line );
-        }
-      }
-      break;
       case CXCursor_CXXAccessSpecifier:
         d->m_currentFunctionType = CodeModel::Normal;
         break;
@@ -1384,10 +1085,8 @@ namespace clang
         if ( d->m_withinFriendDecl || !withinClassDeclaration( cursor ) )
           return Skip;
         d->m_currentFunction = d->createMemberFunction( cursor, false );
-        d->m_currentFunction->setSkipped( d->isSkipped( cursor ) );
         d->m_scopeStack.back()->addFunction( d->m_currentFunction );
         break;
-
       // Not fully supported, currently, seen as normal function
       // Note: May appear inside class (member template) or outside (free template).
       case CXCursor_FunctionTemplate:
@@ -1398,26 +1097,16 @@ namespace clang
           if ( semParent == clang_getCursorLexicalParent( cursor ) )
           {
             d->m_currentFunction = d->createMemberFunction( cursor, true );
-            d->m_currentFunction->setSkipped( d->isSkipped( cursor ) );
             d->m_scopeStack.back()->addFunction( d->m_currentFunction );
             break;
           }
           return Skip; // inline member functions outside class
         }
-
-        if ( !d->isSkipped( cursor ) )
-        {
-          d->m_currentFunction = d->createFunction( cursor, CodeModel::Normal, true );
-          d->m_scopeStack.back()->addFunction( d->m_currentFunction );
-          return Skip;
-        }
       }
+      d->m_currentFunction = d->createFunction( cursor, CodeModel::Normal, true );
+      d->m_scopeStack.back()->addFunction( d->m_currentFunction );
       break;
       case CXCursor_FunctionDecl:
-
-        if ( d->isSkipped( cursor ) )
-          return Skip;
-
         // Free functions or functions completely defined within "friend" (class
         // operators). Note: CXTranslationUnit_SkipFunctionBodies must be off for
         // clang_isCursorDefinition() to work here.
@@ -1436,17 +1125,10 @@ namespace clang
           d->m_scopeStack.at( scope )->addFunction( d->m_currentFunction );
         }
         break;
-
       case CXCursor_Namespace:
       {
-
-        // TODO failing to generate namespace (when there is function maybe?) because it generated an inti_Nmaespace() call
-        // maybe related to this https://bugreports.qt.io/browse/PYSIDE-1075
-        // Qt namespace work with the same declaration function
-        return Skip;
-
         const auto type = namespaceType( cursor );
-        if ( type == NamespaceType::Anonymous || d->isSkipped( cursor ) )
+        if ( type == NamespaceType::Anonymous )
           return Skip;
         const QString name = getCursorSpelling( cursor );
         const auto parentNamespaceItem = std::dynamic_pointer_cast<_NamespaceModelItem>( d->m_scopeStack.back() );
@@ -1638,7 +1320,7 @@ namespace clang
         d->m_currentFunctionType = CodeModel::Normal;
         break;
       case CXCursor_EnumDecl:
-        if ( d->m_currentEnum && !d->isSkipped( cursor ) )
+        if ( d->m_currentEnum )
           d->m_scopeStack.back()->addEnum( d->m_currentEnum );
         d->m_currentEnum.reset();
         break;

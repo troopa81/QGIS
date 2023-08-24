@@ -3,6 +3,7 @@
 // Copyright (C) 2017 The Qt Company Ltd.
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
+#include "parser/codemodel_fwd.h"
 #include <abstractmetabuilder_p.h>
 #include <parser/codemodel.h>
 #include <clangparser/compilersupport.h>
@@ -13,18 +14,58 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QDebug>
 #include <QtCore/QDir>
+#include <QtCore/QDirIterator>
 #include <QtCore/QFile>
 #include <QtCore/QLibraryInfo>
+#include <QtCore/QRegularExpression>
 #include <QtCore/QVersionNumber>
 #include <QtCore/QXmlStreamWriter>
 
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <qstringliteral.h>
 
 using namespace Qt::StringLiterals;
 
 static bool optJoinNamespaces = false;
+
+static const QStringList sSkippedFunctions =
+{
+  QStringLiteral( "qt_getEnumMetaObject" ),
+  QStringLiteral( "qt_getEnumName" )
+};
+
+class TypeSystemGenerator
+{
+  public:
+    TypeSystemGenerator( const QString &outputFileName );
+
+    bool formatXmlOutput( const FileModelItem &dom );
+    bool isValid() const;
+
+  private:
+
+    void formatXmlClass( const ClassModelItem &klass );
+    void formatXmlEnum( const EnumModelItem &en );
+    void formatXmlScopeMembers( const ScopeModelItem &nsp );
+    void formatXmlLocationComment( const CodeModelItem &i );
+    void startXmlNamespace( const NamespaceModelItem &nsp );
+    void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
+    bool loadSkipRanges();
+    bool isSkipped( CodeModelItem item ) const;
+    bool isQgis( CodeModelItem item ) const;
+    bool isSkippedFunction( CodeModelItem item ) const;
+
+    bool mValid = true;
+    std::unique_ptr<QFile> mOutputFile;
+    QString mOutputStr;
+    std::unique_ptr<QXmlStreamWriter> mWriter;
+
+    typedef QPair<int, int> SkipRange;
+    typedef QList<SkipRange> SkipRanges;
+    QMap<QString, SkipRanges> mSkipRanges;
+};
 
 static inline QString languageLevelDescription()
 {
@@ -53,68 +94,16 @@ static const char *primitiveTypes[] =
 
 static inline QString nameAttribute() { return QStringLiteral( "name" ); }
 
-static void formatXmlClass( QXmlStreamWriter &writer, const ClassModelItem &klass );
-
-static void formatXmlEnum( QXmlStreamWriter &writer, const EnumModelItem &en )
-{
-  writer.writeStartElement( u"enum-type"_s );
-  writer.writeAttribute( nameAttribute(), en->name() );
-  writer.writeEndElement();
-}
-
 static bool useClass( const ClassModelItem &c )
 {
   return c->classType() != CodeModel::Union && c->templateParameters().isEmpty()
          && !c->name().isEmpty(); // No anonymous structs
 }
 
-static void formatXmlScopeMembers( QXmlStreamWriter &writer, const ScopeModelItem &nsp )
-{
-  for ( const auto &klass : nsp->classes() )
-  {
-    if ( useClass( klass ) )
-      formatXmlClass( writer, klass );
-  }
-  for ( const auto &en : nsp->enums() )
-    formatXmlEnum( writer, en );
-
-  for ( const auto &fct : nsp->functions() )
-    if ( fct->isSkipped() )
-    {
-      writer.writeStartElement( u"modify-function"_s );
-      writer.writeAttribute( "signature", fct->typeSystemSignature() );
-      writer.writeAttribute( "remove", "true" );
-      writer.writeEndElement();
-    }
-
-
-}
-
 static bool isPublicCopyConstructor( const FunctionModelItem &f )
 {
   return f->functionType() == CodeModel::CopyConstructor
          && f->accessPolicy() == Access::Public && !f->isDeleted();
-}
-
-static void formatXmlLocationComment( QXmlStreamWriter &writer, const CodeModelItem &i )
-{
-  QString comment;
-  QTextStream( &comment ) << ' ' << i->fileName() << ':' << i->startLine() << ' ';
-  writer.writeComment( comment );
-}
-
-static void formatXmlClass( QXmlStreamWriter &writer, const ClassModelItem &klass )
-{
-  // Heuristics for value types: check on public copy constructors.
-  const auto functions = klass->functions();
-  const bool isValueType = std::any_of( functions.cbegin(), functions.cend(),
-                                        isPublicCopyConstructor );
-  formatXmlLocationComment( writer, klass );
-  writer.writeStartElement( isValueType ? u"value-type"_s
-                            : u"object-type"_s );
-  writer.writeAttribute( nameAttribute(), klass->name() );
-  formatXmlScopeMembers( writer, klass );
-  writer.writeEndElement();
 }
 
 // Check whether a namespace is relevant for type system
@@ -130,15 +119,108 @@ static bool hasMembers( const NamespaceModelItem &nsp )
   return std::any_of( classes.cbegin(), classes.cend(), useClass );
 }
 
-static void startXmlNamespace( QXmlStreamWriter &writer, const NamespaceModelItem &nsp )
+TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName )
 {
-  formatXmlLocationComment( writer, nsp );
-  writer.writeStartElement( u"namespace-type"_s );
-  writer.writeAttribute( nameAttribute(), nsp->name() );
+  mOutputFile = std::make_unique<QFile>( outputFileName );
+  if ( !mOutputFile->open( QIODevice::WriteOnly | QIODevice::Text ) )
+  {
+    mValid = false;
+    qWarning() << "Fail to open file " << outputFileName;
+  }
+
+  if ( outputFileName.isEmpty() )
+    mWriter = std::make_unique<QXmlStreamWriter>( &mOutputStr );
+  else
+    mWriter = std::make_unique<QXmlStreamWriter>( mOutputFile.get() );
+
+  if ( mValid )
+    mValid = loadSkipRanges();
 }
 
-static void formatXmlNamespaceMembers( QXmlStreamWriter &writer, const NamespaceModelItem &nsp )
+bool TypeSystemGenerator::isValid() const
 {
+  return mValid;
+}
+
+void TypeSystemGenerator::formatXmlEnum( const EnumModelItem &en )
+{
+  if ( isSkipped( en ) )
+    return;
+
+  mWriter->writeStartElement( u"enum-type"_s );
+  mWriter->writeAttribute( nameAttribute(), en->name() );
+  mWriter->writeEndElement();
+}
+
+void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
+{
+  for ( const auto &klass : nsp->classes() )
+  {
+    if ( useClass( klass ) )
+      formatXmlClass( klass );
+  }
+  for ( const auto &en : nsp->enums() )
+    formatXmlEnum( en );
+
+  if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
+  {
+    for ( const auto &fct : nsp->functions() )
+      if ( isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
+      {
+        mWriter->writeStartElement( u"modify-function"_s );
+        mWriter->writeAttribute( "signature", fct->typeSystemSignature() );
+        mWriter->writeAttribute( "remove", "true" );
+        mWriter->writeEndElement();
+      }
+  }
+}
+
+void TypeSystemGenerator::formatXmlLocationComment( const CodeModelItem &i )
+{
+  QString comment;
+  QTextStream( &comment ) << ' ' << i->fileName() << ':' << i->startLine() << ' ';
+  mWriter->writeComment( comment );
+}
+
+void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
+{
+  if ( isSkipped( klass ) )
+    return;
+
+  const QStringList allowedClass =
+  {
+    QStringLiteral( "QgsField" ),
+    QStringLiteral( "QgsFields" ),
+    QStringLiteral( "QgsAttributes" )
+  };
+
+  if ( !allowedClass.contains( klass->name() ) )
+    return;
+
+  // Heuristics for value types: check on public copy constructors.
+  const auto functions = klass->functions();
+  const bool isValueType = std::any_of( functions.cbegin(), functions.cend(),
+                                        isPublicCopyConstructor );
+  formatXmlLocationComment( klass );
+  mWriter->writeStartElement( isValueType ? u"value-type"_s
+                              : u"object-type"_s );
+  mWriter->writeAttribute( nameAttribute(), klass->name() );
+  formatXmlScopeMembers( klass );
+  mWriter->writeEndElement();
+}
+
+void TypeSystemGenerator::startXmlNamespace( const NamespaceModelItem &nsp )
+{
+  formatXmlLocationComment( nsp );
+  mWriter->writeStartElement( u"namespace-type"_s );
+  mWriter->writeAttribute( nameAttribute(), nsp->name() );
+}
+
+void TypeSystemGenerator::formatXmlNamespaceMembers( const NamespaceModelItem &nsp )
+{
+  if ( isSkipped( nsp ) )
+    return;
+
   auto nestedNamespaces = nsp->namespaces();
   for ( auto i = nestedNamespaces.size() - 1; i >= 0; --i )
   {
@@ -148,8 +230,11 @@ static void formatXmlNamespaceMembers( QXmlStreamWriter &writer, const Namespace
   while ( !nestedNamespaces.isEmpty() )
   {
     auto current = nestedNamespaces.takeFirst();
-    startXmlNamespace( writer, current );
-    formatXmlNamespaceMembers( writer, current );
+    if ( isSkipped( current ) )
+      continue;
+
+    startXmlNamespace( current );
+    formatXmlNamespaceMembers( current );
     if ( optJoinNamespaces )
     {
       // Write out members of identical namespaces and remove
@@ -158,7 +243,7 @@ static void formatXmlNamespaceMembers( QXmlStreamWriter &writer, const Namespace
       {
         if ( nestedNamespaces.at( i )->name() == name )
         {
-          formatXmlNamespaceMembers( writer, nestedNamespaces.at( i ) );
+          formatXmlNamespaceMembers( nestedNamespaces.at( i ) );
           nestedNamespaces.removeAt( i );
         }
         else
@@ -167,61 +252,174 @@ static void formatXmlNamespaceMembers( QXmlStreamWriter &writer, const Namespace
         }
       }
     }
-    writer.writeEndElement();
+    mWriter->writeEndElement();
   }
 
   for ( const auto &func : nsp->functions() )
   {
+    if ( isSkipped( func ) )
+      continue;
+
     const QString signature = func->typeSystemSignature();
     if ( !signature.contains( u"operator" ) ) // Skip free operators
     {
-      writer.writeStartElement( u"function"_s );
-      writer.writeAttribute( u"signature"_s, signature );
-      writer.writeEndElement();
+      mWriter->writeStartElement( u"function"_s );
+      mWriter->writeAttribute( u"signature"_s, signature );
+      mWriter->writeEndElement();
     }
   }
-  formatXmlScopeMembers( writer, nsp );
+  formatXmlScopeMembers( nsp );
 }
 
-static bool formatXmlOutput( const FileModelItem &dom, const QString &outputFileName )
+bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
 {
-  QFile outputFile( outputFileName );
-  if ( !outputFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
-  {
-    qWarning() << "Fail to open file " << outputFileName;
+  if ( !mValid )
     return false;
-  }
 
-  QString outputStr;
-  std::unique_ptr<QXmlStreamWriter> writer;
-
-  if ( outputFileName.isEmpty() )
-    writer = std::make_unique<QXmlStreamWriter>( &outputStr );
-  else
-    writer = std::make_unique<QXmlStreamWriter>( &outputFile );
-
-
-  writer->setAutoFormatting( true );
-  writer->writeStartDocument();
-  writer->writeStartElement( u"typesystem"_s );
-  writer->writeAttribute( u"package"_s, u"core"_s );
-  writer->writeComment( u"Auto-generated "_s +
-                        QDateTime::currentDateTime().toString( Qt::ISODate ) );
+  mWriter->setAutoFormatting( true );
+  mWriter->writeStartDocument();
+  mWriter->writeStartElement( u"typesystem"_s );
+  mWriter->writeAttribute( u"package"_s, u"core"_s );
+  mWriter->writeComment( u"Auto-generated "_s +
+                         QDateTime::currentDateTime().toString( Qt::ISODate ) );
   for ( auto p : primitiveTypes )
   {
-    writer->writeStartElement( u"primitive-type"_s );
-    writer->writeAttribute( nameAttribute(), QLatin1StringView( p ) );
-    writer->writeEndElement();
+    mWriter->writeStartElement( u"primitive-type"_s );
+    mWriter->writeAttribute( nameAttribute(), QLatin1StringView( p ) );
+    mWriter->writeEndElement();
   }
-  formatXmlNamespaceMembers( *writer, dom );
-  writer->writeEndElement();
-  writer->writeEndDocument();
+  formatXmlNamespaceMembers( dom );
+  mWriter->writeEndElement();
+  mWriter->writeEndDocument();
 
-  if ( outputFileName.isEmpty() )
-    std::cout << qPrintable( outputStr ) << '\n';
+  if ( !mOutputFile )
+    std::cout << qPrintable( mOutputStr ) << '\n';
 
   return true;
 }
+
+bool TypeSystemGenerator::loadSkipRanges()
+{
+  // collect #ifndef SIP_RUN
+
+  // TODO fix the path when we get the qgis dir as argument
+  QString dir( QStringLiteral( "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core" ) );
+  QDirIterator it( dir, QStringList() << QStringLiteral( "*.h" ), QDir::Files, QDirIterator::Subdirectories );
+  while ( it.hasNext() )
+  {
+    const QString fileName = it.next();
+    QFile file( fileName );
+    if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
+    {
+      qWarning() << "Error: failed to read file " << fileName;
+      return false;
+    }
+
+    QTextStream in( &file );
+    int numLine = 1;
+    int startIfndef = -1;
+    const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
+    const QRegularExpression reEndIf( QStringLiteral( "^\\s*#(endif|else)" ) );
+    const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
+    const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
+    const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
+    SkipRanges ranges;
+    int nbIf = 0;
+    while ( !in.atEnd() )
+    {
+      QString line = in.readLine();
+
+      if ( reSipNoFile.match( line ).hasMatch() )
+      {
+        ranges = SkipRanges();
+        mSkipRanges[fileName] = ranges;
+        break;
+      }
+
+      if ( startIfndef >= 0 )
+      {
+        if ( reIf.match( line ).hasMatch() )
+        {
+          nbIf++;
+        }
+
+        if ( reEndIf.match( line ).hasMatch() )
+        {
+          if ( nbIf == 1 )
+          {
+            ranges << SkipRange( startIfndef, numLine );
+            startIfndef = -1;
+          }
+
+          nbIf--;
+        }
+      }
+      else
+      {
+        if ( reIfndef.match( line ).hasMatch() )
+        {
+          nbIf++;
+          startIfndef = numLine;
+        }
+        else if ( reSipSkip.match( line ).hasMatch() )
+        {
+          ranges << SkipRange( numLine, numLine );
+        }
+      }
+
+      numLine++;
+    }
+
+    if ( !ranges.isEmpty() )
+      mSkipRanges[ fileName ] = ranges;
+  }
+
+  return true;
+}
+
+
+bool TypeSystemGenerator::isQgis( CodeModelItem item ) const
+{
+  const QString fileName = item->fileName();
+
+  // TODO fix the path when we get the qgis dir as argument
+  return fileName.startsWith( QStringLiteral( "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/" ) );
+}
+
+bool TypeSystemGenerator::isSkippedFunction( CodeModelItem item ) const
+{
+  return dynamic_cast<_FunctionModelItem *>( item.get() ) && sSkippedFunctions.contains( item->name() );
+}
+
+bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
+{
+  const QString fileName = item->fileName();
+  if ( fileName.isEmpty() )
+    return false;
+
+  if ( !isQgis( item ) )
+    return true;
+
+  if ( isSkippedFunction( item ) )
+    return true;
+
+  const int line = item->startLine();
+  if ( mSkipRanges.contains( fileName ) )
+  {
+    const SkipRanges ranges = mSkipRanges[fileName];
+    if ( ranges.isEmpty() ) // SIP_NO_FILE
+      return true;
+
+    for ( SkipRange range : ranges )
+    {
+      if ( range.first <= line && range.second >= line )
+        return true;
+    }
+  }
+
+  return false;
+}
+
 
 static const char descriptionFormat[] = R"(
 QGIS Type system generator
@@ -296,6 +494,16 @@ int main( int argc, char **argv )
 
   optJoinNamespaces = parser.isSet( joinNamespacesOption );
 
+  QString outputFileName;
+  if ( parser.isSet( outputFileOption ) )
+  {
+    outputFileName = parser.value( outputFileOption ).toUtf8();
+  }
+
+  TypeSystemGenerator generator( outputFileName );
+  if ( !generator.isValid() )
+    return -3;
+
   const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom( arguments, true, level, 0 );
   if ( !dom )
   {
@@ -308,14 +516,8 @@ int main( int argc, char **argv )
     formatDebugOutput( dom, parser.isSet( verboseOption ) );
   else
   {
-    QString outputFileName;
-    if ( parser.isSet( outputFileOption ) )
-    {
-      outputFileName = parser.value( outputFileOption ).toUtf8();
-    }
-
-    if ( !formatXmlOutput( dom, outputFileName ) )
-      return -3;
+    if ( !generator.formatXmlOutput( dom ) )
+      return -4;
   }
 
   return 0;

@@ -85,8 +85,20 @@ set(pyqgis_core_SRC
     ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfields_wrapper.h
     ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfields_wrapper.cpp
 
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsattributes_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsattributes_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsziputils_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsziputils_wrapper.h
+
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgshstoreutils_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgshstoreutils_wrapper.h
+
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsmeshutils_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsmeshutils_wrapper.h
+
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgstestutils_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/core/qgstestutils_wrapper.h
+
+    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsattributes_wrapper.h
+    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsattributes_wrapper.cpp
 
     # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfieldconstraints_wrapper.h
     # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfieldconstraints_wrapper.cpp

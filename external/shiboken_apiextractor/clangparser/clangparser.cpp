@@ -158,9 +158,6 @@ namespace clang
         locationType = LocationType::Other;
     }
 
-    // qDebug() << "fileName=" << fileName << "locationType=" << static_cast<int>(locationType);
-
-
     m_currentCxFile = cxFile;
     m_visitCurrent = visitLocation( fileName, locationType );
     return m_visitCurrent;
@@ -310,7 +307,7 @@ namespace clang
 
     CXTranslationUnit translationUnit =
       createTranslationUnit( index, clangArgs, addCompilerSupportArguments,
-                             clangFlags | CXTranslationUnit_DetailedPreprocessingRecord );
+                             clangFlags );
     if ( !translationUnit )
       return false;
 
