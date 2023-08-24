@@ -183,30 +183,50 @@ static void formatXmlNamespaceMembers( QXmlStreamWriter &writer, const Namespace
   formatXmlScopeMembers( writer, nsp );
 }
 
-static void formatXmlOutput( const FileModelItem &dom )
+static bool formatXmlOutput( const FileModelItem &dom, const QString &outputFileName )
 {
-  QString output;
-  QXmlStreamWriter writer( &output );
-  writer.setAutoFormatting( true );
-  writer.writeStartDocument();
-  writer.writeStartElement( u"typesystem"_s );
-  writer.writeAttribute( u"package"_s, u"core"_s );
-  writer.writeComment( u"Auto-generated "_s +
-                       QDateTime::currentDateTime().toString( Qt::ISODate ) );
+  QFile outputFile( outputFileName );
+  if ( !outputFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
+  {
+    qWarning() << "Fail to open file " << outputFileName;
+    return false;
+  }
+
+  QString outputStr;
+  std::unique_ptr<QXmlStreamWriter> writer;
+
+  if ( outputFileName.isEmpty() )
+    writer = std::make_unique<QXmlStreamWriter>( &outputStr );
+  else
+    writer = std::make_unique<QXmlStreamWriter>( &outputFile );
+
+
+  writer->setAutoFormatting( true );
+  writer->writeStartDocument();
+  writer->writeStartElement( u"typesystem"_s );
+  writer->writeAttribute( u"package"_s, u"core"_s );
+  writer->writeComment( u"Auto-generated "_s +
+                        QDateTime::currentDateTime().toString( Qt::ISODate ) );
   for ( auto p : primitiveTypes )
   {
-    writer.writeStartElement( u"primitive-type"_s );
-    writer.writeAttribute( nameAttribute(), QLatin1StringView( p ) );
-    writer.writeEndElement();
+    writer->writeStartElement( u"primitive-type"_s );
+    writer->writeAttribute( nameAttribute(), QLatin1StringView( p ) );
+    writer->writeEndElement();
   }
-  formatXmlNamespaceMembers( writer, dom );
-  writer.writeEndElement();
-  writer.writeEndDocument();
-  std::cout << qPrintable( output ) << '\n';
+  formatXmlNamespaceMembers( *writer, dom );
+  writer->writeEndElement();
+  writer->writeEndDocument();
+
+  if ( outputFileName.isEmpty() )
+    std::cout << qPrintable( outputStr ) << '\n';
+
+  return true;
 }
 
 static const char descriptionFormat[] = R"(
-Type system dumper
+QGIS Type system generator
+
+TODO update comments
 
 Parses a C++ header and dumps out the classes found in typesystem XML syntax.
 Arguments are arguments to the compiler the last of which should be the header
@@ -235,6 +255,10 @@ int main( int argc, char **argv )
   QCommandLineOption debugOption( u"debug"_s,
                                   u"Display debug output"_s );
   parser.addOption( debugOption );
+  QCommandLineOption outputFileOption( u"output-file"_s,
+                                       u"Output file. Default to stdout. Incompatible with debug option)"_s,
+                                       u"file"_s );
+  parser.addOption( outputFileOption );
 
   QCommandLineOption joinNamespacesOption( {u"j"_s, u"join-namespaces"_s},
       u"Join namespaces"_s );
@@ -283,7 +307,16 @@ int main( int argc, char **argv )
   if ( parser.isSet( debugOption ) )
     formatDebugOutput( dom, parser.isSet( verboseOption ) );
   else
-    formatXmlOutput( dom );
+  {
+    QString outputFileName;
+    if ( parser.isSet( outputFileOption ) )
+    {
+      outputFileName = parser.value( outputFileOption ).toUtf8();
+    }
+
+    if ( !formatXmlOutput( dom, outputFileName ) )
+      return -3;
+  }
 
   return 0;
 }

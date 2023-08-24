@@ -1,4 +1,26 @@
 
+# call typesystem_generator to generate binding
+
+# TODO Where does qgis_core_global.h comes from ? we need to generate it
+set(TYPESYSTEM_DIR "${CMAKE_BINARY_DIR}/typesystem_files")
+set(TYPESYSTEM_FILE "${TYPESYSTEM_DIR}/typesystem_generated.xml")
+
+set(TYPESYSTEM_GENERATOR_ARGS "")
+get_target_property(INCLUDE_DIRS qgis_core INCLUDE_DIRECTORIES)
+list(TRANSFORM INCLUDE_DIRS PREPEND "-I")
+
+add_custom_command(OUTPUT ${TYPESYSTEM_FILE}
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${TYPESYSTEM_DIR}"
+    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" -- ${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/qgis_core_global.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS typesystem_generator
+  )
+
+# # Is it really working/usefull ?
+# set(_warnings "")
+# string(REPLACE "-Werror" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+# message(${CMAKE_CXX_FLAGS})
+
 set(pyqgis_core_OBJECT_CLASSES
   QgsEditorWidgetSetup
   QgsFieldModel
@@ -140,6 +162,7 @@ endif()
 
 # Dependencies - changes on these files should trigger new bindings
 set(pyqgis_core_DEPENDS
+  ${TYPESYSTEM_FILE}
 #    ${CMAKE_SOURCE_DIR}/src/core/geometry/qgswkbtypes.h
 )
 
