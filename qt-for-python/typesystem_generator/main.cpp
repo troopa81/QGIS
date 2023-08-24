@@ -280,8 +280,7 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
   mWriter->writeStartDocument();
   mWriter->writeStartElement( u"typesystem"_s );
   mWriter->writeAttribute( u"package"_s, u"core"_s );
-  mWriter->writeComment( u"Auto-generated "_s +
-                         QDateTime::currentDateTime().toString( Qt::ISODate ) );
+  mWriter->writeComment( u"Auto-generated "_s );
   for ( auto p : primitiveTypes )
   {
     mWriter->writeStartElement( u"primitive-type"_s );

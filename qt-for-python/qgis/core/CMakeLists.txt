@@ -2,134 +2,39 @@
 # call typesystem_generator to generate binding
 
 # TODO Where does qgis_core_global.h comes from ? we need to generate it
-set(TYPESYSTEM_DIR "${CMAKE_BINARY_DIR}/typesystem_files")
-set(TYPESYSTEM_FILE "${TYPESYSTEM_DIR}/typesystem_generated.xml")
+set(TYPESYSTEM_FILE "${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/typesystem_generated.xml")
 
 set(TYPESYSTEM_GENERATOR_ARGS "")
 get_target_property(INCLUDE_DIRS qgis_core INCLUDE_DIRECTORIES)
 list(TRANSFORM INCLUDE_DIRS PREPEND "-I")
 
-add_custom_command(OUTPUT ${TYPESYSTEM_FILE}
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${TYPESYSTEM_DIR}"
-    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" -- ${INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/qgis_core_global.h
+add_custom_target(update_pyside_bindings
+    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" -- ${INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS typesystem_generator
   )
 
-# # Is it really working/usefull ?
-# set(_warnings "")
-# string(REPLACE "-Werror" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-# message(${CMAKE_CXX_FLAGS})
-
-set(pyqgis_core_OBJECT_CLASSES
-  QgsEditorWidgetSetup
-  QgsFieldModel
-  QgsFieldProxyModel
-  QgsFeedback
-  QgsRenderContext
-  QgsFeatureSource
-  QgsMapLayerRenderer
-  QgsTemporalRangeObject
-  QgsExpressionContextGenerator
-  QgsExpressionContextScopeGenerator
-  QgsDataProvider
-  QgsProjectTranslator
-  QgsFeatureSink
-  QgsMessageLog
-  QgsRasterInterface
-  QgsRasterBlock
-)
-
-set(pyqgis_core_VALUE_CLASSES
-    QgsAttributes
-    QgsFeature
-    QgsExpressionContext
-    QgsFeatureIterator
-    QgsFeatureRequest
-    QgsCoordinateTransformContext
-    QgsReadWriteContext
-    QgsAction
-    QgsRectangle
-    QgsDefaultValue
-    QgsRenderChecker
-    QgsPointXY
-)
-
-# Auto-Generate files - every class will have a cpp and h file
+# TODO restart this code if typesystem has been modified
+# Get src code from typesystem file
 set(pyqgis_core_SRC
+
     # global module wrapper
     ${CMAKE_CURRENT_BINARY_DIR}/core/core_module_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/core/core_python.h
+  )
 
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgswkbtypes_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgswkbtypes_wrapper.cpp
+file(STRINGS ${TYPESYSTEM_FILE} TYPESYSTEM_CONTENT)
+list(FILTER TYPESYSTEM_CONTENT INCLUDE REGEX "<namespace-type|<value-type|<object-type")
+foreach(LINE ${TYPESYSTEM_CONTENT})
+  string(REGEX MATCH "name=\"(.*)\"" _ ${LINE} )
+  set(ITEM ${CMAKE_MATCH_1})
+  string(TOLOWER ${ITEM} ITEM)
 
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsgeometry_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsgeometry_wrapper.cpp
+  list(APPEND pyqgis_core_SRC
+    ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM}_wrapper.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM}_wrapper.h)
+endforeach()
 
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsunittypes_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsunittypes_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsexpressioncontextscope_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsexpressioncontextscope_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsmaplayer_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsmaplayer_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsproject_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsproject_wrapper.cpp
-
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfield_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfield_wrapper.cpp
-
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfields_wrapper.h
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfields_wrapper.cpp
-
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsziputils_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsziputils_wrapper.h
-
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgshstoreutils_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgshstoreutils_wrapper.h
-
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsmeshutils_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgsmeshutils_wrapper.h
-
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgstestutils_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/core/qgstestutils_wrapper.h
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsattributes_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsattributes_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfieldconstraints_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsfieldconstraints_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgscoordinatereferencesystem_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgscoordinatereferencesystem_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsabstractfeaturesource_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsabstractfeaturesource_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsapplication_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsapplication_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsvectorlayer_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsvectorlayer_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsvectordataprovider_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsvectordataprovider_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsrasterlayer_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsrasterlayer_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsrasterdataprovider_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsrasterdataprovider_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgis_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgis_wrapper.cpp
-
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsrasterblockfeedback_wrapper.h
-    # ${CMAKE_CURRENT_BINARY_DIR}/core/qgsrasterblockfeedback_wrapper.cpp
-)
 
 # The includes are needed to parse and build classes specified in our typesystem
 set(pyqgis_core_include_paths
