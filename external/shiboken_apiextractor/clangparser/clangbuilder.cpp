@@ -1638,7 +1638,7 @@ namespace clang
         d->m_currentFunctionType = CodeModel::Normal;
         break;
       case CXCursor_EnumDecl:
-        if ( d->m_currentEnum )
+        if ( d->m_currentEnum && !d->isSkipped( cursor ) )
           d->m_scopeStack.back()->addEnum( d->m_currentEnum );
         d->m_currentEnum.reset();
         break;
