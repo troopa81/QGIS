@@ -33,13 +33,18 @@ foreach(LINE ${TYPESYSTEM_CONTENT})
   if (END_ITEM)
     list(POP_BACK TS_ITEMS _)
   else ()
-    string(REGEX MATCH "name=\"(.*)\"" _ ${LINE} )
+    string(REGEX MATCH "name=\"([^\"]*)\"" _ ${LINE} )
     set(ITEM ${CMAKE_MATCH_1})
     string(TOLOWER ${ITEM} ITEM)
 
     list(APPEND TS_ITEMS ${ITEM})
 
     list(JOIN TS_ITEMS "_" ITEM_NAME)
+
+    string(REGEX MATCH ".*/>" END_ITEM ${LINE} )
+    if (END_ITEM)
+      list(POP_BACK TS_ITEMS _)
+    endif()
 
     list(APPEND pyqgis_core_SRC
       ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM_NAME}_wrapper.cpp
