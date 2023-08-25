@@ -18,22 +18,33 @@ add_custom_target(update_pyside_bindings
 # Get src code from typesystem file
 set(pyqgis_core_SRC
 
-    # global module wrapper
-    ${CMAKE_CURRENT_BINARY_DIR}/core/core_module_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/core/core_python.h
-  )
+  # global module wrapper
+  ${CMAKE_CURRENT_BINARY_DIR}/core/core_module_wrapper.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/core/core_python.h
+)
 
 file(STRINGS ${TYPESYSTEM_FILE} TYPESYSTEM_CONTENT)
-# TODO Ugly hack to match only the root element, not children
-list(FILTER TYPESYSTEM_CONTENT INCLUDE REGEX "^    (<namespace-type|<value-type|<object-type)")
-foreach(LINE ${TYPESYSTEM_CONTENT})
-  string(REGEX MATCH "name=\"(.*)\"" _ ${LINE} )
-  set(ITEM ${CMAKE_MATCH_1})
-  string(TOLOWER ${ITEM} ITEM)
 
-  list(APPEND pyqgis_core_SRC
-    ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM}_wrapper.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM}_wrapper.h)
+# Parse typesystem file to generate the sources files to build
+list(FILTER TYPESYSTEM_CONTENT INCLUDE REGEX "namespace-type|value-type|object-type")
+foreach(LINE ${TYPESYSTEM_CONTENT})
+
+  string(REGEX MATCH "</namespace-type|</value-type|</object-type" END_ITEM ${LINE} )
+  if (END_ITEM)
+    list(POP_BACK TS_ITEMS _)
+  else ()
+    string(REGEX MATCH "name=\"(.*)\"" _ ${LINE} )
+    set(ITEM ${CMAKE_MATCH_1})
+    string(TOLOWER ${ITEM} ITEM)
+
+    list(APPEND TS_ITEMS ${ITEM})
+
+    list(JOIN TS_ITEMS "_" ITEM_NAME)
+
+    list(APPEND pyqgis_core_SRC
+      ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM_NAME}_wrapper.cpp
+      ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM_NAME}_wrapper.h)
+  endif ()
 endforeach()
 
 # The includes are needed to parse and build classes specified in our typesystem

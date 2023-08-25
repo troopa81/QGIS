@@ -54,6 +54,13 @@
         <modify-function signature="begin()" remove="true"/>
         <modify-function signature="end()" remove="true"/>
     </value-type>
+    <object-type name="QgsSnappingConfig">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingconfig.h:109 -->
+        <object-type name="IndividualLayerSettings"/>
+        <enum-type name="SnappingType"/>
+        <enum-type name="ScaleDependencyMode"/>
+        <modify-function signature="individualLayerSettings()" remove="true"/>
+    </object-type>
     <enum-type name="SymbolTable"/>
     <enum-type name="TagTable"/>
     <enum-type name="TagmapTable"/>
