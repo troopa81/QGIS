@@ -179,6 +179,12 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
   if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
   {
     for ( const auto &fct : nsp->functions() )
+
+      // we should check if arguments and return type (arguments() and type() methods)
+      // if there are not skipped to avoid useless removing and plenty of warnings
+      // to do this we should parse the dom before and build a map of skipped object and check it here
+      // if all types are defined
+
       if ( isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
       {
         mWriter->writeStartElement( u"modify-function"_s );
