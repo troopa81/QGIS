@@ -11,50 +11,20 @@
     <primitive-type name="double"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstestutils.h:34 -->
     <namespace-type name="QgsTestUtils">
-        <function signature="testProviderIteratorThreadSafety(QgsVectorDataProvider*,const QgsFeatureRequest&amp;)"/>
+        <include file-name="qgstestutils.h"/>
     </namespace-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsziputils.h:29 -->
     <namespace-type name="QgsZipUtils">
-        <function signature="isZipFile(const QString&amp;)"/>
-        <function signature="unzip(const QString&amp;,const QString&amp;,QStringList&amp;,bool)"/>
-        <function signature="zip(const QString&amp;,const QStringList&amp;)"/>
-        <function signature="files(const QString&amp;)"/>
+        <include file-name="qgsziputils.h"/>
     </namespace-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgshstoreutils.h:33 -->
     <namespace-type name="QgsHstoreUtils">
-        <function signature="parse(const QString&amp;)"/>
-        <function signature="build(const QVariantMap&amp;)"/>
+        <include file-name="qgshstoreutils.h"/>
     </namespace-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshlayerinterpolator.h:91 -->
     <namespace-type name="QgsMeshUtils">
-        <function signature="exportRasterBlock(const QgsMeshLayer&amp;,const QgsMeshDatasetIndex&amp;,const QgsCoordinateReferenceSystem&amp;,const QgsCoordinateTransformContext&amp;,double,const QgsRectangle&amp;,QgsRasterBlockFeedback*)"/>
-        <function signature="exportRasterBlock(const QgsTriangularMesh&amp;,const QgsMeshDataBlock&amp;,const QgsMeshDataBlock&amp;,const QgsMeshDatasetGroupMetadata::DataType,const QgsCoordinateTransform&amp;,double,const QgsRectangle&amp;,QgsRasterBlockFeedback*)"/>
+        <include file-name="qgsmeshlayerinterpolator.h"/>
     </namespace-type>
-    <function signature="qHash(const Qgis::CaptureTechnique&amp;,uint)"/>
-    <function signature="qHash(const Qgis::RasterAttributeTableFieldUsage&amp;,uint)"/>
-    <function signature="qHash(const QVariant&amp;)"/>
-    <function signature="qgsDoubleToString(double,int)"/>
-    <function signature="qgsNanCompatibleEquals(double,double)"/>
-    <function signature="qgsDoubleNear(double,double,double)"/>
-    <function signature="qgsFloatNear(float,float,float)"/>
-    <function signature="qgsDoubleNearSig(double,double,int)"/>
-    <function signature="qgsRound(double,int)"/>
-    <function signature="qgsPermissiveToDouble(QString,bool&amp;)"/>
-    <function signature="qgsPermissiveToInt(QString,bool&amp;)"/>
-    <function signature="qgsPermissiveToLongLong(QString,bool&amp;)"/>
-    <function signature="qgsVariantLessThan(const QVariant&amp;,const QVariant&amp;)"/>
-    <function signature="qgsVariantEqual(const QVariant&amp;,const QVariant&amp;)"/>
-    <function signature="qgsVariantGreaterThan(const QVariant&amp;,const QVariant&amp;)"/>
-    <function signature="qgsVsiPrefix(const QString&amp;)"/>
-    <function signature="geoWkt()"/>
-    <function signature="geoProj4()"/>
-    <function signature="geoEpsgCrsAuthId()"/>
-    <function signature="geoNone()"/>
-    <function signature="qHash(const QgsSymbolLayerId&amp;)"/>
-    <function signature="qHash(const QgsSymbolLayerReference&amp;)"/>
-    <function signature="symbolLayerReferenceListToString(const QgsSymbolLayerReferenceList&amp;)"/>
-    <function signature="stringToSymbolLayerReferenceList(const QString&amp;)"/>
-    <function signature="compareWkt(const QString&amp;,const QString&amp;,double)"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfield.h:52 -->
     <value-type name="QgsField">
         <modify-function signature="operator=(const QgsField&amp;)" remove="true"/>

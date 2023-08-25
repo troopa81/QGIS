@@ -24,7 +24,8 @@ set(pyqgis_core_SRC
   )
 
 file(STRINGS ${TYPESYSTEM_FILE} TYPESYSTEM_CONTENT)
-list(FILTER TYPESYSTEM_CONTENT INCLUDE REGEX "<namespace-type|<value-type|<object-type")
+# TODO Ugly hack to match only the root element, not children
+list(FILTER TYPESYSTEM_CONTENT INCLUDE REGEX "^    (<namespace-type|<value-type|<object-type)")
 foreach(LINE ${TYPESYSTEM_CONTENT})
   string(REGEX MATCH "name=\"(.*)\"" _ ${LINE} )
   set(ITEM ${CMAKE_MATCH_1})
@@ -34,7 +35,6 @@ foreach(LINE ${TYPESYSTEM_CONTENT})
     ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM}_wrapper.cpp
     ${CMAKE_CURRENT_BINARY_DIR}/core/${ITEM}_wrapper.h)
 endforeach()
-
 
 # The includes are needed to parse and build classes specified in our typesystem
 set(pyqgis_core_include_paths
@@ -82,24 +82,6 @@ set(pyqgis_core_DEPENDS
   ${TYPESYSTEM_FILE}
 #    ${CMAKE_SOURCE_DIR}/src/core/geometry/qgswkbtypes.h
 )
-
-# set(TYPESYSTEM_CONTENT "")
-# set(GLOBAL_HEADER_CONTENT "")
-# foreach(class ${pyqgis_core_OBJECT_CLASSES})
-#     string(TOLOWER ${class} class_lower)
-# #    set(pyqgis_core_DEPENDS "${pyqgis_core_DEPENDS} ${CMAKE_SOURCE_DIR}/src/core/${class_lower}.h")
-#     list(APPEND pyqgis_core_SRC "${CMAKE_CURRENT_BINARY_DIR}/core/${class_lower}_wrapper.h" "${CMAKE_CURRENT_BINARY_DIR}/core/${class_lower}_wrapper.cpp")
-#     set(GLOBAL_HEADER_CONTENT "${GLOBAL_HEADER_CONTENT}\n#include <${class_lower}.h>")
-#     set(TYPESYSTEM_CONTENT "${TYPESYSTEM_CONTENT}\n    <object-type name=\"${class}\"></object-type>")
-# endforeach()
-# set(TYPESYSTEM_CONTENT "${TYPESYSTEM_CONTENT}\n\n")
-# foreach(class ${pyqgis_core_VALUE_CLASSES})
-#     string(TOLOWER ${class} class_lower)
-# #    set(pyqgis_core_DEPENDS "${pyqgis_core_DEPENDS} ${CMAKE_SOURCE_DIR}/src/core/${class_lower}.h")
-#     list(APPEND pyqgis_core_SRC "${CMAKE_CURRENT_BINARY_DIR}/core/${class_lower}_wrapper.h" "${CMAKE_CURRENT_BINARY_DIR}/core/${class_lower}_wrapper.cpp")
-#     set(GLOBAL_HEADER_CONTENT "${GLOBAL_HEADER_CONTENT}\n#include <${class_lower}.h>")
-#     set(TYPESYSTEM_CONTENT "${TYPESYSTEM_CONTENT}\n    <value-type name=\"${class}\"></value-type>")
-# endforeach()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set_source_files_properties(

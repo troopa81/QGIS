@@ -9,6 +9,8 @@
 
 
 
+
+
 class QgsTextFragment
 {
 %Docstring(signature="appended")

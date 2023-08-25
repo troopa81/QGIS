@@ -36,6 +36,17 @@ static const QStringList sSkippedFunctions =
   QStringLiteral( "qt_getEnumName" )
 };
 
+static const QStringList sSkippedClasses =
+{
+  // Index -2 out of range for QgsDataItem::deleteLater()
+  // Issue in pyside-setup/sources/shiboken6/generator/shiboken/cppgenerator.cpp:1463
+  QStringLiteral( "QgsDataItem" ),
+
+  QStringLiteral( "QMetaTypeId" ),
+  QStringLiteral( "QPrivateSignal" ),
+  QStringLiteral( "QTypeInfo" )
+};
+
 class TypeSystemGenerator
 {
   public:
@@ -56,6 +67,7 @@ class TypeSystemGenerator
     bool isSkipped( CodeModelItem item ) const;
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
+    bool isSkippedClass( CodeModelItem item ) const;
 
     bool mValid = true;
     std::unique_ptr<QFile> mOutputFile;
@@ -65,6 +77,8 @@ class TypeSystemGenerator
     typedef QPair<int, int> SkipRange;
     typedef QList<SkipRange> SkipRanges;
     QMap<QString, SkipRanges> mSkipRanges;
+
+    QMap<QString, QList<QString> > mNamespaceFiles;
 };
 
 static inline QString languageLevelDescription()
@@ -189,13 +203,15 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
 
   const QStringList allowedClass =
   {
+    QStringLiteral( "QgsAttributes" ),
     QStringLiteral( "QgsField" ),
     QStringLiteral( "QgsFields" ),
-    QStringLiteral( "QgsAttributes" )
+    QStringLiteral( "QgsMeshUtils" )
   };
 
   if ( !allowedClass.contains( klass->name() ) )
     return;
+
 
   // Heuristics for value types: check on public copy constructors.
   const auto functions = klass->functions();
@@ -214,6 +230,16 @@ void TypeSystemGenerator::startXmlNamespace( const NamespaceModelItem &nsp )
   formatXmlLocationComment( nsp );
   mWriter->writeStartElement( u"namespace-type"_s );
   mWriter->writeAttribute( nameAttribute(), nsp->name() );
+
+  // Hack : if we have a same namespace defined in several place, then only one
+  // is kept by AbstractMetaBuilderPrivate::buildDom, so we add all needed include files
+  // to fix this
+  for ( QString fileName : mNamespaceFiles[nsp->name()] )
+  {
+    mWriter->writeStartElement( u"include"_s );
+    mWriter->writeAttribute( u"file-name"_s, fileName );
+    mWriter->writeEndElement();
+  }
 }
 
 void TypeSystemGenerator::formatXmlNamespaceMembers( const NamespaceModelItem &nsp )
@@ -255,19 +281,20 @@ void TypeSystemGenerator::formatXmlNamespaceMembers( const NamespaceModelItem &n
     mWriter->writeEndElement();
   }
 
-  for ( const auto &func : nsp->functions() )
-  {
-    if ( isSkipped( func ) )
-      continue;
+  // already mapped, no need to explicitly describe them
+  // for ( const auto &func : nsp->functions() )
+  // {
+  //   if ( isSkipped( func ) )
+  //     continue;
 
-    const QString signature = func->typeSystemSignature();
-    if ( !signature.contains( u"operator" ) ) // Skip free operators
-    {
-      mWriter->writeStartElement( u"function"_s );
-      mWriter->writeAttribute( u"signature"_s, signature );
-      mWriter->writeEndElement();
-    }
-  }
+  //   const QString signature = func->typeSystemSignature();
+  //   if ( !signature.contains( u"operator" ) ) // Skip free operators
+  //   {
+  //     mWriter->writeStartElement( u"function"_s );
+  //     mWriter->writeAttribute( u"signature"_s, signature );
+  //     mWriter->writeEndElement();
+  //   }
+  // }
   formatXmlScopeMembers( nsp );
 }
 
@@ -322,6 +349,8 @@ bool TypeSystemGenerator::loadSkipRanges()
     const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
     const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
     const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
+    const QRegularExpression reNamespace( QStringLiteral( "^\\s*namespace\\s*(\\w+)" ) );
+
     SkipRanges ranges;
     int nbIf = 0;
     while ( !in.atEnd() )
@@ -333,6 +362,12 @@ bool TypeSystemGenerator::loadSkipRanges()
         ranges = SkipRanges();
         mSkipRanges[fileName] = ranges;
         break;
+      }
+
+      QRegularExpressionMatch match = reNamespace.match( line );
+      if ( match.hasMatch() )
+      {
+        mNamespaceFiles[match.captured( 1 )].append( QFileInfo( fileName ).fileName() );
       }
 
       if ( startIfndef >= 0 )
@@ -373,9 +408,11 @@ bool TypeSystemGenerator::loadSkipRanges()
       mSkipRanges[ fileName ] = ranges;
   }
 
+
+  qDebug() << "---- mNamespaceFiles=" << mNamespaceFiles;
+
   return true;
 }
-
 
 bool TypeSystemGenerator::isQgis( CodeModelItem item ) const
 {
@@ -390,6 +427,11 @@ bool TypeSystemGenerator::isSkippedFunction( CodeModelItem item ) const
   return dynamic_cast<_FunctionModelItem *>( item.get() ) && sSkippedFunctions.contains( item->name() );
 }
 
+bool TypeSystemGenerator::isSkippedClass( CodeModelItem item ) const
+{
+  return dynamic_cast<_ClassModelItem *>( item.get() ) && sSkippedClasses.contains( item->name() );
+}
+
 bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
 {
   const QString fileName = item->fileName();
@@ -399,7 +441,7 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
   if ( !isQgis( item ) )
     return true;
 
-  if ( isSkippedFunction( item ) )
+  if ( isSkippedFunction( item ) || isSkippedClass( item ) )
     return true;
 
   const int line = item->startLine();

@@ -23,6 +23,10 @@
 
 class QTextFragment;
 
+// TODO needed by shiboken generator, protect with #ifdef
+#include <QTextFragment>
+
+
 /**
  * \class QgsTextFragment
   * \ingroup core
