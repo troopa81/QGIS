@@ -25,6 +25,259 @@
     <namespace-type name="QgsMeshUtils">
         <include file-name="qgsmeshlayerinterpolator.h"/>
     </namespace-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgis.h:53 -->
+    <value-type name="Qgis">
+        <enum-type name="MessageLevel"/>
+        <enum-type name="LayerType"/>
+        <enum-type name="WkbType"/>
+        <enum-type name="GeometryType"/>
+        <enum-type name="DataType"/>
+        <enum-type name="CaptureTechnique"/>
+        <enum-type name="VectorLayerTypeFlag"/>
+        <enum-type name="PythonMacroMode"/>
+        <enum-type name="FeatureCountState"/>
+        <enum-type name="VectorDataProviderAttributeEditCapability"/>
+        <enum-type name="SymbolType"/>
+        <enum-type name="ScaleMethod"/>
+        <enum-type name="SettingsType"/>
+        <enum-type name="SettingsTreeNodeType"/>
+        <enum-type name="SettingsTreeNodeOption"/>
+        <enum-type name="SldExportOption"/>
+        <enum-type name="SldExportVendorExtension"/>
+        <enum-type name="SettingsOption"/>
+        <enum-type name="SnappingMode"/>
+        <enum-type name="SnappingType"/>
+        <enum-type name="SymbolRenderHint"/>
+        <enum-type name="SymbolRotationMode"/>
+        <enum-type name="SymbolFlag"/>
+        <enum-type name="SymbolPreviewFlag"/>
+        <enum-type name="SymbolLayerFlag"/>
+        <enum-type name="SymbolLayerUserFlag"/>
+        <enum-type name="BrowserItemType"/>
+        <enum-type name="BrowserItemState"/>
+        <enum-type name="BrowserItemCapability"/>
+        <enum-type name="BrowserLayerType"/>
+        <enum-type name="BrowserDirectoryMonitoring"/>
+        <enum-type name="HttpMethod"/>
+        <enum-type name="VectorExportResult"/>
+        <enum-type name="VectorFileWriterCapability"/>
+        <enum-type name="SqlLayerDefinitionCapability"/>
+        <enum-type name="SqlKeywordCategory"/>
+        <enum-type name="DriveType"/>
+        <enum-type name="ActionStart"/>
+        <enum-type name="UnplacedLabelVisibility"/>
+        <enum-type name="LabelOverlapHandling"/>
+        <enum-type name="LabelPlacement"/>
+        <enum-type name="LabelPredefinedPointPosition"/>
+        <enum-type name="LabelOffsetType"/>
+        <enum-type name="LabelQuadrantPosition"/>
+        <enum-type name="LabelLinePlacementFlag"/>
+        <enum-type name="LabelPolygonPlacementFlag"/>
+        <enum-type name="UpsideDownLabelHandling"/>
+        <enum-type name="LabelMultiLineAlignment"/>
+        <enum-type name="FileFilterType"/>
+        <enum-type name="SublayerQueryFlag"/>
+        <enum-type name="SublayerFlag"/>
+        <enum-type name="RasterPipeInterfaceRole"/>
+        <enum-type name="RasterResamplingStage"/>
+        <enum-type name="RasterRendererFlag"/>
+        <enum-type name="RasterAttributeTableFieldUsage"/>
+        <enum-type name="RasterAttributeTableType"/>
+        <enum-type name="RasterExportType"/>
+        <enum-type name="RasterFileWriterResult"/>
+        <enum-type name="MeshEditingErrorType"/>
+        <enum-type name="FilePathType"/>
+        <enum-type name="SublayerPromptMode"/>
+        <enum-type name="FieldMetadataProperty"/>
+        <enum-type name="SelectionRenderingMode"/>
+        <enum-type name="SelectBehavior"/>
+        <enum-type name="SelectGeometryRelationship"/>
+        <enum-type name="SelectionFlag"/>
+        <enum-type name="VectorEditResult"/>
+        <enum-type name="VertexMarkerType"/>
+        <enum-type name="ContentStatus"/>
+        <enum-type name="GpsConnectionType"/>
+        <enum-type name="DeviceConnectionStatus"/>
+        <enum-type name="GpsFixStatus"/>
+        <enum-type name="GnssConstellation"/>
+        <enum-type name="GpsQualityIndicator"/>
+        <enum-type name="GpsInformationComponent"/>
+        <enum-type name="BabelFormatCapability"/>
+        <enum-type name="BabelCommandFlag"/>
+        <enum-type name="GpsFeatureType"/>
+        <enum-type name="GeometryOperationResult"/>
+        <enum-type name="GeometryValidityFlag"/>
+        <enum-type name="GeometryValidationEngine"/>
+        <enum-type name="BufferSide"/>
+        <enum-type name="EndCapStyle"/>
+        <enum-type name="JoinStyle"/>
+        <enum-type name="MakeValidMethod"/>
+        <enum-type name="SpatialFilterType"/>
+        <enum-type name="FileOperationFlag"/>
+        <enum-type name="MapLayerProperty"/>
+        <enum-type name="DataProviderFlag"/>
+        <enum-type name="CrsType"/>
+        <enum-type name="CrsAxisDirection"/>
+        <enum-type name="CoordinateOrder"/>
+        <enum-type name="AnnotationItemFlag"/>
+        <enum-type name="AnnotationItemGuiFlag"/>
+        <enum-type name="AnnotationItemNodeType"/>
+        <enum-type name="AnnotationItemEditOperationResult"/>
+        <enum-type name="VectorTemporalMode"/>
+        <enum-type name="VectorTemporalLimitMode"/>
+        <enum-type name="VectorDataProviderTemporalMode"/>
+        <enum-type name="RasterTemporalMode"/>
+        <enum-type name="TemporalIntervalMatchMethod"/>
+        <enum-type name="RasterTemporalCapabilityFlag"/>
+        <enum-type name="TransformDirection"/>
+        <enum-type name="CoordinateTransformationFlag"/>
+        <enum-type name="MapSettingsFlag"/>
+        <enum-type name="RenderContextFlag"/>
+        <enum-type name="TextRenderFormat"/>
+        <enum-type name="LabelingFlag"/>
+        <enum-type name="LabelPlacementEngineVersion"/>
+        <enum-type name="TextOrientation"/>
+        <enum-type name="TextLayoutMode"/>
+        <enum-type name="TextComponent"/>
+        <enum-type name="TextHorizontalAlignment"/>
+        <enum-type name="TextVerticalAlignment"/>
+        <enum-type name="TextCharacterVerticalAlignment"/>
+        <enum-type name="RenderSubcomponentProperty"/>
+        <enum-type name="VertexType"/>
+        <enum-type name="MarkerShape"/>
+        <enum-type name="MarkerLinePlacement"/>
+        <enum-type name="GradientColorSource"/>
+        <enum-type name="GradientType"/>
+        <enum-type name="SymbolCoordinateReference"/>
+        <enum-type name="GradientSpread"/>
+        <enum-type name="PointCountMethod"/>
+        <enum-type name="MarkerClipMode"/>
+        <enum-type name="LineClipMode"/>
+        <enum-type name="DashPatternLineEndingRule"/>
+        <enum-type name="DashPatternSizeAdjustment"/>
+        <enum-type name="GraduatedMethod"/>
+        <enum-type name="PlotAxisSuffixPlacement"/>
+        <enum-type name="DpiMode"/>
+        <enum-type name="TilePixelRatio"/>
+        <enum-type name="Capitalization"/>
+        <enum-type name="TextRendererFlag"/>
+        <enum-type name="ScaleToTileZoomLevelMethod"/>
+        <enum-type name="AngularDirection"/>
+        <enum-type name="RendererUsage"/>
+        <enum-type name="ViewSyncModeFlag"/>
+        <enum-type name="MapRecenteringMode"/>
+        <enum-type name="HistoryProviderBackend"/>
+        <enum-type name="CrsDefinitionFormat"/>
+        <enum-type name="FieldDomainSplitPolicy"/>
+        <enum-type name="FieldDomainMergePolicy"/>
+        <enum-type name="FieldDomainType"/>
+        <enum-type name="TransactionMode"/>
+        <enum-type name="AltitudeClamping"/>
+        <enum-type name="AltitudeBinding"/>
+        <enum-type name="BetweenLineConstraint"/>
+        <enum-type name="LineExtensionSide"/>
+        <enum-type name="CadConstraintType"/>
+        <enum-type name="ProjectFlag"/>
+        <enum-type name="PlotToolFlag"/>
+        <enum-type name="LightSourceType"/>
+        <enum-type name="NavigationMode"/>
+        <enum-type name="VerticalAxisInversion"/>
+        <enum-type name="ProfileSurfaceSymbology"/>
+        <enum-type name="VectorProfileType"/>
+        <enum-type name="ProfileGeneratorFlag"/>
+        <enum-type name="ProfileExportType"/>
+        <enum-type name="PointCloudSymbol"/>
+        <enum-type name="PointCloudDrawOrder"/>
+        <enum-type name="AvoidIntersectionsMode"/>
+        <enum-type name="ProjectFileFormat"/>
+        <enum-type name="ProjectReadFlag"/>
+        <enum-type name="ProjectCapability"/>
+        <enum-type name="MapBoxGlStyleSourceType"/>
+        <enum-type name="ArcGisRestServiceType"/>
+        <enum-type name="RelationshipType"/>
+        <enum-type name="RelationshipStrength"/>
+        <enum-type name="RelationshipCardinality"/>
+        <enum-type name="RelationshipCapability"/>
+        <enum-type name="CoordinateDisplayType"/>
+        <enum-type name="SettingsOrigin"/>
+        <enum-type name="ScriptLanguage"/>
+        <enum-type name="ScriptLanguageCapability"/>
+        <enum-type name="LayerTreeInsertionMethod"/>
+        <enum-type name="LayerTreeFilterFlag"/>
+        <enum-type name="ActionType"/>
+        <enum-type name="MapLayerActionTarget"/>
+        <enum-type name="MapLayerActionFlag"/>
+        <enum-type name="AttributeActionType"/>
+        <enum-type name="MetadataDateType"/>
+        <enum-type name="RasterColorInterpretation"/>
+        <enum-type name="RasterLayerType"/>
+        <enum-type name="RasterDrawingStyle"/>
+        <enum-type name="RasterPyramidFormat"/>
+        <enum-type name="RasterBuildPyramidOption"/>
+        <enum-type name="RasterIdentifyFormat"/>
+        <enum-type name="ElevationMapCombineMethod"/>
+        <enum-type name="BlendMode"/>
+        <enum-type name="SystemOfMeasurement"/>
+        <enum-type name="MapToolUnit"/>
+        <enum-type name="UnitType"/>
+        <enum-type name="DistanceUnit"/>
+        <enum-type name="DistanceUnitType"/>
+        <enum-type name="AreaUnit"/>
+        <enum-type name="VolumeUnit"/>
+        <enum-type name="AngleUnit"/>
+        <enum-type name="TemporalUnit"/>
+        <enum-type name="RenderUnit"/>
+        <enum-type name="LayoutUnit"/>
+        <enum-type name="LayoutUnitType"/>
+        <enum-type name="InputControllerType"/>
+        <enum-type name="PostgresRelKind"/>
+        <enum-type name="DatabaseProviderConnectionCapability2"/>
+        <enum-type name="UserProfileSelectionPolicy"/>
+        <enum-type name="AttributeEditorType"/>
+        <enum-type name="AttributeEditorContainerType"/>
+        <enum-type name="AttributeFormLayout"/>
+        <enum-type name="AttributeFormSuppression"/>
+        <enum-type name="AttributeFormPythonInitCodeSource"/>
+        <enum-type name="ExpressionType"/>
+        <enum-type name="FeatureSymbologyExport"/>
+        <enum-type name="VectorTileProviderFlag"/>
+        <enum-type name="VectorTileProviderCapability"/>
+        <enum-type name="TileAvailability"/>
+        <enum-type name="TiledSceneProviderCapability"/>
+        <enum-type name="TiledSceneBoundingVolumeType"/>
+        <enum-type name="TileRefinementProcess"/>
+        <enum-type name="TileChildrenAvailability"/>
+        <enum-type name="TiledSceneRequestFlag"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsrectangle.h:41 -->
+    <value-type name="QgsRectangle"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgscoordinatereferencesystem.h:211 -->
+    <value-type name="QgsCoordinateReferenceSystem">
+        <enum-type name="CrsType"/>
+        <enum-type name="IdentifierType"/>
+        <enum-type name="WktVariant"/>
+        <modify-function signature="createFromProj(const QString&amp;,bool)" remove="true"/>
+        <modify-function signature="setCustomCrsValidation(CUSTOM_CRS_VALIDATION)" remove="true"/>
+        <modify-function signature="customCrsValidation()" remove="true"/>
+        <modify-function signature="axisOrdering()" remove="true"/>
+        <modify-function signature="projObject()" remove="true"/>
+        <modify-function signature="fromProjObject(PJ*)" remove="true"/>
+        <modify-function signature="createFromProjObject(PJ*)" remove="true"/>
+        <modify-function signature="invalidateCache(bool)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterblock.h:36 -->
+    <value-type name="QgsRasterBlock">
+        <modify-function signature="valueAndNoData(int,int,bool&amp;)" remove="true"/>
+        <modify-function signature="valueAndNoData(qgssize,bool&amp;)" remove="true"/>
+        <modify-function signature="byteData()" remove="true"/>
+        <modify-function signature="colorData()" remove="true"/>
+        <modify-function signature="bits(int,int)" remove="true"/>
+        <modify-function signature="bits(qgssize)" remove="true"/>
+        <modify-function signature="bits()" remove="true"/>
+        <modify-function signature="printValue(float)" remove="true"/>
+        <modify-function signature="readValue(void*,Qgis::DataType,qgssize)" remove="true"/>
+        <modify-function signature="writeValue(void*,Qgis::DataType,qgssize,double)" remove="true"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfield.h:52 -->
     <value-type name="QgsField">
         <modify-function signature="operator=(const QgsField&amp;)" remove="true"/>
@@ -54,12 +307,48 @@
         <modify-function signature="begin()" remove="true"/>
         <modify-function signature="end()" remove="true"/>
     </value-type>
-    <object-type name="QgsSnappingConfig">
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingconfig.h:109 -->
-        <object-type name="IndividualLayerSettings"/>
-        <enum-type name="SnappingType"/>
-        <enum-type name="ScaleDependencyMode"/>
-        <modify-function signature="individualLayerSettings()" remove="true"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:41 -->
+    <object-type name="QgsDataProvider">
+        <enum-type name="DataCapability"/>
+        <enum-type name="ProviderProperty"/>
+        <enum-type name="ReadFlag"/>
+        <modify-function signature="temporalCapabilities()" remove="true"/>
+        <modify-function signature="elevationProperties()" remove="true"/>
+        <modify-function signature="setProviderProperty(int,const QVariant&amp;)" remove="true"/>
+        <modify-function signature="providerProperty(int,const QVariant&amp;)" remove="true"/>
+        <modify-function signature="renderInPreview(const QgsDataProvider::PreviewContext&amp;)" remove="true"/>
+        <modify-function signature="transformContext()" remove="true"/>
+        <modify-function signature="setTransformContext(const QgsCoordinateTransformContext&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterinterface.h:41 -->
+    <object-type name="QgsRasterBlockFeedback"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterinterface.h:135 -->
+    <object-type name="QgsRasterInterface">
+        <enum-type name="Capability"/>
+        <modify-function signature="sourceInput()" remove="true"/>
+        <modify-function signature="histogram(int,int,double,double,const QgsRectangle&amp;,int,bool,QgsRasterBlockFeedback*)" remove="true"/>
+        <modify-function signature="hasHistogram(int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
+        <modify-function signature="initHistogram(QgsRasterHistogram&amp;,int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:43 -->
+    <value-type name="QgsRasterAttributeTable">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:55 -->
+        <value-type name="UsageInformation"/>
+        <modify-function signature="usages()" remove="true"/>
+        <modify-function signature="usageInformation()" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdataprovider.h:58 -->
+    <object-type name="QgsImageFetcher"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdataprovider.h:89 -->
+    <object-type name="QgsRasterDataProvider">
+        <enum-type name="ProviderCapability"/>
+        <enum-type name="TransformType"/>
+        <enum-type name="ResamplingMethod"/>
+        <modify-function signature="temporalCapabilities()" remove="true"/>
+        <modify-function signature="elevationProperties()" remove="true"/>
+        <modify-function signature="getLegendGraphic(double,bool,const QgsRectangle*)" remove="true"/>
+        <modify-function signature="readBlock(int,int,int,void*)" remove="true"/>
+        <modify-function signature="readBlock(int,const QgsRectangle&amp;,int,int,void*,QgsRasterBlockFeedback*)" remove="true"/>
     </object-type>
     <enum-type name="SymbolTable"/>
     <enum-type name="TagTable"/>

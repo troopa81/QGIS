@@ -42,6 +42,9 @@ static const QStringList sSkippedClasses =
   // Issue in pyside-setup/sources/shiboken6/generator/shiboken/cppgenerator.cpp:1463
   QStringLiteral( "QgsDataItem" ),
 
+  QStringLiteral( "QgsSpatialIndexKDBush" ),
+  QStringLiteral( "QgsSnappingConfig" ),
+
   QStringLiteral( "QMetaTypeId" ),
   QStringLiteral( "QPrivateSignal" ),
   QStringLiteral( "QTypeInfo" )
@@ -68,6 +71,8 @@ class TypeSystemGenerator
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
     bool isSkippedClass( CodeModelItem item ) const;
+
+    static bool isValueType( ClassModelItem klass );
 
     bool mValid = true;
     std::unique_ptr<QFile> mOutputFile;
@@ -209,22 +214,29 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
 
   const QStringList allowedClass =
   {
+    QStringLiteral( "Qgis" ),
     QStringLiteral( "QgsAttributes" ),
+    QStringLiteral( "QgsCoordinateReferenceSystem" ),
+    QStringLiteral( "QgsDataProvider" ),
     QStringLiteral( "QgsField" ),
     QStringLiteral( "QgsFields" ),
-    QStringLiteral( "QgsMeshUtils" )
+    QStringLiteral( "QgsImageFetcher" ),
+    QStringLiteral( "QgsMeshUtils" ),
+    QStringLiteral( "QgsRasterAttributeTable" ),
+    QStringLiteral( "QgsRectangle" ),
+    QStringLiteral( "QgsRasterInterface" ),
+    QStringLiteral( "QgsRasterBlock" ),
+    QStringLiteral( "QgsRasterBlockFeedback" ),
+    QStringLiteral( "QgsRasterDataProvider" ),
+    QStringLiteral( "QgsRasterAttributeTableModel" ),
+    QStringLiteral( "UsageInformation" )
   };
 
   if ( !allowedClass.contains( klass->name() ) )
     return;
 
-
-  // Heuristics for value types: check on public copy constructors.
-  const auto functions = klass->functions();
-  const bool isValueType = std::any_of( functions.cbegin(), functions.cend(),
-                                        isPublicCopyConstructor );
   formatXmlLocationComment( klass );
-  mWriter->writeStartElement( isValueType ? u"value-type"_s
+  mWriter->writeStartElement( isValueType( klass ) ? u"value-type"_s
                               : u"object-type"_s );
   mWriter->writeAttribute( nameAttribute(), klass->name() );
   formatXmlScopeMembers( klass );
@@ -465,6 +477,32 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
   }
 
   return false;
+}
+
+bool TypeSystemGenerator::isValueType( ClassModelItem klass )
+{
+  // Heuristics for value types:
+  // value-type when we don't inherit from QObject and there is no abstract function
+  // TODO we should check that the default copycontructor is not delete
+  // and maybe that child classes are not object type
+
+  const auto functions = klass->functions();
+  if ( klass->name() == QStringLiteral( "QObject" )
+       || std::any_of( functions.cbegin(), functions.cend(),
+                       []( const FunctionModelItem & f )
+{
+  return f->isAbstract();
+  } ) )
+  return false;
+
+
+  for ( auto parent : klass->baseClasses() )
+  {
+    if ( parent.klass && !isValueType( parent.klass ) )
+      return false;
+  }
+
+  return true;
 }
 
 
