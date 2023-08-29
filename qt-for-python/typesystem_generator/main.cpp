@@ -49,6 +49,17 @@ static const QStringList sSkippedClasses =
   QStringLiteral( "QTypeInfo" )
 };
 
+
+static const QStringList sUnSkippedClasses =
+{
+  // Because of https://bugreports.qt.io/browse/PYSIDE-2445
+  // force-abstract="true" is not enough because shiboken has to implement
+  // the pure virtual method in is wrapper but it can't if all the argument type don't exist
+  QStringLiteral( "QgsTopologicalMesh" ),
+  QStringLiteral( "TopologicalFaces")
+};
+
+
 class TypeSystemGenerator
 {
   public:
@@ -456,6 +467,10 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
 
   if ( isSkippedFunction( item ) || isSkippedClass( item ) )
     return true;
+
+  // Ugly ... but don't see any other way to do it for some issues
+  if ( sUnSkippedClasses.contains( item->name() ) )
+    return false;
 
   const int line = item->startLine();
   if ( mSkipRanges.contains( fileName ) )
