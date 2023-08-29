@@ -441,7 +441,8 @@ bool TypeSystemGenerator::isSkippedFunction( CodeModelItem item ) const
 
 bool TypeSystemGenerator::isSkippedClass( CodeModelItem item ) const
 {
-  return dynamic_cast<_ClassModelItem *>( item.get() ) && sSkippedClasses.contains( item->name() );
+  _ClassModelItem *klass = dynamic_cast<_ClassModelItem *>( item.get() );
+  return klass && ( sSkippedClasses.contains( klass->name() ) || klass->accessPolicy() == Access::Private );
 }
 
 bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
