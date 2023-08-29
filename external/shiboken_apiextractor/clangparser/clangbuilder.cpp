@@ -228,6 +228,8 @@ namespace clang
     m_currentClass.reset( new _ClassModelItem( m_model, className ) );
     setFileName( cursor, m_currentClass.get() );
     m_currentClass->setClassType( t );
+    m_currentClass->setAccessPolicy( accessPolicy( clang_getCXXAccessSpecifier( cursor ) ) );
+
     // Some inner class? Note that it does not need to be (lexically) contained in a
     // class since it is possible to forward declare an inner class:
     // class QMetaObject { class Connection; }

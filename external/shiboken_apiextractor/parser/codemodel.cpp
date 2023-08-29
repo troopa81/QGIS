@@ -423,6 +423,16 @@ static void formatModelItemList( QDebug &d, const char *prefix, const List &l,
   }
 }
 
+Access _ClassModelItem::accessPolicy() const
+{
+  return m_accessPolicy;
+}
+
+void _ClassModelItem::setAccessPolicy( Access accessPolicy )
+{
+  m_accessPolicy = accessPolicy;
+}
+
 void _ClassModelItem::formatDebug( QDebug &d ) const
 {
   _ScopeModelItem::formatDebug( d );
