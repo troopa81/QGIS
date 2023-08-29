@@ -24,7 +24,6 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-#include <qstringliteral.h>
 
 using namespace Qt::StringLiterals;
 
@@ -117,12 +116,6 @@ static bool useClass( const ClassModelItem &c )
 {
   return c->classType() != CodeModel::Union && c->templateParameters().isEmpty()
          && !c->name().isEmpty(); // No anonymous structs
-}
-
-static bool isPublicCopyConstructor( const FunctionModelItem &f )
-{
-  return f->functionType() == CodeModel::CopyConstructor
-         && f->accessPolicy() == Access::Public && !f->isDeleted();
 }
 
 // Check whether a namespace is relevant for type system
@@ -228,11 +221,10 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
     QStringLiteral( "QgsRasterBlock" ),
     QStringLiteral( "QgsRasterBlockFeedback" ),
     QStringLiteral( "QgsRasterDataProvider" ),
-    QStringLiteral( "QgsRasterAttributeTableModel" ),
-    QStringLiteral( "UsageInformation" )
+    QStringLiteral( "QgsRasterAttributeTableModel" )
   };
 
-  if ( !allowedClass.contains( klass->name() ) )
+  if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
     return;
 
   formatXmlLocationComment( klass );
@@ -363,7 +355,8 @@ bool TypeSystemGenerator::loadSkipRanges()
     int numLine = 1;
     int startIfndef = -1;
     const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
-    const QRegularExpression reEndIf( QStringLiteral( "^\\s*#(endif|else)" ) );
+    const QRegularExpression reEndIf( QStringLiteral( "^\\s*#endif" ) );
+    const QRegularExpression reElse( QStringLiteral( "^\\s*#else" ) );
     const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
     const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
     const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
@@ -394,8 +387,7 @@ bool TypeSystemGenerator::loadSkipRanges()
         {
           nbIf++;
         }
-
-        if ( reEndIf.match( line ).hasMatch() )
+        else if ( reEndIf.match( line ).hasMatch() )
         {
           if ( nbIf == 1 )
           {
@@ -404,6 +396,11 @@ bool TypeSystemGenerator::loadSkipRanges()
           }
 
           nbIf--;
+        }
+        else if ( reElse.match( line ).hasMatch() && nbIf == 1 )
+        {
+          ranges << SkipRange( startIfndef, numLine );
+          startIfndef = -1;
         }
       }
       else
@@ -425,9 +422,6 @@ bool TypeSystemGenerator::loadSkipRanges()
     if ( !ranges.isEmpty() )
       mSkipRanges[ fileName ] = ranges;
   }
-
-
-  qDebug() << "---- mNamespaceFiles=" << mNamespaceFiles;
 
   return true;
 }

@@ -260,10 +260,48 @@
         <modify-function signature="setCustomCrsValidation(CUSTOM_CRS_VALIDATION)" remove="true"/>
         <modify-function signature="customCrsValidation()" remove="true"/>
         <modify-function signature="axisOrdering()" remove="true"/>
+        <modify-function signature="mapUnits()" remove="true"/>
+        <modify-function signature="bounds()" remove="true"/>
+        <modify-function signature="toOgcUri()" remove="true"/>
+        <modify-function signature="updateDefinition()" remove="true"/>
+        <modify-function signature="setValidationHint(const QString&amp;)" remove="true"/>
+        <modify-function signature="validationHint()" remove="true"/>
+        <modify-function signature="syncDatabase()" remove="true"/>
+        <modify-function signature="saveAsUserCrs(const QString&amp;,Qgis::CrsDefinitionFormat)" remove="true"/>
+        <modify-function signature="setNativeFormat(Qgis::CrsDefinitionFormat)" remove="true"/>
+        <modify-function signature="nativeFormat()" remove="true"/>
+        <modify-function signature="toGeographicCrs()" remove="true"/>
+        <modify-function signature="geographicCrsAuthId()" remove="true"/>
         <modify-function signature="projObject()" remove="true"/>
         <modify-function signature="fromProjObject(PJ*)" remove="true"/>
         <modify-function signature="createFromProjObject(PJ*)" remove="true"/>
+        <modify-function signature="recentProjections()" remove="true"/>
+        <modify-function signature="recentCoordinateReferenceSystems()" remove="true"/>
+        <modify-function signature="pushRecentCoordinateReferenceSystem(const QgsCoordinateReferenceSystem&amp;)" remove="true"/>
+        <modify-function signature="removeRecentCoordinateReferenceSystem(const QgsCoordinateReferenceSystem&amp;)" remove="true"/>
+        <modify-function signature="clearRecentCoordinateReferenceSystems()" remove="true"/>
         <modify-function signature="invalidateCache(bool)" remove="true"/>
+        <modify-function signature="projFromSrsId(int)" remove="true"/>
+        <modify-function signature="setProjString(const QString&amp;)" remove="true"/>
+        <modify-function signature="setWktString(const QString&amp;)" remove="true"/>
+        <modify-function signature="debugPrint()" remove="true"/>
+        <modify-function signature="getRecord(const QString&amp;)" remove="true"/>
+        <modify-function signature="openDatabase(const QString&amp;,sqlite3_database_unique_ptr&amp;,bool)" remove="true"/>
+        <modify-function signature="setMapUnits()" remove="true"/>
+        <modify-function signature="getRecordCount()" remove="true"/>
+        <modify-function signature="loadFromAuthCode(const QString&amp;,const QString&amp;)" remove="true"/>
+        <modify-function signature="userSrsIds()" remove="true"/>
+        <modify-function signature="matchToUserCrs()" remove="true"/>
+        <modify-function signature="loadFromDatabase(const QString&amp;,const QString&amp;,const QString&amp;)" remove="true"/>
+        <modify-function signature="createFromWktInternal(const QString&amp;,const QString&amp;)" remove="true"/>
+        <modify-function signature="removeFromCacheObjectsBelongingToCurrentThread(PJ_CONTEXT*)" remove="true"/>
+        <modify-function signature="stringCache()" remove="true"/>
+        <modify-function signature="projCache()" remove="true"/>
+        <modify-function signature="ogcCache()" remove="true"/>
+        <modify-function signature="wktCache()" remove="true"/>
+        <modify-function signature="srsIdCache()" remove="true"/>
+        <modify-function signature="srIdCache()" remove="true"/>
+        <modify-function signature="createFromPostgisSrid(const long)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterblock.h:36 -->
     <value-type name="QgsRasterBlock">
@@ -294,12 +332,22 @@
         <modify-function signature="operator=(const QgsFields&amp;)" remove="true"/>
         <modify-function signature="remove(int)" remove="true"/>
         <modify-function signature="operator[](int)" remove="true"/>
+        <modify-function signature="operator[](int)" remove="true"/>
         <modify-function signature="at(int)" remove="true"/>
         <modify-function signature="field(int)" remove="true"/>
         <modify-function signature="field(const QString&amp;)" remove="true"/>
         <modify-function signature="fieldOrigin(int)" remove="true"/>
         <modify-function signature="fieldOriginIndex(int)" remove="true"/>
+        <modify-function signature="indexFromName(const QString&amp;)" remove="true"/>
+        <modify-function signature="indexOf(const QString&amp;)" remove="true"/>
+        <modify-function signature="lookupField(const QString&amp;)" remove="true"/>
+        <modify-function signature="allAttributesList()" remove="true"/>
+        <modify-function signature="toList()" remove="true"/>
+        <modify-function signature="operator==(const QgsFields&amp;)" remove="true"/>
+        <modify-function signature="operator!=(const QgsFields&amp;)" remove="true"/>
         <modify-function signature="iconForField(int,bool)" remove="true"/>
+        <modify-function signature="iconForFieldType(QMetaType::Type,QMetaType::Type,const QString&amp;)" remove="true"/>
+        <modify-function signature="operator QVariant()" remove="true"/>
         <modify-function signature="constBegin()" remove="true"/>
         <modify-function signature="constEnd()" remove="true"/>
         <modify-function signature="begin()" remove="true"/>
@@ -309,6 +357,8 @@
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:41 -->
     <object-type name="QgsDataProvider">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:108 -->
+        <value-type name="ProviderOptions"/>
         <enum-type name="DataCapability"/>
         <enum-type name="ProviderProperty"/>
         <enum-type name="ReadFlag"/>
@@ -328,12 +378,22 @@
         <modify-function signature="sourceInput()" remove="true"/>
         <modify-function signature="histogram(int,int,double,double,const QgsRectangle&amp;,int,bool,QgsRasterBlockFeedback*)" remove="true"/>
         <modify-function signature="hasHistogram(int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
+        <modify-function signature="cumulativeCut(int,double,double,double&amp;,double&amp;,const QgsRectangle&amp;,int)" remove="true"/>
+        <modify-function signature="writeXml(QDomDocument&amp;,QDomElement&amp;)" remove="true"/>
+        <modify-function signature="readXml(const QDomElement&amp;)" remove="true"/>
         <modify-function signature="initHistogram(QgsRasterHistogram&amp;,int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
+        <modify-function signature="initStatistics(QgsRasterBandStats&amp;,int,int,const QgsRectangle&amp;,int)" remove="true"/>
+        <modify-function signature="QgsRasterInterface(const QgsRasterInterface&amp;)" remove="true"/>
+        <modify-function signature="operator=(const QgsRasterInterface&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:43 -->
     <value-type name="QgsRasterAttributeTable">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:55 -->
         <value-type name="UsageInformation"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:89 -->
+        <value-type name="Field"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:119 -->
+        <value-type name="MinMaxClass"/>
         <modify-function signature="usages()" remove="true"/>
         <modify-function signature="usageInformation()" remove="true"/>
     </value-type>
@@ -341,6 +401,10 @@
     <object-type name="QgsImageFetcher"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdataprovider.h:89 -->
     <object-type name="QgsRasterDataProvider">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdataprovider.h:552 -->
+        <value-type name="VirtualRasterInputLayers"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdataprovider.h:564 -->
+        <value-type name="VirtualRasterParameters"/>
         <enum-type name="ProviderCapability"/>
         <enum-type name="TransformType"/>
         <enum-type name="ResamplingMethod"/>
