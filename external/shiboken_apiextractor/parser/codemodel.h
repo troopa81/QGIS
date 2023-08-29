@@ -308,6 +308,9 @@ class _ClassModelItem: public _ScopeModelItem
     bool isEmpty() const;
     bool isTemplate() const;
 
+    Access accessPolicy() const;
+    void setAccessPolicy( Access accessPolicy );
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug( QDebug &d ) const override;
 #endif
@@ -320,6 +323,9 @@ class _ClassModelItem: public _ScopeModelItem
 
     QStringList m_propertyDeclarations;
     bool m_final = false;
+
+    Access m_accessPolicy;
+
 };
 
 class _NamespaceModelItem: public _ScopeModelItem
