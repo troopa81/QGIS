@@ -127,30 +127,30 @@ bool qgsVariantLessThan( const QVariant &lhs, const QVariant &rhs )
   else if ( !rhs.isValid() || rhs.isNull() )
     return false;
 
-  switch ( lhs.type() )
+  switch ( lhs.userType() )
   {
-    case QVariant::Int:
+    case QMetaType::Int:
       return lhs.toInt() < rhs.toInt();
-    case QVariant::UInt:
+    case QMetaType::UInt:
       return lhs.toUInt() < rhs.toUInt();
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       return lhs.toLongLong() < rhs.toLongLong();
-    case QVariant::ULongLong:
+    case QMetaType::ULongLong:
       return lhs.toULongLong() < rhs.toULongLong();
-    case QVariant::Double:
+    case QMetaType::Double:
       return lhs.toDouble() < rhs.toDouble();
-    case QVariant::Char:
+    case QMetaType::QChar:
       return lhs.toChar() < rhs.toChar();
-    case QVariant::Date:
+    case QMetaType::QDate:
       return lhs.toDate() < rhs.toDate();
-    case QVariant::Time:
+    case QMetaType::QTime:
       return lhs.toTime() < rhs.toTime();
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return lhs.toDateTime() < rhs.toDateTime();
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return lhs.toBool() < rhs.toBool();
 
-    case QVariant::List:
+    case QMetaType::QVariantList:
     {
       const QList<QVariant> &lhsl = lhs.toList();
       const QList<QVariant> &rhsl = rhs.toList();
@@ -165,7 +165,7 @@ bool qgsVariantLessThan( const QVariant &lhs, const QVariant &rhs )
         return qgsVariantLessThan( lhsl[i], rhsl[i] );
     }
 
-    case QVariant::StringList:
+    case QMetaType::QStringList:
     {
       const QStringList &lhsl = lhs.toStringList();
       const QStringList &rhsl = rhs.toStringList();
@@ -200,39 +200,39 @@ uint qHash( const QVariant &variant )
   if ( !variant.isValid() || variant.isNull() )
     return std::numeric_limits<uint>::max();
 
-  switch ( variant.type() )
+  switch ( variant.userType() )
   {
-    case QVariant::Int:
+    case QMetaType::Int:
       return qHash( variant.toInt() );
-    case QVariant::UInt:
+    case QMetaType::UInt:
       return qHash( variant.toUInt() );
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return qHash( variant.toBool() );
-    case QVariant::Double:
+    case QMetaType::Double:
       return qHash( variant.toDouble() );
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       return qHash( variant.toLongLong() );
-    case QVariant::ULongLong:
+    case QMetaType::ULongLong:
       return qHash( variant.toULongLong() );
-    case QVariant::String:
+    case QMetaType::QString:
       return qHash( variant.toString() );
-    case QVariant::Char:
+    case QMetaType::QChar:
       return qHash( variant.toChar() );
-    case QVariant::List:
+    case QMetaType::QVariantList:
       return qHash( variant.toList() );
-    case QVariant::StringList:
+    case QMetaType::QStringList:
       return qHash( variant.toStringList() );
-    case QVariant::ByteArray:
+    case QMetaType::QByteArray:
       return qHash( variant.toByteArray() );
-    case QVariant::Date:
+    case QMetaType::QDate:
       return qHash( variant.toDate() );
-    case QVariant::Time:
+    case QMetaType::QTime:
       return qHash( variant.toTime() );
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return qHash( variant.toDateTime() );
-    case QVariant::Url:
-    case QVariant::Locale:
-    case QVariant::RegularExpression:
+    case QMetaType::QUrl:
+    case QMetaType::QLocale:
+    case QMetaType::QRegularExpression:
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     case QVariant::RegExp:
 #endif
@@ -317,4 +317,3 @@ bool qMapLessThanKey<QVariantList>( const QVariantList &key1, const QVariantList
   return qgsVariantGreaterThan( key1, key2 ) && key1 != key2;
 }
 #endif
-

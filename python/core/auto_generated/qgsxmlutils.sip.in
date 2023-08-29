@@ -67,10 +67,10 @@ Write a QVariant to a QDomElement.
 
 Supported types are
 
-- QVariant.Map
-- QVariant.Int
-- QVariant.Double
-- QVariant.String
+- QMetaType.QVariantMap
+- QMetaType.Int
+- QMetaType.Double
+- QMetaType.QString
 - :py:class:`QgsProperty` (since QGIS 3.4)
 - :py:class:`QgsCoordinateReferenceSystem` (since QGIS 3.4)
 %End

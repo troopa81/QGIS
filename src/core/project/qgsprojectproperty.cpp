@@ -35,7 +35,7 @@ void QgsProjectPropertyValue::dump( int tabs ) const
   QString tabString;
   tabString.fill( '\t', tabs );
 
-  if ( QVariant::StringList == mValue.type() )
+  if ( QMetaType::QStringList == mValue.userType() )
   {
     const QStringList sl = mValue.toStringList();
 
@@ -71,7 +71,7 @@ bool QgsProjectPropertyValue::readXml( const QDomNode &keyNode )
   mValue.clear();
 
   // get the type associated with the value first
-  QVariant::Type type = QVariant::nameToType( typeString.toLocal8Bit().constData() );
+  QMetaType::Type type = static_cast<QMetaType::Type>( QMetaType::fromName( typeString.toLocal8Bit().constData() ).id() );
 
   // This huge switch is left-over from an earlier incarnation of
   // QgsProject where there was a fine level of granularity for value
@@ -82,23 +82,23 @@ bool QgsProjectPropertyValue::readXml( const QDomNode &keyNode )
 
   switch ( type )
   {
-    case QVariant::Invalid:
+    case QMetaType::UnknownType:
       QgsDebugError( QStringLiteral( "invalid value type %1 .. " ).arg( typeString ) );
       return false;
 
-    case QVariant::Map:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Map" ) );
+    case QMetaType::QVariantMap:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QVariantMap" ) );
       return false;
 
-    case QVariant::List:
-      QgsDebugError( QStringLiteral( "no support for QVariant::List" ) );
+    case QMetaType::QVariantList:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QVariantList" ) );
       return false;
 
-    case QVariant::String:
+    case QMetaType::QString:
       mValue = subkeyElement.text();  // no translating necessary
       break;
 
-    case QVariant::StringList:
+    case QMetaType::QStringList:
     {
       int i = 0;
       QDomNodeList values = keyNode.childNodes();
@@ -125,96 +125,96 @@ bool QgsProjectPropertyValue::readXml( const QDomNode &keyNode )
       break;
     }
 
-    case QVariant::Font:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Font" ) );
+    case QMetaType::QFont:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QFont" ) );
       return false;
 
-    case QVariant::Pixmap:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Pixmap" ) );
+    case QMetaType::QPixmap:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QPixmap" ) );
       return false;
 
-    case QVariant::Brush:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Brush" ) );
+    case QMetaType::QBrush:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QBrush" ) );
       return false;
 
-    case QVariant::Rect:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Rect" ) );
+    case QMetaType::QRect:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QRect" ) );
       return false;
 
-    case QVariant::Size:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Size" ) );
+    case QMetaType::QSize:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QSize" ) );
       return false;
 
-    case QVariant::Color:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Color" ) );
+    case QMetaType::QColor:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QColor" ) );
       return false;
 
-    case QVariant::Palette:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Palette" ) );
+    case QMetaType::QPalette:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QPalette" ) );
       return false;
 
-    case QVariant::Point:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Point" ) );
+    case QMetaType::QPoint:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QPoint" ) );
       return false;
 
-    case QVariant::Image:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Image" ) );
+    case QMetaType::QImage:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QImage" ) );
       return false;
 
-    case QVariant::Int:
+    case QMetaType::Int:
       mValue = QVariant( subkeyElement.text() ).toInt();
       break;
 
-    case QVariant::UInt:
+    case QMetaType::UInt:
       mValue = QVariant( subkeyElement.text() ).toUInt();
       break;
 
-    case QVariant::Bool:
+    case QMetaType::Bool:
       mValue = QVariant( subkeyElement.text() ).toBool();
       break;
 
-    case QVariant::Double:
+    case QMetaType::Double:
       mValue = QVariant( subkeyElement.text() ).toDouble();
       break;
 
-    case QVariant::ByteArray:
+    case QMetaType::QByteArray:
       mValue = QVariant( subkeyElement.text() ).toByteArray();
       break;
 
-    case QVariant::Polygon:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Polygon" ) );
+    case QMetaType::QPolygon:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QPolygon" ) );
       return false;
 
-    case QVariant::Region:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Region" ) );
+    case QMetaType::QRegion:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QRegion" ) );
       return false;
 
-    case QVariant::Bitmap:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Bitmap" ) );
+    case QMetaType::QBitmap:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QBitmap" ) );
       return false;
 
-    case QVariant::Cursor:
-      QgsDebugError( QStringLiteral( "no support for QVariant::Cursor" ) );
+    case QMetaType::QCursor:
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QCursor" ) );
       return false;
 
-    case QVariant::BitArray :
-      QgsDebugError( QStringLiteral( "no support for QVariant::BitArray" ) );
+    case QMetaType::QBitArray :
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QBitArray" ) );
       return false;
 
-    case QVariant::KeySequence :
-      QgsDebugError( QStringLiteral( "no support for QVariant::KeySequence" ) );
+    case QMetaType::QKeySequence :
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QKeySequence" ) );
       return false;
 
-    case QVariant::Pen :
-      QgsDebugError( QStringLiteral( "no support for QVariant::Pen" ) );
+    case QMetaType::QPen :
+      QgsDebugError( QStringLiteral( "no support for QMetaType::QPen" ) );
       return false;
 
 #if 0 // Currently unsupported variant types
-    case QVariant::LongLong :
+    case QMetaType::LongLong :
       value_ = QVariant( subkeyElement.text() ).toLongLong();
       break;
 
-    case QVariant::ULongLong :
+    case QMetaType::ULongLong :
       value_ = QVariant( subkeyElement.text() ).toULongLong();
       break;
 #endif
@@ -242,7 +242,7 @@ bool QgsProjectPropertyValue::writeXml( QString const &nodeName,
   // create a sequence of repeated elements to cover all the string list
   // members; each value will be in a <value></value> tag.
   // XXX Not the most elegant way to handle string lists?
-  if ( QVariant::StringList == mValue.type() )
+  if ( QMetaType::QStringList == mValue.userType() )
   {
     QStringList sl = mValue.toStringList();
 
@@ -285,7 +285,7 @@ QVariant QgsProjectPropertyKey::value() const
   if ( !foundQgsProperty )
   {
     QgsDebugError( QStringLiteral( "key has null child" ) );
-    return QVariant();     // just return an QVariant::Invalid
+    return QVariant();     // just return an QMetaType::UnknownType
   }
 
   return foundQgsProperty->value();
@@ -312,7 +312,7 @@ void QgsProjectPropertyKey::dump( int tabs ) const
       {
         QgsProjectPropertyValue *propertyValue = static_cast<QgsProjectPropertyValue *>( i.value() );
 
-        if ( QVariant::StringList == propertyValue->value().type() )
+        if ( QMetaType::QStringList == propertyValue->value().userType() )
         {
           QgsDebugMsgLevel( QStringLiteral( "%1key: <%2>  value:" ).arg( tabString, i.key() ), 4 );
           propertyValue->dump( tabs + 1 );

@@ -291,51 +291,51 @@ QIcon QgsFields::iconForField( int fieldIdx, bool considerOrigin ) const
   return iconForFieldType( d->fields.at( fieldIdx ).field.type(), d->fields.at( fieldIdx ).field.subType(), d->fields.at( fieldIdx ).field.typeName() );
 }
 
-QIcon QgsFields::iconForFieldType( QVariant::Type type, QVariant::Type subType, const QString &typeString )
+QIcon QgsFields::iconForFieldType( QMetaType::Type type, QMetaType::Type subType, const QString &typeString )
 {
   switch ( type )
   {
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldBool.svg" ) );
-    case QVariant::Int:
-    case QVariant::UInt:
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
+    case QMetaType::Int:
+    case QMetaType::UInt:
+    case QMetaType::LongLong:
+    case QMetaType::ULongLong:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldInteger.svg" ) );
-    case QVariant::Double:
+    case QMetaType::Double:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldFloat.svg" ) );
-    case QVariant::String:
+    case QMetaType::QString:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldText.svg" ) );
-    case QVariant::Date:
+    case QMetaType::QDate:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldDate.svg" ) );
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldDateTime.svg" ) );
-    case QVariant::Time:
+    case QMetaType::QTime:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldTime.svg" ) );
-    case QVariant::ByteArray:
+    case QMetaType::QByteArray:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldBinary.svg" ) );
-    case QVariant::List:
+    case QMetaType::QVariantList:
     {
       switch ( subType )
       {
-        case QVariant::Int:
-        case QVariant::UInt:
-        case QVariant::LongLong:
-        case QVariant::ULongLong:
+        case QMetaType::Int:
+        case QMetaType::UInt:
+        case QMetaType::LongLong:
+        case QMetaType::ULongLong:
           return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldArrayInteger.svg" ) );
-        case QVariant::Double:
+        case QMetaType::Double:
           return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldArrayFloat.svg" ) );
-        case QVariant::String:
+        case QMetaType::QString:
           return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldArrayString.svg" ) );
         default:
           return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldArray.svg" ) );
       }
     }
-    case QVariant::StringList:
+    case QMetaType::QStringList:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldArrayString.svg" ) );
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
       return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldJson.svg" ) );
-    case QVariant::UserType:
+    case QMetaType::User:
       if ( typeString.compare( QLatin1String( "geometry" ) ) == 0 )
       {
         return QgsApplication::getThemeIcon( QStringLiteral( "/mIconFieldGeometry.svg" ) );

@@ -3308,22 +3308,22 @@ bool QgsGdalProvider::readNativeAttributeTable( QString *errorMessage )
         for ( int columnNumber = 0; columnNumber < GDALRATGetColumnCount( hRat ); ++columnNumber )
         {
           const Qgis::RasterAttributeTableFieldUsage usage { static_cast<Qgis::RasterAttributeTableFieldUsage>( GDALRATGetUsageOfCol( hRat, columnNumber ) ) };
-          QVariant::Type type = QVariant::Int;
+          QMetaType::Type type = QMetaType::Int;
           switch ( GDALRATGetTypeOfCol( hRat, columnNumber ) )
           {
             case GFT_Integer:
             {
-              type = QVariant::Int;
+              type = QMetaType::Int;
               break;
             }
             case GFT_Real:
             {
-              type = QVariant::Double;
+              type = QMetaType::Double;
               break;
             }
             case GFT_String:
             {
-              type = QVariant::String;
+              type = QMetaType::QString;
               break;
             }
 
@@ -3355,15 +3355,15 @@ bool QgsGdalProvider::readNativeAttributeTable( QString *errorMessage )
           {
             switch ( field.type )
             {
-              case QVariant::Int:
-              case QVariant::UInt:
-              case QVariant::LongLong:
-              case QVariant::ULongLong:
+              case QMetaType::Int:
+              case QMetaType::UInt:
+              case QMetaType::LongLong:
+              case QMetaType::ULongLong:
               {
                 rowData.push_back( GDALRATGetValueAsInt( hRat, rowIdx, colIdx ) );
                 break;
               }
-              case QVariant::Double:
+              case QMetaType::Double:
               {
                 rowData.push_back( GDALRATGetValueAsDouble( hRat, rowIdx, colIdx ) );
                 break;
@@ -3464,15 +3464,15 @@ bool QgsGdalProvider::writeNativeAttributeTable( QString *errorMessage ) //#spel
       GDALRATFieldType fType { GFT_String };
       switch ( field.type )
       {
-        case QVariant::Int:
-        case QVariant::UInt:
-        case QVariant::LongLong:
-        case QVariant::ULongLong:
+        case QMetaType::Int:
+        case QMetaType::UInt:
+        case QMetaType::LongLong:
+        case QMetaType::ULongLong:
         {
           fType = GFT_Integer;
           break;
         }
-        case QVariant::Double:
+        case QMetaType::Double:
         {
           fType = GFT_Real;
           break;

@@ -588,7 +588,7 @@ quotations where required.
 .. versionadded:: 2.14
 %End
 
-    static QString quotedValue( const QVariant &value, QVariant::Type type );
+    static QString quotedValue( const QVariant &value, QMetaType::Type type );
 %Docstring
 Returns a string representation of a literal value, including appropriate
 quotations where required.
@@ -691,7 +691,7 @@ length, and presents text representations of non numeric/text types (e.g., geome
 .. versionadded:: 2.14
 %End
 
-    static QString createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QVariant::Type fieldType = QVariant::Type::Invalid );
+    static QString createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QMetaType::Type fieldType = QMetaType::UnknownType );
 %Docstring
 Create an expression allowing to evaluate if a field is equal to a
 value. The value may be null.

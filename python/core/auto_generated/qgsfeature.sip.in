@@ -77,7 +77,7 @@ geometry and a list of field/values attributes.
 
     if ( a1Wrapper == Py_None )
     {
-      rv = sipCpp->setAttribute( a0, QVariant( QVariant::Int ) );
+      rv = sipCpp->setAttribute( a0, QVariant( QMetaType::Int ) );
     }
     else
     {
@@ -103,7 +103,7 @@ geometry and a list of field/values attributes.
     {
       if ( a1Wrapper == Py_None )
       {
-        sipCpp->setAttribute( *a0, QVariant( QVariant::Int ) );
+        sipCpp->setAttribute( *a0, QVariant( QMetaType::Int ) );
       }
       else
       {
@@ -310,7 +310,7 @@ Alternatively, in Python it is possible to directly set a field's value via the 
 
     if ( a1Wrapper == Py_None )
     {
-      rv = sipCpp->setAttribute( a0, QVariant( QVariant::Int ) );
+      rv = sipCpp->setAttribute( a0, QVariant( QMetaType::Int ) );
     }
     else
     {
@@ -565,7 +565,7 @@ Alternatively, in Python it is possible to directly set a field's value via the 
     {
       if ( a1Wrapper == Py_None )
       {
-        sipCpp->setAttribute( *a0, QVariant( QVariant::Int ) );
+        sipCpp->setAttribute( *a0, QVariant( QMetaType::Int ) );
       }
       else
       {

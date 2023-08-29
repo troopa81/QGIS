@@ -73,10 +73,10 @@ class CORE_EXPORT QgsXmlUtils
      *
      * Supported types are
      *
-     * - QVariant::Map
-     * - QVariant::Int
-     * - QVariant::Double
-     * - QVariant::String
+     * - QMetaType::QVariantMap
+     * - QMetaType::Int
+     * - QMetaType::Double
+     * - QMetaType::QString
      * - QgsProperty (since QGIS 3.4)
      * - QgsCoordinateReferenceSystem (since QGIS 3.4)
      */

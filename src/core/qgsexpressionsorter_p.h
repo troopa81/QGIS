@@ -56,12 +56,12 @@ class QgsExpressionSorter
         }
 
         // Both values are not NULL
-        switch ( v1.type() )
+        switch ( v1.userType() )
         {
-          case QVariant::Int:
-          case QVariant::UInt:
-          case QVariant::LongLong:
-          case QVariant::ULongLong:
+          case QMetaType::Int:
+          case QMetaType::UInt:
+          case QMetaType::LongLong:
+          case QMetaType::ULongLong:
             if ( v1.toLongLong() == v2.toLongLong() )
               continue;
             if ( orderBy.ascending() )
@@ -69,7 +69,7 @@ class QgsExpressionSorter
             else
               return v1.toLongLong() > v2.toLongLong();
 
-          case QVariant::Double:
+          case QMetaType::Double:
             if ( qgsDoubleNear( v1.toDouble(), v2.toDouble() ) )
               continue;
             if ( orderBy.ascending() )
@@ -77,7 +77,7 @@ class QgsExpressionSorter
             else
               return v1.toDouble() > v2.toDouble();
 
-          case QVariant::Date:
+          case QMetaType::QDate:
             if ( v1.toDate() == v2.toDate() )
               continue;
             if ( orderBy.ascending() )
@@ -85,7 +85,7 @@ class QgsExpressionSorter
             else
               return v1.toDate() > v2.toDate();
 
-          case QVariant::Time:
+          case QMetaType::QTime:
             if ( v1.toTime() == v2.toTime() )
               continue;
             if ( orderBy.ascending() )
@@ -93,7 +93,7 @@ class QgsExpressionSorter
             else
               return v1.toTime() > v2.toTime();
 
-          case QVariant::DateTime:
+          case QMetaType::QDateTime:
             if ( v1.toDateTime() == v2.toDateTime() )
               continue;
             if ( orderBy.ascending() )
@@ -101,7 +101,7 @@ class QgsExpressionSorter
             else
               return v1.toDateTime() > v2.toDateTime();
 
-          case QVariant::Bool:
+          case QMetaType::Bool:
             if ( v1.toBool() == v2.toBool() )
               continue;
             if ( orderBy.ascending() )

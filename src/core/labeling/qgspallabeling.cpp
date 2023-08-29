@@ -2204,7 +2204,7 @@ std::unique_ptr<QgsLabelFeature> QgsPalLayerSettings::registerFeatureWithDetails
     const QVariant dataDefinedOutside = mDataDefinedProperties.value( QgsPalLayerSettings::PolygonLabelOutside, context.expressionContext() );
     if ( !QgsVariantUtils::isNull( dataDefinedOutside ) )
     {
-      if ( dataDefinedOutside.type() == QVariant::String )
+      if ( dataDefinedOutside.typeId() == QMetaType::QString )
       {
         const QString value = dataDefinedOutside.toString().trimmed();
         if ( value.compare( QLatin1String( "force" ), Qt::CaseInsensitive ) == 0 )

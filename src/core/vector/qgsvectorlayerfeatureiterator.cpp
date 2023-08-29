@@ -1195,13 +1195,13 @@ void QgsVectorLayerFeatureIterator::FetchJoinInfo::addJoinedAttributesDirect( Qg
     QString v = joinValue.toString();
     switch ( joinValue.type() )
     {
-      case QVariant::Int:
-      case QVariant::LongLong:
-      case QVariant::Double:
+      case QMetaType::Int:
+      case QMetaType::LongLong:
+      case QMetaType::Double:
         break;
 
       default:
-      case QVariant::String:
+      case QMetaType::QString:
         v.replace( '\'', QLatin1String( "''" ) );
         v.prepend( '\'' ).append( '\'' );
         break;

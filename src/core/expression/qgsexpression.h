@@ -685,7 +685,7 @@ class CORE_EXPORT QgsExpression
      * \see quotedColumnRef()
      * \since QGIS 2.14
      */
-    static QString quotedValue( const QVariant &value, QVariant::Type type );
+    static QString quotedValue( const QVariant &value, QMetaType::Type type );
 
     //////
 
@@ -770,7 +770,7 @@ class CORE_EXPORT QgsExpression
      * \returns the expression to evaluate field equality
      * \since QGIS 3.0
      */
-    static QString createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QVariant::Type fieldType = QVariant::Type::Invalid );
+    static QString createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QMetaType::Type fieldType = QMetaType::UnknownType );
 
     /**
      * Returns TRUE if the given \a expression is a simple "field=value" type expression.

@@ -361,7 +361,7 @@ class CORE_EXPORT QgsJsonUtils
      *        the conversion is not possible.
      * \since QGIS 3.0
      */
-    Q_INVOKABLE static QVariantList parseArray( const QString &json, QVariant::Type type = QVariant::Invalid );
+    Q_INVOKABLE static QVariantList parseArray( const QString &json, QMetaType::Type type = QMetaType::UnknownType );
 
 
     /**

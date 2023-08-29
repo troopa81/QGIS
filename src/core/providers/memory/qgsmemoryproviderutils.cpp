@@ -20,41 +20,41 @@
 #include "qgsvectorlayer.h"
 #include <QUrl>
 
-QString memoryLayerFieldType( QVariant::Type type, const QString &typeString )
+QString memoryLayerFieldType( QMetaType::Type type, const QString &typeString )
 {
   switch ( type )
   {
-    case QVariant::Int:
+    case QMetaType::Int:
       return QStringLiteral( "integer" );
 
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       return QStringLiteral( "long" );
 
-    case QVariant::Double:
+    case QMetaType::Double:
       return QStringLiteral( "double" );
 
-    case QVariant::String:
+    case QMetaType::QString:
       return QStringLiteral( "string" );
 
-    case QVariant::Date:
+    case QMetaType::QDate:
       return QStringLiteral( "date" );
 
-    case QVariant::Time:
+    case QMetaType::QTime:
       return QStringLiteral( "time" );
 
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return QStringLiteral( "datetime" );
 
-    case QVariant::ByteArray:
+    case QMetaType::QByteArray:
       return QStringLiteral( "binary" );
 
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return QStringLiteral( "boolean" );
 
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
       return QStringLiteral( "map" );
 
-    case QVariant::UserType:
+    case QMetaType::User:
       if ( typeString.compare( QLatin1String( "geometry" ), Qt::CaseInsensitive ) == 0 )
       {
         return QStringLiteral( "geometry" );
@@ -89,9 +89,9 @@ QgsVectorLayer *QgsMemoryProviderUtils::createMemoryLayer( const QString &name, 
   {
     const QString lengthPrecision = QStringLiteral( "(%1,%2)" ).arg( field.length() ).arg( field.precision() );
     parts << QStringLiteral( "field=%1:%2%3%4" ).arg( QString( QUrl::toPercentEncoding( field.name() ) ),
-          memoryLayerFieldType( field.type() == QVariant::List || field.type() == QVariant::StringList ? field.subType() : field.type(), field.typeName() ),
+          memoryLayerFieldType( field.type() == QMetaType::QVariantList || field.type() == QMetaType::QStringList ? field.subType() : field.type(), field.typeName() ),
           lengthPrecision,
-          field.type() == QVariant::List || field.type() == QVariant::StringList ? QStringLiteral( "[]" ) : QString() );
+          field.type() == QMetaType::QVariantList || field.type() == QMetaType::QStringList ? QStringLiteral( "[]" ) : QString() );
   }
 
   const QString uri = geomType + '?' + parts.join( '&' );

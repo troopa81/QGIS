@@ -36,12 +36,12 @@ length, and if applicable, precision.
 
 
     QgsField( const QString &name = QString(),
-              QVariant::Type type = QVariant::Invalid,
+              QMetaType::Type type = QMetaType::UnknownType,
               const QString &typeName = QString(),
               int len = 0,
               int prec = 0,
               const QString &comment = QString(),
-              QVariant::Type subType = QVariant::Invalid );
+              QMetaType::Type subType = QMetaType::UnknownType );
 %Docstring
 Constructor. Constructs a new QgsField object.
 
@@ -56,13 +56,15 @@ Constructor. Constructs a new QgsField object.
 :param comment: Comment for the field
 :param subType: If the field is a collection, its element's type. When
                 all the elements don't need to have the same type, leave
-                this to QVariant.Invalid.
+                this to QMetaType.UnknownType.
 %End
 
     QgsField( const QgsField &other );
 %Docstring
 Copy constructor
 %End
+
+    QVariant testVariant( QMetaType::Type type );
 
 
     virtual ~QgsField();
@@ -133,16 +135,16 @@ length, precision or constraint information.
 .. versionadded:: 3.14
 %End
 
-    QVariant::Type type() const;
+    QMetaType::Type type() const;
 %Docstring
 Gets variant type of the field as it will be retrieved from data source
 %End
 
-    QVariant::Type subType() const;
+    QMetaType::Type subType() const;
 %Docstring
 If the field is a collection, gets its element's type.
 When all the elements don't need to have the same type, this returns
-QVariant.Invalid.
+QMetaType.UnknownType.
 
 .. versionadded:: 3.0
 %End
@@ -239,16 +241,16 @@ Set the field name.
 :param name: Name of the field
 %End
 
-    void setType( QVariant::Type type );
+    void setType( QMetaType::Type type );
 %Docstring
 Set variant type.
 %End
 
-    void setSubType( QVariant::Type subType );
+    void setSubType( QMetaType::Type subType );
 %Docstring
 If the field is a collection, set its element's type.
 When all the elements don't need to have the same type, set this to
-QVariant.Invalid.
+QMetaType.UnknownType.
 
 .. versionadded:: 3.0
 %End

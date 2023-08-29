@@ -112,7 +112,7 @@ class CORE_EXPORT QgsFeature
 
     if ( a1Wrapper == Py_None )
     {
-      rv = sipCpp->setAttribute( a0, QVariant( QVariant::Int ) );
+      rv = sipCpp->setAttribute( a0, QVariant( QMetaType::Int ) );
     }
     else
     {
@@ -138,7 +138,7 @@ class CORE_EXPORT QgsFeature
     {
       if ( a1Wrapper == Py_None )
       {
-        sipCpp->setAttribute( *a0, QVariant( QVariant::Int ) );
+        sipCpp->setAttribute( *a0, QVariant( QMetaType::Int ) );
       }
       else
       {
@@ -370,7 +370,7 @@ class CORE_EXPORT QgsFeature
 
     if ( a1Wrapper == Py_None )
     {
-      rv = sipCpp->setAttribute( a0, QVariant( QVariant::Int ) );
+      rv = sipCpp->setAttribute( a0, QVariant( QMetaType::Int ) );
     }
     else
     {
@@ -633,7 +633,7 @@ class CORE_EXPORT QgsFeature
     {
       if ( a1Wrapper == Py_None )
       {
-        sipCpp->setAttribute( *a0, QVariant( QVariant::Int ) );
+        sipCpp->setAttribute( *a0, QVariant( QMetaType::Int ) );
       }
       else
       {

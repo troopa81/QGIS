@@ -200,7 +200,7 @@ typedef QVector<QVariant> QgsAttributes;
     PyObject *obj = PyList_GET_ITEM( sipPy, i );
     if ( obj == Py_None )
     {
-      qv->append( QVariant( QVariant::Int ) );
+      qv->append( QVariant( QMetaType::Int ) );
     }
     else
     {

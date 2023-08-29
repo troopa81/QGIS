@@ -1068,7 +1068,7 @@ class CORE_EXPORT QgsVectorFileWriter : public QgsFeatureSink
     std::unique_ptr< QgsCoordinateTransform > mCoordinateTransform;
 
     bool mUsingTransaction = false;
-    QSet< QVariant::Type > mSupportedListSubTypes;
+    QSet< QMetaType::Type > mSupportedListSubTypes;
 
     Qgis::VectorFileWriterCapabilities mCapabilities;
 

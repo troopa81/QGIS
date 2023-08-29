@@ -2172,19 +2172,19 @@ QDomElement QgsOgcUtilsExprToFilter::expressionLiteralToOgcFilter( const QgsExpr
   QString value;
   switch ( node->value().type() )
   {
-    case QVariant::Int:
+    case QMetaType::Int:
       value = QString::number( node->value().toInt() );
       break;
-    case QVariant::Double:
+    case QMetaType::Double:
       value = qgsDoubleToString( node->value().toDouble() );
       break;
-    case QVariant::String:
+    case QMetaType::QString:
       value = node->value().toString();
       break;
-    case QVariant::Date:
+    case QMetaType::QDate:
       value = node->value().toDate().toString( Qt::ISODate );
       break;
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       value = node->value().toDateTime().toString( Qt::ISODate );
       break;
 
@@ -2668,16 +2668,16 @@ QDomElement QgsOgcUtilsSQLStatementToFilter::toOgcFilter( const QgsSQLStatement:
   QString value;
   switch ( node->value().type() )
   {
-    case QVariant::Int:
+    case QMetaType::Int:
       value = QString::number( node->value().toInt() );
       break;
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       value = QString::number( node->value().toLongLong() );
       break;
-    case QVariant::Double:
+    case QMetaType::Double:
       value = qgsDoubleToString( node->value().toDouble() );
       break;
-    case QVariant::String:
+    case QMetaType::QString:
       value = node->value().toString();
       break;
 
@@ -2862,7 +2862,7 @@ bool QgsOgcUtilsSQLStatementToFilter::processSRSName( const QgsSQLStatement::Nod
       return false;
     }
     const QgsSQLStatement::NodeLiteral *lit = static_cast<const QgsSQLStatement::NodeLiteral *>( lastArg );
-    if ( lit->value().type() == QVariant::Int )
+    if ( lit->value().typeId() == QMetaType::Int )
     {
       if ( mFilterVersion == QgsOgcUtils::FILTER_OGC_1_0 )
       {
@@ -2957,11 +2957,11 @@ QDomElement QgsOgcUtilsSQLStatementToFilter::toOgcFilter( const QgsSQLStatement:
       }
       const QgsSQLStatement::NodeLiteral *lit = static_cast<const QgsSQLStatement::NodeLiteral *>( arg );
       double val = 0.0;
-      if ( lit->value().type() == QVariant::Int )
+      if ( lit->value().typeId() == QMetaType::Int )
         val = lit->value().toInt();
-      else if ( lit->value().type() == QVariant::LongLong )
+      else if ( lit->value().typeId() == QMetaType::LongLong )
         val = lit->value().toLongLong();
-      else if ( lit->value().type() == QVariant::Double )
+      else if ( lit->value().typeId() == QMetaType::Double )
         val = lit->value().toDouble();
       else
       {
@@ -3115,16 +3115,16 @@ QDomElement QgsOgcUtilsSQLStatementToFilter::toOgcFilter( const QgsSQLStatement:
     QString unit( QStringLiteral( "m" ) );
     switch ( lit->value().type() )
     {
-      case QVariant::Int:
+      case QMetaType::Int:
         distance = QString::number( lit->value().toInt() );
         break;
-      case QVariant::LongLong:
+      case QMetaType::LongLong:
         distance = QString::number( lit->value().toLongLong() );
         break;
-      case QVariant::Double:
+      case QMetaType::Double:
         distance = qgsDoubleToString( lit->value().toDouble() );
         break;
-      case QVariant::String:
+      case QMetaType::QString:
       {
         distance = lit->value().toString();
         for ( int i = 0; i < distance.size(); i++ )

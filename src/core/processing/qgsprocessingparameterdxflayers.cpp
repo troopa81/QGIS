@@ -42,7 +42,7 @@ bool QgsProcessingParameterDxfLayers::checkValueIsAcceptable( const QVariant &in
     return true;
   }
 
-  if ( input.type() == QVariant::String )
+  if ( input.typeId() == QMetaType::QString )
   {
     if ( input.toString().isEmpty() )
       return mFlags & FlagOptional;
@@ -53,7 +53,7 @@ bool QgsProcessingParameterDxfLayers::checkValueIsAcceptable( const QVariant &in
     QgsMapLayer *mapLayer = QgsProcessingUtils::mapLayerFromString( input.toString(), *context );
     return mapLayer && ( mapLayer->type() == Qgis::LayerType::Vector );
   }
-  else if ( input.type() == QVariant::List )
+  else if ( input.typeId() == QMetaType::QVariantList )
   {
     if ( input.toList().isEmpty() )
       return mFlags & FlagOptional;;
@@ -64,7 +64,7 @@ bool QgsProcessingParameterDxfLayers::checkValueIsAcceptable( const QVariant &in
       if ( qobject_cast< QgsVectorLayer * >( qvariant_cast<QObject *>( variantLayer ) ) )
         continue;
 
-      if ( variantLayer.type() == QVariant::String )
+      if ( variantLayer.typeId() == QMetaType::QString )
       {
         if ( !context )
           return true;
@@ -73,7 +73,7 @@ bool QgsProcessingParameterDxfLayers::checkValueIsAcceptable( const QVariant &in
         if ( !mapLayer || mapLayer->type() != Qgis::LayerType::Vector )
           return false;
       }
-      else if ( variantLayer.type() == QVariant::Map )
+      else if ( variantLayer.typeId() == QMetaType::QVariantMap )
       {
         const QVariantMap layerMap = variantLayer.toMap();
 
@@ -102,7 +102,7 @@ bool QgsProcessingParameterDxfLayers::checkValueIsAcceptable( const QVariant &in
     }
     return true;
   }
-  else if ( input.type() == QVariant::StringList )
+  else if ( input.typeId() == QMetaType::QStringList )
   {
     const auto constToStringList = input.toStringList();
     if ( constToStringList.isEmpty() )
@@ -172,29 +172,29 @@ QList<QgsDxfExport::DxfLayer> QgsProcessingParameterDxfLayers::parameterAsLayers
     layers << QgsDxfExport::DxfLayer( layer );
   }
 
-  if ( layersVariant.type() == QVariant::String )
+  if ( layersVariant.typeId() == QMetaType::QString )
   {
     QgsMapLayer *mapLayer = QgsProcessingUtils::mapLayerFromString( layersVariant.toString(), context );
     layers << QgsDxfExport::DxfLayer( static_cast<QgsVectorLayer *>( mapLayer ) );
   }
-  else if ( layersVariant.type() == QVariant::List )
+  else if ( layersVariant.typeId() == QMetaType::QVariantList )
   {
     const QVariantList layersVariantList = layersVariant.toList();
     for ( const QVariant &layerItem : layersVariantList )
     {
-      if ( layerItem.type() == QVariant::Map )
+      if ( layerItem.typeId() == QMetaType::QVariantMap )
       {
         const QVariantMap layerVariantMap = layerItem.toMap();
         layers << variantMapAsLayer( layerVariantMap, context );
       }
-      else if ( layerItem.type() == QVariant::String )
+      else if ( layerItem.typeId() == QMetaType::QString )
       {
         QgsMapLayer *mapLayer = QgsProcessingUtils::mapLayerFromString( layerItem.toString(), context );
         layers << QgsDxfExport::DxfLayer( static_cast<QgsVectorLayer *>( mapLayer ) );
       }
     }
   }
-  else if ( layersVariant.type() == QVariant::StringList )
+  else if ( layersVariant.typeId() == QMetaType::QStringList )
   {
     const auto layersStringList = layersVariant.toStringList();
     for ( const QString &layerItem : layersStringList )

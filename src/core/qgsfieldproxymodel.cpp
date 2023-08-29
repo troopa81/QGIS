@@ -95,18 +95,18 @@ bool QgsFieldProxyModel::filterAcceptsRow( int source_row, const QModelIndex &so
     return true;
 
   bool ok;
-  const QVariant::Type type = ( QVariant::Type )typeVar.toInt( &ok );
+  const QMetaType::Type type = ( QMetaType::Type )typeVar.toInt( &ok );
   if ( !ok )
     return true;
 
-  if ( ( mFilters.testFlag( String ) && type == QVariant::String ) ||
-       ( mFilters.testFlag( LongLong ) && type == QVariant::LongLong ) ||
-       ( mFilters.testFlag( Int ) && type == QVariant::Int ) ||
-       ( mFilters.testFlag( Double ) && type == QVariant::Double ) ||
-       ( mFilters.testFlag( Date ) && type == QVariant::Date ) ||
-       ( mFilters.testFlag( Date ) && type == QVariant::DateTime ) ||
-       ( mFilters.testFlag( DateTime ) && type == QVariant::DateTime ) ||
-       ( mFilters.testFlag( Time ) && type == QVariant::Time ) )
+  if ( ( mFilters.testFlag( String ) && type == QMetaType::QString ) ||
+       ( mFilters.testFlag( LongLong ) && type == QMetaType::LongLong ) ||
+       ( mFilters.testFlag( Int ) && type == QMetaType::Int ) ||
+       ( mFilters.testFlag( Double ) && type == QMetaType::Double ) ||
+       ( mFilters.testFlag( Date ) && type == QMetaType::QDate ) ||
+       ( mFilters.testFlag( Date ) && type == QMetaType::QDateTime ) ||
+       ( mFilters.testFlag( DateTime ) && type == QMetaType::QDateTime ) ||
+       ( mFilters.testFlag( Time ) && type == QMetaType::QTime ) )
     return true;
 
   return false;

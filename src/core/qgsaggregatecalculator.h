@@ -57,7 +57,7 @@ class CORE_EXPORT QgsAggregateCalculator
       //! A translated, human readable name
       QString name;
       //! This aggregate function can only be used with these datatypes
-      QSet<QVariant::Type> supportedTypes;
+      QSet<QMetaType::Type> supportedTypes;
     };
 
     /**
@@ -248,7 +248,7 @@ class CORE_EXPORT QgsAggregateCalculator
     static QVariant calculateArrayAggregate( QgsFeatureIterator &fit, int attr, QgsExpression *expression,
         QgsExpressionContext *context );
 
-    static QVariant calculate( Aggregate aggregate, QgsFeatureIterator &fit, QVariant::Type resultType, int userType,
+    static QVariant calculate( Aggregate aggregate, QgsFeatureIterator &fit, QMetaType::Type resultType, int userType,
                                int attr, QgsExpression *expression,
                                const QString &delimiter,
                                QgsExpressionContext *context, bool *ok = nullptr, QString *error = nullptr );

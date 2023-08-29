@@ -587,7 +587,7 @@ static QVariant fcnExponentialScale( const QVariantList &values, const QgsExpres
 
 static QVariant fcnMax( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
 {
-  QVariant result( QVariant::Double );
+  QVariant result { QMetaType( QMetaType::Double ) };
   double maxVal = std::numeric_limits<double>::quiet_NaN();
   for ( const QVariant &val : values )
   {
@@ -611,7 +611,7 @@ static QVariant fcnMax( const QVariantList &values, const QgsExpressionContext *
 
 static QVariant fcnMin( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
 {
-  QVariant result( QVariant::Double );
+  QVariant result{ QMetaType( QMetaType::Double ) };
   double minVal = std::numeric_limits<double>::quiet_NaN();
   for ( const QVariant &val : values )
   {
@@ -1505,7 +1505,7 @@ static QVariant fcnLength3D( const QVariantList &values, const QgsExpressionCont
 
 static QVariant fcnReplace( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
 {
-  if ( values.count() == 2 && values.at( 1 ).type() == QVariant::Map )
+  if ( values.count() == 2 && values.at( 1 ).typeId() == QMetaType::QVariantMap )
   {
     QString str = QgsExpressionUtils::getStringValue( values.at( 0 ), parent );
     QVariantMap map = QgsExpressionUtils::getMapValue( values.at( 1 ), parent );
@@ -1539,7 +1539,7 @@ static QVariant fcnReplace( const QVariantList &values, const QgsExpressionConte
     QVariantList after;
     bool isSingleReplacement = false;
 
-    if ( !QgsExpressionUtils::isList( values.at( 1 ) ) && values.at( 2 ).type() != QVariant::StringList )
+    if ( !QgsExpressionUtils::isList( values.at( 1 ) ) && values.at( 2 ).typeId() != QMetaType::QStringList )
     {
       before = QVariantList() << QgsExpressionUtils::getStringValue( values.at( 1 ), parent );
     }
@@ -2323,13 +2323,13 @@ static QVariant fcnIsSelected( const QVariantList &values, const QgsExpressionCo
     QgsVectorLayer *layer = qobject_cast< QgsVectorLayer * >( mapLayer );
     if ( !layer || !feature.isValid() )
     {
-      return QVariant( QVariant::Bool );
+      return QVariant( QMetaType( QMetaType::Bool ) );
     }
 
     return layer->selectedFeatureIds().contains( feature.id() );
   }, foundLayer );
   if ( !foundLayer )
-    return  QVariant( QVariant::Bool );
+    return QVariant( QMetaType( QMetaType::Bool ) );
   else
     return res;
 }
@@ -2354,13 +2354,13 @@ static QVariant fcnNumSelected( const QVariantList &values, const QgsExpressionC
     QgsVectorLayer *layer = qobject_cast< QgsVectorLayer * >( mapLayer );
     if ( !layer )
     {
-      return QVariant( QVariant::LongLong );
+      return QVariant( QMetaType( QMetaType::LongLong ) );
     }
 
     return layer->selectedFeatureCount();
   }, foundLayer );
   if ( !foundLayer )
-    return  QVariant( QVariant::LongLong );
+    return  QVariant( QMetaType( QMetaType::LongLong ) );
   else
     return res;
 }
@@ -3743,7 +3743,7 @@ static QVariant fcnMakeLine( const QVariantList &values, const QgsExpressionCont
 
   for ( const QVariant &value : values )
   {
-    if ( value.type() == QVariant::List )
+    if ( value.typeId() == QMetaType::QVariantList )
     {
       const QVariantList list = value.toList();
       for ( const QVariant &v : list )
@@ -4477,7 +4477,7 @@ static QVariant fcnZMax( const QVariantList &values, const QgsExpressionContext 
   }
 
   if ( max == std::numeric_limits< double >::lowest() )
-    return QVariant( QVariant::Double );
+    return QVariant( QMetaType( QMetaType::Double ) );
 
   return QVariant( max );
 }
@@ -4503,7 +4503,7 @@ static QVariant fcnZMin( const QVariantList &values, const QgsExpressionContext 
   }
 
   if ( min == std::numeric_limits< double >::max() )
-    return QVariant( QVariant::Double );
+    return QVariant( QMetaType( QMetaType::Double ) );
 
   return QVariant( min );
 }
@@ -4529,7 +4529,7 @@ static QVariant fcnMMin( const QVariantList &values, const QgsExpressionContext 
   }
 
   if ( min == std::numeric_limits< double >::max() )
-    return QVariant( QVariant::Double );
+    return QVariant( QMetaType( QMetaType::Double ) );
 
   return QVariant( min );
 }
@@ -4555,7 +4555,7 @@ static QVariant fcnMMax( const QVariantList &values, const QgsExpressionContext 
   }
 
   if ( max == std::numeric_limits< double >::lowest() )
-    return QVariant( QVariant::Double );
+    return QVariant( QMetaType( QMetaType::Double ) );
 
   return QVariant( max );
 }
@@ -6237,7 +6237,7 @@ static QVariant fcnGetFeature( const QVariantList &values, const QgsExpressionCo
   }
   QgsFeatureRequest req;
   QString cacheValueKey;
-  if ( values.at( 1 ).type() == QVariant::Map )
+  if ( values.at( 1 ).typeId() == QMetaType::QVariantMap )
   {
     QVariantMap attributeMap = QgsExpressionUtils::getMapValue( values.at( 1 ), parent );
 
@@ -6754,7 +6754,7 @@ static QVariant fcnArraySum( const QVariantList &values, const QgsExpressionCont
   return i == 0 ? QVariant() : total;
 }
 
-static QVariant convertToSameType( const QVariant &value, QVariant::Type type )
+static QVariant convertToSameType( const QVariant &value, QMetaType::Type type )
 {
   QVariant result = value;
   result.convert( static_cast<int>( type ) );
@@ -6778,7 +6778,7 @@ static QVariant fcnArrayMajority( const QVariantList &values, const QgsExpressio
   const QString option = values.at( 1 ).toString();
   if ( option.compare( QLatin1String( "all" ), Qt::CaseInsensitive ) == 0 )
   {
-    return convertToSameType( hash.keys( maxValue ), values.at( 0 ).type() );
+    return convertToSameType( hash.keys( maxValue ), static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
   }
   else if ( option.compare( QLatin1String( "any" ), Qt::CaseInsensitive ) == 0 )
   {
@@ -6789,7 +6789,7 @@ static QVariant fcnArrayMajority( const QVariantList &values, const QgsExpressio
   }
   else if ( option.compare( QLatin1String( "median" ), Qt::CaseInsensitive ) == 0 )
   {
-    return fcnArrayMedian( QVariantList() << convertToSameType( hash.keys( maxValue ), values.at( 0 ).type() ), context, parent, node );
+    return fcnArrayMedian( QVariantList() << convertToSameType( hash.keys( maxValue ), static_cast<QMetaType::Type>( values.at( 0 ).userType() ) ), context, parent, node );
   }
   else if ( option.compare( QLatin1String( "real_majority" ), Qt::CaseInsensitive ) == 0 )
   {
@@ -6822,7 +6822,7 @@ static QVariant fcnArrayMinority( const QVariantList &values, const QgsExpressio
   const QString option = values.at( 1 ).toString();
   if ( option.compare( QLatin1String( "all" ), Qt::CaseInsensitive ) == 0 )
   {
-    return convertToSameType( hash.keys( minValue ), values.at( 0 ).type() );
+    return convertToSameType( hash.keys( minValue ), static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
   }
   else if ( option.compare( QLatin1String( "any" ), Qt::CaseInsensitive ) == 0 )
   {
@@ -6833,7 +6833,7 @@ static QVariant fcnArrayMinority( const QVariantList &values, const QgsExpressio
   }
   else if ( option.compare( QLatin1String( "median" ), Qt::CaseInsensitive ) == 0 )
   {
-    return fcnArrayMedian( QVariantList() << convertToSameType( hash.keys( minValue ), values.at( 0 ).type() ), context, parent, node );
+    return fcnArrayMedian( QVariantList() << convertToSameType( hash.keys( minValue ), static_cast<QMetaType::Type>( values.at( 0 ).userType() ) ), context, parent, node );
   }
   else if ( option.compare( QLatin1String( "real_minority" ), Qt::CaseInsensitive ) == 0 )
   {
@@ -6845,7 +6845,7 @@ static QVariant fcnArrayMinority( const QVariantList &values, const QgsExpressio
     if ( maxValue * 2 > list.size() )
       hash.remove( hash.key( maxValue ) );
 
-    return convertToSameType( hash.keys(), values.at( 0 ).type() );
+    return convertToSameType( hash.keys(), static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
   }
   else
   {
@@ -6858,21 +6858,21 @@ static QVariant fcnArrayAppend( const QVariantList &values, const QgsExpressionC
 {
   QVariantList list = QgsExpressionUtils::getListValue( values.at( 0 ), parent );
   list.append( values.at( 1 ) );
-  return convertToSameType( list, values.at( 0 ).type() );
+  return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArrayPrepend( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
 {
   QVariantList list = QgsExpressionUtils::getListValue( values.at( 0 ), parent );
   list.prepend( values.at( 1 ) );
-  return convertToSameType( list, values.at( 0 ).type() );
+  return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArrayInsert( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
 {
   QVariantList list = QgsExpressionUtils::getListValue( values.at( 0 ), parent );
   list.insert( QgsExpressionUtils::getNativeIntValue( values.at( 1 ), parent ), values.at( 2 ) );
-  return convertToSameType( list, values.at( 0 ).type() );
+  return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArrayRemoveAt( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
@@ -6883,7 +6883,7 @@ static QVariant fcnArrayRemoveAt( const QVariantList &values, const QgsExpressio
     position = position + list.length();
   if ( position >= 0 && position < list.length() )
     list.removeAt( position );
-  return convertToSameType( list, values.at( 0 ).type() );
+  return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArrayRemoveAll( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
@@ -6905,12 +6905,12 @@ static QVariant fcnArrayRemoveAll( const QVariantList &values, const QgsExpressi
   {
     list.removeAll( toRemove );
   }
-  return convertToSameType( list, values.at( 0 ).type() );
+  return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArrayReplace( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
 {
-  if ( values.count() == 2 && values.at( 1 ).type() == QVariant::Map )
+  if ( values.count() == 2 && values.at( 1 ).typeId() == QMetaType::QVariantMap )
   {
     QVariantMap map = QgsExpressionUtils::getMapValue( values.at( 1 ), parent );
 
@@ -6925,7 +6925,7 @@ static QVariant fcnArrayReplace( const QVariantList &values, const QgsExpression
       }
     }
 
-    return convertToSameType( list, values.at( 0 ).type() );
+    return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
   }
   else if ( values.count() == 3 )
   {
@@ -6933,7 +6933,7 @@ static QVariant fcnArrayReplace( const QVariantList &values, const QgsExpression
     QVariantList after;
     bool isSingleReplacement = false;
 
-    if ( !QgsExpressionUtils::isList( values.at( 1 ) ) && values.at( 2 ).type() != QVariant::StringList )
+    if ( !QgsExpressionUtils::isList( values.at( 1 ) ) && values.at( 2 ).typeId() != QMetaType::QStringList )
     {
       before = QVariantList() << values.at( 1 );
     }
@@ -6969,7 +6969,7 @@ static QVariant fcnArrayReplace( const QVariantList &values, const QgsExpression
       }
     }
 
-    return convertToSameType( list, values.at( 0 ).type() );
+    return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
   }
   else
   {
@@ -6993,7 +6993,7 @@ static QVariant fcnArrayPrioritize( const QVariantList &values, const QgsExpress
 
   list_new.append( list );
 
-  return convertToSameType( list_new, values.at( 0 ).type() );
+  return convertToSameType( list_new, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArrayCat( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )
@@ -7003,7 +7003,7 @@ static QVariant fcnArrayCat( const QVariantList &values, const QgsExpressionCont
   {
     list += QgsExpressionUtils::getListValue( cur, parent );
   }
-  return convertToSameType( list, values.at( 0 ).type() );
+  return convertToSameType( list, static_cast<QMetaType::Type>( values.at( 0 ).userType() ) );
 }
 
 static QVariant fcnArraySlice( const QVariantList &values, const QgsExpressionContext *, QgsExpression *parent, const QgsExpressionNodeFunction * )

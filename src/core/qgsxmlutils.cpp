@@ -106,15 +106,15 @@ QDomElement QgsXmlUtils::writeRectangle( const QgsRectangle &rect, QDomDocument 
 QDomElement QgsXmlUtils::writeVariant( const QVariant &value, QDomDocument &doc )
 {
   QDomElement element = doc.createElement( QStringLiteral( "Option" ) );
-  switch ( value.type() )
+  switch ( value.userType() )
   {
-    case QVariant::Invalid:
+    case QMetaType::UnknownType:
     {
       element.setAttribute( QStringLiteral( "type" ), QStringLiteral( "invalid" ) );
       break;
     }
 
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
     {
       const QVariantMap map = value.toMap();
 
@@ -128,7 +128,7 @@ QDomElement QgsXmlUtils::writeVariant( const QVariant &value, QDomDocument &doc 
       break;
     }
 
-    case QVariant::List:
+    case QMetaType::QVariantList:
     {
       const QVariantList list = value.toList();
 
@@ -142,7 +142,7 @@ QDomElement QgsXmlUtils::writeVariant( const QVariant &value, QDomDocument &doc 
       break;
     }
 
-    case QVariant::StringList:
+    case QMetaType::QStringList:
     {
       const QStringList list = value.toStringList();
 
@@ -156,43 +156,43 @@ QDomElement QgsXmlUtils::writeVariant( const QVariant &value, QDomDocument &doc 
       break;
     }
 
-    case QVariant::Int:
-    case QVariant::UInt:
-    case QVariant::Bool:
-    case QVariant::Double:
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
-    case QVariant::String:
+    case QMetaType::Int:
+    case QMetaType::UInt:
+    case QMetaType::Bool:
+    case QMetaType::Double:
+    case QMetaType::LongLong:
+    case QMetaType::ULongLong:
+    case QMetaType::QString:
       element.setAttribute( QStringLiteral( "type" ), QVariant::typeToName( value.type() ) );
       element.setAttribute( QStringLiteral( "value" ), value.toString() );
       break;
 
-    case QVariant::Char:
+    case QMetaType::QChar:
       element.setAttribute( QStringLiteral( "type" ), QVariant::typeToName( value.type() ) );
       element.setAttribute( QStringLiteral( "value" ), QgsVariantUtils::isNull( value ) ? QString() : QString( value.toChar() ) );
       break;
 
-    case QVariant::Color:
+    case QMetaType::QColor:
       element.setAttribute( QStringLiteral( "type" ), QStringLiteral( "color" ) );
       element.setAttribute( QStringLiteral( "value" ), value.value< QColor >().isValid() ? QgsSymbolLayerUtils::encodeColor( value.value< QColor >() ) : QString() );
       break;
 
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       element.setAttribute( QStringLiteral( "type" ), QStringLiteral( "datetime" ) );
       element.setAttribute( QStringLiteral( "value" ), value.value< QDateTime >().isValid() ? value.toDateTime().toString( Qt::ISODate ) : QString() );
       break;
 
-    case QVariant::Date:
+    case QMetaType::QDate:
       element.setAttribute( QStringLiteral( "type" ), QStringLiteral( "date" ) );
       element.setAttribute( QStringLiteral( "value" ), value.value< QDate >().isValid() ? value.toDate().toString( Qt::ISODate ) : QString() );
       break;
 
-    case QVariant::Time:
+    case QMetaType::QTime:
       element.setAttribute( QStringLiteral( "type" ), QStringLiteral( "time" ) );
       element.setAttribute( QStringLiteral( "value" ), value.value< QTime >().isValid() ? value.toTime().toString( Qt::ISODate ) : QString() );
       break;
 
-    case QVariant::UserType:
+    case QMetaType::User:
     {
       if ( value.userType() == QMetaType::type( "QgsProperty" ) )
       {

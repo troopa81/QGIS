@@ -547,20 +547,20 @@ void QgsOfflineEditing::convertToOfflineLayer( QgsVectorLayer *layer, sqlite3 *d
       for ( const auto &field : providerFields )
       {
         QString dataType;
-        const QVariant::Type type = field.type();
-        if ( type == QVariant::Int || type == QVariant::LongLong )
+        const QMetaType::Type type = field.type();
+        if ( type == QMetaType::Int || type == QMetaType::LongLong )
         {
           dataType = QStringLiteral( "INTEGER" );
         }
-        else if ( type == QVariant::Double )
+        else if ( type == QMetaType::Double )
         {
           dataType = QStringLiteral( "REAL" );
         }
-        else if ( type == QVariant::String )
+        else if ( type == QMetaType::QString )
         {
           dataType = QStringLiteral( "TEXT" );
         }
-        else if ( type == QVariant::StringList  || type == QVariant::List )
+        else if ( type == QMetaType::QStringList  || type == QMetaType::QVariantList )
         {
           dataType = QStringLiteral( "TEXT" );
           showWarning( tr( "Field '%1' from layer %2 has been converted from a list to a string of comma-separated values." ).arg( field.name(), layer->name() ) );
@@ -713,27 +713,27 @@ void QgsOfflineEditing::convertToOfflineLayer( QgsVectorLayer *layer, sqlite3 *d
       for ( const auto &field : providerFields )
       {
         const QString fieldName( field.name() );
-        const QVariant::Type type = field.type();
+        const QMetaType::Type type = field.type();
         OGRFieldType ogrType( OFTString );
         OGRFieldSubType ogrSubType = OFSTNone;
-        if ( type == QVariant::Int )
+        if ( type == QMetaType::Int )
           ogrType = OFTInteger;
-        else if ( type == QVariant::LongLong )
+        else if ( type == QMetaType::LongLong )
           ogrType = OFTInteger64;
-        else if ( type == QVariant::Double )
+        else if ( type == QMetaType::Double )
           ogrType = OFTReal;
-        else if ( type == QVariant::Time )
+        else if ( type == QMetaType::QTime )
           ogrType = OFTTime;
-        else if ( type == QVariant::Date )
+        else if ( type == QMetaType::QDate )
           ogrType = OFTDate;
-        else if ( type == QVariant::DateTime )
+        else if ( type == QMetaType::QDateTime )
           ogrType = OFTDateTime;
-        else if ( type == QVariant::Bool )
+        else if ( type == QMetaType::Bool )
         {
           ogrType = OFTInteger;
           ogrSubType = OFSTBoolean;
         }
-        else if ( type == QVariant::StringList || type == QVariant::List )
+        else if ( type == QMetaType::QStringList || type == QMetaType::QVariantList )
         {
           ogrType = OFTString;
           ogrSubType = OFSTJSON;
@@ -821,7 +821,7 @@ void QgsOfflineEditing::convertToOfflineLayer( QgsVectorLayer *layer, sqlite3 *d
       for ( int it = 0; it < attrs.count(); ++it )
       {
         QVariant attr = attrs.at( it );
-        if ( layer->fields().at( it ).type() == QVariant::StringList || layer->fields().at( it ).type() == QVariant::List )
+        if ( layer->fields().at( it ).type() == QMetaType::QStringList || layer->fields().at( it ).type() == QMetaType::QVariantList )
         {
           attr = QgsJsonUtils::encodeValue( attr );
         }
@@ -927,8 +927,8 @@ void QgsOfflineEditing::applyAttributesAdded( QgsVectorLayer *remoteLayer, sqlit
   const QgsVectorDataProvider *provider = remoteLayer->dataProvider();
   const QList<QgsVectorDataProvider::NativeType> nativeTypes = provider->nativeTypes();
 
-  // NOTE: uses last matching QVariant::Type of nativeTypes
-  QMap < QVariant::Type, QString /*typeName*/ > typeNameLookup;
+  // NOTE: uses last matching QMetaType::Type of nativeTypes
+  QMap < QMetaType::Type, QString /*typeName*/ > typeNameLookup;
   for ( int i = 0; i < nativeTypes.size(); i++ )
   {
     const QgsVectorDataProvider::NativeType nativeType = nativeTypes.at( i );
@@ -999,20 +999,20 @@ void QgsOfflineEditing::applyFeaturesAdded( QgsVectorLayer *offlineLayer, QgsVec
       if ( remoteAttributeIndex == -1 )
         continue;
       QVariant attr = attrs.at( it );
-      if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QVariant::StringList )
+      if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QMetaType::QStringList )
       {
-        if ( attr.type() == QVariant::StringList || attr.type() == QVariant::List )
+        if ( attr.typeId() == QMetaType::QStringList || attr.typeId() == QMetaType::QVariantList )
         {
           attr = attr.toStringList();
         }
         else
         {
-          attr = QgsJsonUtils::parseArray( attr.toString(), QVariant::String );
+          attr = QgsJsonUtils::parseArray( attr.toString(), QMetaType::QString );
         }
       }
-      else if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QVariant::List )
+      else if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QMetaType::QVariantList )
       {
-        if ( attr.type() == QVariant::StringList || attr.type() == QVariant::List )
+        if ( attr.typeId() == QMetaType::QStringList || attr.typeId() == QMetaType::QVariantList )
         {
           attr = attr.toList();
         }
@@ -1070,11 +1070,11 @@ void QgsOfflineEditing::applyAttributeValueChanges( QgsVectorLayer *offlineLayer
 
     const int remoteAttributeIndex = attrLookup[ values.at( i ).attr ];
     QVariant attr = values.at( i ).value;
-    if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QVariant::StringList )
+    if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QMetaType::QStringList )
     {
-      attr = QgsJsonUtils::parseArray( attr.toString(), QVariant::String );
+      attr = QgsJsonUtils::parseArray( attr.toString(), QMetaType::QString );
     }
-    else if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QVariant::List )
+    else if ( remoteLayer->fields().at( remoteAttributeIndex ).type() == QMetaType::QVariantList )
     {
       attr = QgsJsonUtils::parseArray( attr.toString(), remoteLayer->fields().at( remoteAttributeIndex ).subType() );
     }
@@ -1372,7 +1372,7 @@ QList<QgsField> QgsOfflineEditing::sqlQueryAttributesAdded( sqlite3 *db, const Q
   while ( ret == SQLITE_ROW )
   {
     const QgsField field( QString( reinterpret_cast< const char * >( sqlite3_column_text( stmt, 0 ) ) ),
-                          static_cast< QVariant::Type >( sqlite3_column_int( stmt, 1 ) ),
+                          static_cast< QMetaType::Type >( sqlite3_column_int( stmt, 1 ) ),
                           QString(), // typeName
                           sqlite3_column_int( stmt, 2 ),
                           sqlite3_column_int( stmt, 3 ),
@@ -1580,7 +1580,7 @@ void QgsOfflineEditing::committedAttributeValuesChanges( const QString &qgisLaye
     const QgsAttributeMap attrMap = cit.value();
     for ( QgsAttributeMap::const_iterator it = attrMap.constBegin(); it != attrMap.constEnd(); ++it )
     {
-      QString value = it.value().type() == QVariant::StringList || it.value().type() == QVariant::List ? QgsJsonUtils::encodeValue( it.value() ) : it.value().toString();
+      QString value = it.value().typeId() == QMetaType::QStringList || it.value().typeId() == QMetaType::QVariantList ? QgsJsonUtils::encodeValue( it.value() ) : it.value().toString();
       value.replace( QLatin1String( "'" ), QLatin1String( "''" ) ); // escape quote
       const QString sql = QStringLiteral( "INSERT INTO 'log_feature_updates' VALUES ( %1, %2, %3, %4, '%5' )" )
                           .arg( layerId )
@@ -1694,9 +1694,9 @@ int QgsOfflineEditing::getLayerPkIdx( const QgsVectorLayer *layer ) const
   if ( pkAttrs.length() == 1 )
   {
     const QgsField pkField = layer->fields().at( pkAttrs[0] );
-    const QVariant::Type pkType = pkField.type();
+    const QMetaType::Type pkType = pkField.type();
 
-    if ( pkType == QVariant::String )
+    if ( pkType == QMetaType::QString )
     {
       return pkAttrs[0];
     }

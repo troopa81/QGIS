@@ -1316,19 +1316,19 @@ QString QgsOgrProviderUtils::quotedValue( const QVariant &value )
   if ( QgsVariantUtils::isNull( value ) )
     return QStringLiteral( "NULL" );
 
-  switch ( value.type() )
+  switch ( value.typeId() )
   {
-    case QVariant::Int:
-    case QVariant::LongLong:
-    case QVariant::Double:
+    case QMetaType::Int:
+    case QMetaType::LongLong:
+    case QMetaType::Double:
       return value.toString();
 
-    case QVariant::Bool:
+    case QMetaType::Bool:
       //OGR does not support boolean literals
       return value.toBool() ? "1" : "0";
 
     default:
-    case QVariant::String:
+    case QMetaType::QString:
       QString v = value.toString();
       v.replace( '\'', QLatin1String( "''" ) );
       if ( v.contains( '\\' ) )

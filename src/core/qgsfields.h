@@ -443,7 +443,7 @@ class CORE_EXPORT  QgsFields
      *
      * \since QGIS 3.16
      */
-    static QIcon iconForFieldType( QVariant::Type type, QVariant::Type subType = QVariant::Type::Invalid, const QString &typeString = QString() );
+    static QIcon iconForFieldType( QMetaType::Type type, QMetaType::Type subType = QMetaType::UnknownType, const QString &typeString = QString() );
 
     //! Allows direct construction of QVariants from fields.
     operator QVariant() const

@@ -202,7 +202,7 @@ bool QgsGmlSchema::xsdFeatureClass( const QDomElement &element, const QString &t
       fieldTypeName = stripNS( sequenceElementRestriction.attribute( QStringLiteral( "base" ) ) );
     }
 
-    QVariant::Type fieldType = QVariant::String;
+    QMetaType::Type fieldType = QMetaType::QString;
     if ( fieldTypeName.isEmpty() )
     {
       QgsDebugError( QStringLiteral( "Cannot get %1.%2 field type" ).arg( typeName, fieldName ) );
@@ -218,11 +218,11 @@ bool QgsGmlSchema::xsdFeatureClass( const QDomElement &element, const QString &t
 
       if ( fieldTypeName == QLatin1String( "decimal" ) )
       {
-        fieldType = QVariant::Double;
+        fieldType = QMetaType::Double;
       }
       else if ( fieldTypeName == QLatin1String( "integer" ) )
       {
-        fieldType = QVariant::Int;
+        fieldType = QMetaType::Int;
       }
     }
 
@@ -515,17 +515,17 @@ void QgsGmlSchema::addAttribute( const QString &name, const QString &value )
   // It is not geometry attribute -> analyze value
   bool ok;
   ( void ) value.toInt( &ok );
-  QVariant::Type type = QVariant::String;
+  QMetaType::Type type = QMetaType::QString;
   if ( ok )
   {
-    type = QVariant::Int;
+    type = QMetaType::Int;
   }
   else
   {
     ( void ) value.toDouble( &ok );
     if ( ok )
     {
-      type = QVariant::Double;
+      type = QMetaType::Double;
     }
   }
   //QgsDebugMsgLevel( "mStringCash = " + mStringCash + " type = " + QVariant::typeToName( type ),2 );
@@ -541,8 +541,8 @@ void QgsGmlSchema::addAttribute( const QString &name, const QString &value )
   {
     QgsField &field = fields[fieldIndex];
     // check if type is sufficient
-    if ( ( field.type() == QVariant::Int && ( type == QVariant::String || type == QVariant::Double ) ) ||
-         ( field.type() == QVariant::Double && type == QVariant::String ) )
+    if ( ( field.type() == QMetaType::Int && ( type == QMetaType::QString || type == QMetaType::Double ) ) ||
+         ( field.type() == QMetaType::Double && type == QMetaType::QString ) )
     {
       field.setType( type );
     }

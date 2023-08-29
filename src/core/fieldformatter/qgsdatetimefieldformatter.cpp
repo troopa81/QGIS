@@ -106,26 +106,26 @@ QString QgsDateTimeFieldFormatter::representValue( QgsVectorLayer *layer, int fi
   return result;
 }
 
-QString QgsDateTimeFieldFormatter::defaultFormat( QVariant::Type type )
+QString QgsDateTimeFieldFormatter::defaultFormat( QMetaType::Type type )
 {
   switch ( type )
   {
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return QgsDateTimeFieldFormatter::DATETIME_FORMAT;
-    case QVariant::Time:
+    case QMetaType::QTime:
       return QgsDateTimeFieldFormatter::TIME_FORMAT;
     default:
       return QgsDateTimeFieldFormatter::DATE_FORMAT;
   }
 }
 
-QString QgsDateTimeFieldFormatter::defaultDisplayFormat( QVariant::Type type )
+QString QgsDateTimeFieldFormatter::defaultDisplayFormat( QMetaType::Type type )
 {
   switch ( type )
   {
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return QgsDateTimeFieldFormatter::DATETIME_DISPLAY_FORMAT;
-    case QVariant::Time:
+    case QMetaType::QTime:
       return QgsDateTimeFieldFormatter::TIME_FORMAT;
     default:
       return QgsDateTimeFieldFormatter::DATE_DISPLAY_FORMAT;

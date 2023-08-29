@@ -1228,16 +1228,16 @@ void QgsGmlStreamingParser::setAttribute( const QString &name, const QString &va
     QVariant var;
     switch ( att_it.value().second.type() )
     {
-      case QVariant::Double:
+      case QMetaType::Double:
         var = QVariant( value.toDouble( &conversionOk ) );
         break;
-      case QVariant::Int:
+      case QMetaType::Int:
         var = QVariant( value.toInt( &conversionOk ) );
         break;
-      case QVariant::LongLong:
+      case QMetaType::LongLong:
         var = QVariant( value.toLongLong( &conversionOk ) );
         break;
-      case QVariant::DateTime:
+      case QMetaType::QDateTime:
         var = QVariant( QDateTime::fromString( value, Qt::ISODate ) );
         break;
       default: //string type is default

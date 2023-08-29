@@ -722,21 +722,21 @@ QString QgsProcessingUtils::variantToPythonLiteral( const QVariant &value )
 
   switch ( value.type() )
   {
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return value.toBool() ? QStringLiteral( "True" ) : QStringLiteral( "False" );
 
-    case QVariant::Double:
+    case QMetaType::Double:
       return QString::number( value.toDouble() );
 
-    case QVariant::Int:
-    case QVariant::UInt:
+    case QMetaType::Int:
+    case QMetaType::UInt:
       return QString::number( value.toInt() );
 
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
+    case QMetaType::LongLong:
+    case QMetaType::ULongLong:
       return QString::number( value.toLongLong() );
 
-    case QVariant::List:
+    case QMetaType::QVariantList:
     {
       QStringList parts;
       const QVariantList vl = value.toList();
@@ -747,7 +747,7 @@ QString QgsProcessingUtils::variantToPythonLiteral( const QVariant &value )
       return parts.join( ',' ).prepend( '[' ).append( ']' );
     }
 
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
     {
       const QVariantMap map = value.toMap();
       QStringList parts;
@@ -759,7 +759,7 @@ QString QgsProcessingUtils::variantToPythonLiteral( const QVariant &value )
       return parts.join( ',' ).prepend( '{' ).append( '}' );
     }
 
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
     {
       const QDateTime dateTime = value.toDateTime();
       return QStringLiteral( "QDateTime(QDate(%1, %2, %3), QTime(%4, %5, %6))" )
@@ -1494,11 +1494,11 @@ QVariantMap QgsProcessingUtils::removePointerValuesFromMap( const QVariantMap &m
   QVariantMap res;
   for ( auto it = map.constBegin(); it != map.constEnd(); ++it )
   {
-    if ( it->type() == QVariant::Map )
+    if ( it->typeId() == QMetaType::QVariantMap )
     {
       res.insert( it.key(), removePointerValuesFromMap( it.value().toMap() ) );
     }
-    else if ( it->type() == QVariant::List )
+    else if ( it->typeId() == QMetaType::QVariantList )
     {
       QVariantList dest;
       const QVariantList source = it.value().toList();
@@ -1523,7 +1523,7 @@ QVariantMap QgsProcessingUtils::preprocessQgisProcessParameters( const QVariantM
   ok = true;
   for ( auto it = parameters.constBegin(); it != parameters.constEnd(); ++it )
   {
-    if ( it.value().type() == QVariant::Map )
+    if ( it.value().typeId() == QMetaType::QVariantMap )
     {
       const QVariantMap value = it.value().toMap();
       if ( value.value( QStringLiteral( "type" ) ).toString() == QLatin1String( "data_defined" ) )
@@ -1549,7 +1549,7 @@ QVariantMap QgsProcessingUtils::preprocessQgisProcessParameters( const QVariantM
         output.insert( it.key(), it.value() );
       }
     }
-    else if ( it.value().type() == QVariant::String )
+    else if ( it.value().typeId() == QMetaType::QString )
     {
       const QString stringValue = it.value().toString();
 

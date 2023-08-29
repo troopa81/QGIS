@@ -271,17 +271,17 @@ QString QgsSqliteUtils::quotedValue( const QVariant &value )
 
   switch ( value.type() )
   {
-    case QVariant::Int:
-    case QVariant::LongLong:
-    case QVariant::Double:
+    case QMetaType::Int:
+    case QMetaType::LongLong:
+    case QMetaType::Double:
       return value.toString();
 
-    case QVariant::Bool:
+    case QMetaType::Bool:
       //SQLite has no boolean literals
       return value.toBool() ? QStringLiteral( "1" ) : QStringLiteral( "0" );
 
     default:
-    case QVariant::String:
+    case QMetaType::QString:
       QString v = value.toString();
       // https://www.sqlite.org/lang_expr.html :
       // """A string constant is formed by enclosing the string in single quotes (').

@@ -57,7 +57,7 @@ class CORE_EXPORT QgsField
     Q_PROPERTY( bool isDateOrTime READ isDateOrTime )
     Q_PROPERTY( int length READ length WRITE setLength )
     Q_PROPERTY( int precision READ precision WRITE setPrecision )
-    Q_PROPERTY( QVariant::Type type READ type WRITE setType )
+    Q_PROPERTY( QMetaType::Type type READ type WRITE setType )
     Q_PROPERTY( QString comment READ comment WRITE setComment )
     Q_PROPERTY( QString name READ name WRITE setName )
     Q_PROPERTY( QString alias READ alias WRITE setAlias )
@@ -103,22 +103,22 @@ class CORE_EXPORT QgsField
      * \param comment Comment for the field
      * \param subType If the field is a collection, its element's type. When
      *                all the elements don't need to have the same type, leave
-     *                this to QVariant::Invalid.
+     *                this to QMetaType::UnknownType.
      */
     QgsField( const QString &name = QString(),
-              QVariant::Type type = QVariant::Invalid,
+              QMetaType::Type type = QMetaType::UnknownType,
               const QString &typeName = QString(),
               int len = 0,
               int prec = 0,
               const QString &comment = QString(),
-              QVariant::Type subType = QVariant::Invalid );
+              QMetaType::Type subType = QMetaType::UnknownType );
 
     /**
      * Copy constructor
      */
     QgsField( const QgsField &other );
 
-    QVariant testVariant( QVariant::Type type ){return QVariant(type);}
+    QVariant testVariant( QMetaType::Type type ) {return QVariant( QMetaType( type ) );}
 
     /**
      * Assignment operator
@@ -184,15 +184,15 @@ class CORE_EXPORT QgsField
     QString friendlyTypeString() const;
 
     //! Gets variant type of the field as it will be retrieved from data source
-    QVariant::Type type() const;
+    QMetaType::Type type() const;
 
     /**
      * If the field is a collection, gets its element's type.
      * When all the elements don't need to have the same type, this returns
-     * QVariant::Invalid.
+     * QMetaType::UnknownType.
      * \since QGIS 3.0
      */
-    QVariant::Type subType() const;
+    QMetaType::Type subType() const;
 
     /**
      * Gets the field type. Field types vary depending on the data source. Examples
@@ -295,15 +295,15 @@ class CORE_EXPORT QgsField
     /**
      * Set variant type.
      */
-    void setType( QVariant::Type type );
+    void setType( QMetaType::Type type );
 
     /**
      * If the field is a collection, set its element's type.
      * When all the elements don't need to have the same type, set this to
-     * QVariant::Invalid.
+     * QMetaType::UnknownType.
      * \since QGIS 3.0
      */
-    void setSubType( QVariant::Type subType );
+    void setSubType( QMetaType::Type subType );
 
     /**
      * Set the field type.

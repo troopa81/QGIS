@@ -60,17 +60,17 @@ void QgsDateTimeStatisticalSummary::calculate( const QVariantList &values )
 void QgsDateTimeStatisticalSummary::addValue( const QVariant &value )
 {
 
-  if ( value.type() == QVariant::DateTime )
+  if ( value.typeId() == QMetaType::QDateTime )
   {
     testDateTime( value.toDateTime(), QgsVariantUtils::isNull( value ) );
   }
-  else if ( value.type() == QVariant::Date )
+  else if ( value.typeId() == QMetaType::QDate )
   {
     const QDate date = value.toDate();
     testDateTime( date.isValid() ? QDateTime( date, QTime( 0, 0, 0 ) )
                   : QDateTime(), QgsVariantUtils::isNull( value ) );
   }
-  else if ( value.type() == QVariant::Time )
+  else if ( value.typeId() == QMetaType::QTime )
   {
     mIsTimes = true;
     const QTime time = value.toTime();

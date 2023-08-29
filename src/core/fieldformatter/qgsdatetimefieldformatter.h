@@ -52,23 +52,23 @@ class CORE_EXPORT QgsDateTimeFieldFormatter : public QgsFieldFormatter
      * Gets the default format in function of the type.
      * The type is expected to be one of
      *
-     * - QVariant::DateTime
-     * - QVariant::Date
-     * - QVariant::Time
+     * - QMetaType::QDateTime
+     * - QMetaType::QDate
+     * - QMetaType::QTime
      */
-    static QString defaultFormat( QVariant::Type type );
+    static QString defaultFormat( QMetaType::Type type );
 
     /**
      * Gets the default display format in function of the type.
      * The type is expected to be one of
      *
-     * - QVariant::DateTime
-     * - QVariant::Date
-     * - QVariant::Time
+     * - QMetaType::QDateTime
+     * - QMetaType::QDate
+     * - QMetaType::QTime
      *
      * \since QGIS 3.30
      */
-    static QString defaultDisplayFormat( QVariant::Type type );
+    static QString defaultDisplayFormat( QMetaType::Type type );
 
     /**
      * Adjusts the date time display formats according to locale.

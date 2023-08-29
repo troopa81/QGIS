@@ -38,13 +38,13 @@ bool QgsProcessingParameterVectorTileWriterLayers::checkValueIsAcceptable( const
   if ( !input.isValid() )
     return mFlags & FlagOptional;
 
-  if ( input.type() != QVariant::List )
+  if ( input.typeId() != QMetaType::QVariantList )
     return false;
 
   const QVariantList inputList = input.toList();
   for ( const QVariant &inputItem : inputList )
   {
-    if ( inputItem.type() != QVariant::Map )
+    if ( inputItem.typeId() != QMetaType::QVariantMap )
       return false;
     QVariantMap inputItemMap = inputItem.toMap();
 

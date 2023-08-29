@@ -46,35 +46,35 @@
 #include <QRegularExpression>
 #include <QUrl>
 
-QVariant::Type QgsArcGisRestUtils::convertFieldType( const QString &esriFieldType )
+QMetaType::Type QgsArcGisRestUtils::convertFieldType( const QString &esriFieldType )
 {
   if ( esriFieldType == QLatin1String( "esriFieldTypeInteger" ) )
-    return QVariant::LongLong;
+    return QMetaType::LongLong;
   if ( esriFieldType == QLatin1String( "esriFieldTypeSmallInteger" ) )
-    return QVariant::Int;
+    return QMetaType::Int;
   if ( esriFieldType == QLatin1String( "esriFieldTypeDouble" ) )
-    return QVariant::Double;
+    return QMetaType::Double;
   if ( esriFieldType == QLatin1String( "esriFieldTypeSingle" ) )
-    return QVariant::Double;
+    return QMetaType::Double;
   if ( esriFieldType == QLatin1String( "esriFieldTypeString" ) )
-    return QVariant::String;
+    return QMetaType::QString;
   if ( esriFieldType == QLatin1String( "esriFieldTypeDate" ) )
-    return QVariant::DateTime;
+    return QMetaType::QDateTime;
   if ( esriFieldType == QLatin1String( "esriFieldTypeGeometry" ) )
-    return QVariant::Invalid; // Geometry column should not appear as field
+    return QMetaType::UnknownType; // Geometry column should not appear as field
   if ( esriFieldType == QLatin1String( "esriFieldTypeOID" ) )
-    return QVariant::LongLong;
+    return QMetaType::LongLong;
   if ( esriFieldType == QLatin1String( "esriFieldTypeBlob" ) )
-    return QVariant::ByteArray;
+    return QMetaType::QByteArray;
   if ( esriFieldType == QLatin1String( "esriFieldTypeGlobalID" ) )
-    return QVariant::String;
+    return QMetaType::QString;
   if ( esriFieldType == QLatin1String( "esriFieldTypeRaster" ) )
-    return QVariant::ByteArray;
+    return QMetaType::QByteArray;
   if ( esriFieldType == QLatin1String( "esriFieldTypeGUID" ) )
-    return QVariant::String;
+    return QMetaType::QString;
   if ( esriFieldType == QLatin1String( "esriFieldTypeXML" ) )
-    return QVariant::String;
-  return QVariant::Invalid;
+    return QMetaType::QString;
+  return QMetaType::UnknownType;
 }
 
 Qgis::WkbType QgsArcGisRestUtils::convertGeometryType( const QString &esriGeometryType )
@@ -191,7 +191,7 @@ std::unique_ptr< QgsCompoundCurve > QgsArcGisRestUtils::convertCompoundCurve( co
   int curveListIndex = 0;
   for ( const QVariant &curveData : curvesList )
   {
-    if ( curveData.type() == QVariant::List )
+    if ( curveData.typeId() == QMetaType::QVariantList )
     {
       const QVariantList coordList = curveData.toList();
       const int nCoords = coordList.size();
@@ -217,7 +217,7 @@ std::unique_ptr< QgsCompoundCurve > QgsArcGisRestUtils::convertCompoundCurve( co
         *outLineM++ = ( ( hasZ && nCoords >= 4 ) || ( !hasZ && nCoords >= 3 ) ) ? coordList[ hasZ ? 3 : 2].toDouble() : std::numeric_limits< double >::quiet_NaN();
       }
     }
-    else if ( curveData.type() == QVariant::Map )
+    else if ( curveData.typeId() == QMetaType::QVariantMap )
     {
       // The last point of the linestring is the start point of this circular string
       QgsPoint lastLineStringPoint;
@@ -1571,25 +1571,25 @@ QVariantMap QgsArcGisRestUtils::featureToJson( const QgsFeature &feature, const 
   return res;
 }
 
-QVariant QgsArcGisRestUtils::variantToAttributeValue( const QVariant &variant, QVariant::Type expectedType, const QgsArcGisRestContext &context )
+QVariant QgsArcGisRestUtils::variantToAttributeValue( const QVariant &variant, QMetaType::Type expectedType, const QgsArcGisRestContext &context )
 {
   if ( QgsVariantUtils::isNull( variant ) )
     return QVariant();
 
   switch ( expectedType )
   {
-    case QVariant::String:
+    case QMetaType::QString:
       return QString( QUrl::toPercentEncoding( variant.toString() ) );
 
-    case QVariant::DateTime:
-    case QVariant::Date:
+    case QMetaType::QDateTime:
+    case QMetaType::QDate:
     {
-      switch ( variant.type() )
+      switch ( variant.userType() )
       {
-        case QVariant::DateTime:
+        case QMetaType::QDateTime:
           return variant.toDateTime().toMSecsSinceEpoch();
 
-        case QVariant::Date:
+        case QMetaType::QDate:
           // for date values, assume start of day -- the REST api requires datetime values only, not plain dates
           if ( context.timeZone().isValid() )
             return QDateTime( variant.toDate(), QTime( 0, 0, 0 ), context.timeZone() ).toMSecsSinceEpoch();
@@ -1614,28 +1614,28 @@ QVariantMap QgsArcGisRestUtils::fieldDefinitionToJson( const QgsField &field )
   QString fieldType;
   switch ( field.type() )
   {
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       fieldType = QStringLiteral( "esriFieldTypeInteger" );
       break;
 
-    case QVariant::Int:
+    case QMetaType::Int:
       fieldType = QStringLiteral( "esriFieldTypeSmallInteger" );
       break;
 
-    case QVariant::Double:
+    case QMetaType::Double:
       fieldType = QStringLiteral( "esriFieldTypeDouble" );
       break;
 
-    case QVariant::String:
+    case QMetaType::QString:
       fieldType = QStringLiteral( "esriFieldTypeString" );
       break;
 
-    case QVariant::DateTime:
-    case QVariant::Date:
+    case QMetaType::QDateTime:
+    case QMetaType::QDate:
       fieldType = QStringLiteral( "esriFieldTypeDate" );
       break;
 
-    case QVariant::ByteArray:
+    case QMetaType::QByteArray:
       fieldType = QStringLiteral( "esriFieldTypeBlob" );
       break;
 
@@ -1676,4 +1676,3 @@ Qgis::ArcGisRestServiceType QgsArcGisRestUtils::serviceTypeFromString( const QSt
 
   return Qgis::ArcGisRestServiceType::Unknown;
 }
-

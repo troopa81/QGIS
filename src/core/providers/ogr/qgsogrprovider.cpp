@@ -72,67 +72,67 @@ bool QgsOgrProvider::convertField( QgsField &field, const QTextCodec &encoding )
     ogrWidth += 1;
   switch ( field.type() )
   {
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       ogrType = OFTInteger64;
       ogrPrecision = 0;
       ogrWidth = ogrWidth > 0 && ogrWidth <= 21 ? ogrWidth : 21;
       break;
 
-    case QVariant::String:
+    case QMetaType::QString:
       ogrType = OFTString;
       if ( ogrWidth < 0 || ogrWidth > 255 )
         ogrWidth = 255;
       break;
 
-    case QVariant::Int:
+    case QMetaType::Int:
       ogrType = OFTInteger;
       ogrWidth = ogrWidth > 0 && ogrWidth <= 10 ? ogrWidth : 10;
       ogrPrecision = 0;
       break;
 
-    case QVariant::Bool:
+    case QMetaType::Bool:
       ogrType = OFTInteger;
       ogrSubType = OFSTBoolean;
       ogrWidth = 1;
       ogrPrecision = 0;
       break;
 
-    case QVariant::Double:
+    case QMetaType::Double:
       ogrType = OFTReal;
       break;
 
-    case QVariant::Date:
+    case QMetaType::QDate:
       ogrType = OFTDate;
       break;
 
-    case QVariant::Time:
+    case QMetaType::QTime:
       ogrType = OFTTime;
       break;
 
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       ogrType = OFTDateTime;
       break;
 
-    case QVariant::StringList:
+    case QMetaType::QStringList:
     {
       ogrType = OFTStringList;
       break;
     }
 
-    case QVariant::List:
-      if ( field.subType() == QVariant::String )
+    case QMetaType::QVariantList:
+      if ( field.subType() == QMetaType::QString )
       {
         ogrType = OFTStringList;
       }
-      else if ( field.subType() == QVariant::Int )
+      else if ( field.subType() == QMetaType::Int )
       {
         ogrType = OFTIntegerList;
       }
-      else if ( field.subType() == QVariant::LongLong )
+      else if ( field.subType() == QMetaType::LongLong )
       {
         ogrType = OFTInteger64List;
       }
-      else if ( field.subType() == QVariant::Double )
+      else if ( field.subType() == QMetaType::Double )
       {
         ogrType = OFTRealList;
       }
@@ -143,7 +143,7 @@ bool QgsOgrProvider::convertField( QgsField &field, const QTextCodec &encoding )
       }
       break;
 
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
       ogrType = OFTString;
       ogrSubType = OFSTJSON;
       break;
@@ -736,7 +736,7 @@ void QgsOgrProvider::loadFields()
   {
     QgsField fidField(
       fidColumn,
-      QVariant::LongLong,
+      QMetaType::LongLong,
       QStringLiteral( "Integer64" )
     );
     // Set constraints for feature id
@@ -765,8 +765,8 @@ void QgsOgrProvider::loadFields()
     const OGRFieldType ogrType = OGR_Fld_GetType( fldDef );
     const OGRFieldSubType ogrSubType = OGR_Fld_GetSubType( fldDef );
 
-    QVariant::Type varType = QVariant::Invalid;
-    QVariant::Type varSubType = QVariant::Invalid;
+    QMetaType::Type varType = QMetaType::UnknownType;
+    QMetaType::Type varSubType = QMetaType::UnknownType;
     QgsOgrUtils::ogrFieldTypeToQVariantType( ogrType, ogrSubType, varType, varSubType );
 
     //TODO: fix this hack
@@ -1008,7 +1008,7 @@ void QgsOgrProvider::loadMetadata()
           if ( f )
           {
             bool ok = false;
-            QVariant res = QgsOgrUtils::getOgrFeatureAttribute( f.get(), QgsField( QString(), QVariant::String ), 0, nullptr, &ok );
+            QVariant res = QgsOgrUtils::getOgrFeatureAttribute( f.get(), QgsField( QString(), QMetaType::QString ), 0, nullptr, &ok );
             if ( ok )
             {
               QDomDocument doc;
@@ -1036,7 +1036,7 @@ void QgsOgrProvider::loadMetadata()
         if ( f )
         {
           bool ok = false;
-          QVariant res = QgsOgrUtils::getOgrFeatureAttribute( f.get(), QgsField( QString(), QVariant::String ), 0, textEncoding(), &ok );
+          QVariant res = QgsOgrUtils::getOgrFeatureAttribute( f.get(), QgsField( QString(), QMetaType::QString ), 0, textEncoding(), &ok );
           if ( ok )
           {
             QDomDocument metadataDoc;
@@ -1477,7 +1477,7 @@ bool QgsOgrProvider::addFeaturePrivate( QgsFeature &f, Flags flags, QgsFeatureId
     {
       OGR_F_UnsetField( feature.get(), ogrAttributeId );
     }
-    else if ( QgsVariantUtils::isNull( attrVal ) || ( type != OFTString && ( ( attrVal.type() != QVariant::List && attrVal.toString().isEmpty() && attrVal.type() != QVariant::StringList && attrVal.toStringList().isEmpty() ) || ( attrVal.type() == QVariant::List && attrVal.toList().empty() ) ) ) )
+    else if ( QgsVariantUtils::isNull( attrVal ) || ( type != OFTString && ( ( attrVal.typeId() != QMetaType::QVariantList && attrVal.toString().isEmpty() && attrVal.typeId() != QMetaType::QStringList && attrVal.toStringList().isEmpty() ) || ( attrVal.typeId() == QMetaType::QVariantList && attrVal.toList().empty() ) ) ) )
     {
 // Starting with GDAL 2.2, there are 2 concepts: unset fields and null fields
 // whereas previously there was only unset fields. For a GeoJSON output,
@@ -1764,11 +1764,11 @@ bool QgsOgrProvider::addAttributeOGRLevel( const QgsField &field, bool &ignoreEr
 
   switch ( field.type() )
   {
-    case QVariant::Int:
-    case QVariant::Bool:
+    case QMetaType::Int:
+    case QMetaType::Bool:
       type = OFTInteger;
       break;
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
     {
       const char *pszDataTypes = GDALGetMetadataItem( mOgrLayer->driver(), GDAL_DMD_CREATIONFIELDDATATYPES, nullptr );
       if ( pszDataTypes && strstr( pszDataTypes, "Integer64" ) )
@@ -1779,47 +1779,47 @@ bool QgsOgrProvider::addAttributeOGRLevel( const QgsField &field, bool &ignoreEr
       }
       break;
     }
-    case QVariant::Double:
+    case QMetaType::Double:
       type = OFTReal;
       break;
-    case QVariant::Date:
+    case QMetaType::QDate:
       type = OFTDate;
       break;
-    case QVariant::Time:
+    case QMetaType::QTime:
       type = OFTTime;
       break;
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       type = OFTDateTime;
       break;
-    case QVariant::String:
+    case QMetaType::QString:
       type = OFTString;
       break;
-    case QVariant::ByteArray:
+    case QMetaType::QByteArray:
       type = OFTBinary;
       break;
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
       type = OFTString;
       break;
-    case QVariant::StringList:
+    case QMetaType::QStringList:
       type = OFTStringList;
       break;
-    case QVariant::List:
-      if ( field.subType() == QVariant::String )
+    case QMetaType::QVariantList:
+      if ( field.subType() == QMetaType::QString )
       {
         type = OFTStringList;
         break;
       }
-      else if ( field.subType() == QVariant::Int )
+      else if ( field.subType() == QMetaType::Int )
       {
         type = OFTIntegerList;
         break;
       }
-      else if ( field.subType() == QVariant::LongLong )
+      else if ( field.subType() == QMetaType::LongLong )
       {
         type = OFTInteger64List;
         break;
       }
-      else if ( field.subType() == QVariant::Double )
+      else if ( field.subType() == QMetaType::Double )
       {
         type = OFTRealList;
         break;
@@ -1845,10 +1845,10 @@ bool QgsOgrProvider::addAttributeOGRLevel( const QgsField &field, bool &ignoreEr
 
   switch ( field.type() )
   {
-    case QVariant::Bool:
+    case QMetaType::Bool:
       OGR_Fld_SetSubType( fielddefn.get(), OFSTBoolean );
       break;
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
       OGR_Fld_SetSubType( fielddefn.get(), OFSTJSON );
       break;
     default:
@@ -1914,7 +1914,7 @@ bool QgsOgrProvider::addAttributes( const QList<QgsField> &attributes )
   // real-world drivers that might only be able to satisfy request only partially.
   // So to avoid erroring out, patch field type, width and precision to match
   // what was requested.
-  // For example in case of Integer64->Real mapping so that QVariant::LongLong is
+  // For example in case of Integer64->Real mapping so that QMetaType::LongLong is
   // still returned to the caller
   // Or if a field width was specified but not strictly enforced by the driver (#15614)
   for ( QMap< QString, QgsField >::const_iterator it = mapFieldNameToOriginalField.constBegin();
@@ -2285,7 +2285,7 @@ bool QgsOgrProvider::changeAttributeValues( const QgsChangedAttributesMap &attr_
       }
 
       OGRFieldType type = OGR_Fld_GetType( fd );
-      if ( QgsVariantUtils::isNull( *it2 ) || ( type != OFTString && ( ( it2->type() != QVariant::List && it2->type() != QVariant::StringList && it2->toString().isEmpty() ) || ( it2->type() == QVariant::List && it2->toList().empty() ) || ( it2->type() == QVariant::StringList && it2->toStringList().empty() ) ) ) )
+      if ( QgsVariantUtils::isNull( *it2 ) || ( type != OFTString && ( ( it2->typeId() != QMetaType::QVariantList && it2->typeId() != QMetaType::QStringList && it2->toString().isEmpty() ) || ( it2->typeId() == QMetaType::QVariantList && it2->toList().empty() ) || ( it2->typeId() == QMetaType::QStringList && it2->toStringList().empty() ) ) ) )
       {
 // Starting with GDAL 2.2, there are 2 concepts: unset fields and null fields
 // whereas previously there was only unset fields. For a GeoJSON output,
@@ -3361,9 +3361,9 @@ QVariant QgsOgrProvider::minimumValue( int index ) const
   QgsField fld = originalField;
 
   // can't use native date/datetime types -- OGR converts these to string in the MAX return value
-  if ( fld.type() == QVariant::DateTime || fld.type() == QVariant::Date )
+  if ( fld.type() == QMetaType::QDateTime || fld.type() == QMetaType::QDate )
   {
-    fld.setType( QVariant::String );
+    fld.setType( QMetaType::QString );
   }
 
   // Don't quote column name (see https://trac.osgeo.org/gdal/ticket/5799#comment:9)
@@ -3393,10 +3393,10 @@ QVariant QgsOgrProvider::minimumValue( int index ) const
   if ( !ok )
     return QVariant();
 
-  if ( res.type() != originalField.type() )
+  if ( static_cast<QMetaType::Type>( res.userType() ) != originalField.type() )
     res = convertValue( originalField.type(), res.toString() );
 
-  if ( originalField.type() == QVariant::DateTime )
+  if ( originalField.type() == QMetaType::QDateTime )
   {
     // ensure that we treat times as local time, to match behavior when iterating features
     QDateTime temp = res.toDateTime();
@@ -3421,9 +3421,9 @@ QVariant QgsOgrProvider::maximumValue( int index ) const
   QgsField fld = originalField;
 
   // can't use native date/datetime types -- OGR converts these to string in the MAX return value
-  if ( fld.type() == QVariant::DateTime || fld.type() == QVariant::Date )
+  if ( fld.type() == QMetaType::QDateTime || fld.type() == QMetaType::QDate )
   {
-    fld.setType( QVariant::String );
+    fld.setType( QMetaType::QString );
   }
 
   // Don't quote column name (see https://trac.osgeo.org/gdal/ticket/5799#comment:9)
@@ -3453,10 +3453,10 @@ QVariant QgsOgrProvider::maximumValue( int index ) const
   if ( !ok )
     return QVariant();
 
-  if ( res.type() != originalField.type() )
+  if ( static_cast<QMetaType::Type>( res.userType() ) != originalField.type() )
     res = convertValue( originalField.type(), res.toString() );
 
-  if ( originalField.type() == QVariant::DateTime )
+  if ( originalField.type() == QMetaType::QDateTime )
   {
     // ensure that we treat times as local time, to match behavior when iterating features
     QDateTime temp = res.toDateTime();

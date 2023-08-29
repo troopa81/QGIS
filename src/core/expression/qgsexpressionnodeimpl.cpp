@@ -223,7 +223,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
   switch ( mOp )
   {
     case boPlus:
-      if ( vL.type() == QVariant::String && vR.type() == QVariant::String )
+      if ( vL.typeId() == QMetaType::QString && vR.typeId() == QMetaType::QString )
       {
         QString sL = QgsExpressionUtils::isNull( vL ) ? QString() : QgsExpressionUtils::getStringValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -266,17 +266,17 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
         }
         return QVariant( computeDateTimeFromInterval( dL, &iL ) );
       }
-      else if ( mOp == boPlus && ( ( vL.type() == QVariant::Date && vR.type() == QVariant::Time ) ||
-                                   ( vR.type() == QVariant::Date && vL.type() == QVariant::Time ) ) )
+      else if ( mOp == boPlus && ( ( vL.typeId() == QMetaType::QDate && vR.typeId() == QMetaType::QTime ) ||
+                                   ( vR.typeId() == QMetaType::QDate && vL.typeId() == QMetaType::QTime ) ) )
       {
-        QDate date = QgsExpressionUtils::getDateValue( vL.type() == QVariant::Date ? vL : vR, parent );
+        QDate date = QgsExpressionUtils::getDateValue( vL.typeId() == QMetaType::QDate ? vL : vR, parent );
         ENSURE_NO_EVAL_ERROR
-        QTime time = QgsExpressionUtils::getTimeValue( vR.type() == QVariant::Time ? vR : vL, parent );
+        QTime time = QgsExpressionUtils::getTimeValue( vR.typeId() == QMetaType::QTime ? vR : vL, parent );
         ENSURE_NO_EVAL_ERROR
         QDateTime dt = QDateTime( date, time );
         return QVariant( dt );
       }
-      else if ( mOp == boMinus && vL.type() == QVariant::Date && vR.type() == QVariant::Date )
+      else if ( mOp == boMinus && vL.typeId() == QMetaType::QDate && vR.typeId() == QMetaType::QDate )
       {
         QDate date1 = QgsExpressionUtils::getDateValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -284,7 +284,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
         ENSURE_NO_EVAL_ERROR
         return date1 - date2;
       }
-      else if ( mOp == boMinus && vL.type() == QVariant::Time && vR.type() == QVariant::Time )
+      else if ( mOp == boMinus && vL.typeId() == QMetaType::QTime && vR.typeId() == QMetaType::QTime )
       {
         QTime time1 = QgsExpressionUtils::getTimeValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -292,7 +292,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
         ENSURE_NO_EVAL_ERROR
         return time1 - time2;
       }
-      else if ( mOp == boMinus && vL.type() == QVariant::DateTime && vR.type() == QVariant::DateTime )
+      else if ( mOp == boMinus && vL.typeId() == QMetaType::QDateTime && vR.typeId() == QMetaType::QDateTime )
       {
         QDateTime datetime1 = QgsExpressionUtils::getDateTimeValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -428,7 +428,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
             return TVL_Unknown;
         }
       }
-      else if ( ( vL.type() == QVariant::DateTime && vR.type() == QVariant::DateTime ) )
+      else if ( ( vL.typeId() == QMetaType::QDateTime && vR.typeId() == QMetaType::QDateTime ) )
       {
         QDateTime dL = QgsExpressionUtils::getDateTimeValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -444,7 +444,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
 
         return compare( dR.msecsTo( dL ) ) ? TVL_True : TVL_False;
       }
-      else if ( ( vL.type() == QVariant::Date && vR.type() == QVariant::Date ) )
+      else if ( ( vL.typeId() == QMetaType::QDate && vR.typeId() == QMetaType::QDate ) )
       {
         const QDate dL = QgsExpressionUtils::getDateValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -452,7 +452,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
         ENSURE_NO_EVAL_ERROR
         return compare( dR.daysTo( dL ) ) ? TVL_True : TVL_False;
       }
-      else if ( ( vL.type() == QVariant::Time && vR.type() == QVariant::Time ) )
+      else if ( ( vL.typeId() == QMetaType::QTime && vR.typeId() == QMetaType::QTime ) )
       {
         const QTime dL = QgsExpressionUtils::getTimeValue( vL, parent );
         ENSURE_NO_EVAL_ERROR
@@ -460,7 +460,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
         ENSURE_NO_EVAL_ERROR
         return compare( dR.msecsTo( dL ) ) ? TVL_True : TVL_False;
       }
-      else if ( ( vL.type() != QVariant::String || vR.type() != QVariant::String ) &&
+      else if ( ( vL.typeId() != QMetaType::QString || vR.typeId() != QMetaType::QString ) &&
                 QgsExpressionUtils::isDoubleSafe( vL ) && QgsExpressionUtils::isDoubleSafe( vR ) )
       {
         // do numeric comparison if both operators can be converted to numbers,
@@ -501,7 +501,7 @@ QVariant QgsExpressionNodeBinaryOperator::evalNode( QgsExpression *parent, const
       {
         bool equal = false;
         if ( QgsExpressionUtils::isDoubleSafe( vL ) && QgsExpressionUtils::isDoubleSafe( vR ) &&
-             ( vL.type() != QVariant::String || vR.type() != QVariant::String ) )
+             ( vL.typeId() != QMetaType::QString || vR.typeId() != QMetaType::QString ) )
         {
           double fL = QgsExpressionUtils::getDoubleValue( vL, parent );
           ENSURE_NO_EVAL_ERROR
@@ -972,7 +972,7 @@ QVariant QgsExpressionNodeInOperator::evalNode( QgsExpression *parent, const Qgs
     {
       bool equal = false;
       // check whether they are equal
-      if ( ( v1.type() != QVariant::String || v2.type() != QVariant::String ) &&
+      if ( ( v1.typeId() != QMetaType::QString || v2.typeId() != QMetaType::QString ) &&
            QgsExpressionUtils::isDoubleSafe( v1 ) && QgsExpressionUtils::isDoubleSafe( v2 ) )
       {
         // do numeric comparison if both operators can be converted to numbers,
@@ -1379,23 +1379,23 @@ QString QgsExpressionNodeLiteral::valueAsString() const
   if ( QgsVariantUtils::isNull( mValue ) )
     return QStringLiteral( "NULL" );
 
-  switch ( mValue.type() )
+  switch ( mValue.typeId() )
   {
-    case QVariant::Int:
+    case QMetaType::Int:
       return QString::number( mValue.toInt() );
-    case QVariant::Double:
+    case QMetaType::Double:
       return QString::number( mValue.toDouble() );
-    case QVariant::LongLong:
+    case QMetaType::LongLong:
       return QString::number( mValue.toLongLong() );
-    case QVariant::String:
+    case QMetaType::QString:
       return QgsExpression::quotedString( mValue.toString() );
-    case QVariant::Time:
+    case QMetaType::QTime:
       return QgsExpression::quotedString( mValue.toTime().toString( Qt::ISODate ) );
-    case QVariant::Date:
+    case QMetaType::QDate:
       return QgsExpression::quotedString( mValue.toDate().toString( Qt::ISODate ) );
-    case QVariant::DateTime:
+    case QMetaType::QDateTime:
       return QgsExpression::quotedString( mValue.toDateTime().toString( Qt::ISODate ) );
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return mValue.toBool() ? QStringLiteral( "TRUE" ) : QStringLiteral( "FALSE" );
     default:
       return tr( "[unsupported type: %1; value: %2]" ).arg( mValue.typeName(), mValue.toString() );
@@ -2010,11 +2010,11 @@ QVariant QgsExpressionNodeIndexOperator::evalNode( QgsExpression *parent, const 
 
   switch ( container.type() )
   {
-    case QVariant::Map:
+    case QMetaType::QVariantMap:
       return QgsExpressionUtils::getMapValue( container, parent ).value( index.toString() );
 
-    case QVariant::List:
-    case QVariant::StringList:
+    case QMetaType::QVariantList:
+    case QMetaType::QStringList:
     {
       const QVariantList list = QgsExpressionUtils::getListValue( container, parent );
       qlonglong pos = QgsExpressionUtils::getIntValue( index, parent );

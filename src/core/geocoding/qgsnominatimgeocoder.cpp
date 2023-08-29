@@ -49,19 +49,19 @@ QgsGeocoderInterface::Flags QgsNominatimGeocoder::flags() const
 QgsFields QgsNominatimGeocoder::appendedFields() const
 {
   QgsFields fields;
-  fields.append( QgsField( QStringLiteral( "osm_type" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "display_name" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "place_id" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "class" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "type" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "road" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "village" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "city_district" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "town" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "city" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "state" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "country" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "postcode" ), QVariant::String ) );
+  fields.append( QgsField( QStringLiteral( "osm_type" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "display_name" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "place_id" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "class" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "type" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "road" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "village" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "city_district" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "town" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "city" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "state" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "country" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "postcode" ), QMetaType::QString ) );
   return fields;
 }
 

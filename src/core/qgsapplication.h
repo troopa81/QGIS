@@ -990,7 +990,7 @@ class CORE_EXPORT QgsApplication : public QApplication
      * This string is used to represent the value `NULL` throughout QGIS.
      *
      * In general, when passing values around, prefer to use a null QVariant
-     * `QVariant( field.type() )` or `QVariant( QVariant::Int )`. This value
+     * `QVariant( field.type() )` or `QVariant( QMetaType::Int )`. This value
      * should only be used in the final presentation step when showing values
      * in a widget or sending it to a web browser.
      */

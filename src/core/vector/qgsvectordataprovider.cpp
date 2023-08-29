@@ -37,8 +37,8 @@
 #include <mutex>
 
 const int QgsVectorDataProvider::EditingCapabilities = AddFeatures | DeleteFeatures |
-                                           ChangeAttributeValues | ChangeGeometries | AddAttributes | DeleteAttributes |
-                                           RenameAttributes;
+    ChangeAttributeValues | ChangeGeometries | AddAttributes | DeleteAttributes |
+    RenameAttributes;
 QgsVectorDataProvider::QgsVectorDataProvider( const QString &uri, const ProviderOptions &options,
     QgsDataProvider::ReadFlags flags )
   : QgsDataProvider( uri, options, flags )
@@ -623,17 +623,17 @@ void QgsVectorDataProvider::fillMinMaxCache() const
   const QgsFields flds = fields();
   for ( int i = 0; i < flds.count(); ++i )
   {
-    if ( flds.at( i ).type() == QVariant::Int )
+    if ( flds.at( i ).type() == QMetaType::Int )
     {
       mCacheMinValues[i] = QVariant( std::numeric_limits<int>::max() );
       mCacheMaxValues[i] = QVariant( std::numeric_limits<int>::lowest() );
     }
-    else if ( flds.at( i ).type() == QVariant::LongLong )
+    else if ( flds.at( i ).type() == QMetaType::LongLong )
     {
       mCacheMinValues[i] = QVariant( std::numeric_limits<qlonglong>::max() );
       mCacheMaxValues[i] = QVariant( std::numeric_limits<qlonglong>::lowest() );
     }
-    else if ( flds.at( i ).type() == QVariant::Double )
+    else if ( flds.at( i ).type() == QMetaType::Double )
     {
       mCacheMinValues[i] = QVariant( std::numeric_limits<double>::max() );
       mCacheMaxValues[i] = QVariant( std::numeric_limits<double>::lowest() );
@@ -663,7 +663,7 @@ void QgsVectorDataProvider::fillMinMaxCache() const
 
       switch ( flds.at( attributeIndex ).type() )
       {
-        case QVariant::Int:
+        case QMetaType::Int:
         {
           const int value = varValue.toInt();
           if ( value < mCacheMinValues[ attributeIndex ].toInt() )
@@ -672,7 +672,7 @@ void QgsVectorDataProvider::fillMinMaxCache() const
             mCacheMaxValues[ attributeIndex ] = value;
           break;
         }
-        case QVariant::LongLong:
+        case QMetaType::LongLong:
         {
           const qlonglong value = varValue.toLongLong();
           if ( value < mCacheMinValues[ attributeIndex ].toLongLong() )
@@ -681,7 +681,7 @@ void QgsVectorDataProvider::fillMinMaxCache() const
             mCacheMaxValues[ attributeIndex ] = value;
           break;
         }
-        case QVariant::Double:
+        case QMetaType::Double:
         {
           const double value = varValue.toDouble();
           if ( value < mCacheMinValues[ attributeIndex ].toDouble() )
@@ -690,7 +690,7 @@ void QgsVectorDataProvider::fillMinMaxCache() const
             mCacheMaxValues[ attributeIndex ] = value;
           break;
         }
-        case QVariant::DateTime:
+        case QMetaType::QDateTime:
         {
           const QDateTime value = varValue.toDateTime();
           if ( value < mCacheMinValues[ attributeIndex ].toDateTime() || !mCacheMinValues[ attributeIndex ].isValid() )
@@ -699,7 +699,7 @@ void QgsVectorDataProvider::fillMinMaxCache() const
             mCacheMaxValues[ attributeIndex ] = value;
           break;
         }
-        case QVariant::Date:
+        case QMetaType::QDate:
         {
           const QDate value = varValue.toDate();
           if ( value < mCacheMinValues[ attributeIndex ].toDate() || !mCacheMinValues[ attributeIndex ].isValid() )
@@ -708,7 +708,7 @@ void QgsVectorDataProvider::fillMinMaxCache() const
             mCacheMaxValues[ attributeIndex ] = value;
           break;
         }
-        case QVariant::Time:
+        case QMetaType::QTime:
         {
           const QTime value = varValue.toTime();
           if ( value < mCacheMinValues[ attributeIndex ].toTime() || !mCacheMinValues[ attributeIndex ].isValid() )
@@ -737,12 +737,12 @@ void QgsVectorDataProvider::fillMinMaxCache() const
   mCacheMinMaxDirty = false;
 }
 
-QVariant QgsVectorDataProvider::convertValue( QVariant::Type type, const QString &value )
+QVariant QgsVectorDataProvider::convertValue( QMetaType::Type type, const QString &value )
 {
   QVariant v( value );
 
   if ( !v.convert( type ) || value.isNull() )
-    v = QVariant( type );
+    v = QVariant( QMetaType( type ) );
 
   return v;
 }

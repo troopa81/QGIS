@@ -483,7 +483,7 @@ bool QgsExifTools::tagImage( const QString &imagePath, const QString &tag, const
     {
       actualValue = QStringLiteral( "%1/1000" ).arg( static_cast< int>( std::floor( std::abs( value.toDouble() ) * 1000 ) ) );
     }
-    else if ( value.type() == QVariant::DateTime )
+    else if ( value.typeId() == QMetaType::QDateTime )
     {
       const QDateTime dateTime = value.toDateTime();
       if ( tag == QLatin1String( "Exif.Image.DateTime" ) ||
@@ -498,7 +498,7 @@ bool QgsExifTools::tagImage( const QString &imagePath, const QString &tag, const
         actualValue = dateTime.toString( Qt::ISODate );
       }
     }
-    else if ( value.type() == QVariant::Date )
+    else if ( value.typeId() == QMetaType::QDate )
     {
       const QDate date = value.toDate();
       if ( tag == QLatin1String( "Exif.GPSInfo.GPSDateStamp" ) )
@@ -510,7 +510,7 @@ bool QgsExifTools::tagImage( const QString &imagePath, const QString &tag, const
         actualValue = date.toString( QStringLiteral( "yyyy-MM-dd" ) );
       }
     }
-    else if ( value.type() == QVariant::Time )
+    else if ( value.typeId() == QMetaType::QTime )
     {
       const QTime time = value.toTime();
       if ( tag == QLatin1String( "Exif.GPSInfo.GPSTimeStamp" ) )
@@ -529,8 +529,8 @@ bool QgsExifTools::tagImage( const QString &imagePath, const QString &tag, const
 
     const bool isXmp = tag.startsWith( QLatin1String( "Xmp." ) );
     image->readMetadata();
-    if ( actualValue.type() == QVariant::Int ||
-         actualValue.type() == QVariant::LongLong )
+    if ( actualValue.typeId() == QMetaType::Int ||
+         actualValue.typeId() == QMetaType::LongLong )
     {
       if ( isXmp )
       {
@@ -543,8 +543,8 @@ bool QgsExifTools::tagImage( const QString &imagePath, const QString &tag, const
         exifData[tag.toStdString()] = static_cast<uint32_t>( actualValue.toLongLong() );
       }
     }
-    if ( actualValue.type() == QVariant::UInt ||
-         actualValue.type() ==  QVariant::ULongLong )
+    if ( actualValue.typeId() == QMetaType::UInt ||
+         actualValue.typeId() ==  QMetaType::ULongLong )
     {
       if ( isXmp )
       {
@@ -557,7 +557,7 @@ bool QgsExifTools::tagImage( const QString &imagePath, const QString &tag, const
         exifData[tag.toStdString()] = static_cast<int32_t>( actualValue.toULongLong() );
       }
     }
-    else if ( actualValue.type() == QVariant::Double )
+    else if ( actualValue.typeId() == QMetaType::Double )
     {
       if ( isXmp )
       {

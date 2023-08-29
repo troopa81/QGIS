@@ -87,26 +87,26 @@ QString QgsExpression::quotedString( QString text )
 
 QString QgsExpression::quotedValue( const QVariant &value )
 {
-  return quotedValue( value, value.type() );
+  return quotedValue( value, static_cast<QMetaType::Type>( value.userType() ) );
 }
 
-QString QgsExpression::quotedValue( const QVariant &value, QVariant::Type type )
+QString QgsExpression::quotedValue( const QVariant &value, QMetaType::Type type )
 {
   if ( QgsVariantUtils::isNull( value ) )
     return QStringLiteral( "NULL" );
 
   switch ( type )
   {
-    case QVariant::Int:
-    case QVariant::LongLong:
-    case QVariant::Double:
+    case QMetaType::Int:
+    case QMetaType::LongLong:
+    case QMetaType::Double:
       return value.toString();
 
-    case QVariant::Bool:
+    case QMetaType::Bool:
       return value.toBool() ? QStringLiteral( "TRUE" ) : QStringLiteral( "FALSE" );
 
-    case QVariant::List:
-    case QVariant::StringList:
+    case QMetaType::QVariantList:
+    case QMetaType::QStringList:
     {
       QStringList quotedValues;
       const QVariantList values = value.toList();
@@ -119,7 +119,7 @@ QString QgsExpression::quotedValue( const QVariant &value, QVariant::Type type )
     }
 
     default:
-    case QVariant::String:
+    case QMetaType::QString:
       return quotedString( value.toString() );
   }
 
@@ -1058,22 +1058,22 @@ QString QgsExpression::formatPreviewString( const QVariant &value, const bool ht
   {
     return startToken + tr( "gradient ramp" ) + endToken;
   }
-  else if ( value.type() == QVariant::Date )
+  else if ( value.typeId() == QMetaType::QDate )
   {
     const QDate dt = value.toDate();
     return startToken + tr( "date: %1" ).arg( dt.toString( QStringLiteral( "yyyy-MM-dd" ) ) ) + endToken;
   }
-  else if ( value.type() == QVariant::Time )
+  else if ( value.typeId() == QMetaType::QTime )
   {
     const QTime tm = value.toTime();
     return startToken + tr( "time: %1" ).arg( tm.toString( QStringLiteral( "hh:mm:ss" ) ) ) + endToken;
   }
-  else if ( value.type() == QVariant::DateTime )
+  else if ( value.typeId() == QMetaType::QDateTime )
   {
     const QDateTime dt = value.toDateTime();
     return startToken + tr( "datetime: %1 (%2)" ).arg( dt.toString( QStringLiteral( "yyyy-MM-dd hh:mm:ss" ) ), dt.timeZoneAbbreviation() ) + endToken;
   }
-  else if ( value.type() == QVariant::String )
+  else if ( value.typeId() == QMetaType::QString )
   {
     const QString previewString = value.toString();
     if ( previewString.length() > maximumPreviewLength + 3 )
@@ -1085,7 +1085,7 @@ QString QgsExpression::formatPreviewString( const QVariant &value, const bool ht
       return '\'' + previewString + '\'';
     }
   }
-  else if ( value.type() == QVariant::Map )
+  else if ( value.typeId() == QMetaType::QVariantMap )
   {
     QString mapStr = QStringLiteral( "{" );
     const QVariantMap map = value.toMap();
@@ -1108,7 +1108,7 @@ QString QgsExpression::formatPreviewString( const QVariant &value, const bool ht
     mapStr += QLatin1Char( '}' );
     return mapStr;
   }
-  else if ( value.type() == QVariant::List || value.type() == QVariant::StringList )
+  else if ( value.typeId() == QMetaType::QVariantList || value.typeId() == QMetaType::QStringList )
   {
     QString listStr = QStringLiteral( "[" );
     const QVariantList list = value.toList();
@@ -1132,13 +1132,12 @@ QString QgsExpression::formatPreviewString( const QVariant &value, const bool ht
     listStr += QLatin1Char( ']' );
     return listStr;
   }
-  else if ( value.type() == QVariant::Int ||
-            value.type() == QVariant::UInt ||
-            value.type() == QVariant::LongLong ||
-            value.type() == QVariant::ULongLong ||
-            value.type() == QVariant::Double ||
-            // Qt madness with QMetaType::Float :/
-            value.type() == static_cast<QVariant::Type>( QMetaType::Float ) )
+  else if ( value.typeId() == QMetaType::Int ||
+            value.typeId() == QMetaType::UInt ||
+            value.typeId() == QMetaType::LongLong ||
+            value.typeId() == QMetaType::ULongLong ||
+            value.typeId() == QMetaType::Double ||
+            value.typeId() == QMetaType::Float )
   {
     return QgsExpressionUtils::toLocalizedString( value );
   }
@@ -1153,13 +1152,13 @@ QString QgsExpression::formatPreviewString( const QVariant &value, const bool ht
   }
 }
 
-QString QgsExpression::createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QVariant::Type fieldType )
+QString QgsExpression::createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QMetaType::Type fieldType )
 {
   QString expr;
 
   if ( QgsVariantUtils::isNull( value ) )
     expr = QStringLiteral( "%1 IS NULL" ).arg( quotedColumnRef( fieldName ) );
-  else if ( fieldType == QVariant::Type::Invalid )
+  else if ( fieldType == QMetaType::UnknownType )
     expr = QStringLiteral( "%1 = %2" ).arg( quotedColumnRef( fieldName ), quotedValue( value ) );
   else
     expr = QStringLiteral( "%1 = %2" ).arg( quotedColumnRef( fieldName ), quotedValue( value, fieldType ) );
@@ -1436,6 +1435,3 @@ QList<const QgsExpressionNode *> QgsExpression::nodes() const
 
   return d->mRootNode->nodes();
 }
-
-
-

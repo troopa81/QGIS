@@ -106,7 +106,7 @@ QVariant QgsFeatureFilterModel::nullIdentifier() const
 {
   QVariantList nullValues;
   for ( int i = 0; i < mIdentifierFields.count(); i++ )
-    nullValues << QVariant( QVariant::Int );
+    nullValues << QVariant( QMetaType( QMetaType::Int ) );
   return nullValues;
 }
 
@@ -151,4 +151,3 @@ void QgsFeatureFilterModel::setExtraIdentifierValueToNull()
 {
   setExtraIdentifierValue( nullIdentifier() );
 }
-

@@ -303,7 +303,7 @@ void QgsSettings::setValue( const QString &key, const QVariant &value, const Qgs
   // Do not store if it hasn't changed from default value
   // First check if the values are different and if at least one of them is valid.
   // The valid check is required because different invalid QVariant types
-  // like QVariant(QVariant::String) and QVariant(QVariant::Int))
+  // like QVariant(QMetaType::QString) and QVariant(QMetaType::Int))
   // may be considered different and we don't want to store the value in that case.
   const QVariant currentValue = QgsSettings::value( prefixedKey( key, section ) );
   if ( ( currentValue.isValid() || value.isValid() ) && ( currentValue != value ) )

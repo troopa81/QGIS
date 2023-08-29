@@ -49,18 +49,18 @@ QgsGeocoderInterface::Flags QgsGoogleMapsGeocoder::flags() const
 QgsFields QgsGoogleMapsGeocoder::appendedFields() const
 {
   QgsFields fields;
-  fields.append( QgsField( QStringLiteral( "location_type" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "formatted_address" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "place_id" ), QVariant::String ) );
+  fields.append( QgsField( QStringLiteral( "location_type" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "formatted_address" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "place_id" ), QMetaType::QString ) );
 
   // add more?
-  fields.append( QgsField( QStringLiteral( "street_number" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "route" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "locality" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "administrative_area_level_2" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "administrative_area_level_1" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "country" ), QVariant::String ) );
-  fields.append( QgsField( QStringLiteral( "postal_code" ), QVariant::String ) );
+  fields.append( QgsField( QStringLiteral( "street_number" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "route" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "locality" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "administrative_area_level_2" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "administrative_area_level_1" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "country" ), QMetaType::QString ) );
+  fields.append( QgsField( QStringLiteral( "postal_code" ), QMetaType::QString ) );
   return fields;
 }
 

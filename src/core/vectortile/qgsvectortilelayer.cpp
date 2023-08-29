@@ -708,8 +708,8 @@ void QgsVectorTileLayer::selectByGeometry( const QgsGeometry &geometry, const Qg
   auto addDerivedFields = []( QgsFeature & feature, const int tileZoom, const QString & layer )
   {
     QgsFields fields = feature.fields();
-    fields.append( QgsField( QStringLiteral( "tile_zoom" ), QVariant::Int ) );
-    fields.append( QgsField( QStringLiteral( "tile_layer" ), QVariant::String ) );
+    fields.append( QgsField( QStringLiteral( "tile_zoom" ), QMetaType::Int ) );
+    fields.append( QgsField( QStringLiteral( "tile_layer" ), QMetaType::QString ) );
     QgsAttributes attributes = feature.attributes();
     attributes << tileZoom << layer;
     feature.setFields( fields );

@@ -231,7 +231,7 @@ QVariant QgsVectorLayerUtils::createUniqueValue( const QgsVectorLayer *layer, in
   {
     switch ( field.type() )
     {
-      case QVariant::String:
+      case QMetaType::QString:
       {
         QString base;
         if ( seed.isValid() )
@@ -311,7 +311,7 @@ QVariant QgsVectorLayerUtils::createUniqueValueFromCache( const QgsVectorLayer *
   {
     switch ( field.type() )
     {
-      case QVariant::String:
+      case QMetaType::QString:
       {
         QString base;
         if ( seed.isValid() )
@@ -715,7 +715,7 @@ void QgsVectorLayerUtils::matchAttributesToFields( QgsFeature &feature, const Qg
     for ( const QgsField &field : fields )
     {
       int index = feature.fields().lookupField( field.name() );
-      attributes.append( index >= 0 ? feature.attribute( index ) : QVariant( field.type() ) );
+      attributes.append( index >= 0 ? feature.attribute( index ) : QVariant( QMetaType( field.type() ) ) );
     }
     feature.setAttributes( attributes );
   }
@@ -736,7 +736,7 @@ void QgsVectorLayerUtils::matchAttributesToFields( QgsFeature &feature, const Qg
       attributes.reserve( fields.count() );
       for ( int i = feature.attributes().count(); i < fields.count(); ++i )
       {
-        attributes.append( QVariant( fields.at( i ).type() ) );
+        attributes.append( QVariant( QMetaType( fields.at( i ).type() ) ) );
       }
       feature.setAttributes( attributes );
     }
@@ -1253,7 +1253,7 @@ QString QgsVectorLayerUtils::guessFriendlyIdentifierField( const QgsFields &fiel
     // no good matches found by name, so scan through and look for the first string field
     for ( const QgsField &field : fields )
     {
-      if ( field.type() == QVariant::String )
+      if ( field.type() == QMetaType::QString )
         return field.name();
     }
 

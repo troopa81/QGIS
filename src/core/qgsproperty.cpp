@@ -618,7 +618,7 @@ QDateTime QgsProperty::valueAsDateTime( const QgsExpressionContext &context, con
   }
 
   QDateTime dateTime;
-  if ( val.type() == QVariant::DateTime )
+  if ( val.typeId() == QMetaType::QDateTime )
   {
     dateTime = val.value<QDateTime>();
   }
@@ -668,7 +668,7 @@ QColor QgsProperty::valueAsColor( const QgsExpressionContext &context, const QCo
     return defaultColor;
 
   QColor color;
-  if ( val.type() == QVariant::Color )
+  if ( val.typeId() == QMetaType::QColor )
   {
     color = val.value<QColor>();
   }
