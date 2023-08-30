@@ -389,7 +389,8 @@ bool TypeSystemGenerator::loadSkipRanges()
 
     QTextStream in( &file );
     int numLine = 1;
-    int startIfndef = -1;
+    int sipRunLine = -1;
+    int sipRunIf = -1;
     const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
     const QRegularExpression reEndIf( QStringLiteral( "^\\s*#endif" ) );
     const QRegularExpression reElse( QStringLiteral( "^\\s*#else" ) );
@@ -417,39 +418,36 @@ bool TypeSystemGenerator::loadSkipRanges()
         mNamespaceFiles[match.captured( 1 )].append( QFileInfo( fileName ).fileName() );
       }
 
-      if ( startIfndef >= 0 )
+      if ( reIfndef.match( line ).hasMatch() )
       {
-        if ( reIf.match( line ).hasMatch() )
-        {
-          nbIf++;
-        }
-        else if ( reEndIf.match( line ).hasMatch() )
-        {
-          if ( nbIf == 1 )
-          {
-            ranges << SkipRange( startIfndef, numLine );
-            startIfndef = -1;
-          }
-
-          nbIf--;
-        }
-        else if ( reElse.match( line ).hasMatch() && nbIf == 1 )
-        {
-          ranges << SkipRange( startIfndef, numLine );
-          startIfndef = -1;
-        }
+        nbIf++;
+        sipRunLine = numLine;
+        sipRunIf = nbIf;
       }
-      else
+      else if ( reIf.match( line ).hasMatch() )
       {
-        if ( reIfndef.match( line ).hasMatch() )
+        nbIf++;
+      }
+      else if ( reEndIf.match( line ).hasMatch() )
+      {
+        if ( nbIf == sipRunIf && sipRunLine >= 0 )
         {
-          nbIf++;
-          startIfndef = numLine;
+          ranges << SkipRange( sipRunLine, numLine );
+          sipRunLine = -1;
+          sipRunIf = -1;
         }
-        else if ( reSipSkip.match( line ).hasMatch() )
-        {
-          ranges << SkipRange( numLine, numLine );
-        }
+
+        nbIf--;
+      }
+      else if ( reElse.match( line ).hasMatch() && nbIf == sipRunIf && sipRunLine >= 0 )
+      {
+        ranges << SkipRange( sipRunLine, numLine );
+        sipRunLine = -1;
+        sipRunIf = -1;
+      }
+      else if ( reSipSkip.match( line ).hasMatch() )
+      {
+        ranges << SkipRange( numLine, numLine );
       }
 
       numLine++;
