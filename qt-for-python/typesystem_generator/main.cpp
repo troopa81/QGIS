@@ -83,7 +83,7 @@ class TypeSystemGenerator
   private:
 
     void formatXmlClass( const ClassModelItem &klass );
-    void formatXmlEnum( const EnumModelItem &en );
+    void formatXmlEnum( const EnumModelItem &en, const QMap<QString, QString> &flags );
     void formatXmlScopeMembers( const ScopeModelItem &nsp );
     void formatXmlLocationComment( const CodeModelItem &i );
     void startXmlNamespace( const NamespaceModelItem &nsp );
@@ -177,13 +177,17 @@ bool TypeSystemGenerator::isValid() const
   return mValid;
 }
 
-void TypeSystemGenerator::formatXmlEnum( const EnumModelItem &en )
+void TypeSystemGenerator::formatXmlEnum( const EnumModelItem &en, const QMap<QString, QString> &flags )
 {
   if ( isSkipped( en ) )
     return;
 
   mWriter->writeStartElement( u"enum-type"_s );
   mWriter->writeAttribute( nameAttribute(), en->name() );
+
+  if ( flags.contains( en->name() ) )
+    mWriter->writeAttribute( u"flags"_s, flags.value( en->name() ) );
+
   mWriter->writeEndElement();
 }
 
@@ -194,8 +198,23 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
     if ( useClass( klass ) )
       formatXmlClass( klass );
   }
+
+  QMap<QString, QString> flags;
+  if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
+  {
+    const QRegularExpression reFlag( QStringLiteral( "^QFlags<(\\w+)::(\\w+)>$" ) );
+    for ( const auto &td : nsp->typeDefs() )
+    {
+      const QRegularExpressionMatch match = reFlag.match( td->type().toString() );
+      if ( match.hasMatch() && match.captured(1) == nsp->name() )
+      {
+        flags[match.captured(2)] = td->name();
+      }
+    }
+  }
+
   for ( const auto &en : nsp->enums() )
-    formatXmlEnum( en );
+    formatXmlEnum( en, flags );
 
   if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
   {
