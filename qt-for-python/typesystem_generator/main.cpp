@@ -70,15 +70,6 @@ static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction =
       {"resize(qsizetype)", ModifiedFunction( true )}}}
 };
 
-static const QStringList sUnSkippedClasses =
-{
-  // Because of https://bugreports.qt.io/browse/PYSIDE-2445
-  // force-abstract="true" is not enough because shiboken has to implement
-  // the pure virtual method in is wrapper but it can't if all the argument type don't exist
-  QStringLiteral( "QgsTopologicalMesh" ),
-  QStringLiteral( "TopologicalFaces")
-};
-
 
 class TypeSystemGenerator
 {
@@ -289,10 +280,37 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
     return;
 
+
+  // If there is at least one abstract method not skipped or no abstract method at all
+  // shiboken will figure out the class is abstract and we wouldn't need to force abstract
+  bool needForceAbstract = false;
+  for ( auto fct : klass->functions() )
+  {
+    if ( fct->isAbstract() )
+    {
+      if ( isSkipped( fct ) )
+      {
+        needForceAbstract = true;
+      }
+      else
+      {
+        needForceAbstract = false;
+        break;
+      }
+    }
+  }
+
   formatXmlLocationComment( klass );
   mWriter->writeStartElement( isValueType( klass ) ? u"value-type"_s
                               : u"object-type"_s );
   mWriter->writeAttribute( nameAttribute(), klass->name() );
+
+  if ( needForceAbstract )
+  {
+    mWriter->writeAttribute( u"force-abstract"_s, "true" );
+    mWriter->writeAttribute( u"disable-wrapper"_s, "true" ); // see https://bugreports.qt.io/browse/PYSIDE-2445
+  }
+
   formatXmlScopeMembers( klass );
   mWriter->writeEndElement();
 }
@@ -516,10 +534,6 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
 
   if ( isSkippedFunction( item ) || isSkippedClass( item ) )
     return true;
-
-  // Ugly ... but don't see any other way to do it for some issues
-  if ( sUnSkippedClasses.contains( item->name() ) )
-    return false;
 
   const int line = item->startLine();
   if ( mSkipRanges.contains( fileName ) )
