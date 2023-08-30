@@ -49,6 +49,18 @@ static const QStringList sSkippedClasses =
   QStringLiteral( "QTypeInfo" )
 };
 
+struct ModifiedFunction
+{
+    ModifiedFunction(){};
+    ModifiedFunction( bool _isRemove ):isRemove(_isRemove){};
+
+    bool isRemove = false;
+};
+
+static const QMap<QPair<QString, QString>, ModifiedFunction> sModifiedFunction =
+{
+  {{"QgsFeature","QgsFeature(QgsFeatureId)"}, ModifiedFunction( false ) }
+};
 
 static const QStringList sUnSkippedClasses =
 {
@@ -188,19 +200,32 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
   if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
   {
     for ( const auto &fct : nsp->functions() )
+    {
+
+      const QPair<QString,QString> key { nsp->name(), fct->typeSystemSignature() };
+      if ( sModifiedFunction.contains( key ) )
+      {
+        const ModifiedFunction modifiedFunction = sModifiedFunction.value( key );
+
+        mWriter->writeStartElement( u"modify-function"_s );
+        mWriter->writeAttribute( "signature", fct->typeSystemSignature() );
+        mWriter->writeAttribute( "remove", modifiedFunction.isRemove ? "true" : "false" );
+        mWriter->writeEndElement();
+      }
 
       // we should check if arguments and return type (arguments() and type() methods)
       // if there are not skipped to avoid useless removing and plenty of warnings
       // to do this we should parse the dom before and build a map of skipped object and check it here
       // if all types are defined
 
-      if ( isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
+      else if ( isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
       {
         mWriter->writeStartElement( u"modify-function"_s );
         mWriter->writeAttribute( "signature", fct->typeSystemSignature() );
         mWriter->writeAttribute( "remove", "true" );
         mWriter->writeEndElement();
       }
+    }
   }
 }
 
