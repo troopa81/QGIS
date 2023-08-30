@@ -57,9 +57,17 @@ struct ModifiedFunction
     bool isRemove = false;
 };
 
-static const QMap<QPair<QString, QString>, ModifiedFunction> sModifiedFunction =
+static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction =
 {
-  {{"QgsFeature","QgsFeature(QgsFeatureId)"}, ModifiedFunction( false ) }
+  // remove because if SIP_RUN but needed to build a QgsFeature
+  {"QgsFeature",{
+      {"QgsFeature(QgsFeatureId)", ModifiedFunction( false ) }}},
+
+  // QGsFeatureRequest::OrderBy
+  // TODO should prefix with class name in case an other OrderBy is somewhere
+  {"OrderBy",{
+      {"value(qsizetype)const", ModifiedFunction( true )},
+      {"resize(qsizetype)", ModifiedFunction( true )}}}
 };
 
 static const QStringList sUnSkippedClasses =
@@ -218,32 +226,31 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
 
   if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
   {
+    const QMap<QString, ModifiedFunction> modifiedFunctions = sModifiedFunction.value( nsp->name() );
     for ( const auto &fct : nsp->functions() )
     {
-
-      const QPair<QString,QString> key { nsp->name(), fct->typeSystemSignature() };
-      if ( sModifiedFunction.contains( key ) )
-      {
-        const ModifiedFunction modifiedFunction = sModifiedFunction.value( key );
-
-        mWriter->writeStartElement( u"modify-function"_s );
-        mWriter->writeAttribute( "signature", fct->typeSystemSignature() );
-        mWriter->writeAttribute( "remove", modifiedFunction.isRemove ? "true" : "false" );
-        mWriter->writeEndElement();
-      }
-
       // we should check if arguments and return type (arguments() and type() methods)
       // if there are not skipped to avoid useless removing and plenty of warnings
       // to do this we should parse the dom before and build a map of skipped object and check it here
       // if all types are defined
 
-      else if ( isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
+      if ( !modifiedFunctions.contains( fct->typeSystemSignature() ) && isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
       {
         mWriter->writeStartElement( u"modify-function"_s );
         mWriter->writeAttribute( "signature", fct->typeSystemSignature() );
         mWriter->writeAttribute( "remove", "true" );
         mWriter->writeEndElement();
       }
+    }
+
+    QMapIterator<QString, ModifiedFunction> it(modifiedFunctions);
+    while (it.hasNext())
+    {
+      it.next();
+      mWriter->writeStartElement( u"modify-function"_s );
+      mWriter->writeAttribute( "signature", it.key() );
+      mWriter->writeAttribute( "remove", it.value().isRemove ? "true" : "false" );
+      mWriter->writeEndElement();
     }
   }
 }
