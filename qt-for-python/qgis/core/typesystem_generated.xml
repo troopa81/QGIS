@@ -21,10 +21,6 @@
     <namespace-type name="QgsHstoreUtils">
         <include file-name="qgshstoreutils.h"/>
     </namespace-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshlayerinterpolator.h:91 -->
-    <namespace-type name="QgsMeshUtils">
-        <include file-name="qgsmeshlayerinterpolator.h"/>
-    </namespace-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgis.h:53 -->
     <value-type name="Qgis">
         <enum-type name="MessageLevel"/>
@@ -33,35 +29,35 @@
         <enum-type name="GeometryType"/>
         <enum-type name="DataType"/>
         <enum-type name="CaptureTechnique"/>
-        <enum-type name="VectorLayerTypeFlag"/>
+        <enum-type name="VectorLayerTypeFlag" flags="VectorLayerTypeFlags"/>
         <enum-type name="PythonMacroMode"/>
         <enum-type name="FeatureCountState"/>
-        <enum-type name="VectorDataProviderAttributeEditCapability"/>
+        <enum-type name="VectorDataProviderAttributeEditCapability" flags="VectorDataProviderAttributeEditCapabilities"/>
         <enum-type name="SymbolType"/>
         <enum-type name="ScaleMethod"/>
         <enum-type name="SettingsType"/>
         <enum-type name="SettingsTreeNodeType"/>
-        <enum-type name="SettingsTreeNodeOption"/>
-        <enum-type name="SldExportOption"/>
+        <enum-type name="SettingsTreeNodeOption" flags="SettingsTreeNodeOptions"/>
+        <enum-type name="SldExportOption" flags="SldExportOptions"/>
         <enum-type name="SldExportVendorExtension"/>
-        <enum-type name="SettingsOption"/>
+        <enum-type name="SettingsOption" flags="SettingsOptions"/>
         <enum-type name="SnappingMode"/>
-        <enum-type name="SnappingType"/>
-        <enum-type name="SymbolRenderHint"/>
+        <enum-type name="SnappingType" flags="SnappingTypes"/>
+        <enum-type name="SymbolRenderHint" flags="SymbolRenderHints"/>
         <enum-type name="SymbolRotationMode"/>
-        <enum-type name="SymbolFlag"/>
-        <enum-type name="SymbolPreviewFlag"/>
-        <enum-type name="SymbolLayerFlag"/>
-        <enum-type name="SymbolLayerUserFlag"/>
+        <enum-type name="SymbolFlag" flags="SymbolFlags"/>
+        <enum-type name="SymbolPreviewFlag" flags="SymbolPreviewFlags"/>
+        <enum-type name="SymbolLayerFlag" flags="SymbolLayerFlags"/>
+        <enum-type name="SymbolLayerUserFlag" flags="SymbolLayerUserFlags"/>
         <enum-type name="BrowserItemType"/>
         <enum-type name="BrowserItemState"/>
-        <enum-type name="BrowserItemCapability"/>
+        <enum-type name="BrowserItemCapability" flags="BrowserItemCapabilities"/>
         <enum-type name="BrowserLayerType"/>
         <enum-type name="BrowserDirectoryMonitoring"/>
         <enum-type name="HttpMethod"/>
         <enum-type name="VectorExportResult"/>
-        <enum-type name="VectorFileWriterCapability"/>
-        <enum-type name="SqlLayerDefinitionCapability"/>
+        <enum-type name="VectorFileWriterCapability" flags="VectorFileWriterCapabilities"/>
+        <enum-type name="SqlLayerDefinitionCapability" flags="SqlLayerDefinitionCapabilities"/>
         <enum-type name="SqlKeywordCategory"/>
         <enum-type name="DriveType"/>
         <enum-type name="ActionStart"/>
@@ -71,16 +67,16 @@
         <enum-type name="LabelPredefinedPointPosition"/>
         <enum-type name="LabelOffsetType"/>
         <enum-type name="LabelQuadrantPosition"/>
-        <enum-type name="LabelLinePlacementFlag"/>
-        <enum-type name="LabelPolygonPlacementFlag"/>
+        <enum-type name="LabelLinePlacementFlag" flags="LabelLinePlacementFlags"/>
+        <enum-type name="LabelPolygonPlacementFlag" flags="LabelPolygonPlacementFlags"/>
         <enum-type name="UpsideDownLabelHandling"/>
         <enum-type name="LabelMultiLineAlignment"/>
         <enum-type name="FileFilterType"/>
-        <enum-type name="SublayerQueryFlag"/>
-        <enum-type name="SublayerFlag"/>
+        <enum-type name="SublayerQueryFlag" flags="SublayerQueryFlags"/>
+        <enum-type name="SublayerFlag" flags="SublayerFlags"/>
         <enum-type name="RasterPipeInterfaceRole"/>
         <enum-type name="RasterResamplingStage"/>
-        <enum-type name="RasterRendererFlag"/>
+        <enum-type name="RasterRendererFlag" flags="RasterRendererFlags"/>
         <enum-type name="RasterAttributeTableFieldUsage"/>
         <enum-type name="RasterAttributeTableType"/>
         <enum-type name="RasterExportType"/>
@@ -92,7 +88,7 @@
         <enum-type name="SelectionRenderingMode"/>
         <enum-type name="SelectBehavior"/>
         <enum-type name="SelectGeometryRelationship"/>
-        <enum-type name="SelectionFlag"/>
+        <enum-type name="SelectionFlag" flags="SelectionFlags"/>
         <enum-type name="VectorEditResult"/>
         <enum-type name="VertexMarkerType"/>
         <enum-type name="ContentStatus"/>
@@ -101,26 +97,26 @@
         <enum-type name="GpsFixStatus"/>
         <enum-type name="GnssConstellation"/>
         <enum-type name="GpsQualityIndicator"/>
-        <enum-type name="GpsInformationComponent"/>
-        <enum-type name="BabelFormatCapability"/>
-        <enum-type name="BabelCommandFlag"/>
+        <enum-type name="GpsInformationComponent" flags="GpsInformationComponents"/>
+        <enum-type name="BabelFormatCapability" flags="BabelFormatCapabilities"/>
+        <enum-type name="BabelCommandFlag" flags="BabelCommandFlags"/>
         <enum-type name="GpsFeatureType"/>
         <enum-type name="GeometryOperationResult"/>
-        <enum-type name="GeometryValidityFlag"/>
+        <enum-type name="GeometryValidityFlag" flags="GeometryValidityFlags"/>
         <enum-type name="GeometryValidationEngine"/>
         <enum-type name="BufferSide"/>
         <enum-type name="EndCapStyle"/>
         <enum-type name="JoinStyle"/>
         <enum-type name="MakeValidMethod"/>
         <enum-type name="SpatialFilterType"/>
-        <enum-type name="FileOperationFlag"/>
-        <enum-type name="MapLayerProperty"/>
-        <enum-type name="DataProviderFlag"/>
+        <enum-type name="FileOperationFlag" flags="FileOperationFlags"/>
+        <enum-type name="MapLayerProperty" flags="MapLayerProperties"/>
+        <enum-type name="DataProviderFlag" flags="DataProviderFlags"/>
         <enum-type name="CrsType"/>
         <enum-type name="CrsAxisDirection"/>
         <enum-type name="CoordinateOrder"/>
-        <enum-type name="AnnotationItemFlag"/>
-        <enum-type name="AnnotationItemGuiFlag"/>
+        <enum-type name="AnnotationItemFlag" flags="AnnotationItemFlags"/>
+        <enum-type name="AnnotationItemGuiFlag" flags="AnnotationItemGuiFlags"/>
         <enum-type name="AnnotationItemNodeType"/>
         <enum-type name="AnnotationItemEditOperationResult"/>
         <enum-type name="VectorTemporalMode"/>
@@ -128,13 +124,13 @@
         <enum-type name="VectorDataProviderTemporalMode"/>
         <enum-type name="RasterTemporalMode"/>
         <enum-type name="TemporalIntervalMatchMethod"/>
-        <enum-type name="RasterTemporalCapabilityFlag"/>
+        <enum-type name="RasterTemporalCapabilityFlag" flags="RasterTemporalCapabilityFlags"/>
         <enum-type name="TransformDirection"/>
-        <enum-type name="CoordinateTransformationFlag"/>
-        <enum-type name="MapSettingsFlag"/>
-        <enum-type name="RenderContextFlag"/>
+        <enum-type name="CoordinateTransformationFlag" flags="CoordinateTransformationFlags"/>
+        <enum-type name="MapSettingsFlag" flags="MapSettingsFlags"/>
+        <enum-type name="RenderContextFlag" flags="RenderContextFlags"/>
         <enum-type name="TextRenderFormat"/>
-        <enum-type name="LabelingFlag"/>
+        <enum-type name="LabelingFlag" flags="LabelingFlags"/>
         <enum-type name="LabelPlacementEngineVersion"/>
         <enum-type name="TextOrientation"/>
         <enum-type name="TextLayoutMode"/>
@@ -145,7 +141,7 @@
         <enum-type name="RenderSubcomponentProperty"/>
         <enum-type name="VertexType"/>
         <enum-type name="MarkerShape"/>
-        <enum-type name="MarkerLinePlacement"/>
+        <enum-type name="MarkerLinePlacement" flags="MarkerLinePlacements"/>
         <enum-type name="GradientColorSource"/>
         <enum-type name="GradientType"/>
         <enum-type name="SymbolCoordinateReference"/>
@@ -160,13 +156,13 @@
         <enum-type name="DpiMode"/>
         <enum-type name="TilePixelRatio"/>
         <enum-type name="Capitalization"/>
-        <enum-type name="TextRendererFlag"/>
+        <enum-type name="TextRendererFlag" flags="TextRendererFlags"/>
         <enum-type name="ScaleToTileZoomLevelMethod"/>
         <enum-type name="AngularDirection"/>
         <enum-type name="RendererUsage"/>
-        <enum-type name="ViewSyncModeFlag"/>
+        <enum-type name="ViewSyncModeFlag" flags="ViewSyncModeFlags"/>
         <enum-type name="MapRecenteringMode"/>
-        <enum-type name="HistoryProviderBackend"/>
+        <enum-type name="HistoryProviderBackend" flags="HistoryProviderBackends"/>
         <enum-type name="CrsDefinitionFormat"/>
         <enum-type name="FieldDomainSplitPolicy"/>
         <enum-type name="FieldDomainMergePolicy"/>
@@ -177,36 +173,36 @@
         <enum-type name="BetweenLineConstraint"/>
         <enum-type name="LineExtensionSide"/>
         <enum-type name="CadConstraintType"/>
-        <enum-type name="ProjectFlag"/>
-        <enum-type name="PlotToolFlag"/>
+        <enum-type name="ProjectFlag" flags="ProjectFlags"/>
+        <enum-type name="PlotToolFlag" flags="PlotToolFlags"/>
         <enum-type name="LightSourceType"/>
         <enum-type name="NavigationMode"/>
         <enum-type name="VerticalAxisInversion"/>
         <enum-type name="ProfileSurfaceSymbology"/>
         <enum-type name="VectorProfileType"/>
-        <enum-type name="ProfileGeneratorFlag"/>
+        <enum-type name="ProfileGeneratorFlag" flags="ProfileGeneratorFlags"/>
         <enum-type name="ProfileExportType"/>
         <enum-type name="PointCloudSymbol"/>
         <enum-type name="PointCloudDrawOrder"/>
         <enum-type name="AvoidIntersectionsMode"/>
         <enum-type name="ProjectFileFormat"/>
-        <enum-type name="ProjectReadFlag"/>
-        <enum-type name="ProjectCapability"/>
+        <enum-type name="ProjectReadFlag" flags="ProjectReadFlags"/>
+        <enum-type name="ProjectCapability" flags="ProjectCapabilities"/>
         <enum-type name="MapBoxGlStyleSourceType"/>
         <enum-type name="ArcGisRestServiceType"/>
         <enum-type name="RelationshipType"/>
         <enum-type name="RelationshipStrength"/>
         <enum-type name="RelationshipCardinality"/>
-        <enum-type name="RelationshipCapability"/>
+        <enum-type name="RelationshipCapability" flags="RelationshipCapabilities"/>
         <enum-type name="CoordinateDisplayType"/>
         <enum-type name="SettingsOrigin"/>
         <enum-type name="ScriptLanguage"/>
-        <enum-type name="ScriptLanguageCapability"/>
+        <enum-type name="ScriptLanguageCapability" flags="ScriptLanguageCapabilities"/>
         <enum-type name="LayerTreeInsertionMethod"/>
-        <enum-type name="LayerTreeFilterFlag"/>
+        <enum-type name="LayerTreeFilterFlag" flags="LayerTreeFilterFlags"/>
         <enum-type name="ActionType"/>
-        <enum-type name="MapLayerActionTarget"/>
-        <enum-type name="MapLayerActionFlag"/>
+        <enum-type name="MapLayerActionTarget" flags="MapLayerActionTargets"/>
+        <enum-type name="MapLayerActionFlag" flags="MapLayerActionFlags"/>
         <enum-type name="AttributeActionType"/>
         <enum-type name="MetadataDateType"/>
         <enum-type name="RasterColorInterpretation"/>
@@ -231,7 +227,7 @@
         <enum-type name="LayoutUnitType"/>
         <enum-type name="InputControllerType"/>
         <enum-type name="PostgresRelKind"/>
-        <enum-type name="DatabaseProviderConnectionCapability2"/>
+        <enum-type name="DatabaseProviderConnectionCapability2" flags="DatabaseProviderConnectionCapabilities2"/>
         <enum-type name="UserProfileSelectionPolicy"/>
         <enum-type name="AttributeEditorType"/>
         <enum-type name="AttributeEditorContainerType"/>
@@ -240,14 +236,14 @@
         <enum-type name="AttributeFormPythonInitCodeSource"/>
         <enum-type name="ExpressionType"/>
         <enum-type name="FeatureSymbologyExport"/>
-        <enum-type name="VectorTileProviderFlag"/>
-        <enum-type name="VectorTileProviderCapability"/>
+        <enum-type name="VectorTileProviderFlag" flags="VectorTileProviderFlags"/>
+        <enum-type name="VectorTileProviderCapability" flags="VectorTileProviderCapabilities"/>
         <enum-type name="TileAvailability"/>
-        <enum-type name="TiledSceneProviderCapability"/>
+        <enum-type name="TiledSceneProviderCapability" flags="TiledSceneProviderCapabilities"/>
         <enum-type name="TiledSceneBoundingVolumeType"/>
         <enum-type name="TileRefinementProcess"/>
         <enum-type name="TileChildrenAvailability"/>
-        <enum-type name="TiledSceneRequestFlag"/>
+        <enum-type name="TiledSceneRequestFlag" flags="TiledSceneRequestFlags"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsrectangle.h:41 -->
     <value-type name="QgsRectangle"/>
@@ -260,49 +256,17 @@
         <modify-function signature="setCustomCrsValidation(CUSTOM_CRS_VALIDATION)" remove="true"/>
         <modify-function signature="customCrsValidation()" remove="true"/>
         <modify-function signature="axisOrdering()" remove="true"/>
-        <modify-function signature="mapUnits()" remove="true"/>
-        <modify-function signature="bounds()" remove="true"/>
-        <modify-function signature="toOgcUri()" remove="true"/>
-        <modify-function signature="updateDefinition()" remove="true"/>
-        <modify-function signature="setValidationHint(const QString&amp;)" remove="true"/>
-        <modify-function signature="validationHint()" remove="true"/>
-        <modify-function signature="syncDatabase()" remove="true"/>
-        <modify-function signature="saveAsUserCrs(const QString&amp;,Qgis::CrsDefinitionFormat)" remove="true"/>
-        <modify-function signature="setNativeFormat(Qgis::CrsDefinitionFormat)" remove="true"/>
-        <modify-function signature="nativeFormat()" remove="true"/>
-        <modify-function signature="toGeographicCrs()" remove="true"/>
-        <modify-function signature="geographicCrsAuthId()" remove="true"/>
         <modify-function signature="projObject()" remove="true"/>
         <modify-function signature="fromProjObject(PJ*)" remove="true"/>
         <modify-function signature="createFromProjObject(PJ*)" remove="true"/>
-        <modify-function signature="recentProjections()" remove="true"/>
-        <modify-function signature="recentCoordinateReferenceSystems()" remove="true"/>
-        <modify-function signature="pushRecentCoordinateReferenceSystem(const QgsCoordinateReferenceSystem&amp;)" remove="true"/>
-        <modify-function signature="removeRecentCoordinateReferenceSystem(const QgsCoordinateReferenceSystem&amp;)" remove="true"/>
-        <modify-function signature="clearRecentCoordinateReferenceSystems()" remove="true"/>
         <modify-function signature="invalidateCache(bool)" remove="true"/>
-        <modify-function signature="projFromSrsId(int)" remove="true"/>
-        <modify-function signature="setProjString(const QString&amp;)" remove="true"/>
-        <modify-function signature="setWktString(const QString&amp;)" remove="true"/>
-        <modify-function signature="debugPrint()" remove="true"/>
-        <modify-function signature="getRecord(const QString&amp;)" remove="true"/>
-        <modify-function signature="openDatabase(const QString&amp;,sqlite3_database_unique_ptr&amp;,bool)" remove="true"/>
-        <modify-function signature="setMapUnits()" remove="true"/>
-        <modify-function signature="getRecordCount()" remove="true"/>
-        <modify-function signature="loadFromAuthCode(const QString&amp;,const QString&amp;)" remove="true"/>
-        <modify-function signature="userSrsIds()" remove="true"/>
-        <modify-function signature="matchToUserCrs()" remove="true"/>
-        <modify-function signature="loadFromDatabase(const QString&amp;,const QString&amp;,const QString&amp;)" remove="true"/>
-        <modify-function signature="createFromWktInternal(const QString&amp;,const QString&amp;)" remove="true"/>
-        <modify-function signature="removeFromCacheObjectsBelongingToCurrentThread(PJ_CONTEXT*)" remove="true"/>
-        <modify-function signature="stringCache()" remove="true"/>
-        <modify-function signature="projCache()" remove="true"/>
-        <modify-function signature="ogcCache()" remove="true"/>
-        <modify-function signature="wktCache()" remove="true"/>
-        <modify-function signature="srsIdCache()" remove="true"/>
-        <modify-function signature="srIdCache()" remove="true"/>
-        <modify-function signature="createFromPostgisSrid(const long)" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgscoordinatetransformcontext.h:57 -->
+    <value-type name="QgsCoordinateTransformContext">
+        <modify-function signature="operator=(const QgsCoordinateTransformContext&amp;)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeedback.h:44 -->
+    <object-type name="QgsFeedback"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterblock.h:36 -->
     <value-type name="QgsRasterBlock">
         <modify-function signature="valueAndNoData(int,int,bool&amp;)" remove="true"/>
@@ -332,22 +296,12 @@
         <modify-function signature="operator=(const QgsFields&amp;)" remove="true"/>
         <modify-function signature="remove(int)" remove="true"/>
         <modify-function signature="operator[](int)" remove="true"/>
-        <modify-function signature="operator[](int)" remove="true"/>
         <modify-function signature="at(int)" remove="true"/>
         <modify-function signature="field(int)" remove="true"/>
         <modify-function signature="field(const QString&amp;)" remove="true"/>
         <modify-function signature="fieldOrigin(int)" remove="true"/>
         <modify-function signature="fieldOriginIndex(int)" remove="true"/>
-        <modify-function signature="indexFromName(const QString&amp;)" remove="true"/>
-        <modify-function signature="indexOf(const QString&amp;)" remove="true"/>
-        <modify-function signature="lookupField(const QString&amp;)" remove="true"/>
-        <modify-function signature="allAttributesList()" remove="true"/>
-        <modify-function signature="toList()" remove="true"/>
-        <modify-function signature="operator==(const QgsFields&amp;)" remove="true"/>
-        <modify-function signature="operator!=(const QgsFields&amp;)" remove="true"/>
         <modify-function signature="iconForField(int,bool)" remove="true"/>
-        <modify-function signature="iconForFieldType(QMetaType::Type,QMetaType::Type,const QString&amp;)" remove="true"/>
-        <modify-function signature="operator QVariant()" remove="true"/>
         <modify-function signature="constBegin()" remove="true"/>
         <modify-function signature="constEnd()" remove="true"/>
         <modify-function signature="begin()" remove="true"/>
@@ -355,13 +309,149 @@
         <modify-function signature="begin()" remove="true"/>
         <modify-function signature="end()" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeature.h:55 -->
+    <value-type name="QgsFeature">
+        <modify-function signature="QgsFeature(const QgsFields&amp;,QgsFeatureId)" remove="true"/>
+        <modify-function signature="attributeMap()" remove="true"/>
+        <modify-function signature="setAttribute(int,const QVariant&amp;)" remove="true"/>
+        <modify-function signature="deleteAttribute(int)" remove="true"/>
+        <modify-function signature="setGeometry(std::unique_ptr)" remove="true"/>
+        <modify-function signature="setAttribute(const QString&amp;,const QVariant&amp;)" remove="true"/>
+        <modify-function signature="deleteAttribute(const QString&amp;)" remove="true"/>
+        <modify-function signature="attribute(const QString&amp;)" remove="true"/>
+        <modify-function signature="attribute(int)" remove="true"/>
+        <modify-function signature="isUnsetValue(int)" remove="true"/>
+        <modify-function signature="QgsFeature(QgsFeatureId)" remove="false"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgspoint.h:48 -->
+    <object-type name="QgsPoint">
+        <modify-function signature="QgsPoint(double,double,double,double,Qgis::WkbType)" remove="true"/>
+        <modify-function signature="QgsPoint(const QgsPointXY&amp;)" remove="true"/>
+        <modify-function signature="QgsPoint(QPointF)" remove="true"/>
+        <modify-function signature="QgsPoint(Qgis::WkbType,double,double,double,double)" remove="true"/>
+        <modify-function signature="rx()" remove="true"/>
+        <modify-function signature="ry()" remove="true"/>
+        <modify-function signature="rz()" remove="true"/>
+        <modify-function signature="rm()" remove="true"/>
+        <modify-function signature="asJsonObject(int)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:163 -->
+    <value-type name="QgsGeometry">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:2611 -->
+        <value-type name="Error"/>
+        <modify-function signature="operator=(const QgsGeometry&amp;)" remove="true"/>
+        <modify-function signature="QgsGeometry(std::unique_ptr)" remove="true"/>
+        <modify-function signature="fromWkb(unsigned char*,int)" remove="true"/>
+        <modify-function signature="vertices_begin()" remove="true"/>
+        <modify-function signature="vertices_end()" remove="true"/>
+        <modify-function signature="parts_begin()" remove="true"/>
+        <modify-function signature="parts_end()" remove="true"/>
+        <modify-function signature="const_parts_begin()" remove="true"/>
+        <modify-function signature="const_parts_end()" remove="true"/>
+        <modify-function signature="splitGeometry(const QVector&amp;,QVector&amp;,bool,QVector&amp;,bool)" remove="true"/>
+        <modify-function signature="splitGeometry(const QgsPointSequence&amp;,QVector&amp;,bool,QgsPointSequence&amp;,bool,bool)" remove="true"/>
+        <modify-function signature="makeDifferenceInPlace(const QgsGeometry&amp;)" remove="true"/>
+        <modify-function signature="orientedMinimumBoundingBox()" remove="true"/>
+        <modify-function signature="minimalEnclosingCircle(unsigned int)" remove="true"/>
+        <modify-function signature="randomPointsInPolygon(int,const std::function&amp;,unsigned long,QgsFeedback*,int)" remove="true"/>
+        <modify-function signature="randomPointsInPolygon(int,unsigned long,QgsFeedback*)" remove="true"/>
+        <modify-function signature="asJsonObject(int)" remove="true"/>
+        <modify-function signature="asPoint()" remove="true"/>
+        <modify-function signature="asPolyline()" remove="true"/>
+        <modify-function signature="asPolygon()" remove="true"/>
+        <modify-function signature="asMultiPoint()" remove="true"/>
+        <modify-function signature="asMultiPolyline()" remove="true"/>
+        <modify-function signature="asMultiPolygon()" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="compare(const QgsPolylineXY&amp;,const QgsPolylineXY&amp;,double)" remove="true"/>
+        <modify-function signature="compare(const QgsPolygonXY&amp;,const QgsPolygonXY&amp;,double)" remove="true"/>
+        <modify-function signature="compare(const QgsMultiPolygonXY&amp;,const QgsMultiPolygonXY&amp;,double)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:117 -->
+    <value-type name="QgsExpressionContextScope">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:124 -->
+        <value-type name="StaticVariable"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:480 -->
+    <value-type name="QgsExpressionContext">
+        <modify-function signature="operator=(const QgsExpressionContext&amp;)" remove="true"/>
+        <modify-function signature="operator=(QgsExpressionContext&amp;&amp;)" remove="true"/>
+        <modify-function signature="activeScopeForVariable(const QString&amp;)" remove="true"/>
+        <modify-function signature="takeScopes()" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:189 -->
+    <value-type name="QgsExpression">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:198 -->
+        <value-type name="ParserError">
+            <enum-type name="ParserErrorType"/>
+        </value-type>
+        <enum-type name="SpatialOperator"/>
+        <modify-function signature="operator QString()" remove="true"/>
+        <modify-function signature="nodes()" remove="true"/>
+        <modify-function signature="findNodes()" remove="true"/>
+        <modify-function signature="functionHelpTexts()" remove="true"/>
+        <modify-function signature="detach()" remove="true"/>
+        <modify-function signature="initFunctionHelp()" remove="true"/>
+        <modify-function signature="initVariableHelp()" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturerequest.h:83 -->
+    <value-type name="QgsFeatureRequest">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturerequest.h:139 -->
+        <value-type name="OrderByClause"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturerequest.h:251 -->
+        <value-type name="OrderBy">
+            <modify-function signature="resize(qsizetype)" remove="true"/>
+            <modify-function signature="value(qsizetype)const" remove="true"/>
+        </value-type>
+        <enum-type name="Flag" flags="Flags"/>
+        <enum-type name="FilterType"/>
+        <enum-type name="InvalidGeometryCheck"/>
+        <modify-function signature="referenceGeometryEngine()" remove="true"/>
+        <modify-function signature="setInvalidGeometryCallback(const std::function&amp;)" remove="true"/>
+        <modify-function signature="invalidGeometryCallback(const QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="limit()" remove="true"/>
+        <modify-function signature="setTransformErrorCallback(const std::function&amp;)" remove="true"/>
+        <modify-function signature="transformErrorCallback(const QgsFeature&amp;)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrange.h:202 -->
+    <value-type name="QgsDoubleRange">
+        <modify-function signature="QgsDoubleRange(double,double,bool,bool)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractmetadatabase.h:57 -->
+    <object-type name="QgsAbstractMetadataBase">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractmetadatabase.h:86 -->
+        <value-type name="Address"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractmetadatabase.h:140 -->
+        <value-type name="Contact"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractmetadatabase.h:210 -->
+        <value-type name="Link"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgslayermetadata.h:56 -->
+    <value-type name="QgsLayerMetadata">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgslayermetadata.h:63 -->
+        <value-type name="SpatialExtent"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgslayermetadata.h:91 -->
+        <value-type name="Extent"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgslayermetadata.h:138 -->
+        <value-type name="Constraint"/>
+        <modify-function signature="extent()" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:34 -->
+    <value-type name="QgsReadWriteContext">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:42 -->
+        <value-type name="ReadWriteMessage"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:41 -->
     <object-type name="QgsDataProvider">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:108 -->
         <value-type name="ProviderOptions"/>
-        <enum-type name="DataCapability"/>
+        <enum-type name="DataCapability" flags="DataCapabilities"/>
         <enum-type name="ProviderProperty"/>
-        <enum-type name="ReadFlag"/>
+        <enum-type name="ReadFlag" flags="ReadFlags"/>
         <modify-function signature="temporalCapabilities()" remove="true"/>
         <modify-function signature="elevationProperties()" remove="true"/>
         <modify-function signature="setProviderProperty(int,const QVariant&amp;)" remove="true"/>
@@ -370,6 +460,32 @@
         <modify-function signature="transformContext()" remove="true"/>
         <modify-function signature="setTransformContext(const QgsCoordinateTransformContext&amp;)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayer.h:73 -->
+    <object-type name="QgsMapLayer">
+        <enum-type name="PropertyType"/>
+        <enum-type name="LayerFlag" flags="LayerFlags"/>
+        <enum-type name="StyleCategory" flags="StyleCategories"/>
+        <enum-type name="ReadFlag" flags="ReadFlags"/>
+        <modify-function signature="dataProvider()" remove="true"/>
+        <modify-function signature="serverProperties()" remove="true"/>
+        <modify-function signature="customEnumProperty(const QString&amp;,const T&amp;)" remove="true"/>
+        <modify-function signature="setCustomEnumProperty(const QString&amp;,const T&amp;)" remove="true"/>
+        <modify-function signature="customFlagProperty(const QString&amp;,const T&amp;)" remove="true"/>
+        <modify-function signature="setCustomFlagProperty(const QString&amp;,const T&amp;)" remove="true"/>
+        <modify-function signature="crsHtmlMetadata()" remove="true"/>
+        <modify-function signature="generalHtmlMetadata()" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstemporalrangeobject.h:33 -->
+    <value-type name="QgsTemporalRangeObject"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrendercontext.h:60 -->
+    <value-type name="QgsRenderContext">
+        <modify-function signature="painter()" remove="true"/>
+        <modify-function signature="labelingEngine()" remove="true"/>
+        <modify-function signature="labelSink()" remove="true"/>
+        <modify-function signature="setLabelingEngine(QgsLabelingEngine*)" remove="true"/>
+        <modify-function signature="setLabelSink(QgsLabelSink*)" remove="true"/>
+        <modify-function signature="expressionContext()" remove="true"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterinterface.h:41 -->
     <object-type name="QgsRasterBlockFeedback"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterinterface.h:135 -->
@@ -378,13 +494,7 @@
         <modify-function signature="sourceInput()" remove="true"/>
         <modify-function signature="histogram(int,int,double,double,const QgsRectangle&amp;,int,bool,QgsRasterBlockFeedback*)" remove="true"/>
         <modify-function signature="hasHistogram(int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
-        <modify-function signature="cumulativeCut(int,double,double,double&amp;,double&amp;,const QgsRectangle&amp;,int)" remove="true"/>
-        <modify-function signature="writeXml(QDomDocument&amp;,QDomElement&amp;)" remove="true"/>
-        <modify-function signature="readXml(const QDomElement&amp;)" remove="true"/>
         <modify-function signature="initHistogram(QgsRasterHistogram&amp;,int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
-        <modify-function signature="initStatistics(QgsRasterBandStats&amp;,int,int,const QgsRectangle&amp;,int)" remove="true"/>
-        <modify-function signature="QgsRasterInterface(const QgsRasterInterface&amp;)" remove="true"/>
-        <modify-function signature="operator=(const QgsRasterInterface&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:43 -->
     <value-type name="QgsRasterAttributeTable">
@@ -405,7 +515,7 @@
         <value-type name="VirtualRasterInputLayers"/>
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdataprovider.h:564 -->
         <value-type name="VirtualRasterParameters"/>
-        <enum-type name="ProviderCapability"/>
+        <enum-type name="ProviderCapability" flags="ProviderCapabilities"/>
         <enum-type name="TransformType"/>
         <enum-type name="ResamplingMethod"/>
         <modify-function signature="temporalCapabilities()" remove="true"/>
@@ -414,6 +524,102 @@
         <modify-function signature="readBlock(int,int,int,void*)" remove="true"/>
         <modify-function signature="readBlock(int,const QgsRectangle&amp;,int,int,void*,QgsRasterBlockFeedback*)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilesource.h:33 -->
+    <object-type name="QgsAbstractProfileSource"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeatureiterator.h:289 -->
+    <value-type name="QgsFeatureIterator">
+        <modify-function signature="setInterruptionChecker(QgsFeedback*)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturesink.h:33 -->
+    <object-type name="QgsFeatureSink">
+        <enum-type name="SinkFlag" flags="SinkFlags"/>
+        <enum-type name="Flag" flags="Flags"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturesource.h:37 -->
+    <object-type name="QgsFeatureSource">
+        <enum-type name="FeatureAvailability"/>
+        <enum-type name="SpatialIndexPresence"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:40 -->
+    <value-type name="QgsEditFormConfig">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:47 -->
+        <value-type name="GroupData"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:59 -->
+        <value-type name="TabData"/>
+        <enum-type name="DataDefinedProperty"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontextgenerator.h:36 -->
+    <object-type name="QgsExpressionContextGenerator"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontextscopegenerator.h:28 -->
+    <object-type name="QgsExpressionContextScopeGenerator"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayer.h:399 -->
+    <object-type name="QgsVectorLayer">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayer.h:422 -->
+        <value-type name="LayerOptions"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayer.h:535 -->
+        <value-type name="DeleteContext"/>
+        <modify-function signature="dataProvider()" remove="true"/>
+        <modify-function signature="joinBuffer()" remove="true"/>
+        <modify-function signature="actions()" remove="true"/>
+        <modify-function signature="renderer()" remove="true"/>
+        <modify-function signature="auxiliaryLayer()" remove="true"/>
+        <modify-function signature="labeling()" remove="true"/>
+        <modify-function signature="setFieldSplitPolicy(int,Qgis::FieldDomainSplitPolicy)" remove="true"/>
+        <modify-function signature="weakRelations()" remove="true"/>
+        <modify-function signature="setWeakRelations(const QList&amp;)" remove="true"/>
+        <modify-function signature="editBuffer()" remove="true"/>
+        <modify-function signature="setFieldConfigurationFlags(int,QgsField::ConfigurationFlags)" remove="true"/>
+        <modify-function signature="setFieldConfigurationFlag(int,QgsField::ConfigurationFlag,bool)" remove="true"/>
+        <modify-function signature="fieldConfigurationFlags(int)" remove="true"/>
+        <modify-function signature="allowCommit()" remove="true"/>
+        <modify-function signature="setAllowCommit(bool)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerrenderer.h:51 -->
+    <object-type name="QgsMapLayerRenderer">
+        <modify-function signature="renderContext()" remove="true"/>
+        <modify-function signature="setLayerRenderingTimeHint(int)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgstopologicalmesh.h:47 -->
+    <value-type name="QgsTopologicalMesh">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgstopologicalmesh.h:62 -->
+        <value-type name="TopologicalFaces"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgstopologicalmesh.h:96 -->
+        <value-type name="Changes"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:38 -->
+    <object-type name="QgsMeshAdvancedEditing" force-abstract="true" disable-wrapper="true">
+        <modify-function signature="apply(QgsMeshEditor*)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:96 -->
+    <object-type name="QgsMeshEditRefineFaces"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmesheditor.h:67 -->
+    <object-type name="QgsMeshEditor">
+        <modify-function signature="QgsMeshEditor(QgsMesh*,QgsTriangularMesh*,QObject*)" remove="true"/>
+        <modify-function signature="resetTriangularMesh(QgsTriangularMesh*)" remove="true"/>
+        <modify-function signature="faceCanBeAddedWithNewVertices(const QList&amp;,const QList&amp;)" remove="true"/>
+        <modify-function signature="addFaces(const QVector&amp;)" remove="true"/>
+        <modify-function signature="addFaceWithNewVertices(const QList&amp;,const QList&amp;)" remove="true"/>
+        <modify-function signature="addVertices(const QVector&amp;,double)" remove="true"/>
+        <modify-function signature="canBeTransformed(const QList&amp;,const std::function&amp;)" remove="true"/>
+        <modify-function signature="vertexCirculator(int)" remove="true"/>
+        <modify-function signature="topologicalMesh()" remove="true"/>
+        <modify-function signature="triangularMesh()" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:39 -->
+    <value-type name="QgsProfileRenderContext"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:198 -->
+    <object-type name="QgsAbstractProfileResults">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:207 -->
+        <value-type name="Feature"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:291 -->
+    <value-type name="QgsProfileGenerationContext"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:421 -->
+    <object-type name="QgsAbstractProfileGenerator"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilerequest.h:37 -->
+    <value-type name="QgsProfileRequest">
+        <modify-function signature="expressionContext()" remove="true"/>
+    </value-type>
     <enum-type name="SymbolTable"/>
     <enum-type name="TagTable"/>
     <enum-type name="TagmapTable"/>

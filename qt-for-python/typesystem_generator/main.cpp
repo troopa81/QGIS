@@ -24,6 +24,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <qstringliteral.h>
 
 using namespace Qt::StringLiterals;
 
@@ -51,23 +52,29 @@ static const QStringList sSkippedClasses =
 
 struct ModifiedFunction
 {
-    ModifiedFunction(){};
-    ModifiedFunction( bool _isRemove ):isRemove(_isRemove){};
+  ModifiedFunction() {};
+  ModifiedFunction( bool _isRemove ): isRemove( _isRemove ) {};
 
-    bool isRemove = false;
+  bool isRemove = false;
 };
 
 static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction =
 {
   // remove because if SIP_RUN but needed to build a QgsFeature
-  {"QgsFeature",{
-      {"QgsFeature(QgsFeatureId)", ModifiedFunction( false ) }}},
+  {
+    "QgsFeature", {
+      {"QgsFeature(QgsFeatureId)", ModifiedFunction( false ) }
+    }
+  },
 
   // QGsFeatureRequest::OrderBy
   // TODO should prefix with class name in case an other OrderBy is somewhere
-  {"OrderBy",{
+  {
+    "OrderBy", {
       {"value(qsizetype)const", ModifiedFunction( true )},
-      {"resize(qsizetype)", ModifiedFunction( true )}}}
+      {"resize(qsizetype)", ModifiedFunction( true )}
+    }
+  }
 };
 
 
@@ -205,9 +212,9 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
     for ( const auto &td : nsp->typeDefs() )
     {
       const QRegularExpressionMatch match = reFlag.match( td->type().toString() );
-      if ( match.hasMatch() && match.captured(1) == nsp->name() )
+      if ( match.hasMatch() && match.captured( 1 ) == nsp->name() )
       {
-        flags[match.captured(2)] = td->name();
+        flags[match.captured( 2 )] = td->name();
       }
     }
   }
@@ -234,8 +241,8 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
       }
     }
 
-    QMapIterator<QString, ModifiedFunction> it(modifiedFunctions);
-    while (it.hasNext())
+    QMapIterator<QString, ModifiedFunction> it( modifiedFunctions );
+    while ( it.hasNext() )
     {
       it.next();
       mWriter->writeStartElement( u"modify-function"_s );
@@ -267,14 +274,48 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
     QStringLiteral( "QgsField" ),
     QStringLiteral( "QgsFields" ),
     QStringLiteral( "QgsImageFetcher" ),
-    QStringLiteral( "QgsMeshUtils" ),
+    QStringLiteral( "QgsMeshAdvancedEditing" ),
+    QStringLiteral( "QgsMeshEditRefineFaces" ),
+    QStringLiteral( "QgsMeshEditor" ),
     QStringLiteral( "QgsRasterAttributeTable" ),
     QStringLiteral( "QgsRectangle" ),
     QStringLiteral( "QgsRasterInterface" ),
     QStringLiteral( "QgsRasterBlock" ),
     QStringLiteral( "QgsRasterBlockFeedback" ),
     QStringLiteral( "QgsRasterDataProvider" ),
-    QStringLiteral( "QgsRasterAttributeTableModel" )
+    QStringLiteral( "QgsRasterAttributeTableModel" ),
+    QStringLiteral( "QgsTopologicalMesh" ),
+    QStringLiteral( "QgsExpressionContextGenerator" ),
+    QStringLiteral( "QgsExpressionContextScopeGenerator" ),
+    QStringLiteral( "QgsFeatureSink" ),
+    QStringLiteral( "QgsFeatureSource" ),
+    QStringLiteral( "QgsAbstractProfileSource" ),
+    QStringLiteral( "QgsMapLayer" ),
+    QStringLiteral( "QgsVectorLayer" ),
+    QStringLiteral( "QgsLayerMetadata" ),
+    QStringLiteral( "QgsEditFormConfig" ),
+    QStringLiteral( "QgsMapLayerRenderer" ),
+    QStringLiteral( "QgsReadWriteContext" ),
+    QStringLiteral( "QgsCoordinateTransformContext" ),
+    QStringLiteral( "QgsAbstractProfileGenerator" ),
+    QStringLiteral( "QgsFeature" ),
+    QStringLiteral( "QgsFeatureIterator" ),
+    QStringLiteral( "QgsExpression" ),
+    QStringLiteral( "QgsExpressionContext" ),
+    QStringLiteral( "QgsExpressionContextScope" ),
+    QStringLiteral( "QgsLayerMetadata" ),
+    QStringLiteral( "QgsAbstractMetadataBase" ),
+    QStringLiteral( "QgsRenderContext" ),
+    QStringLiteral( "QgsProfileRequest" ),
+    QStringLiteral( "QgsFeatureRequest" ),
+    QStringLiteral( "QgsProfileGenerationContext" ),
+    QStringLiteral( "QgsFeedback" ),
+    QStringLiteral( "QgsAbstractProfileResults" ),
+    QStringLiteral( "QgsPoint" ),
+    QStringLiteral( "QgsGeometry" ),
+    QStringLiteral( "QgsDoubleRange" ),
+    QStringLiteral( "QgsProfileRenderContext" ),
+    QStringLiteral( "QgsTemporalRangeObject" )
   };
 
   if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
@@ -337,6 +378,10 @@ void TypeSystemGenerator::formatXmlNamespaceMembers( const NamespaceModelItem &n
   if ( isSkipped( nsp ) )
     return;
 
+  // TODO qgstriangularmesh is SIP_NO_FILE but not qgsmeshlayerinterpolator.h
+  if ( nsp->name() == QStringLiteral( "QgsMeshUtils" ) )
+    return;
+
   auto nestedNamespaces = nsp->namespaces();
   for ( auto i = nestedNamespaces.size() - 1; i >= 0; --i )
   {
@@ -347,6 +392,10 @@ void TypeSystemGenerator::formatXmlNamespaceMembers( const NamespaceModelItem &n
   {
     auto current = nestedNamespaces.takeFirst();
     if ( isSkipped( current ) )
+      continue;
+
+    // TODO qgstriangularmesh is SIP_NO_FILE but not qgsmeshlayerinterpolator.h
+    if ( current->name() == QStringLiteral( "QgsMeshUtils" ) )
       continue;
 
     startXmlNamespace( current );
@@ -554,6 +603,11 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
 
 bool TypeSystemGenerator::isValueType( ClassModelItem klass )
 {
+  // not sure to get why but we get an error on QgsMapLayer::metadata() that it fails to find a
+  // default constructor but there is one actually...
+  if ( klass->name() == QStringLiteral( "QgsLayerMetadata" ) )
+    return true;
+
   // Heuristics for value types:
   // value-type when we don't inherit from QObject and there is no abstract function
   // TODO we should check that the default copycontructor is not delete
