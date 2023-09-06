@@ -81,12 +81,20 @@ static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction =
 class TypeSystemGenerator
 {
   public:
-    TypeSystemGenerator( const QString &outputFileName );
+    TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName );
 
     bool formatXmlOutput( const FileModelItem &dom );
     bool isValid() const;
 
   private:
+
+    struct AddedFunction
+    {
+        QString returnType;
+        QString signature;
+        QString body;
+        QString snippetName;
+    };
 
     void formatXmlClass( const ClassModelItem &klass );
     void formatXmlEnum( const EnumModelItem &en, const QMap<QString, QString> &flags );
@@ -95,10 +103,12 @@ class TypeSystemGenerator
     void startXmlNamespace( const NamespaceModelItem &nsp );
     void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
     bool loadSkipRanges();
+    bool loadSnippet( const QString& snippetFileName );
     bool isSkipped( CodeModelItem item ) const;
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
     bool isSkippedClass( CodeModelItem item ) const;
+    void addInjectCode( const QString& klass, const QString& signature, const QStringList& body );
 
     static bool isValueType( ClassModelItem klass );
 
@@ -112,6 +122,8 @@ class TypeSystemGenerator
     QMap<QString, SkipRanges> mSkipRanges;
 
     QMap<QString, QList<QString> > mNamespaceFiles;
+    QMap<QString, QList<AddedFunction>> mAddedFunctions;
+    QSet<QString> mSnippets;
 };
 
 static inline QString languageLevelDescription()
@@ -160,7 +172,7 @@ static bool hasMembers( const NamespaceModelItem &nsp )
   return std::any_of( classes.cbegin(), classes.cend(), useClass );
 }
 
-TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName )
+TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName )
 {
   mOutputFile = std::make_unique<QFile>( outputFileName );
   if ( !mOutputFile->open( QIODevice::WriteOnly | QIODevice::Text ) )
@@ -173,6 +185,9 @@ TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName )
     mWriter = std::make_unique<QXmlStreamWriter>( &mOutputStr );
   else
     mWriter = std::make_unique<QXmlStreamWriter>( mOutputFile.get() );
+
+  if ( mValid && !snippetFileName.isEmpty() )
+    mValid = loadSnippet( snippetFileName );
 
   if ( mValid )
     mValid = loadSkipRanges();
@@ -353,7 +368,37 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   }
 
   formatXmlScopeMembers( klass );
+
+  // write added function
+  for ( AddedFunction func : mAddedFunctions.value( klass->name() ) )
+  {
+    mWriter->writeStartElement( u"add-function"_s );
+    mWriter->writeAttribute( u"signature"_s, func.signature );
+    if ( !func.returnType.isEmpty() && func.returnType != QStringLiteral( "Py_ssize_t" ) )
+      mWriter->writeAttribute( u"return-type"_s, func.returnType );
+
+    mWriter->writeStartElement( u"inject-code"_s );
+    mWriter->writeAttribute( u"class"_s, u"target"_s );
+    mWriter->writeAttribute( u"position"_s, u"beginning"_s );
+
+    if ( !func.snippetName.isEmpty() )
+    {
+      // TODO configure snippet file correctly
+      mWriter->writeAttribute( u"file"_s, "./qgis_core.cpp" );
+      mWriter->writeAttribute( u"snippet"_s, func.snippetName );
+    }
+    else
+    {
+      mWriter->writeCDATA(func.body);
+    }
+
+    mWriter->writeEndElement();
+
+    mWriter->writeEndElement();
+  }
+
   mWriter->writeEndElement();
+
 }
 
 void TypeSystemGenerator::startXmlNamespace( const NamespaceModelItem &nsp )
@@ -491,9 +536,16 @@ bool TypeSystemGenerator::loadSkipRanges()
     const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
     const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
     const QRegularExpression reNamespace( QStringLiteral( "^\\s*namespace\\s*(\\w+)" ) );
+    const QRegularExpression reMethodCode( QStringLiteral( "^\\s*% MethodCode" ) );
+    const QRegularExpression reMethodCodeEnd( QStringLiteral( "^\\s*% End" ) );
+    const QRegularExpression reClass( QStringLiteral( "^\\s*class\\s+CORE_EXPORT\\s+(\\w+)" ) );
 
     SkipRanges ranges;
     int nbIf = 0;
+    QString previousLine;
+    QString methodCodeSignature;
+    QStringList methodCodeBody;
+    QString klass;
     while ( !in.atEnd() )
     {
       QString line = in.readLine();
@@ -543,12 +595,63 @@ bool TypeSystemGenerator::loadSkipRanges()
         ranges << SkipRange( numLine, numLine );
       }
 
+      // extract MethodCode
+
+      QRegularExpressionMatch matchClass = reClass.match( line );
+      if ( matchClass.hasMatch() )
+      {
+        klass = matchClass.captured( 1 );
+      }
+
+      if ( reMethodCode.match( line ).hasMatch() )
+      {
+        methodCodeSignature = previousLine;
+      }
+      else if ( reMethodCodeEnd.match( line ).hasMatch() )
+      {
+        addInjectCode( klass, methodCodeSignature, methodCodeBody );
+        methodCodeSignature.clear();
+        methodCodeBody.clear();
+      }
+      else if ( !methodCodeSignature.isEmpty() )
+      {
+        methodCodeBody.append( line );
+      }
+
       numLine++;
+      previousLine = line;
     }
 
     if ( !ranges.isEmpty() )
       mSkipRanges[ fileName ] = ranges;
   }
+
+  return true;
+}
+
+bool TypeSystemGenerator::loadSnippet( const QString& snippetFileName )
+{
+  QFile file( snippetFileName );
+  if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
+  {
+    qWarning() << "Error: failed to read snippet file " << snippetFileName;
+    return false;
+  }
+
+  QTextStream in( &file );
+
+  const QRegularExpression reSnippet( QStringLiteral( "^\\s*//\\s*@snippet\\s+([\\w-]*)" ) );
+
+  while ( !in.atEnd() )
+  {
+    QString line = in.readLine();
+
+    QRegularExpressionMatch match = reSnippet.match( line );
+    if ( match.hasMatch() )
+      mSnippets << match.captured(1);
+  }
+
+  qDebug() << "snippets=" << mSnippets;
 
   return true;
 }
@@ -632,6 +735,126 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
   return true;
 }
 
+void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& signature, const QStringList& body )
+{
+  const QRegularExpression reSignature( QStringLiteral( "^\\s*(\\w+)\\s+(.*);" ) );
+  const QRegularExpressionMatch matchSignature = reSignature.match( signature );
+
+  if ( !matchSignature.hasMatch() )
+  {
+    qWarning() << "Error: fail to parse signature for class" << klass << ":" << signature;
+    return;
+  }
+
+
+  AddedFunction func;
+
+  func.signature = matchSignature.captured( 2 );
+
+  func.returnType = matchSignature.captured( 1 );
+  if ( func.returnType == QStringLiteral( "void" ) )
+  {
+    func.returnType.clear();
+  }
+  else if ( func.signature.contains("__len__") )
+  {
+    func.returnType = QStringLiteral( "Py_ssize_t" );
+  }
+  else if ( func.signature.contains("__setitem__") || func.signature.contains("__contains__") )
+  {
+    func.returnType = QStringLiteral( "int" );
+  }
+  else
+  {
+    func.returnType.replace("SIP_PYOBJECT","PyObject*");
+    if ( !func.returnType.startsWith( "Qgs" ) && !func.returnType.startsWith( "Q" ) &&
+         !( QStringList() << QStringLiteral( "long" ) << QStringLiteral( "PyObject*" ) << QStringLiteral( "int" ) << QStringLiteral( "bool" ) << QStringLiteral( "double" ) << QStringLiteral( "float" ) ).contains( func.returnType ) )
+    {
+      // wild guess, it's maybe an enum...
+      func.returnType = klass + "::" + func.returnType;
+    }
+  }
+
+
+  // remove sip annotation in args
+  func.signature.replace(QRegularExpression("/ .* /"), "");
+
+  // remove args name
+  func.signature.replace(QRegularExpression("(const |)\\s*(\\w+)\\s+(\\&|)\\w+\\s*(=*\\s*\\w*)\\s*([,\\)])"), "\\1\\2\\3\\4\\5");
+
+  // TODO looks like it's not possible to have a setitem with something different than than int as a a string
+  // It's not done in Qt
+  if ( func.signature == QStringLiteral( "__setitem__( const QString&,QVariant)" ) )
+  {
+    return;
+  }
+
+  // TODO remove
+  if ( func.signature == QStringLiteral( "setGeometry( QgsAbstractGeometry *geometry)" ) )
+  {
+    return;
+  }
+
+  if ( func.signature.contains( QStringLiteral( "__setitem__" ) ) )
+    func.signature = QStringLiteral( "__setitem__" ); // don't have to write the params, it expects int/PyObject
+
+  const QString &snippetName = QString("%1-%2").arg( klass, func.signature );
+  if ( mSnippets.contains( snippetName ) )
+  {
+    func.snippetName = snippetName;
+  }
+  else
+  {
+    func.body = "\n" + body.join("\n") + "\n";
+
+    // const QString errorReturnedValue = func.returnType == "void" || func.returnType == "int" ? "-1" :
+    //   ( func.returnType == "bool" ? "false" : "nullptr" );
+
+    const QString errorReturnedValue( "nullptr" );
+    func.body.replace("sipIsErr = 1;",QString("return %1;").arg( errorReturnedValue ));
+
+    for ( int i=0; i<5; i++ )
+    {
+      func.body.replace(QString( "a%1Wrapper == Py_None" ).arg( i ), QStringLiteral( "!%" ) + QString::number( i+1 ) + QStringLiteral( ".isValid()" ) );
+      func.body.replace(QString( "a%1->" ).arg( i ), QStringLiteral( "%" ) + QString::number( i+1 ) + QStringLiteral( "." ) );
+      func.body.replace(QString( "*a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i+1 ) );
+      func.body.replace(QString( "a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i+1 ) ) ;
+    }
+
+    func.body.replace("sipRes = true;","Py_RETURN_TRUE;");
+    func.body.replace("sipRes = false;","Py_RETURN_FALSE;");
+
+    // TODO Should have been fixed before in commit which remove QVariant::Type
+    func.body.replace("QVariant( QMetaType::Int )","QVariant( QMetaType( QMetaType::Int ) )");
+
+    if ( func.returnType == "Py_ssize_t" )
+    {
+      func.body.replace("sipRes = ","return ");
+    }
+    else if ( !func.returnType.isEmpty() && !func.signature.contains( "__repr__" ) )
+    {
+      // replace pointer return instruction
+      func.body.replace(QRegularExpression("([ ]*)sipRes = new\\s+(\\w+)(.*)"),"\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);");
+
+      // replace value return instruction
+      func.body.replace(QRegularExpression("([ ]*)sipRes =(.*)"),QString( "\\1auto var = \\2\n\\1%PYARG_0 = %CONVERTTOPYTHON[%1](var);").arg(func.returnType) );
+    }
+    func.body.replace("sipRes","%PYARG_0");
+    func.body.replace("sipCpp","%CPPSELF");
+
+    // need to be done manually
+    if ( func.body.contains( QStringLiteral( "sip" ) ) )
+    {
+      qWarning() << "Added function skipped (contains SIP code) in klass=" << klass << "signature:" << signature;
+      return;
+    }
+  }
+
+  mAddedFunctions[klass].append(func);
+  // qDebug() << "klass=" << klass << "signature=" << func.signature << "returnType=" << func.returnType
+  //          << "body=" << func.body;
+}
+
 
 static const char descriptionFormat[] = R"(
 QGIS Type system generator
@@ -669,6 +892,11 @@ int main( int argc, char **argv )
                                        u"Output file. Default to stdout. Incompatible with debug option)"_s,
                                        u"file"_s );
   parser.addOption( outputFileOption );
+
+  QCommandLineOption snippetFileOption( u"snippet-file"_s,
+                                       u"Snippet file. Default to empty"_s,
+                                       u"file"_s );
+  parser.addOption( snippetFileOption );
 
   QCommandLineOption joinNamespacesOption( {u"j"_s, u"join-namespaces"_s},
       u"Join namespaces"_s );
@@ -712,7 +940,13 @@ int main( int argc, char **argv )
     outputFileName = parser.value( outputFileOption ).toUtf8();
   }
 
-  TypeSystemGenerator generator( outputFileName );
+  QString snippetFileName;
+  if ( parser.isSet( snippetFileOption ) )
+  {
+    snippetFileName = parser.value( snippetFileOption ).toUtf8();
+  }
+
+  TypeSystemGenerator generator( outputFileName, snippetFileName );
   if ( !generator.isValid() )
     return -3;
 
