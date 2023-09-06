@@ -104,6 +104,7 @@ class TypeSystemGenerator
     void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
     bool loadSkipRanges();
     bool loadSnippet( const QString& snippetFileName );
+    bool loadInjectedCode();
     bool isSkipped( CodeModelItem item ) const;
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
@@ -191,6 +192,9 @@ TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const Q
 
   if ( mValid )
     mValid = loadSkipRanges();
+
+  if ( mValid )
+    mValid = loadInjectedCode();
 }
 
 bool TypeSystemGenerator::isValid() const
@@ -512,6 +516,16 @@ bool TypeSystemGenerator::loadSkipRanges()
 {
   // collect #ifndef SIP_RUN
 
+  const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
+  const QRegularExpression reEndIf( QStringLiteral( "^\\s*#endif" ) );
+  const QRegularExpression reElse( QStringLiteral( "^\\s*#else" ) );
+  const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
+  const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
+  const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
+  const QRegularExpression reNamespace( QStringLiteral( "^\\s*namespace\\s*(\\w+)" ) );
+  const QRegularExpression reMethodCode( QStringLiteral( "^\\s*% MethodCode" ) );
+  const QRegularExpression reMethodCodeEnd( QStringLiteral( "^\\s*% End" ) );
+
   // TODO fix the path when we get the qgis dir as argument
   QString dir( QStringLiteral( "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core" ) );
   QDirIterator it( dir, QStringList() << QStringLiteral( "*.h" ), QDir::Files, QDirIterator::Subdirectories );
@@ -529,23 +543,11 @@ bool TypeSystemGenerator::loadSkipRanges()
     int numLine = 1;
     int sipRunLine = -1;
     int sipRunIf = -1;
-    const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
-    const QRegularExpression reEndIf( QStringLiteral( "^\\s*#endif" ) );
-    const QRegularExpression reElse( QStringLiteral( "^\\s*#else" ) );
-    const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
-    const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
-    const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
-    const QRegularExpression reNamespace( QStringLiteral( "^\\s*namespace\\s*(\\w+)" ) );
-    const QRegularExpression reMethodCode( QStringLiteral( "^\\s*% MethodCode" ) );
-    const QRegularExpression reMethodCodeEnd( QStringLiteral( "^\\s*% End" ) );
-    const QRegularExpression reClass( QStringLiteral( "^\\s*class\\s+CORE_EXPORT\\s+(\\w+)" ) );
 
     SkipRanges ranges;
     int nbIf = 0;
-    QString previousLine;
     QString methodCodeSignature;
     QStringList methodCodeBody;
-    QString klass;
     while ( !in.atEnd() )
     {
       QString line = in.readLine();
@@ -595,7 +597,46 @@ bool TypeSystemGenerator::loadSkipRanges()
         ranges << SkipRange( numLine, numLine );
       }
 
-      // extract MethodCode
+      numLine++;
+    }
+
+    if ( !ranges.isEmpty() )
+      mSkipRanges[ fileName ] = ranges;
+  }
+
+  return true;
+}
+
+bool TypeSystemGenerator::loadInjectedCode()
+{
+  const QRegularExpression reClass( QStringLiteral( "^\\s*class\\s+(\\w+)" ) );
+  const QRegularExpression reMethodCode( QStringLiteral( "^%MethodCode" ) );
+  const QRegularExpression reDocString( QStringLiteral( "^%Docstring" ) );
+  const QRegularExpression reEnd( QStringLiteral( "^%End" ) );
+  const QRegularExpression rePublic( QStringLiteral( "^\\s*public:" ) );
+
+  // TODO fix the path when we get the qgis dir as argument
+  QString dir( QStringLiteral( "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/python/core/auto_generated" ) );
+  QDirIterator it( dir, QStringList() << QStringLiteral( "*.sip.in" ), QDir::Files, QDirIterator::Subdirectories );
+  while ( it.hasNext() )
+  {
+    const QString fileName = it.next();
+    QFile file( fileName );
+    if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
+    {
+      qWarning() << "Error: failed to read file " << fileName;
+      return false;
+    }
+
+    QTextStream in( &file );
+    QString klass;
+    QString previousLines;
+    QString methodCodeSignature;
+    QStringList methodCodeBody;
+    bool isDocString = false;
+    while ( !in.atEnd() )
+    {
+      QString line = in.readLine();
 
       QRegularExpressionMatch matchClass = reClass.match( line );
       if ( matchClass.hasMatch() )
@@ -603,27 +644,45 @@ bool TypeSystemGenerator::loadSkipRanges()
         klass = matchClass.captured( 1 );
       }
 
-      if ( reMethodCode.match( line ).hasMatch() )
+      if ( reDocString.match( line ).hasMatch() )
       {
-        methodCodeSignature = previousLine;
+        isDocString = true;
       }
-      else if ( reMethodCodeEnd.match( line ).hasMatch() )
+      else if ( reMethodCode.match( line ).hasMatch() )
       {
-        addInjectCode( klass, methodCodeSignature, methodCodeBody );
-        methodCodeSignature.clear();
-        methodCodeBody.clear();
+        // remove // comments
+        previousLines.replace(QRegularExpression("\\/\\/.*"),"");
+        previousLines.replace("\n","");
+
+        methodCodeSignature = previousLines;
+        previousLines.clear();
+      }
+      else if ( reEnd.match( line ).hasMatch() )
+      {
+        if ( !methodCodeSignature.isEmpty() )
+        {
+          addInjectCode( klass, methodCodeSignature, methodCodeBody );
+          methodCodeSignature.clear();
+          methodCodeBody.clear();
+          previousLines.clear();
+        }
+
+        isDocString = false;
       }
       else if ( !methodCodeSignature.isEmpty() )
       {
         methodCodeBody.append( line );
       }
-
-      numLine++;
-      previousLine = line;
+      else if ( ( !isDocString && line.isEmpty() )
+              || rePublic.match( line ).hasMatch() )
+      {
+        previousLines.clear();
+      }
+      else if ( !isDocString )
+      {
+        previousLines.append( line + "\n" );
+      }
     }
-
-    if ( !ranges.isEmpty() )
-      mSkipRanges[ fileName ] = ranges;
   }
 
   return true;
@@ -650,8 +709,6 @@ bool TypeSystemGenerator::loadSnippet( const QString& snippetFileName )
     if ( match.hasMatch() )
       mSnippets << match.captured(1);
   }
-
-  qDebug() << "snippets=" << mSnippets;
 
   return true;
 }
@@ -737,7 +794,7 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
 
 void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& signature, const QStringList& body )
 {
-  const QRegularExpression reSignature( QStringLiteral( "^\\s*(\\w+)\\s+(.*);" ) );
+  const QRegularExpression reSignature( QStringLiteral( "^\\s*(\\w*)\\s+(.*);" ) );
   const QRegularExpressionMatch matchSignature = reSignature.match( signature );
 
   if ( !matchSignature.hasMatch() )
@@ -745,7 +802,6 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
     qWarning() << "Error: fail to parse signature for class" << klass << ":" << signature;
     return;
   }
-
 
   AddedFunction func;
 
@@ -775,9 +831,8 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
     }
   }
 
-
   // remove sip annotation in args
-  func.signature.replace(QRegularExpression("/ .* /"), "");
+  func.signature.replace(QRegularExpression("/.*/"), "");
 
   // remove args name
   func.signature.replace(QRegularExpression("(const |)\\s*(\\w+)\\s+(\\&|)\\w+\\s*(=*\\s*\\w*)\\s*([,\\)])"), "\\1\\2\\3\\4\\5");
@@ -790,7 +845,7 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
   }
 
   // TODO remove
-  if ( func.signature == QStringLiteral( "setGeometry( QgsAbstractGeometry *geometry)" ) )
+  if ( func.signature == QStringLiteral( "setGeometry( QgsAbstractGeometry *geometry  )" ) )
   {
     return;
   }
@@ -851,8 +906,6 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
   }
 
   mAddedFunctions[klass].append(func);
-  // qDebug() << "klass=" << klass << "signature=" << func.signature << "returnType=" << func.returnType
-  //          << "body=" << func.body;
 }
 
 
