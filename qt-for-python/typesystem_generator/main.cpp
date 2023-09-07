@@ -806,8 +806,8 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
   AddedFunction func;
 
   func.signature = matchSignature.captured( 2 );
-
   func.returnType = matchSignature.captured( 1 );
+
   if ( func.returnType == QStringLiteral( "void" ) )
   {
     func.returnType.clear();
@@ -835,7 +835,7 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
   func.signature.replace(QRegularExpression("/.*/"), "");
 
   // remove args name
-  func.signature.replace(QRegularExpression("(const |)\\s*(\\w+)\\s+(\\&|)\\w+\\s*(=*\\s*\\w*)\\s*([,\\)])"), "\\1\\2\\3\\4\\5");
+  func.signature.replace(QRegularExpression("(const |)\\s*(unsigned |)\\s*(\\w+)\\s+(\\&|)\\s*\\w+\\s*(=*\\s*\\w*)\\s*([,\\)])"), "\\1\\2\\3\\4\\5\\6");
 
   // TODO looks like it's not possible to have a setitem with something different than than int as a a string
   // It's not done in Qt
@@ -888,6 +888,12 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
     }
     else if ( !func.returnType.isEmpty() && !func.signature.contains( "__repr__" ) )
     {
+      // remove lines with sipFindType
+      func.body.replace(QRegularExpression(".*sipFindType\\(.*"), "");
+
+      // replace sipConvertFromNewType( new XXX, sipTYpe_XXX, to ) with just new XXX (that would be replaced later with correct conversion)
+      func.body.replace(QRegularExpression("sipConvertFromNewType\\(\\s*(new\\s+.*),\\s*\\w+\\s*,\\s*\\w+\\s*\\)"),"\\1");
+
       // replace pointer return instruction
       func.body.replace(QRegularExpression("([ ]*)sipRes = new\\s+(\\w+)(.*)"),"\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);");
 
