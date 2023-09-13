@@ -90,10 +90,10 @@ class TypeSystemGenerator
 
     struct AddedFunction
     {
-        QString returnType;
-        QString signature;
-        QString body;
-        QString snippetName;
+      QString returnType;
+      QString signature;
+      QString body;
+      QString snippetName;
     };
 
     void formatXmlClass( const ClassModelItem &klass );
@@ -103,13 +103,13 @@ class TypeSystemGenerator
     void startXmlNamespace( const NamespaceModelItem &nsp );
     void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
     bool loadSkipRanges();
-    bool loadSnippet( const QString& snippetFileName );
+    bool loadSnippet( const QString &snippetFileName );
     bool loadInjectedCode();
     bool isSkipped( CodeModelItem item ) const;
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
     bool isSkippedClass( CodeModelItem item ) const;
-    void addInjectCode( const QString& klass, const QString& signature, const QStringList& body );
+    void addInjectCode( const QString &klass, const QString &signature, const QStringList &body );
 
     static bool isValueType( ClassModelItem klass );
 
@@ -374,7 +374,9 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   formatXmlScopeMembers( klass );
 
   // write added function
-  for ( AddedFunction func : mAddedFunctions.value( klass->name() ) )
+  const _ClassModelItem *parentClass = dynamic_cast<const _ClassModelItem *>( klass->enclosingScope() );
+  const QString klassName = ( parentClass ? parentClass->name() + "::" : QString() ) + klass->name();
+  for ( AddedFunction func : mAddedFunctions.value( klassName ) )
   {
     mWriter->writeStartElement( u"add-function"_s );
     mWriter->writeAttribute( u"signature"_s, func.signature );
@@ -393,7 +395,7 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
     }
     else
     {
-      mWriter->writeCDATA(func.body);
+      mWriter->writeCDATA( func.body );
     }
 
     mWriter->writeEndElement();
@@ -609,7 +611,7 @@ bool TypeSystemGenerator::loadSkipRanges()
 
 bool TypeSystemGenerator::loadInjectedCode()
 {
-  const QRegularExpression reClass( QStringLiteral( "^\\s*class\\s+(\\w+)" ) );
+  const QRegularExpression reScope( QStringLiteral( "^\\s*(namespace|class|struct|enum|%MappedType)\\s+(\\w+).*" ) );
   const QRegularExpression reMethodCode( QStringLiteral( "^%MethodCode" ) );
   const QRegularExpression reDocString( QStringLiteral( "^%Docstring" ) );
   const QRegularExpression reEnd( QStringLiteral( "^%End" ) );
@@ -629,7 +631,7 @@ bool TypeSystemGenerator::loadInjectedCode()
     }
 
     QTextStream in( &file );
-    QString klass;
+    QStringList scopes;
     QString previousLines;
     QString methodCodeSignature;
     QStringList methodCodeBody;
@@ -638,10 +640,15 @@ bool TypeSystemGenerator::loadInjectedCode()
     {
       QString line = in.readLine();
 
-      QRegularExpressionMatch matchClass = reClass.match( line );
-      if ( matchClass.hasMatch() )
+      if ( QRegularExpression( "(^|\\s+)};" ).match( line ).hasMatch() )
       {
-        klass = matchClass.captured( 1 );
+        scopes.removeLast();
+      }
+
+      QRegularExpressionMatch matchScope = reScope.match( line );
+      if ( matchScope.hasMatch() )
+      {
+        scopes << matchScope.captured( 2 );
       }
 
       if ( reDocString.match( line ).hasMatch() )
@@ -651,8 +658,8 @@ bool TypeSystemGenerator::loadInjectedCode()
       else if ( reMethodCode.match( line ).hasMatch() )
       {
         // remove // comments
-        previousLines.replace(QRegularExpression("\\/\\/.*"),"");
-        previousLines.replace("\n","");
+        previousLines.replace( QRegularExpression( "\\/\\/.*" ), "" );
+        previousLines.replace( "\n", "" );
 
         methodCodeSignature = previousLines;
         previousLines.clear();
@@ -661,7 +668,7 @@ bool TypeSystemGenerator::loadInjectedCode()
       {
         if ( !methodCodeSignature.isEmpty() )
         {
-          addInjectCode( klass, methodCodeSignature, methodCodeBody );
+          addInjectCode( scopes.join( "::" ), methodCodeSignature, methodCodeBody );
           methodCodeSignature.clear();
           methodCodeBody.clear();
           previousLines.clear();
@@ -674,7 +681,7 @@ bool TypeSystemGenerator::loadInjectedCode()
         methodCodeBody.append( line );
       }
       else if ( ( !isDocString && line.isEmpty() )
-              || rePublic.match( line ).hasMatch() )
+                || rePublic.match( line ).hasMatch() )
       {
         previousLines.clear();
       }
@@ -688,7 +695,7 @@ bool TypeSystemGenerator::loadInjectedCode()
   return true;
 }
 
-bool TypeSystemGenerator::loadSnippet( const QString& snippetFileName )
+bool TypeSystemGenerator::loadSnippet( const QString &snippetFileName )
 {
   QFile file( snippetFileName );
   if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
@@ -707,7 +714,7 @@ bool TypeSystemGenerator::loadSnippet( const QString& snippetFileName )
 
     QRegularExpressionMatch match = reSnippet.match( line );
     if ( match.hasMatch() )
-      mSnippets << match.captured(1);
+      mSnippets << match.captured( 1 );
   }
 
   return true;
@@ -792,9 +799,9 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
   return true;
 }
 
-void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& signature, const QStringList& body )
+void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &signature, const QStringList &body )
 {
-  const QRegularExpression reSignature( QStringLiteral( "^\\s*(\\w*)\\s+(.*);" ) );
+  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)(\\w*)\\s*(\\*|)\\s*(.*);" ) );
   const QRegularExpressionMatch matchSignature = reSignature.match( signature );
 
   if ( !matchSignature.hasMatch() )
@@ -805,24 +812,29 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
 
   AddedFunction func;
 
-  func.signature = matchSignature.captured( 2 );
-  func.returnType = matchSignature.captured( 1 );
+  func.signature = matchSignature.captured( 4 );
+  func.signature.replace( "SIP_PYOBJECT", "PyObject*" );
+
+  // replace SIP anotation [..]
+  func.signature.replace( QRegularExpression( "\\[.*\\]" ), "" );
+
+  func.returnType = matchSignature.captured( 2 ) + matchSignature.captured( 3 );
 
   if ( func.returnType == QStringLiteral( "void" ) )
   {
     func.returnType.clear();
   }
-  else if ( func.signature.contains("__len__") )
+  else if ( func.signature.contains( "__len__" ) )
   {
     func.returnType = QStringLiteral( "Py_ssize_t" );
   }
-  else if ( func.signature.contains("__setitem__") || func.signature.contains("__contains__") )
+  else if ( func.signature.contains( "__setitem__" ) || func.signature.contains( "__contains__" ) )
   {
     func.returnType = QStringLiteral( "int" );
   }
   else
   {
-    func.returnType.replace("SIP_PYOBJECT","PyObject*");
+    func.returnType.replace( "SIP_PYOBJECT", "PyObject*" );
     if ( !func.returnType.startsWith( "Qgs" ) && !func.returnType.startsWith( "Q" ) &&
          !( QStringList() << QStringLiteral( "long" ) << QStringLiteral( "PyObject*" ) << QStringLiteral( "int" ) << QStringLiteral( "bool" ) << QStringLiteral( "double" ) << QStringLiteral( "float" ) ).contains( func.returnType ) )
     {
@@ -832,10 +844,20 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
   }
 
   // remove sip annotation in args
-  func.signature.replace(QRegularExpression("/.*/"), "");
+  func.signature.replace( QRegularExpression( "\\/.*\\/" ), "" );
 
   // remove args name
-  func.signature.replace(QRegularExpression("(const |)\\s*(unsigned |)\\s*(\\w+)\\s+(\\&|)\\s*\\w+\\s*(=*\\s*\\w*)\\s*([,\\)])"), "\\1\\2\\3\\4\\5\\6");
+  QRegularExpressionMatch reParams = QRegularExpression( "([^\\(]*)\\((.*)\\)" ).match( func.signature );
+  if ( !reParams.hasMatch() )
+  {
+    qWarning() << "Error: fail to parse arguments for signature for class" << klass << ":" << signature;
+    return;
+  }
+
+  // remove arg names in params
+  QString params = reParams.captured( 2 );
+  params.replace( QRegularExpression( "\\s*(const |)\\s*(unsigned |)\\s*(\\w+)\\s*(\\&|\\*|)\\s*\\w+\\s*(=*\\s*[^,]*)\\s*(,*)" ), "\\1\\2\\3\\4\\5\\6" );
+  func.signature = QString( "%1(%2)" ).arg( reParams.captured( 1 ) ).arg( params );
 
   // TODO looks like it's not possible to have a setitem with something different than than int as a a string
   // It's not done in Qt
@@ -844,64 +866,71 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
     return;
   }
 
-  // TODO remove
-  if ( func.signature == QStringLiteral( "setGeometry( QgsAbstractGeometry *geometry  )" ) )
-  {
-    return;
-  }
-
   if ( func.signature.contains( QStringLiteral( "__setitem__" ) ) )
     func.signature = QStringLiteral( "__setitem__" ); // don't have to write the params, it expects int/PyObject
 
-  const QString &snippetName = QString("%1-%2").arg( klass, func.signature );
+  const QString &snippetName = QString( "%1-%2" ).arg( klass, func.signature );
   if ( mSnippets.contains( snippetName ) )
   {
     func.snippetName = snippetName;
   }
   else
   {
-    func.body = "\n" + body.join("\n") + "\n";
+    func.body = "\n" + body.join( "\n" ) + "\n";
+
+    // TODO need to be wrapped
+    if ( func.body.contains( QStringLiteral( "QgsPolylineXY" ) )
+         || func.body.contains( QStringLiteral( "QgsPolygonXY" ) )
+         || func.body.contains( QStringLiteral( "QgsMultiPolygonXY" ) )
+         || func.body.contains( QStringLiteral( "QgsAbstractGeometry" ) )
+         || func.body.contains( QStringLiteral( "QgsMultiPolylineXY" ) )
+         || func.body.contains( QStringLiteral( "QVector<QgsPointXY>" ) )
+       )
+    {
+      qWarning() << "Added function skipped (contains non binded type) in klass=" << klass << "signature:" << signature;
+      return;
+    }
 
     // const QString errorReturnedValue = func.returnType == "void" || func.returnType == "int" ? "-1" :
     //   ( func.returnType == "bool" ? "false" : "nullptr" );
 
     const QString errorReturnedValue( "nullptr" );
-    func.body.replace("sipIsErr = 1;",QString("return %1;").arg( errorReturnedValue ));
+    func.body.replace( "sipIsErr = 1;", QString( "return %1;" ).arg( errorReturnedValue ) );
 
-    for ( int i=0; i<5; i++ )
+    for ( int i = 0; i < 7; i++ )
     {
-      func.body.replace(QString( "a%1Wrapper == Py_None" ).arg( i ), QStringLiteral( "!%" ) + QString::number( i+1 ) + QStringLiteral( ".isValid()" ) );
-      func.body.replace(QString( "a%1->" ).arg( i ), QStringLiteral( "%" ) + QString::number( i+1 ) + QStringLiteral( "." ) );
-      func.body.replace(QString( "*a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i+1 ) );
-      func.body.replace(QString( "a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i+1 ) ) ;
+      func.body.replace( QString( "a%1Wrapper == Py_None" ).arg( i ), QStringLiteral( "!%" ) + QString::number( i + 1 ) + QStringLiteral( ".isValid()" ) );
+      func.body.replace( QString( "a%1->" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) + QStringLiteral( "." ) );
+      func.body.replace( QString( "*a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) );
+      func.body.replace( QString( "a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) ) ;
     }
 
-    func.body.replace("sipRes = true;","Py_RETURN_TRUE;");
-    func.body.replace("sipRes = false;","Py_RETURN_FALSE;");
+    func.body.replace( "sipRes = true;", "Py_RETURN_TRUE;" );
+    func.body.replace( "sipRes = false;", "Py_RETURN_FALSE;" );
 
     // TODO Should have been fixed before in commit which remove QVariant::Type
-    func.body.replace("QVariant( QMetaType::Int )","QVariant( QMetaType( QMetaType::Int ) )");
+    func.body.replace( "QVariant( QMetaType::Int )", "QVariant( QMetaType( QMetaType::Int ) )" );
 
     if ( func.returnType == "Py_ssize_t" )
     {
-      func.body.replace("sipRes = ","return ");
+      func.body.replace( "sipRes = ", "return " );
     }
     else if ( !func.returnType.isEmpty() && !func.signature.contains( "__repr__" ) )
     {
       // remove lines with sipFindType
-      func.body.replace(QRegularExpression(".*sipFindType\\(.*"), "");
+      func.body.replace( QRegularExpression( ".*sipFindType\\(.*" ), "" );
 
       // replace sipConvertFromNewType( new XXX, sipTYpe_XXX, to ) with just new XXX (that would be replaced later with correct conversion)
-      func.body.replace(QRegularExpression("sipConvertFromNewType\\(\\s*(new\\s+.*),\\s*\\w+\\s*,\\s*\\w+\\s*\\)"),"\\1");
+      func.body.replace( QRegularExpression( "sipConvertFromNewType\\(\\s*(new\\s+.*),\\s*\\w+\\s*,\\s*\\w+\\s*\\)" ), "\\1" );
 
       // replace pointer return instruction
-      func.body.replace(QRegularExpression("([ ]*)sipRes = new\\s+(\\w+)(.*)"),"\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);");
+      func.body.replace( QRegularExpression( "([ ]*)sipRes = new\\s+(\\w+)(.*)" ), "\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);" );
 
       // replace value return instruction
-      func.body.replace(QRegularExpression("([ ]*)sipRes =(.*)"),QString( "\\1auto var = \\2\n\\1%PYARG_0 = %CONVERTTOPYTHON[%1](var);").arg(func.returnType) );
+      func.body.replace( QRegularExpression( "([ ]*)sipRes =(.*)" ), QString( "\\1auto var = \\2\n\\1%PYARG_0 = %CONVERTTOPYTHON[%1](var);" ).arg( func.returnType ) );
     }
-    func.body.replace("sipRes","%PYARG_0");
-    func.body.replace("sipCpp","%CPPSELF");
+    func.body.replace( "sipRes", "%PYARG_0" );
+    func.body.replace( "sipCpp", "%CPPSELF" );
 
     // need to be done manually
     if ( func.body.contains( QStringLiteral( "sip" ) ) )
@@ -911,7 +940,7 @@ void TypeSystemGenerator::addInjectCode( const QString& klass, const QString& si
     }
   }
 
-  mAddedFunctions[klass].append(func);
+  mAddedFunctions[klass].append( func );
 }
 
 
@@ -953,8 +982,8 @@ int main( int argc, char **argv )
   parser.addOption( outputFileOption );
 
   QCommandLineOption snippetFileOption( u"snippet-file"_s,
-                                       u"Snippet file. Default to empty"_s,
-                                       u"file"_s );
+                                        u"Snippet file. Default to empty"_s,
+                                        u"file"_s );
   parser.addOption( snippetFileOption );
 
   QCommandLineOption joinNamespacesOption( {u"j"_s, u"join-namespaces"_s},
