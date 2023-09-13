@@ -38,7 +38,7 @@ Abstract base class for bounding volumes for tiled scene nodes.
       default:
         sipType = 0;
         break;
-    };
+    }
 %End
 
     virtual ~QgsAbstractTiledSceneBoundingVolume();

@@ -56,7 +56,7 @@ class CORE_EXPORT QgsAbstractTiledSceneBoundingVolume
       default:
         sipType = 0;
         break;
-    };
+    }
     SIP_END
 #endif
 
