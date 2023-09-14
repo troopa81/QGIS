@@ -246,7 +246,14 @@
         <enum-type name="TiledSceneRequestFlag" flags="TiledSceneRequestFlags"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsrectangle.h:41 -->
-    <value-type name="QgsRectangle"/>
+    <value-type name="QgsRectangle">
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsRectangle: %1>" ).arg( %CPPSELF->asWktCoordinates() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgscoordinatereferencesystem.h:211 -->
     <value-type name="QgsCoordinateReferenceSystem">
         <enum-type name="CrsType"/>
@@ -260,6 +267,14 @@
         <modify-function signature="fromProjObject(PJ*)" remove="true"/>
         <modify-function signature="createFromProjObject(PJ*)" remove="true"/>
         <modify-function signature="invalidateCache(bool)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const QString str = %CPPSELF->isValid() ? QStringLiteral( "<QgsCoordinateReferenceSystem: %1%2>" ).arg( !%CPPSELF->authid().isEmpty() ? %CPPSELF->authid() : %CPPSELF->toWkt( QgsCoordinateReferenceSystem::WKT_PREFERRED ),
+                        std::isfinite( %CPPSELF->coordinateEpoch() ) ? QStringLiteral( " @ %1" ).arg( %CPPSELF->coordinateEpoch() ) : QString() )
+                        : QStringLiteral( "<QgsCoordinateReferenceSystem: invalid>" );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/proj/qgscoordinatetransformcontext.h:57 -->
     <value-type name="QgsCoordinateTransformContext">
@@ -289,6 +304,12 @@
         <modify-function signature="setConfigurationFlags(QgsField::ConfigurationFlags)" remove="true"/>
         <modify-function signature="readableConfigurationFlag(QgsField::ConfigurationFlag)" remove="true"/>
         <modify-function signature="convertCompatible(QVariant&amp;,QString*)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsField: %1 (%2)>" ).arg( %CPPSELF->name() ).arg( %CPPSELF->typeName() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfields.h:44 -->
     <value-type name="QgsFields">
@@ -308,6 +329,114 @@
         <modify-function signature="end()" remove="true"/>
         <modify-function signature="begin()" remove="true"/>
         <modify-function signature="end()" remove="true"/>
+        <add-function signature="remove(int)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 >= %CPPSELF->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      %CPPSELF->remove( %1 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return %CPPSELF->count();
+]]></inject-code>
+        </add-function>
+        <add-function signature="__bool__()" return-type="int">
+            <inject-code class="target" position="beginning"><![CDATA[
+    Py_RETURN_TRUE;
+]]></inject-code>
+        </add-function>
+        <add-function signature="at(int)" return-type="QgsField">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 >= %CPPSELF->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      auto var = new QgsField( %CPPSELF->at( %1 ) );
+      %PYARG_0 = %CONVERTTOPYTHON[QgsField *](var);
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="field(int)" return-type="QgsField">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 >= %CPPSELF->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      auto var = new QgsField( %CPPSELF->field( %1 ) );
+      %PYARG_0 = %CONVERTTOPYTHON[QgsField *](var);
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="field(const QString&amp;)" return-type="QgsField">
+            <inject-code class="target" position="beginning"><![CDATA[
+    int fieldIdx = %CPPSELF->indexFromName( %1 );
+    if ( fieldIdx == -1 )
+    {
+      PyErr_SetString( PyExc_KeyError, %1.toLatin1() );
+      return nullptr;
+    }
+    else
+    {
+      auto var = new QgsField( %CPPSELF->field( %1 ) );
+      %PYARG_0 = %CONVERTTOPYTHON[QgsField *](var);
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="fieldOrigin(int)" return-type="QgsFields::FieldOrigin">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 >= %CPPSELF->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      auto var =  %CPPSELF->fieldOrigin( %1 );
+      %PYARG_0 = %CONVERTTOPYTHON[QgsFields::FieldOrigin](var);
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="fieldOriginIndex(int)" return-type="int">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 >= %CPPSELF->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      auto var =  %CPPSELF->fieldOriginIndex( %1 );
+      %PYARG_0 = %CONVERTTOPYTHON[int](var);
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="iconForField(int,bool= false )" return-type="QIcon">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 >= %CPPSELF->count() )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      auto var = new QIcon( %CPPSELF->iconForField( %1 ) );
+      %PYARG_0 = %CONVERTTOPYTHON[QIcon *](var);
+    }
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeature.h:55 -->
     <value-type name="QgsFeature">
@@ -322,6 +451,128 @@
         <modify-function signature="attribute(int)" remove="true"/>
         <modify-function signature="isUnsetValue(int)" remove="true"/>
         <modify-function signature="QgsFeature(QgsFeatureId)" remove="false"/>
+        <add-function signature="__setitem__">
+            <inject-code class="target" position="beginning" file="./qgis_core.cpp" snippet="QgsFeature-__setitem__"/>
+        </add-function>
+        <add-function signature="__setitem__">
+            <inject-code class="target" position="beginning" file="./qgis_core.cpp" snippet="QgsFeature-__setitem__"/>
+        </add-function>
+        <add-function signature="__delitem__(int)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 >= 0 && %1 < %CPPSELF->attributes().count() )
+      %CPPSELF->deleteAttribute( %1 );
+    else
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__delitem__(const QString&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    int fieldIdx = %CPPSELF->fieldNameIndex( %1 );
+    if ( fieldIdx == -1 )
+    {
+      PyErr_SetString( PyExc_KeyError, %1.toLatin1() );
+      return nullptr;
+    }
+    else
+      %CPPSELF->deleteAttribute( fieldIdx );
+]]></inject-code>
+        </add-function>
+        <add-function signature="__hash__()" return-type="long">
+            <inject-code class="target" position="beginning"><![CDATA[
+    auto var =  qHash( *%CPPSELF );
+    %PYARG_0 = %CONVERTTOPYTHON[long](var);
+]]></inject-code>
+        </add-function>
+        <add-function signature="setAttribute(int,const QVariant&amp;)" return-type="bool">
+            <inject-code class="target" position="beginning"><![CDATA[
+    bool rv;
+
+    if ( !%2.isValid() )
+    {
+      rv = %CPPSELF->setAttribute( %1, QVariant( QMetaType( QMetaType::Int ) ) );
+    }
+    else
+    {
+      rv = %CPPSELF->setAttribute( %1, %2 );
+    }
+
+    if ( !rv )
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+
+    auto var =  rv;
+    %PYARG_0 = %CONVERTTOPYTHON[bool](var);
+]]></inject-code>
+        </add-function>
+        <add-function signature="deleteAttribute(int)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 >= 0 && %1 < %CPPSELF->attributes().count() )
+      %CPPSELF->deleteAttribute( %1 );
+    else
+    {
+      PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="setAttribute(const QString&amp;,const QVariant&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    int fieldIdx = %CPPSELF->fieldNameIndex( %1 );
+    if ( fieldIdx == -1 )
+    {
+      PyErr_SetString( PyExc_KeyError, %1.toLatin1() );
+      return nullptr;
+    }
+    else
+    {
+      if ( !%2.isValid() )
+      {
+        %CPPSELF->setAttribute( %1, QVariant( QMetaType( QMetaType::Int ) ) );
+      }
+      else
+      {
+        %CPPSELF->setAttribute( fieldIdx, %2 );
+      }
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="deleteAttribute(const QString&amp;)" return-type="bool">
+            <inject-code class="target" position="beginning"><![CDATA[
+    int fieldIdx = %CPPSELF->fieldNameIndex( %1 );
+    if ( fieldIdx == -1 )
+    {
+      PyErr_SetString( PyExc_KeyError, %1.toLatin1() );
+      return nullptr;
+      Py_RETURN_FALSE;
+    }
+    else
+    {
+      %CPPSELF->deleteAttribute( fieldIdx );
+      Py_RETURN_TRUE;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="isUnsetValue(int)" return-type="bool">
+            <inject-code class="target" position="beginning"><![CDATA[
+    {
+      if ( %1 < 0 || %1 >= %CPPSELF->attributes().count() )
+      {
+        PyErr_SetString( PyExc_KeyError, QByteArray::number( %1 ) );
+        return nullptr;
+      }
+      else
+      {
+        auto var =  %CPPSELF->isUnsetValue( %1 );
+        %PYARG_0 = %CONVERTTOPYTHON[bool](var);
+      }
+    }
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgspoint.h:48 -->
     <object-type name="QgsPoint">
@@ -337,11 +588,24 @@
         <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
         <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsPoint: %1>" ).arg( %CPPSELF->asWkt() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:163 -->
     <value-type name="QgsGeometry">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometry.h:2611 -->
-        <value-type name="Error"/>
+        <value-type name="Error">
+            <add-function signature="__repr__()" return-type="PyObject*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        QString str = QStringLiteral( "<QgsGeometry.Error: %1>" ).arg( %CPPSELF->what() );
+        %PYARG_0 = PyUnicode_FromString( str.toUtf8().data() );
+]]></inject-code>
+            </add-function>
+        </value-type>
         <modify-function signature="operator=(const QgsGeometry&amp;)" remove="true"/>
         <modify-function signature="QgsGeometry(std::unique_ptr)" remove="true"/>
         <modify-function signature="fromWkb(unsigned char*,int)" remove="true"/>
@@ -370,6 +634,21 @@
         <modify-function signature="compare(const QgsPolylineXY&amp;,const QgsPolylineXY&amp;,double)" remove="true"/>
         <modify-function signature="compare(const QgsPolygonXY&amp;,const QgsPolygonXY&amp;,double)" remove="true"/>
         <modify-function signature="compare(const QgsMultiPolygonXY&amp;,const QgsMultiPolygonXY&amp;,double)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str;
+    if ( %CPPSELF->isNull() )
+      str = QStringLiteral( "<QgsGeometry: null>" );
+    else
+    {
+      QString wkt = %CPPSELF->asWkt();
+      if ( wkt.length() > 1000 )
+        wkt = wkt.left( 1000 ) + QStringLiteral( "..." );
+      str = QStringLiteral( "<QgsGeometry: %1>" ).arg( wkt );
+    }
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:117 -->
     <value-type name="QgsExpressionContextScope">
@@ -397,6 +676,12 @@
         <modify-function signature="detach()" remove="true"/>
         <modify-function signature="initFunctionHelp()" remove="true"/>
         <modify-function signature="initVariableHelp()" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsExpression: '%1'>" ).arg( %CPPSELF->expression() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturerequest.h:83 -->
     <value-type name="QgsFeatureRequest">
@@ -419,7 +704,17 @@
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrange.h:202 -->
     <value-type name="QgsDoubleRange">
-        <modify-function signature="QgsDoubleRange(double,double,bool,bool)" remove="true"/>
+        <!-- TODO error here because some methods avec expose only for sip files -->
+        <!--modify-function signature="QgsDoubleRange(double,double,bool,bool)" remove="true"/-->
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsDoubleRange: %1%2, %3%4>" ).arg( %CPPSELF->includeLower() ? QStringLiteral( "[" ) : QStringLiteral( "(" ) )
+                  .arg( %CPPSELF->lower() )
+                  .arg( %CPPSELF->upper() )
+                  .arg( %CPPSELF->includeUpper() ? QStringLiteral( "]" ) : QStringLiteral( ")" ) );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractmetadatabase.h:57 -->
     <object-type name="QgsAbstractMetadataBase">
@@ -443,7 +738,14 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:34 -->
     <value-type name="QgsReadWriteContext">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:42 -->
-        <value-type name="ReadWriteMessage"/>
+        <value-type name="ReadWriteMessage">
+            <add-function signature="__repr__()" return-type="PyObject*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        QString str = QStringLiteral( "<QgsReadWriteContext.ReadWriteMessage: %1>" ).arg( %CPPSELF->message() );
+        %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+            </add-function>
+        </value-type>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsdataprovider.h:41 -->
     <object-type name="QgsDataProvider">
@@ -474,6 +776,12 @@
         <modify-function signature="setCustomFlagProperty(const QString&amp;,const T&amp;)" remove="true"/>
         <modify-function signature="crsHtmlMetadata()" remove="true"/>
         <modify-function signature="generalHtmlMetadata()" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsMapLayer: '%1' (%2)>" ).arg( %CPPSELF->name(), %CPPSELF->dataProvider() ? %CPPSELF->dataProvider()->name() : QStringLiteral( "Invalid" ) );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstemporalrangeobject.h:33 -->
     <value-type name="QgsTemporalRangeObject"/>
@@ -495,6 +803,32 @@
         <modify-function signature="histogram(int,int,double,double,const QgsRectangle&amp;,int,bool,QgsRasterBlockFeedback*)" remove="true"/>
         <modify-function signature="hasHistogram(int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
         <modify-function signature="initHistogram(QgsRasterHistogram&amp;,int,int,double,double,const QgsRectangle&amp;,int,bool)" remove="true"/>
+        <add-function signature="hasHistogram(int,int,PyObject*= Py_None,PyObject*= Py_None,const QgsRectangle&amp;= QgsRectangle(),int= 0,bool= false )" return-type="bool">
+            <inject-code class="target" position="beginning"><![CDATA[
+    double minimum;
+    double maximum;
+    if ( %3 == Py_None )
+    {
+      minimum = std::numeric_limits<double>::quiet_NaN();
+    }
+    else
+    {
+      minimum = PyFloat_AsDouble( %3 );
+    }
+
+    if ( %4 == Py_None )
+    {
+      maximum = std::numeric_limits<double>::quiet_NaN();
+    }
+    else
+    {
+      maximum = PyFloat_AsDouble( %4 );
+    }
+
+    auto var =  %CPPSELF->hasHistogram( %1, %2, minimum, maximum, %5, %6, %7 );
+    %PYARG_0 = %CONVERTTOPYTHON[bool](var);
+]]></inject-code>
+        </add-function>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterattributetable.h:43 -->
     <value-type name="QgsRasterAttributeTable">
@@ -529,6 +863,12 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeatureiterator.h:289 -->
     <value-type name="QgsFeatureIterator">
         <modify-function signature="setInterruptionChecker(QgsFeedback*)" remove="true"/>
+        <add-function signature="__iter__()" return-type="QgsFeatureIterator*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    auto var =  %CPPSELF;
+    %PYARG_0 = %CONVERTTOPYTHON[QgsFeatureIterator*](var);
+]]></inject-code>
+        </add-function>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturesink.h:33 -->
     <object-type name="QgsFeatureSink">
@@ -539,6 +879,16 @@
     <object-type name="QgsFeatureSource">
         <enum-type name="FeatureAvailability"/>
         <enum-type name="SpatialIndexPresence"/>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return %CPPSELF->featureCount();
+]]></inject-code>
+        </add-function>
+        <add-function signature="__bool__()" return-type="int">
+            <inject-code class="target" position="beginning"><![CDATA[
+    Py_RETURN_TRUE;
+]]></inject-code>
+        </add-function>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:40 -->
     <value-type name="QgsEditFormConfig">
@@ -573,6 +923,12 @@
         <modify-function signature="fieldConfigurationFlags(int)" remove="true"/>
         <modify-function signature="allowCommit()" remove="true"/>
         <modify-function signature="setAllowCommit(bool)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsVectorLayer: '%1' (%2)>" ).arg( %CPPSELF->name(), %CPPSELF->dataProvider() ? %CPPSELF->dataProvider()->name() : QStringLiteral( "Invalid" ) );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerrenderer.h:51 -->
     <object-type name="QgsMapLayerRenderer">
@@ -607,14 +963,14 @@
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:39 -->
     <value-type name="QgsProfileRenderContext"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:198 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:192 -->
     <object-type name="QgsAbstractProfileResults">
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:207 -->
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:201 -->
         <value-type name="Feature"/>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:291 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:285 -->
     <value-type name="QgsProfileGenerationContext"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:421 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:415 -->
     <object-type name="QgsAbstractProfileGenerator"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilerequest.h:37 -->
     <value-type name="QgsProfileRequest">
