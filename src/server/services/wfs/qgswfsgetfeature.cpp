@@ -464,7 +464,8 @@ namespace QgsWfs
         const QString srsName {request.serverParameters().value( QStringLiteral( "SRSNAME" ) )};
         const bool invertAxis { mWfsParameters.versionAsNumber() >= QgsProjectVersion( 1, 1, 0 ) &&
                                 outputCrs.hasAxisInverted() &&
-                                ! srsName.startsWith( QLatin1String( "EPSG:" ) ) };
+                                ! srsName.startsWith( QLatin1String( "EPSG:" ) ) &&
+                                !srsName.isEmpty() };
 
         const createFeatureParams cfp = { layerPrecision,
                                           layerCrs,
@@ -1250,7 +1251,8 @@ namespace QgsWfs
           const QString srsName {request.serverParameters().value( QStringLiteral( "SRSNAME" ) )};
           const bool invertAxis { mWfsParameters.versionAsNumber() >= QgsProjectVersion( 1, 1, 0 ) &&
                                   crs.hasAxisInverted() &&
-                                  ! srsName.startsWith( QLatin1String( "EPSG:" ) ) };
+                                  ! srsName.startsWith( QLatin1String( "EPSG:" ) ) &&
+                                  !srsName.isEmpty() };
 
           // If requested SRS (srsName) is different from rect CRS (crs) we need to transform the envelope
           QgsCoordinateTransform transform;
