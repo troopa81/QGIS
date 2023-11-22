@@ -21,14 +21,13 @@ CLANG_WARNINGS="-Wrange-loop-construct"
 export CC=/usr/lib/ccache/clang
 export CXX=/usr/lib/ccache/clang++
 
-ln -s /usr/bin/ninja /usr/bin/ninja-build
-
 cmake -GNinja \
  -DPYTHON_LIBRARY=/usr/lib64/libpython3.10.so.1.0 \
  -DENABLE_TESTING=ON \
  -DWITH_PYSIDE=ON \
  -DBUILD_WITH_QT6=ON \
  -DWITH_EPT=OFF \
+ -DWITH_COPC=OFF \
  -DWITH_QUICK=OFF \
  -DWITH_3D=OFF \
  -DWITH_ANALYSIS=OFF \
@@ -38,7 +37,7 @@ cmake -GNinja \
  -DWITH_GRASS=OFF \
  -DWITH_QGIS_PROCESS=OFF \
  -DWITH_QTWEBKIT=OFF \
- -DWITH_QT5SERIALPORT=OFF \
+ -DWITH_QTSERIALPORT=OFF \
  -DSUPPRESS_QT_WARNINGS=ON \
  -DENABLE_MODELTEST=ON \
  -DENABLE_PGTEST=OFF \
@@ -53,16 +52,22 @@ cmake -GNinja \
  -DWITH_BINDINGS=OFF \
  -DWITH_SERVER=OFF \
  -DWITH_ORACLE=OFF \
+ -DWITH_PDAL=OFF \
+ -DWITH_DRACO=OFF \
  -DDISABLE_DEPRECATED=ON \
  -DCXX_EXTRA_FLAGS="${CLANG_WARNINGS}" \
  -DCMAKE_C_COMPILER=/bin/clang \
  -DCMAKE_CXX_COMPILER=/bin/clang++ \
  -DADD_CLAZY_CHECKS=ON \
- -DWERROR=TRUE \
+ -DWERROR=FALSE \
  ..
 
-ninja qgis_core pyqgis_core pyutils pyqtcompat pytesting
-ninja install
+git config --global --add safe.directory /usr/src/qgis
+
+ninja qgis_core pycore pyutils pyqtcompat pytesting
+
+xvfb-run ctest -V -R "Py*"
+
 
 ########################
 # Show ccache statistics

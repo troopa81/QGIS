@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - qt-for-python-qt6
+      - pyside6-new
     paths:
     - 'src/**'
     - 'tests/**'
@@ -67,6 +68,13 @@ jobs:
             ${DOCKER_IMAGE} /usr/src/qgis/.docker/docker-qgis-build-qt-for-python.sh
         env:
           DOCKER_IMAGE: ${{ steps.docker-build.outputs.FULL_IMAGE_NAME }}
+
+      - name: Archive test results report
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: build-pyside6/Testing/Temporary/LastTest.log
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
