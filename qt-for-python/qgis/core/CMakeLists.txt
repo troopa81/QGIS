@@ -97,7 +97,7 @@ endif()
 # Dependencies - changes on these files should trigger new bindings
 set(pyqgis_core_DEPENDS
   ${TYPESYSTEM_FILE}
-#    ${CMAKE_SOURCE_DIR}/src/core/geometry/qgswkbtypes.h
+  ${SNIPPET_FILE}
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")

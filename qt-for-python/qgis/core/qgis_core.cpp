@@ -1,10 +1,10 @@
 
 // @snippet QgsFeature-__setitem__
-QVariant cppValue = % CONVERTTOCPP[QVariant]( _value );
+QVariant cppValue = %CONVERTTOCPP[QVariant](_value);
 
 qDebug() << "cppValue=" << cppValue;
 
-bool rv = % CPPSELF->setAttribute( _i, cppValue );
+bool rv = %CPPSELF->setAttribute( _i, cppValue );
 
 if ( !rv )
 {
