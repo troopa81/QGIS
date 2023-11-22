@@ -287,6 +287,7 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   const QStringList allowedClass =
   {
     QStringLiteral( "Qgis" ),
+    QStringLiteral( "QgsApplication" ),
     QStringLiteral( "QgsAttributes" ),
     QStringLiteral( "QgsCoordinateReferenceSystem" ),
     QStringLiteral( "QgsDataProvider" ),
@@ -310,8 +311,12 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
     QStringLiteral( "QgsFeatureSource" ),
     QStringLiteral( "QgsAbstractProfileSource" ),
     QStringLiteral( "QgsMapLayer" ),
+    QStringLiteral( "QgsMapSettings" ),
+    QStringLiteral( "QgsMultiRenderChecker" ),
     QStringLiteral( "QgsVectorLayer" ),
     QStringLiteral( "QgsLayerMetadata" ),
+    QStringLiteral( "QgsLayout" ),
+    QStringLiteral( "QgsLayoutChecker" ),
     QStringLiteral( "QgsEditFormConfig" ),
     QStringLiteral( "QgsMapLayerRenderer" ),
     QStringLiteral( "QgsReadWriteContext" ),
@@ -334,6 +339,7 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
     QStringLiteral( "QgsGeometry" ),
     QStringLiteral( "QgsDoubleRange" ),
     QStringLiteral( "QgsProfileRenderContext" ),
+    QStringLiteral( "QgsRenderChecker" ),
     QStringLiteral( "QgsTemporalRangeObject" )
   };
 
@@ -776,18 +782,35 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
     return true;
 
   // Heuristics for value types:
-  // value-type when we don't inherit from QObject and there is no abstract function
-  // TODO we should check that the default copycontructor is not delete
-  // and maybe that child classes are not object type
+  // value-type when :
+  // - we don't inherit from QObject
+  // - there is no abstract function
+  // - A copy constructor exist (default or user defined)
+  // TODO and maybe that child classes are not object type ?
 
   const auto functions = klass->functions();
-  if ( klass->name() == QStringLiteral( "QObject" )
-       || std::any_of( functions.cbegin(), functions.cend(),
-                       []( const FunctionModelItem & f )
-{
-  return f->isAbstract();
-  } ) )
-  return false;
+  if ( klass->name() == QStringLiteral( "QObject" ) )
+    return false;
+
+
+  bool copyContructorDefined = false;
+  bool defaultConstructorDeleted = false;
+  for( const FunctionModelItem & f : functions )
+  {
+    if ( f->isAbstract()
+         || ( f->functionType() == CodeModel::CopyConstructor && f->isDeleted() ) )
+      return false;
+
+    if ( f->functionType() == CodeModel::CopyConstructor )
+      copyContructorDefined = true;
+
+    if ( f->functionType() == CodeModel::Constructor && f->isDeleted() )
+      defaultConstructorDeleted = true;
+  }
+
+  // as we delete the default contructor, the default constructor doesn't exist anymore
+  if ( !copyContructorDefined && defaultConstructorDeleted )
+    return false;
 
 
   for ( auto parent : klass->baseClasses() )

@@ -785,6 +785,8 @@
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstemporalrangeobject.h:33 -->
     <value-type name="QgsTemporalRangeObject"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapsettings.h:89 -->
+    <value-type name="QgsMapSettings"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrendercontext.h:60 -->
     <value-type name="QgsRenderContext">
         <modify-function signature="painter()" remove="true"/>
@@ -890,6 +892,19 @@
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:95 -->
+    <object-type name="QgsApplication">
+        <enum-type name="StyleSheetType"/>
+        <enum-type name="Cursor"/>
+        <enum-type name="endian_t"/>
+        <modify-function signature="QgsApplication(int&amp;,char**,bool,const QString&amp;,const QString&amp;)" remove="true"/>
+        <modify-function signature="init(QString)" remove="true"/>
+        <modify-function signature="rasterRendererRegistry()" remove="true"/>
+        <modify-function signature="tileDownloadManager()" remove="true"/>
+        <modify-function signature="annotationRegistry()" remove="true"/>
+        <modify-function signature="preNotify(QObject*,QEvent*,bool*)" remove="true"/>
+        <modify-function signature="installTranslators()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:40 -->
     <value-type name="QgsEditFormConfig">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:47 -->
@@ -935,6 +950,20 @@
         <modify-function signature="renderContext()" remove="true"/>
         <modify-function signature="setLayerRenderingTimeHint(int)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayout.h:49 -->
+    <object-type name="QgsLayout">
+        <enum-type name="ZValues"/>
+        <enum-type name="UndoCommand"/>
+        <modify-function signature="layoutItems(QList&amp;)" remove="true"/>
+        <modify-function signature="layoutObjects(QList&amp;)" remove="true"/>
+        <modify-function signature="renderContext()" remove="true"/>
+        <modify-function signature="reportContext()" remove="true"/>
+        <modify-function signature="snapper()" remove="true"/>
+        <modify-function signature="gridSettings()" remove="true"/>
+        <modify-function signature="guides()" remove="true"/>
+        <modify-function signature="pageCollection()" remove="true"/>
+        <modify-function signature="undoStack()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgstopologicalmesh.h:47 -->
     <value-type name="QgsTopologicalMesh">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgstopologicalmesh.h:62 -->
@@ -961,6 +990,14 @@
         <modify-function signature="topologicalMesh()" remove="true"/>
         <modify-function signature="triangularMesh()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrenderchecker.h:41 -->
+    <value-type name="QgsRenderChecker">
+        <enum-type name="Flag" flags="Flags"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmultirenderchecker.h:56 -->
+    <value-type name="QgsMultiRenderChecker"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmultirenderchecker.h:171 -->
+    <object-type name="QgsLayoutChecker"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:39 -->
     <value-type name="QgsProfileRenderContext"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsabstractprofilegenerator.h:192 -->
