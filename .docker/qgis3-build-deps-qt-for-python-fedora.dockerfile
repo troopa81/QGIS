@@ -71,10 +71,10 @@ RUN cd /usr/src \
   && ninja install
 
 RUN cd /usr/src \
-  && wget https://github.com/frankosterfeld/qtkeychain/archive/refs/heads/master.zip \
-  && unzip master.zip \
-  && rm master.zip \
-  && cd qtkeychain-master \
+  && wget https://github.com/frankosterfeld/qtkeychain/archive/refs/heads/main.zip \
+  && unzip main.zip \
+  && rm main.zip \
+  && cd qtkeychain-main \
   && cmake -DBUILD_WITH_QT6=ON -DBUILD_TRANSLATIONS=OFF -DCMAKE_INSTALL_PREFIX=/usr/local -GNinja \
   && ninja install
 
