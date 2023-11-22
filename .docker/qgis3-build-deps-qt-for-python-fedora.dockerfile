@@ -1,4 +1,4 @@
-ARG DISTRO_VERSION=37
+ARG DISTRO_VERSION=38
 
 FROM fedora:${DISTRO_VERSION} as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
@@ -7,6 +7,7 @@ RUN dnf -y --refresh install \
     bison \
     ccache \
     clang \
+    clang-devel \
     clazy \
     exiv2-devel \
     expat-devel \
