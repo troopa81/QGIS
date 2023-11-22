@@ -98,16 +98,6 @@ RUN cd /usr/src \
   && make -j4 \
   && make install
 
-#RUN pip install --index-url=http://download.qt.io/official_releases/QtForPython/ --trusted-host download.qt.io shiboken6 pyside6 shiboken6_generator
-
 ENV PATH="/usr/local/bin:${PATH}"
 
-RUN dnf install -y libxslt-devel
-
-RUN dnf -y install git python-setuptools python3-packaging clang-devel llvm-devel
-WORKDIR /usr
-#RUN git clone https://code.qt.io/pyside/pyside-setup && cd pyside-setup && git checkout 6.3
-#RUN wget https://codereview.qt-project.org/changes/pyside%2Fpyside-setup~395307/revisions/1/archive?format=tar
-#RUN mv archive?format=tar pyside.tar.gz && tar tzf pyside
-#WORKDIR /usr/pyside-setup
-#RUN python3 setup.py build --qtpaths=/usr/lib64/qt6/bin/qtpaths --parallel=8
+RUN dnf install -y python3-pip && pip install PySide6
