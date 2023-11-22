@@ -6,6 +6,7 @@ on:
       - master
       - release-**
       - qt-for-python-qt6
+      - pyside6
     paths:
     - 'src/**'
     - 'tests/**'
