@@ -10,7 +10,7 @@ __author__ = "Nyall Dawson"
 __date__ = "16/08/2015"
 __copyright__ = "Copyright 2015, The QGIS Project"
 
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import Qgis, QgsField, QgsCoordinateReferenceSystem
 import unittest
 from qgis.testing import start_app, QgisTestCase
@@ -67,13 +67,13 @@ class TestQgsField(QgisTestCase):
         )
 
     def test_convert_compatible_exceptions(self):
-        field = QgsField("test", QVariant.Int)
+        field = QgsField("test", QMetaType.Int)
 
         self.assertTrue(field.convertCompatible(5))
         with self.assertRaises(ValueError):
             field.convertCompatible("abc")
 
-        field = QgsField("test", QVariant.DateTime)
+        field = QgsField("test", QMetaType.QDateTime)
 
         with self.assertRaises(ValueError):
             field.convertCompatible(5)
