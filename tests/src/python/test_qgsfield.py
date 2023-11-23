@@ -10,7 +10,7 @@ __date__ = '16/08/2015'
 __copyright__ = 'Copyright 2015, The QGIS Project'
 
 import qgis  # NOQA
-from qgis.PyQt.QtCore import QVariant
+from qgis.PyQt.QtCore import QMetaType
 from qgis.core import (
     Qgis,
     QgsField,
@@ -52,13 +52,13 @@ class TestQgsField(QgisTestCase):
                           Qgis.FieldMetadataProperty.CustomProperty + 3: 'test2'})
 
     def test_convert_compatible_exceptions(self):
-        field = QgsField('test', QVariant.Int)
+        field = QgsField('test', QMetaType.Int)
 
         self.assertTrue(field.convertCompatible(5))
         with self.assertRaises(ValueError):
             field.convertCompatible('abc')
 
-        field = QgsField('test', QVariant.DateTime)
+        field = QgsField('test', QMetaType.QDateTime)
 
         with self.assertRaises(ValueError):
             field.convertCompatible(5)
