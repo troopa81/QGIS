@@ -313,6 +313,7 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
     QStringLiteral( "QgsMapLayer" ),
     QStringLiteral( "QgsMapSettings" ),
     QStringLiteral( "QgsMultiRenderChecker" ),
+    QStringLiteral( "QgsMessageLog" ),
     QStringLiteral( "QgsVectorLayer" ),
     QStringLiteral( "QgsLayerMetadata" ),
     QStringLiteral( "QgsLayout" ),
@@ -712,7 +713,7 @@ bool TypeSystemGenerator::loadSnippet( const QString &snippetFileName )
 
   QTextStream in( &file );
 
-  const QRegularExpression reSnippet( QStringLiteral( "^\\s*//\\s*@snippet\\s+([\\w-]*)" ) );
+  const QRegularExpression reSnippet( QStringLiteral( "^\\s*//\\s*@snippet\\s+(.*)" ) );
 
   while ( !in.atEnd() )
   {

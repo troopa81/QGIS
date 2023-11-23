@@ -304,6 +304,9 @@
         <modify-function signature="setConfigurationFlags(QgsField::ConfigurationFlags)" remove="true"/>
         <modify-function signature="readableConfigurationFlag(QgsField::ConfigurationFlag)" remove="true"/>
         <modify-function signature="convertCompatible(QVariant&amp;,QString*)" remove="true"/>
+        <add-function signature="convertCompatible(QVariant&amp;)" return-type="bool">
+            <inject-code class="target" position="beginning" file="./qgis_core.cpp" snippet="QgsField-convertCompatible(QVariant&amp;)"/>
+        </add-function>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
     QString str = QStringLiteral( "<QgsField: %1 (%2)>" ).arg( %CPPSELF->name() ).arg( %CPPSELF->typeName() );
@@ -892,6 +895,8 @@
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmessagelog.h:39 -->
+    <object-type name="QgsMessageLog"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:95 -->
     <object-type name="QgsApplication">
         <enum-type name="StyleSheetType"/>
