@@ -65,7 +65,6 @@ cmake -GNinja \
 git config --global --add safe.directory /usr/src/qgis
 
 ninja qgis_core pycore pyutils pyqtcompat pytesting
-ninja install
 
 ########################
 # Show ccache statistics
