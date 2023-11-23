@@ -23,6 +23,7 @@ RUN dnf -y --refresh install \
     libpq-devel \
     libspatialite-devel \
     libxml2-devel \
+    libxslt-devel \
     libzip-devel \
     libzstd-devel \
     llvm-devel \
@@ -102,4 +103,9 @@ RUN cd /usr/src \
 
 ENV PATH="/usr/local/bin:${PATH}"
 
-RUN dnf install -y python3-pip && pip install PySide6
+RUN dnf install -y python3-pip && pip install PySide6 shiboken6_generator
+
+# Ugly hack because shiboken6_generator link on an old icu librairy
+RUN ln -s /usr/lib64/libicui18n.so.72 /usr/lib64/libicui18n.so.56 \
+    && ln -s /usr/lib64/libicuuc.so.72 /usr/lib64/libicuuc.so.56 \
+    && ln -s /usr/lib64/libicudata.so.72 /usr/lib64/libicudata.so.56

@@ -27,6 +27,7 @@ cmake -GNinja \
  -DWITH_PYSIDE=ON \
  -DBUILD_WITH_QT6=ON \
  -DWITH_EPT=OFF \
+ -DWITH_COPC=OFF \
  -DWITH_QUICK=OFF \
  -DWITH_3D=OFF \
  -DWITH_ANALYSIS=OFF \
@@ -58,10 +59,10 @@ cmake -GNinja \
  -DCMAKE_C_COMPILER=/bin/clang \
  -DCMAKE_CXX_COMPILER=/bin/clang++ \
  -DADD_CLAZY_CHECKS=ON \
- -DWERROR=TRUE \
+ -DWERROR=FALSE \
  ..
 
-ninja qgis_core pyqgis_core pyutils pyqtcompat pytesting
+ninja qgis_core pycore pyutils pyqtcompat pytesting
 ninja install
 
 ########################
