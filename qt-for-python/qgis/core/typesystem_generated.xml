@@ -899,16 +899,26 @@
     <object-type name="QgsMessageLog"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:95 -->
     <object-type name="QgsApplication">
+      <extra-includes>
+        <include file-name="pysideqapp.h" location="global"/>
+        <include file-name="pysidecleanup.h" location="global"/>
+      </extra-includes>
+
         <enum-type name="StyleSheetType"/>
         <enum-type name="Cursor"/>
         <enum-type name="endian_t"/>
-        <modify-function signature="QgsApplication(int&amp;,char**,bool,const QString&amp;,const QString&amp;)" remove="true"/>
+        <modify-function signature="QgsApplication(int&amp;,char**,bool,const QString&amp;,const QString&amp;)" access="private"/>
         <modify-function signature="init(QString)" remove="true"/>
         <modify-function signature="rasterRendererRegistry()" remove="true"/>
         <modify-function signature="tileDownloadManager()" remove="true"/>
         <modify-function signature="annotationRegistry()" remove="true"/>
         <modify-function signature="preNotify(QObject*,QEvent*,bool*)" remove="true"/>
         <modify-function signature="installTranslators()" remove="true"/>
+        <add-function signature="QgsApplication(QStringList,bool)">
+          <inject-code file="./qgis_core.cpp" snippet="qgsapplication"/>
+        </add-function>
+        <inject-code class="native" position="beginning" file="./qgis_core.cpp" snippet="qgsapplication-init"/>
+
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:40 -->
     <value-type name="QgsEditFormConfig">

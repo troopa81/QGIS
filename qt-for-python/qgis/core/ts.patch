@@ -1,0 +1,42 @@
+diff --git a/qt-for-python/qgis/core/typesystem_generated.xml b/qt-for-python/qgis/core/typesystem_generated.xml
+index 2d4e0d1fa96..435758ef277 100644
+--- a/qt-for-python/qgis/core/typesystem_generated.xml
++++ b/qt-for-python/qgis/core/typesystem_generated.xml
+@@ -707,7 +707,8 @@
+     </value-type>
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrange.h:202 -->
+     <value-type name="QgsDoubleRange">
+-        <modify-function signature="QgsDoubleRange(double,double,bool,bool)" remove="true"/>
++        <!-- TODO error here because some methods avec expose only for sip files -->
++        <!--modify-function signature="QgsDoubleRange(double,double,bool,bool)" remove="true"/-->
+         <add-function signature="__repr__()" return-type="PyObject*">
+             <inject-code class="target" position="beginning"><![CDATA[
+     QString str = QStringLiteral( "<QgsDoubleRange: %1%2, %3%4>" ).arg( %CPPSELF->includeLower() ? QStringLiteral( "[" ) : QStringLiteral( "(" ) )
+@@ -898,16 +899,26 @@
+     <object-type name="QgsMessageLog"/>
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:95 -->
+     <object-type name="QgsApplication">
++      <extra-includes>
++        <include file-name="pysideqapp.h" location="global"/>
++        <include file-name="pysidecleanup.h" location="global"/>
++      </extra-includes>
++
+         <enum-type name="StyleSheetType"/>
+         <enum-type name="Cursor"/>
+         <enum-type name="endian_t"/>
+-        <modify-function signature="QgsApplication(int&amp;,char**,bool,const QString&amp;,const QString&amp;)" remove="true"/>
++        <modify-function signature="QgsApplication(int&amp;,char**,bool,const QString&amp;,const QString&amp;)" access="private"/>
+         <modify-function signature="init(QString)" remove="true"/>
+         <modify-function signature="rasterRendererRegistry()" remove="true"/>
+         <modify-function signature="tileDownloadManager()" remove="true"/>
+         <modify-function signature="annotationRegistry()" remove="true"/>
+         <modify-function signature="preNotify(QObject*,QEvent*,bool*)" remove="true"/>
+         <modify-function signature="installTranslators()" remove="true"/>
++        <add-function signature="QgsApplication(QStringList,bool)">
++          <inject-code file="./qgis_core.cpp" snippet="qgsapplication"/>
++        </add-function>
++        <inject-code class="native" position="beginning" file="./qgis_core.cpp" snippet="qgsapplication-init"/>
++
+     </object-type>
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:40 -->
+     <value-type name="QgsEditFormConfig">
