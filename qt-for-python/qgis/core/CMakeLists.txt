@@ -4,13 +4,14 @@
 # TODO Where does qgis_core_global.h comes from ? we need to generate it
 set(TYPESYSTEM_FILE "${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/typesystem_generated.xml")
 set(SNIPPET_FILE "${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/qgis_core.cpp")
+set(CLASSBLOCKLIST_FILE "${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/classBlockList.txt")
 
 set(TYPESYSTEM_GENERATOR_ARGS "")
 get_target_property(INCLUDE_DIRS qgis_core INCLUDE_DIRECTORIES)
 list(TRANSFORM INCLUDE_DIRS PREPEND "-I")
 
 add_custom_target(update_pyside_bindings
-    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" --snippet-file=${SNIPPET_FILE} -- ${INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h
+    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" --snippet-file=${SNIPPET_FILE} --class-block-list-file ${CLASSBLOCKLIST_FILE} -- ${INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS typesystem_generator
   )

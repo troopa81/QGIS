@@ -13,7 +13,7 @@ index 2d4e0d1fa96..435758ef277 100644
              <inject-code class="target" position="beginning"><![CDATA[
      QString str = QStringLiteral( "<QgsDoubleRange: %1%2, %3%4>" ).arg( %CPPSELF->includeLower() ? QStringLiteral( "[" ) : QStringLiteral( "(" ) )
 @@ -898,16 +899,26 @@
-     <object-type name="QgsMessageLog"/>
+     <value-type name="QgsTranslationContext"/>
      <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:95 -->
      <object-type name="QgsApplication">
 +      <extra-includes>
@@ -38,5 +38,5 @@ index 2d4e0d1fa96..435758ef277 100644
 +        <inject-code class="native" position="beginning" file="./qgis_core.cpp" snippet="qgsapplication-init"/>
 +
      </object-type>
-     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/editform/qgseditformconfig.h:40 -->
-     <value-type name="QgsEditFormConfig">
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnetworkreply.h:28 -->
+     <value-type name="QgsNetworkReplyContent">

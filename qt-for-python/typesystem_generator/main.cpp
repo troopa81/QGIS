@@ -81,7 +81,7 @@ static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction =
 class TypeSystemGenerator
 {
   public:
-    TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName );
+    TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName, const QString &classBlockListFileName );
 
     bool formatXmlOutput( const FileModelItem &dom );
     bool isValid() const;
@@ -104,6 +104,7 @@ class TypeSystemGenerator
     void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
     bool loadSkipRanges();
     bool loadSnippet( const QString &snippetFileName );
+    bool loadClassBlockList( const QString& classBlockListFileName );
     bool loadInjectedCode();
     bool isSkipped( CodeModelItem item ) const;
     bool isQgis( CodeModelItem item ) const;
@@ -125,6 +126,7 @@ class TypeSystemGenerator
     QMap<QString, QList<QString> > mNamespaceFiles;
     QMap<QString, QList<AddedFunction>> mAddedFunctions;
     QSet<QString> mSnippets;
+    QSet<QString> mClassBlockList;
 };
 
 static inline QString languageLevelDescription()
@@ -173,7 +175,7 @@ static bool hasMembers( const NamespaceModelItem &nsp )
   return std::any_of( classes.cbegin(), classes.cend(), useClass );
 }
 
-TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName )
+TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName, const QString &classBlockListFileName )
 {
   mOutputFile = std::make_unique<QFile>( outputFileName );
   if ( !mOutputFile->open( QIODevice::WriteOnly | QIODevice::Text ) )
@@ -189,6 +191,9 @@ TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const Q
 
   if ( mValid && !snippetFileName.isEmpty() )
     mValid = loadSnippet( snippetFileName );
+
+  if ( mValid && !classBlockListFileName.isEmpty() )
+    mValid = loadClassBlockList( classBlockListFileName );
 
   if ( mValid )
     mValid = loadSkipRanges();
@@ -284,69 +289,74 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   if ( isSkipped( klass ) )
     return;
 
-  const QStringList allowedClass =
-  {
-    QStringLiteral( "Qgis" ),
-    QStringLiteral( "QgsApplication" ),
-    QStringLiteral( "QgsAttributes" ),
-    QStringLiteral( "QgsCoordinateReferenceSystem" ),
-    QStringLiteral( "QgsDataProvider" ),
-    QStringLiteral( "QgsField" ),
-    QStringLiteral( "QgsFields" ),
-    QStringLiteral( "QgsImageFetcher" ),
-    QStringLiteral( "QgsMeshAdvancedEditing" ),
-    QStringLiteral( "QgsMeshEditRefineFaces" ),
-    QStringLiteral( "QgsMeshEditor" ),
-    QStringLiteral( "QgsRasterAttributeTable" ),
-    QStringLiteral( "QgsRectangle" ),
-    QStringLiteral( "QgsRasterInterface" ),
-    QStringLiteral( "QgsRasterBlock" ),
-    QStringLiteral( "QgsRasterBlockFeedback" ),
-    QStringLiteral( "QgsRasterDataProvider" ),
-    QStringLiteral( "QgsRasterAttributeTableModel" ),
-    QStringLiteral( "QgsTopologicalMesh" ),
-    QStringLiteral( "QgsExpressionContextGenerator" ),
-    QStringLiteral( "QgsExpressionContextScopeGenerator" ),
-    QStringLiteral( "QgsFeatureSink" ),
-    QStringLiteral( "QgsFeatureSource" ),
-    QStringLiteral( "QgsAbstractProfileSource" ),
-    QStringLiteral( "QgsMapLayer" ),
-    QStringLiteral( "QgsMapSettings" ),
-    QStringLiteral( "QgsMultiRenderChecker" ),
-    QStringLiteral( "QgsMessageLog" ),
-    QStringLiteral( "QgsVectorLayer" ),
-    QStringLiteral( "QgsLayerMetadata" ),
-    QStringLiteral( "QgsLayout" ),
-    QStringLiteral( "QgsLayoutChecker" ),
-    QStringLiteral( "QgsEditFormConfig" ),
-    QStringLiteral( "QgsMapLayerRenderer" ),
-    QStringLiteral( "QgsReadWriteContext" ),
-    QStringLiteral( "QgsCoordinateTransformContext" ),
-    QStringLiteral( "QgsAbstractProfileGenerator" ),
-    QStringLiteral( "QgsFeature" ),
-    QStringLiteral( "QgsFeatureIterator" ),
-    QStringLiteral( "QgsExpression" ),
-    QStringLiteral( "QgsExpressionContext" ),
-    QStringLiteral( "QgsExpressionContextScope" ),
-    QStringLiteral( "QgsLayerMetadata" ),
-    QStringLiteral( "QgsAbstractMetadataBase" ),
-    QStringLiteral( "QgsRenderContext" ),
-    QStringLiteral( "QgsProfileRequest" ),
-    QStringLiteral( "QgsFeatureRequest" ),
-    QStringLiteral( "QgsProfileGenerationContext" ),
-    QStringLiteral( "QgsFeedback" ),
-    QStringLiteral( "QgsAbstractProfileResults" ),
-    QStringLiteral( "QgsPoint" ),
-    QStringLiteral( "QgsGeometry" ),
-    QStringLiteral( "QgsDoubleRange" ),
-    QStringLiteral( "QgsProfileRenderContext" ),
-    QStringLiteral( "QgsRenderChecker" ),
-    QStringLiteral( "QgsTemporalRangeObject" )
-  };
+  // const QStringList allowedClass =
+  // {
+  //   QStringLiteral( "Qgis" ),
+  //   QStringLiteral( "QgsApplication" ),
+  //   QStringLiteral( "QgsAttributes" ),
+  //   QStringLiteral( "QgsCoordinateReferenceSystem" ),
+  //   QStringLiteral( "QgsDataProvider" ),
+  //   QStringLiteral( "QgsField" ),
+  //   QStringLiteral( "QgsFields" ),
+  //   QStringLiteral( "QgsImageFetcher" ),
+  //   QStringLiteral( "QgsMeshAdvancedEditing" ),
+  //   QStringLiteral( "QgsMeshEditRefineFaces" ),
+  //   QStringLiteral( "QgsMeshEditor" ),
+  //   QStringLiteral( "QgsRasterAttributeTable" ),
+  //   QStringLiteral( "QgsRectangle" ),
+  //   QStringLiteral( "QgsRasterInterface" ),
+  //   QStringLiteral( "QgsRasterBlock" ),
+  //   QStringLiteral( "QgsRasterBlockFeedback" ),
+  //   QStringLiteral( "QgsRasterDataProvider" ),
+  //   QStringLiteral( "QgsRasterAttributeTableModel" ),
+  //   QStringLiteral( "QgsTopologicalMesh" ),
+  //   QStringLiteral( "QgsExpressionContextGenerator" ),
+  //   QStringLiteral( "QgsExpressionContextScopeGenerator" ),
+  //   QStringLiteral( "QgsFeatureSink" ),
+  //   QStringLiteral( "QgsFeatureSource" ),
+  //   QStringLiteral( "QgsAbstractProfileSource" ),
+  //   QStringLiteral( "QgsMapLayer" ),
+  //   QStringLiteral( "QgsMapSettings" ),
+  //   QStringLiteral( "QgsMultiRenderChecker" ),
+  //   QStringLiteral( "QgsMessageLog" ),
+  //   QStringLiteral( "QgsVectorLayer" ),
+  //   QStringLiteral( "QgsLayerMetadata" ),
+  //   QStringLiteral( "QgsLayout" ),
+  //   QStringLiteral( "QgsLayoutChecker" ),
+  //   QStringLiteral( "QgsEditFormConfig" ),
+  //   QStringLiteral( "QgsMapLayerRenderer" ),
+  //   QStringLiteral( "QgsReadWriteContext" ),
+  //   QStringLiteral( "QgsCoordinateTransformContext" ),
+  //   QStringLiteral( "QgsAbstractProfileGenerator" ),
+  //   QStringLiteral( "QgsFeature" ),
+  //   QStringLiteral( "QgsFeatureIterator" ),
+  //   QStringLiteral( "QgsExpression" ),
+  //   QStringLiteral( "QgsExpressionContext" ),
+  //   QStringLiteral( "QgsExpressionContextScope" ),
+  //   QStringLiteral( "QgsLayerMetadata" ),
+  //   QStringLiteral( "QgsAbstractMetadataBase" ),
+  //   QStringLiteral( "QgsRenderContext" ),
+  //   QStringLiteral( "QgsProfileRequest" ),
+  //   QStringLiteral( "QgsFeatureRequest" ),
+  //   QStringLiteral( "QgsProfileGenerationContext" ),
+  //   QStringLiteral( "QgsFeedback" ),
+  //   QStringLiteral( "QgsAbstractProfileResults" ),
+  //   QStringLiteral( "QgsPoint" ),
+  //   QStringLiteral( "QgsGeometry" ),
+  //   QStringLiteral( "QgsDoubleRange" ),
+  //   QStringLiteral( "QgsProfileRenderContext" ),
+  //   QStringLiteral( "QgsRenderChecker" ),
+  //   QStringLiteral( "QgsTemporalRangeObject" ),
+  //   QStringLiteral( "QgsProcessingModelParameter" ),
+  //   QStringLiteral( "QgsProcessingModelComponent" ),
+  //   QStringLiteral( "QgsProcessingModelAlgorithm" )
+  // };
 
-  if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
+  // if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
+  //   return;
+
+  if ( mClassBlockList.contains( klass->name() ) || mClassBlockList.contains( klass->enclosingScope()->name() ) )
     return;
-
 
   // If there is at least one abstract method not skipped or no abstract method at all
   // shiboken will figure out the class is abstract and we wouldn't need to force abstract
@@ -727,6 +737,24 @@ bool TypeSystemGenerator::loadSnippet( const QString &snippetFileName )
   return true;
 }
 
+bool TypeSystemGenerator::loadClassBlockList( const QString& classBlockListFileName )
+{
+  QFile file( classBlockListFileName );
+  if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
+  {
+    qWarning() << "Error: failed to class block file file " << classBlockListFileName;
+    return false;
+  }
+
+  QTextStream in( &file );
+  while ( !in.atEnd() )
+  {
+    mClassBlockList << in.readLine();
+  }
+
+  return true;
+}
+
 bool TypeSystemGenerator::isQgis( CodeModelItem item ) const
 {
   const QString fileName = item->fileName();
@@ -1010,6 +1038,11 @@ int main( int argc, char **argv )
                                         u"file"_s );
   parser.addOption( snippetFileOption );
 
+  QCommandLineOption classBlockListFileOption( u"class-block-list-file"_s,
+                                        u"class block list file. Default to empty"_s,
+                                        u"file"_s );
+  parser.addOption( classBlockListFileOption );
+
   QCommandLineOption joinNamespacesOption( {u"j"_s, u"join-namespaces"_s},
       u"Join namespaces"_s );
   parser.addOption( joinNamespacesOption );
@@ -1058,7 +1091,13 @@ int main( int argc, char **argv )
     snippetFileName = parser.value( snippetFileOption ).toUtf8();
   }
 
-  TypeSystemGenerator generator( outputFileName, snippetFileName );
+  QString classBlockListFileName;
+  if ( parser.isSet( classBlockListFileOption ) )
+  {
+    classBlockListFileName = parser.value( classBlockListFileOption ).toUtf8();
+  }
+
+  TypeSystemGenerator generator( outputFileName, snippetFileName, classBlockListFileName );
   if ( !generator.isValid() )
     return -3;
 
