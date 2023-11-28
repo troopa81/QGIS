@@ -908,7 +908,7 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
 
   // remove arg names in params
   QString params = reParams.captured( 2 );
-  params.replace( QRegularExpression( "\\s*(const |)\\s*(unsigned |)\\s*(\\w+)\\s*(\\&|\\*|)\\s*\\w+\\s*(=*\\s*[^,]*)\\s*(,*)" ), "\\1\\2\\3\\4\\5\\6" );
+  params.replace( QRegularExpression( "\\s*(const |)\\s*(unsigned |)\\s*(\\w+)\\s*(\\&|\\*|)\\s*(\\w+|)\\s*(=*\\s*[^,]*)\\s*(,*)" ), "\\1\\2\\3\\4\\5\\6" );
   func.signature = QString( "%1(%2)" ).arg( reParams.captured( 1 ) ).arg( params );
 
   // TODO looks like it's not possible to have a setitem with something different than than int as a a string
@@ -948,6 +948,13 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
 
     const QString errorReturnedValue( "nullptr" );
     func.body.replace( "sipIsErr = 1;", QString( "return %1;" ).arg( errorReturnedValue ) );
+
+    if ( func.signature.contains( "__getitem__" ) )
+    {
+      func.body.replace( QStringLiteral( "a0" ), QStringLiteral( "_i" ) );
+      func.body.replace( QStringLiteral( "sipRes =" ), QStringLiteral( "return" ) );
+      func.body.replace( QRegularExpression( "(PyErr_SetString\\(.*\\);)" ), "\\1\nreturn 0;" );
+    }
 
     for ( int i = 0; i < 7; i++ )
     {
