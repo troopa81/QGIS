@@ -289,74 +289,75 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   if ( isSkipped( klass ) )
     return;
 
-  // const QStringList allowedClass =
-  // {
-  //   QStringLiteral( "Qgis" ),
-  //   QStringLiteral( "QgsApplication" ),
-  //   QStringLiteral( "QgsAttributes" ),
-  //   QStringLiteral( "QgsCoordinateReferenceSystem" ),
-  //   QStringLiteral( "QgsDataProvider" ),
-  //   QStringLiteral( "QgsField" ),
-  //   QStringLiteral( "QgsFields" ),
-  //   QStringLiteral( "QgsImageFetcher" ),
-  //   QStringLiteral( "QgsMeshAdvancedEditing" ),
-  //   QStringLiteral( "QgsMeshEditRefineFaces" ),
-  //   QStringLiteral( "QgsMeshEditor" ),
-  //   QStringLiteral( "QgsRasterAttributeTable" ),
-  //   QStringLiteral( "QgsRectangle" ),
-  //   QStringLiteral( "QgsRasterInterface" ),
-  //   QStringLiteral( "QgsRasterBlock" ),
-  //   QStringLiteral( "QgsRasterBlockFeedback" ),
-  //   QStringLiteral( "QgsRasterDataProvider" ),
-  //   QStringLiteral( "QgsRasterAttributeTableModel" ),
-  //   QStringLiteral( "QgsTopologicalMesh" ),
-  //   QStringLiteral( "QgsExpressionContextGenerator" ),
-  //   QStringLiteral( "QgsExpressionContextScopeGenerator" ),
-  //   QStringLiteral( "QgsFeatureSink" ),
-  //   QStringLiteral( "QgsFeatureSource" ),
-  //   QStringLiteral( "QgsAbstractProfileSource" ),
-  //   QStringLiteral( "QgsMapLayer" ),
-  //   QStringLiteral( "QgsMapSettings" ),
-  //   QStringLiteral( "QgsMultiRenderChecker" ),
-  //   QStringLiteral( "QgsMessageLog" ),
-  //   QStringLiteral( "QgsVectorLayer" ),
-  //   QStringLiteral( "QgsLayerMetadata" ),
-  //   QStringLiteral( "QgsLayout" ),
-  //   QStringLiteral( "QgsLayoutChecker" ),
-  //   QStringLiteral( "QgsEditFormConfig" ),
-  //   QStringLiteral( "QgsMapLayerRenderer" ),
-  //   QStringLiteral( "QgsReadWriteContext" ),
-  //   QStringLiteral( "QgsCoordinateTransformContext" ),
-  //   QStringLiteral( "QgsAbstractProfileGenerator" ),
-  //   QStringLiteral( "QgsFeature" ),
-  //   QStringLiteral( "QgsFeatureIterator" ),
-  //   QStringLiteral( "QgsExpression" ),
-  //   QStringLiteral( "QgsExpressionContext" ),
-  //   QStringLiteral( "QgsExpressionContextScope" ),
-  //   QStringLiteral( "QgsLayerMetadata" ),
-  //   QStringLiteral( "QgsAbstractMetadataBase" ),
-  //   QStringLiteral( "QgsRenderContext" ),
-  //   QStringLiteral( "QgsProfileRequest" ),
-  //   QStringLiteral( "QgsFeatureRequest" ),
-  //   QStringLiteral( "QgsProfileGenerationContext" ),
-  //   QStringLiteral( "QgsFeedback" ),
-  //   QStringLiteral( "QgsAbstractProfileResults" ),
-  //   QStringLiteral( "QgsPoint" ),
-  //   QStringLiteral( "QgsGeometry" ),
-  //   QStringLiteral( "QgsDoubleRange" ),
-  //   QStringLiteral( "QgsProfileRenderContext" ),
-  //   QStringLiteral( "QgsRenderChecker" ),
-  //   QStringLiteral( "QgsTemporalRangeObject" ),
-  //   QStringLiteral( "QgsProcessingModelParameter" ),
-  //   QStringLiteral( "QgsProcessingModelComponent" ),
-  //   QStringLiteral( "QgsProcessingModelAlgorithm" )
-  // };
+  const QStringList allowedClass =
+  {
+    // QStringLiteral( "Qgis" ),
+    QStringLiteral( "QgsLineString" ),
+    // QStringLiteral( "QgsApplication" ),
+    // QStringLiteral( "QgsAttributes" ),
+    // QStringLiteral( "QgsCoordinateReferenceSystem" ),
+    // QStringLiteral( "QgsDataProvider" ),
+    // QStringLiteral( "QgsField" ),
+    // QStringLiteral( "QgsFields" ),
+    // QStringLiteral( "QgsImageFetcher" ),
+    // QStringLiteral( "QgsMeshAdvancedEditing" ),
+    // QStringLiteral( "QgsMeshEditRefineFaces" ),
+    // QStringLiteral( "QgsMeshEditor" ),
+    // QStringLiteral( "QgsRasterAttributeTable" ),
+    // QStringLiteral( "QgsRectangle" ),
+    // QStringLiteral( "QgsRasterInterface" ),
+    // QStringLiteral( "QgsRasterBlock" ),
+    // QStringLiteral( "QgsRasterBlockFeedback" ),
+    // QStringLiteral( "QgsRasterDataProvider" ),
+    // QStringLiteral( "QgsRasterAttributeTableModel" ),
+    // QStringLiteral( "QgsTopologicalMesh" ),
+    // QStringLiteral( "QgsExpressionContextGenerator" ),
+    // QStringLiteral( "QgsExpressionContextScopeGenerator" ),
+    // QStringLiteral( "QgsFeatureSink" ),
+    // QStringLiteral( "QgsFeatureSource" ),
+    // QStringLiteral( "QgsAbstractProfileSource" ),
+    // QStringLiteral( "QgsMapLayer" ),
+    // QStringLiteral( "QgsMapSettings" ),
+    // QStringLiteral( "QgsMultiRenderChecker" ),
+    // QStringLiteral( "QgsMessageLog" ),
+    // QStringLiteral( "QgsVectorLayer" ),
+    // QStringLiteral( "QgsLayerMetadata" ),
+    // QStringLiteral( "QgsLayout" ),
+    // QStringLiteral( "QgsLayoutChecker" ),
+    // QStringLiteral( "QgsEditFormConfig" ),
+    // QStringLiteral( "QgsMapLayerRenderer" ),
+    // QStringLiteral( "QgsReadWriteContext" ),
+    // QStringLiteral( "QgsCoordinateTransformContext" ),
+    // QStringLiteral( "QgsAbstractProfileGenerator" ),
+    // QStringLiteral( "QgsFeature" ),
+    // QStringLiteral( "QgsFeatureIterator" ),
+    // QStringLiteral( "QgsExpression" ),
+    // QStringLiteral( "QgsExpressionContext" ),
+    // QStringLiteral( "QgsExpressionContextScope" ),
+    // QStringLiteral( "QgsLayerMetadata" ),
+    // QStringLiteral( "QgsAbstractMetadataBase" ),
+    // QStringLiteral( "QgsRenderContext" ),
+    // QStringLiteral( "QgsProfileRequest" ),
+    // QStringLiteral( "QgsFeatureRequest" ),
+    // QStringLiteral( "QgsProfileGenerationContext" ),
+    // QStringLiteral( "QgsFeedback" ),
+    // QStringLiteral( "QgsAbstractProfileResults" ),
+    // QStringLiteral( "QgsPoint" ),
+    // QStringLiteral( "QgsGeometry" ),
+    // QStringLiteral( "QgsDoubleRange" ),
+    // QStringLiteral( "QgsProfileRenderContext" ),
+    // QStringLiteral( "QgsRenderChecker" ),
+    // QStringLiteral( "QgsTemporalRangeObject" ),
+    // QStringLiteral( "QgsProcessingModelParameter" ),
+    // QStringLiteral( "QgsProcessingModelComponent" ),
+    // QStringLiteral( "QgsProcessingModelAlgorithm" )
+  };
 
-  // if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
-  //   return;
-
-  if ( mClassBlockList.contains( klass->name() ) || mClassBlockList.contains( klass->enclosingScope()->name() ) )
+  if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
     return;
+
+  // if ( mClassBlockList.contains( klass->name() ) || mClassBlockList.contains( klass->enclosingScope()->name() ) )
+  //   return;
 
   // If there is at least one abstract method not skipped or no abstract method at all
   // shiboken will figure out the class is abstract and we wouldn't need to force abstract
@@ -908,13 +909,14 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
 
   // remove arg names in params
   QString params = reParams.captured( 2 );
-  params.replace( QRegularExpression( "\\s*(const |)\\s*(unsigned |)\\s*(\\w+)\\s*(\\&|\\*|)\\s*(\\w+|)\\s*(=*\\s*[^,]*)\\s*(,*)" ), "\\1\\2\\3\\4\\5\\6" );
+  params.replace( QRegularExpression( "\\s*(const |)\\s*(unsigned |)\\s*(\\w+)\\s*(\\&|\\*|)\\s*(\\w+|)\\s*(=*\\s*[^,]*)\\s*(,*)" ), "\\1\\2\\3\\4\\6\\7" );
   func.signature = QString( "%1(%2)" ).arg( reParams.captured( 1 ) ).arg( params );
 
   // TODO looks like it's not possible to have a setitem with something different than than int as a a string
   // It's not done in Qt
-  if ( func.signature == QStringLiteral( "__setitem__( const QString&,QVariant)" ) )
+  if ( func.signature.contains( QStringLiteral( "__setitem__" ) ) && func.signature != QStringLiteral( "__setitem__(int)" ) )
   {
+    qWarning() << "Error: signature not supported : " << func.signature;
     return;
   }
 
