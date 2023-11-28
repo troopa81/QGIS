@@ -2854,7 +2854,7 @@
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectelevationproperties.h:38 -->
     <object-type name="QgsProjectElevationProperties"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectfiletransform.h:38 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsmapviewsmanager.h:40 -->
     <object-type name="QgsMapViewsManager">
         <modify-function signature="get3DViewSettings(const QString&amp;)" remove="true"/>
         <modify-function signature="register3DViewSettings(const QString&amp;,const QDomElement&amp;)" remove="true"/>
@@ -4358,8 +4358,6 @@
     <object-type name="QgsTcpSocketSensor"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsiodevicesensor.h:156 -->
     <object-type name="QgsUdpSocketSensor"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsiodevicesensor.h:231 -->
-    <object-type name="QgsSerialPortSensor"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgssensormanager.h:41 -->
     <object-type name="QgsSensorManager"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdbquerylog.h:31 -->
