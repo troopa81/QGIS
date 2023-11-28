@@ -40,3 +40,11 @@ index 2d4e0d1fa96..435758ef277 100644
      </object-type>
      <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnetworkreply.h:28 -->
      <value-type name="QgsNetworkReplyContent">
+@@ -3360,6 +3349,7 @@
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstracer.h:44 -->
+     <object-type name="QgsTracer">
+         <enum-type name="PathError"/>
++        <modify-function signature="findShortestPath(const QgsPointXY&amp;,const QgsPointXY&amp;,QgsTracer::PathError*)" remove="true"/>
+     </object-type>
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsbookmarkmanager.h:37 -->
+     <value-type name="QgsBookmark">

@@ -254,6 +254,44 @@
 ]]></inject-code>
         </add-function>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgspointxy.h:58 -->
+    <value-type name="QgsPointXY">
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsPointXY: %1>" ).arg( %CPPSELF->asWkt() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return 2;
+]]></inject-code>
+        </add-function>
+        <add-function signature="__getitem__(int)" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( _i == 0 )
+    {
+      return Py_BuildValue( "d", %CPPSELF->x() );
+    }
+    else if ( _i == 1 )
+    {
+      return Py_BuildValue( "d", %CPPSELF->y() );
+    }
+    else
+    {
+      QString msg = QString( "Bad index: %1" ).arg( _i );
+      PyErr_SetString( PyExc_IndexError, msg.toLatin1().constData() );
+return 0;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__hash__()" return-type="long">
+            <inject-code class="target" position="beginning"><![CDATA[
+    auto var =  qHash( *%CPPSELF );
+    %PYARG_0 = %CONVERTTOPYTHON[long](var);
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsspatialindexkdbushdata.h:32 -->
     <value-type name="QgsSpatialIndexKDBushData"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsgeometrysimplifier.h:70 -->
@@ -584,12 +622,6 @@
         <modify-function signature="attribute(int)" remove="true"/>
         <modify-function signature="isUnsetValue(int)" remove="true"/>
         <modify-function signature="QgsFeature(QgsFeatureId)" remove="false"/>
-        <add-function signature="__setitem__">
-            <inject-code class="target" position="beginning" file="./qgis_core.cpp" snippet="QgsFeature-__setitem__"/>
-        </add-function>
-        <add-function signature="__setitem__">
-            <inject-code class="target" position="beginning" file="./qgis_core.cpp" snippet="QgsFeature-__setitem__"/>
-        </add-function>
         <add-function signature="__delitem__(int)">
             <inject-code class="target" position="beginning"><![CDATA[
     if ( %1 >= 0 && %1 < %CPPSELF->attributes().count() )
@@ -1601,6 +1633,126 @@
       wkt = wkt.left( 1000 ) + QStringLiteral( "..." );
     QString str = QStringLiteral( "<QgsCompoundCurve: %1>" ).arg( wkt );
     %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgslinestring.h:44 -->
+    <object-type name="QgsLineString">
+        <modify-function signature="QgsLineString(const QVector&amp;)" remove="true"/>
+        <modify-function signature="QgsLineString(const QVector&amp;)" remove="true"/>
+        <modify-function signature="pointN(int)" remove="true"/>
+        <modify-function signature="xAt(int)" remove="true"/>
+        <modify-function signature="yAt(int)" remove="true"/>
+        <modify-function signature="xData()" remove="true"/>
+        <modify-function signature="yData()" remove="true"/>
+        <modify-function signature="zData()" remove="true"/>
+        <modify-function signature="mData()" remove="true"/>
+        <modify-function signature="xVector()" remove="true"/>
+        <modify-function signature="yVector()" remove="true"/>
+        <modify-function signature="zVector()" remove="true"/>
+        <modify-function signature="mVector()" remove="true"/>
+        <modify-function signature="zAt(int)" remove="true"/>
+        <modify-function signature="mAt(int)" remove="true"/>
+        <modify-function signature="setXAt(int,double)" remove="true"/>
+        <modify-function signature="setYAt(int,double)" remove="true"/>
+        <modify-function signature="setZAt(int,double)" remove="true"/>
+        <modify-function signature="setMAt(int,double)" remove="true"/>
+        <modify-function signature="setPoints(size_t,const double*,const double*,const double*,const double*)" remove="true"/>
+        <modify-function signature="visitPointsByRegularDistance(double,const std::function&amp;)" remove="true"/>
+        <modify-function signature="asJsonObject(int)" remove="true"/>
+        <modify-function signature="splitCurveAtVertex(int)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
+        <add-function signature="setXAt(int,double)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numPoints();
+    if ( %1 < -count || %1 >= count )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      if ( %1 >= 0 )
+        %CPPSELF->setXAt( %1, %2 );
+      else
+        %CPPSELF->setXAt( count + %1, %2 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="setYAt(int,double)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numPoints();
+    if ( %1 < -count || %1 >= count )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      if ( %1 >= 0 )
+        %CPPSELF->setYAt( %1, %2 );
+      else
+        %CPPSELF->setYAt( count + %1, %2 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="setZAt(int,double)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numPoints();
+    if ( %1 < -count || %1 >= count )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      if ( %1 >= 0 )
+        %CPPSELF->setZAt( %1, %2 );
+      else
+        %CPPSELF->setZAt( count + %1, %2 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="setMAt(int,double)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numPoints();
+    if ( %1 < -count || %1 >= count )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      if ( %1 >= 0 )
+        %CPPSELF->setMAt( %1, %2 );
+      else
+        %CPPSELF->setMAt( count + %1, %2 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString wkt = %CPPSELF->asWkt();
+    if ( wkt.length() > 1000 )
+      wkt = wkt.left( 1000 ) + QStringLiteral( "..." );
+    QString str = QStringLiteral( "<QgsLineString: %1>" ).arg( wkt );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+        <add-function signature="__delitem__(int)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numPoints();
+    if ( %1 >= 0 && %1 < count )
+      %CPPSELF->deleteVertex( QgsVertexId( -1, -1, %1 ) );
+    else if ( %1 < 0 && %1 >= -count )
+      %CPPSELF->deleteVertex( QgsVertexId( -1, -1, count + %1 ) );
+    else
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
 ]]></inject-code>
         </add-function>
     </object-type>
@@ -3209,6 +3361,7 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstracer.h:44 -->
     <object-type name="QgsTracer">
         <enum-type name="PathError"/>
+        <modify-function signature="findShortestPath(const QgsPointXY&amp;,const QgsPointXY&amp;,QgsTracer::PathError*)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsbookmarkmanager.h:37 -->
     <value-type name="QgsBookmark">
@@ -3301,6 +3454,15 @@
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitem.h:43 -->
     <object-type name="QgsLayoutItemRenderContext">
         <modify-function signature="renderContext()" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitem.h:111 -->
+    <object-type name="QgsLayoutItem">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitem.h:522 -->
+        <value-type name="ExportLayerDetail"/>
+        <enum-type name="ReferencePoint"/>
+        <enum-type name="UndoCommand"/>
+        <enum-type name="Flag" flags="Flags"/>
+        <enum-type name="ExportLayerBehavior"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemregistry.h:329 -->
     <object-type name="QgsLayoutItemRegistry">

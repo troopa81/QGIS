@@ -94,7 +94,6 @@ QgsProcessingParameterPointCloudLayer
 QgsRenderedFeatureHandlerInterface
 QgsSnappingUtils
 QgsLayoutUndoObjectInterface
-QgsLayoutItem
 QgsLayoutItemAbstractMetadata
 QgsLayoutMultiFrameAbstractMetadata
 QgsMasterLayoutInterface
