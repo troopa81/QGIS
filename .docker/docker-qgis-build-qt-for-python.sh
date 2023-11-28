@@ -66,7 +66,8 @@ git config --global --add safe.directory /usr/src/qgis
 
 ninja qgis_core pycore pyutils pyqtcompat pytesting
 
-ctest -v -R "Py*"
+xvfb-run ctest -V -R "Py*"
+
 
 ########################
 # Show ccache statistics
