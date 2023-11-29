@@ -351,7 +351,7 @@ Returns the smallest distance between the box and the point ``point``
 
     bool operator==( const QgsBox3D &other ) const /HoldGIL/;
 
-    void scale( double scaleFactor, const QgsPoint &center = QgsPoint() ) /HoldGIL/;
+    void scale( double scaleFactor, const QgsPoint &center = {} ) /HoldGIL/;
 %Docstring
 Scale the rectangle around a ``center`` :py:class:`QgsPoint`.
 

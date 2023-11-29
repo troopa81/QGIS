@@ -2,11 +2,8 @@ QgsAbstractGeometrySimplifier
 QgsContrastEnhancementFunction
 QgsLinearMinMaxEnhancement
 QgsExpressionFunction
-QgsConstWkbPtr
-QgsAbstractGeometry
 QgsScopedExpressionFunction
 QgsInterval
-QgsBox3D
 QgsMapLayerServerProperties
 QgsPathResolver
 QgsReadWriteContextCategoryPopper
@@ -98,7 +95,6 @@ QgsLayoutItemAbstractMetadata
 QgsLayoutMultiFrameAbstractMetadata
 QgsMasterLayoutInterface
 QgsLayoutItemMapGrid
-QgsLayoutItemMap
 QgsLayoutNodesItem
 QgsLayoutMultiFrame
 QgsLayoutTable

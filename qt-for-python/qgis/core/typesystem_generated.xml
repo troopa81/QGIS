@@ -765,6 +765,41 @@ return 0;
         <modify-function signature="remaining()" remove="true"/>
         <modify-function signature="writtenSize()" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgswkbptr.h:137 -->
+    <value-type name="QgsConstWkbPtr">
+        <modify-function signature="verifyBound(int)" remove="true"/>
+        <modify-function signature="read(T&amp;)" remove="true"/>
+        <modify-function signature="QgsConstWkbPtr(const QByteArray&amp;)" remove="true"/>
+        <modify-function signature="readHeader()" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(double&amp;)" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(float&amp;)" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(int&amp;)" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(unsigned int&amp;)" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(char&amp;)" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(QPointF&amp;)" remove="true"/>
+        <modify-function signature="operator&gt;&gt;(QPolygonF&amp;)" remove="true"/>
+        <modify-function signature="operator+=(int)" remove="true"/>
+        <modify-function signature="operator-=(int)" remove="true"/>
+        <modify-function signature="operator const unsigned char*()" remove="true"/>
+        <modify-function signature="remaining()" remove="true"/>
+        <modify-function signature="endian_swap(T&amp;)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsabstractgeometry.h:79 -->
+    <object-type name="QgsAbstractGeometry">
+        <enum-type name="SegmentationToleranceType"/>
+        <enum-type name="AxisOrder"/>
+        <enum-type name="WkbFlag" flags="WkbFlags"/>
+        <modify-function signature="asJsonObject(int)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="parts_begin()" remove="true"/>
+        <modify-function signature="parts_end()" remove="true"/>
+        <modify-function signature="parts()" remove="true"/>
+        <modify-function signature="const_parts_begin()" remove="true"/>
+        <modify-function signature="const_parts_end()" remove="true"/>
+        <modify-function signature="vertices_begin()" remove="true"/>
+        <modify-function signature="vertices_end()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsabstractgeometry.h:1159 -->
     <value-type name="QgsVertexIterator">
         <add-function signature="__iter__()" return-type="QgsVertexIterator*">
@@ -964,6 +999,24 @@ return 0;
             <inject-code class="target" position="beginning"><![CDATA[
     auto var =  qHash( *%CPPSELF );
     %PYARG_0 = %CONVERTTOPYTHON[long](var);
+]]></inject-code>
+        </add-function>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsbox3d.h:43 -->
+    <value-type name="QgsBox3D">
+        <modify-function signature="QgsBox3D(double,double,double,double,double,double,bool)" remove="true"/>
+        <modify-function signature="QgsBox3D(const QgsPoint&amp;,const QgsPoint&amp;,bool)" remove="true"/>
+        <modify-function signature="QgsBox3D(const QgsRectangle&amp;,double,double,bool)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsBox3D(%1, %2, %3, %4, %5, %6)>" )
+                  .arg( %CPPSELF->xMinimum() )
+                  .arg( %CPPSELF->yMinimum() )
+                  .arg( %CPPSELF->zMinimum() )
+                  .arg( %CPPSELF->xMaximum() )
+                  .arg( %CPPSELF->yMaximum() )
+                  .arg( %CPPSELF->zMaximum() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
 ]]></inject-code>
         </add-function>
     </value-type>
@@ -3509,6 +3562,12 @@ return 0;
     <object-type name="QgsLayoutItemMapAtlasClippingSettings"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmap.h:170 -->
     <object-type name="QgsLayoutItemMapItemClipPathSettings"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmap.h:318 -->
+    <object-type name="QgsLayoutItemMap">
+        <enum-type name="AtlasScalingMode"/>
+        <enum-type name="MapItemFlag" flags="MapItemFlags"/>
+        <enum-type name="PartType"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitempolygon.h:30 -->
     <object-type name="QgsLayoutItemPolygon"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgsabstractlayoutiterator.h:30 -->

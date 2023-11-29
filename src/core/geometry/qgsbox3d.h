@@ -357,7 +357,7 @@ class CORE_EXPORT QgsBox3D
      *
      * \since QGIS 3.26
      */
-    void scale( double scaleFactor, const QgsPoint &center = QgsPoint() ) SIP_HOLDGIL;
+    void scale( double scaleFactor, const QgsPoint &center = {} ) SIP_HOLDGIL;
 
     /**
      * Scale the rectangle around a center coordinates.
