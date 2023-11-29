@@ -3196,6 +3196,17 @@ return 0;
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometrytransformer.h:32 -->
     <object-type name="QgsAbstractGeometryTransformer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsquadrilateral.h:36 -->
+    <value-type name="QgsQuadrilateral">
+        <enum-type name="ConstructionOption"/>
+        <enum-type name="Point"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsQuadrilateral: %1>" ).arg( %CPPSELF->toString() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgslinesegment.h:31 -->
     <value-type name="QgsLineSegment2D"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsmulticurve.h:29 -->

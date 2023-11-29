@@ -77,7 +77,6 @@ QgsLayerTreeLayer
 QgsLayerTree
 QgsGeometryCollection
 QgsCircle
-QgsQuadrilateral
 QgsProcessingParameterFile
 QgsProcessingParameterMultipleLayers
 QgsProcessingParameterRasterLayer
