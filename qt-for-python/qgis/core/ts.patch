@@ -48,3 +48,21 @@ index 2d4e0d1fa96..435758ef277 100644
      </object-type>
      <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsbookmarkmanager.h:37 -->
      <value-type name="QgsBookmark">
+@@ -4601,14 +4601,14 @@ return 0;
+     {
+       QVector<QMap<QString, QVariant>> res = %CPPSELF->identify( %1, %2, %3, %4 );
+       auto var =  PyList_New( res.size() );
+-      %PYARG_0 = %CONVERTTOPYTHON[PyObject*](var);
++      %PYARG_0 = var;
+       for ( int i = 0; i < res.size(); ++i )
+       {
+         PyObject *dict = PyDict_New();
+         for ( QString key : res[i].keys() )
+         {
+-          PyObject *keyObj = new QString( key );
+-          PyObject *valObj = new QVariant( res[i][key] );
++          PyObject *keyObj = %CONVERTTOPYTHON[QString](key);
++          PyObject *valObj = %CONVERTTOPYTHON[QVariant](res[i][key]);
+           PyDict_SetItem( dict, keyObj, valObj );
+         }
+         PyList_SET_ITEM( %PYARG_0, i, dict );
