@@ -1,4 +1,4 @@
-ARG DISTRO_VERSION=38
+ARG DISTRO_VERSION=37
 
 FROM fedora:${DISTRO_VERSION} as single
 MAINTAINER Matthias Kuhn <matthias@opengis.ch>
@@ -103,9 +103,14 @@ RUN cd /usr/src \
 
 ENV PATH="/usr/local/bin:${PATH}"
 
-RUN dnf install -y python3-pip && pip install PySide6 shiboken6_generator
+# Doesn't work this way because Qt_6.6_PRIVATE_API differs between Qt pip/fedora package
+# RUN dnf install -y python3-pip && pip install PySide6 shiboken6_generator
 
-# Ugly hack because shiboken6_generator link on an old icu librairy
-RUN ln -s /usr/lib64/libicui18n.so.72 /usr/lib64/libicui18n.so.56 \
-    && ln -s /usr/lib64/libicuuc.so.72 /usr/lib64/libicuuc.so.56 \
-    && ln -s /usr/lib64/libicudata.so.72 /usr/lib64/libicudata.so.56
+# # Ugly hack because shiboken6_generator link on an old icu librairy
+# RUN ln -s /usr/lib64/libicui18n.so.72 /usr/lib64/libicui18n.so.56 \
+#     && ln -s /usr/lib64/libicuuc.so.72 /usr/lib64/libicuuc.so.56 \
+#     && ln -s /usr/lib64/libicudata.so.72 /usr/lib64/libicudata.so.56
+
+RUN dnf -y install patchelf qt6-qtbase-static qt6-qtbase-private-devel \
+    && git clone https://code.qt.io/pyside/pyside-setup && cd pyside-setup && git checkout v6.5.1 && mkdir /usr/modules \
+    && python3 setup.py install --qtpaths=/usr/bin/qtpaths6 --parallel=8
