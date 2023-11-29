@@ -5,7 +5,6 @@ QgsExpressionFunction
 QgsScopedExpressionFunction
 QgsInterval
 QgsMapLayerServerProperties
-QgsPathResolver
 QgsReadWriteContextCategoryPopper
 QgsHttpHeaders
 QgsFeatureRenderer
@@ -156,9 +155,6 @@ QgsDatabaseSchemaModel
 QgsReadWriteLocker
 QgsActionScope
 QgsProviderRegistry
-QgsExternalStorage
-QgsExternalStorageFetchedContent
-QgsExternalStorageStoredContent
 QgsVectorLayerFeatureCounter
 QgsVectorLayerExporterTask
 QgsProcessingParameterType

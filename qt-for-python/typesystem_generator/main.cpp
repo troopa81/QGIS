@@ -854,7 +854,7 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
 
 void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &signature, const QStringList &body )
 {
-  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)(\\w*)\\s*(\\*|)\\s*(.*);" ) );
+  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)\\s*(static\\s|)(\\w*)\\s*(\\*|)\\s*(.*);" ) );
   const QRegularExpressionMatch matchSignature = reSignature.match( signature );
 
   if ( !matchSignature.hasMatch() )
@@ -865,13 +865,13 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
 
   AddedFunction func;
 
-  func.signature = matchSignature.captured( 4 );
+  func.signature = matchSignature.captured( 5 );
   func.signature.replace( "SIP_PYOBJECT", "PyObject*" );
 
   // replace SIP anotation [..]
   func.signature.replace( QRegularExpression( "\\[.*\\]" ), "" );
 
-  func.returnType = matchSignature.captured( 2 ) + matchSignature.captured( 3 );
+  func.returnType = matchSignature.captured( 3 ) + matchSignature.captured( 4 );
 
   if ( func.returnType == QStringLiteral( "void" ) )
   {

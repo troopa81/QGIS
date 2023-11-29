@@ -1089,6 +1089,31 @@ return 0;
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerserverproperties.h:325 -->
     <object-type name="QgsVectorLayerServerProperties"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgspathresolver.h:31 -->
+    <value-type name="QgsPathResolver">
+        <modify-function signature="setPathPreprocessor(const std::function&amp;)" remove="true"/>
+        <modify-function signature="removePathPreprocessor(const QString&amp;)" remove="true"/>
+        <modify-function signature="setPathWriter(const std::function&amp;)" remove="true"/>
+        <modify-function signature="removePathWriter(const QString&amp;)" remove="true"/>
+        <add-function signature="removePathPreprocessor(const QString&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( !QgsPathResolver::removePathPreprocessor( %1 ) )
+    {
+      PyErr_SetString( PyExc_KeyError, QStringLiteral( "No processor with id %1 exists." ).arg( %1 ).toUtf8().constData() );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="removePathWriter(const QString&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( !QgsPathResolver::removePathWriter( %1 ) )
+    {
+      PyErr_SetString( PyExc_KeyError, QStringLiteral( "No writer with id %1 exists." ).arg( %1 ).toUtf8().constData() );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojecttranslator.h:30 -->
     <object-type name="QgsProjectTranslator"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsreadwritecontext.h:34 -->
@@ -2975,15 +3000,6 @@ return 0;
     <object-type name="QgsProjectGpsSettings"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:39 -->
     <value-type name="QgsReferencedGeometryBase"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:73 -->
-    <value-type name="QgsReferencedRectangle">
-        <add-function signature="__repr__()" return-type="PyObject*">
-            <inject-code class="target" position="beginning"><![CDATA[
-    QString str = QStringLiteral( "<QgsReferencedRectangle: %1 (%2)>" ).arg( %CPPSELF->asWktCoordinates(), %CPPSELF->crs().authid() );
-    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
-]]></inject-code>
-        </add-function>
-    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:155 -->
     <value-type name="QgsReferencedGeometry">
         <add-function signature="__repr__()" return-type="PyObject*">
@@ -4825,8 +4841,14 @@ return 0;
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/externalstorage/qgsexternalstorageregistry.h:36 -->
     <value-type name="QgsExternalStorageRegistry"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/externalstorage/qgsexternalstorage.h:36 -->
+    <object-type name="QgsExternalStorage"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/externalstorage/qgsexternalstorage.h:111 -->
     <object-type name="QgsExternalStorageContent"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/externalstorage/qgsexternalstorage.h:179 -->
+    <object-type name="QgsExternalStorageFetchedContent"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/externalstorage/qgsexternalstorage.h:209 -->
+    <object-type name="QgsExternalStorageStoredContent"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/diagram/qgsstackedbardiagram.h:43 -->
     <object-type name="QgsStackedBarDiagram"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/diagram/qgshistogramdiagram.h:40 -->
