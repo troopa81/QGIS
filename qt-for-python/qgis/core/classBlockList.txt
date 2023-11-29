@@ -177,3 +177,4 @@ QgsProcessingModelParameter
 QgsProjectFileTransform
 QgsLayoutAtlas
 QgsAbstractGeocoderLocatorFilter
+QgsReferencedRectangle
