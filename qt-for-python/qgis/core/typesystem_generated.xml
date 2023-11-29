@@ -1697,6 +1697,13 @@ return 0;
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectordataprovidertemporalcapabilities.h:37 -->
     <value-type name="QgsVectorDataProviderTemporalCapabilities"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectordataprovider.h:58 -->
+    <object-type name="QgsVectorDataProvider">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectordataprovider.h:481 -->
+        <value-type name="NativeType"/>
+        <enum-type name="Capability" flags="Capabilities"/>
+        <modify-function signature="temporalCapabilities()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgscompoundcurve.h:31 -->
     <object-type name="QgsCompoundCurve">
         <modify-function signature="asJsonObject(int)" remove="true"/>
@@ -2319,6 +2326,60 @@ return 0;
     <value-type name="QgsLayerMetadataProviderResult"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractlayermetadataprovider.h:176 -->
     <value-type name="QgsLayerMetadataSearchResults"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:47 -->
+    <object-type name="QgsAbstractDatabaseProviderConnection">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:87 -->
+        <value-type name="QueryResult">
+            <modify-function signature="appendColumn(const QString&amp;)" remove="true"/>
+            <modify-function signature="QueryResult(std::shared_ptr)" remove="true"/>
+            <modify-function signature="QueryResult()" remove="true"/>
+            <add-function signature="__iter__()" return-type="QgsAbstractDatabaseProviderConnection::QueryResult*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        auto var =  %CPPSELF;
+        %PYARG_0 = %CONVERTTOPYTHON[QgsAbstractDatabaseProviderConnection::QueryResult*](var);
+]]></inject-code>
+            </add-function>
+            <add-function signature="__next__()" return-type="PyObject*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        QList<QVariant> result;
+        Py_BEGIN_ALLOW_THREADS
+        result = %CPPSELF->nextRow( );
+        Py_END_ALLOW_THREADS
+        if ( ! result.isEmpty() )
+        {
+
+          auto var = new QList<QVariant>( result );
+          %PYARG_0 = %CONVERTTOPYTHON[QList<QVariant> *](var);
+        }
+        else
+        {
+          PyErr_SetString( PyExc_StopIteration, "" );
+        }
+]]></inject-code>
+            </add-function>
+        </value-type>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:241 -->
+        <value-type name="SqlVectorLayerOptions"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:269 -->
+        <value-type name="TableProperty">
+            <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:284 -->
+            <value-type name="GeometryColumnType"/>
+            <add-function signature="__repr__()" return-type="PyObject*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        QString str = QStringLiteral( "<QgsAbstractDatabaseProviderConnection.TableProperty: '%1'>" ).arg( %CPPSELF->tableName() );
+        %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+            </add-function>
+        </value-type>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:474 -->
+        <value-type name="SpatialIndexOptions"/>
+        <enum-type name="TableFlag" flags="TableFlags"/>
+        <enum-type name="Capability" flags="Capabilities"/>
+        <enum-type name="GeometryColumnCapability" flags="GeometryColumnCapabilities"/>
+        <modify-function signature="tables(const QString&amp;,const QgsAbstractDatabaseProviderConnection::TableFlags&amp;,QgsFeedback*)" remove="true"/>
+        <modify-function signature="supportedRelationshipCardinalities()" remove="true"/>
+        <modify-function signature="supportedRelationshipStrengths()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/browser/qgsfielddomainsitem.h:30 -->
     <object-type name="QgsFieldDomainsItem">
         <add-function signature="__repr__()" return-type="PyObject*">

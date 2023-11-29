@@ -806,6 +806,13 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
     return;
   }
 
+  // if we are on a class defined inside another one
+  QString innerClass;
+  if ( klass.contains("::") )
+  {
+    innerClass = klass.split("::").last();
+  }
+
   AddedFunction func;
 
   func.signature = matchSignature.captured( 5 );
@@ -839,6 +846,10 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
     {
       // wild guess, it's maybe an enum...
       func.returnType = klass + "::" + func.returnType;
+    }
+    else if ( !innerClass.isEmpty() )
+    {
+      func.returnType.replace( innerClass, klass );
     }
   }
 
@@ -931,7 +942,7 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
       func.body.replace( QRegularExpression( "sipConvertFromNewType\\(\\s*(new\\s+.*),\\s*\\w+\\s*,\\s*\\w+\\s*\\)" ), "\\1" );
 
       // replace pointer return instruction
-      func.body.replace( QRegularExpression( "([ ]*)sipRes = new\\s+(\\w+)(.*)" ), "\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);" );
+      func.body.replace( QRegularExpression( "([ ]*)sipRes = new\\s+([\\w<>]+)(.*)" ), "\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);" );
 
       // replace value return instruction
       func.body.replace( QRegularExpression( "([ ]*)sipRes =(.*)" ), QString( "\\1auto var = \\2\n\\1%PYARG_0 = %CONVERTTOPYTHON[%1](var);" ).arg( func.returnType ) );
