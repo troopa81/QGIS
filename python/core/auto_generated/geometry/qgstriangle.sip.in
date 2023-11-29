@@ -103,7 +103,7 @@ Inherited method not used. You cannot delete or insert a vertex directly. Return
     virtual void setExteriorRing( QgsCurve *ring /Transfer/ );
 
 
-    virtual QgsCurve *boundary() const /Factory/;
+    virtual QgsAbstractGeometry *boundary() const /Factory/;
 
 
 

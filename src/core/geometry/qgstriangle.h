@@ -98,7 +98,7 @@ class CORE_EXPORT QgsTriangle : public QgsPolygon
 
     void setExteriorRing( QgsCurve *ring SIP_TRANSFER ) override;
 
-    QgsCurve *boundary() const override SIP_FACTORY;
+    QgsAbstractGeometry *boundary() const override SIP_FACTORY;
 
     // inherited: double pointDistanceToBoundary( double x, double y ) const;
 
