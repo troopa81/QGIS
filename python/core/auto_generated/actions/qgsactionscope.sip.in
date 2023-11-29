@@ -114,6 +114,7 @@ Returns if this scope is valid.
 
 .. versionadded:: 3.0
 %End
+
     long __hash__();
 %MethodCode
     sipRes = qHash( *sipCpp );

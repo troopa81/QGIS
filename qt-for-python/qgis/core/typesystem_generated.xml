@@ -4525,6 +4525,37 @@ return 0;
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudattribute.h:141 -->
     <value-type name="QgsPointCloudAttributeCollection"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointclouddataprovider.h:47 -->
+    <object-type name="QgsPointCloudDataProvider">
+        <enum-type name="Capability" flags="Capabilities"/>
+        <enum-type name="PointCloudIndexGenerationState"/>
+        <modify-function signature="identify(double,const QgsGeometry&amp;,const QgsDoubleRange&amp;,int)" remove="true"/>
+        <modify-function signature="index()" remove="true"/>
+        <modify-function signature="subIndexes()" remove="true"/>
+        <modify-function signature="loadSubIndex(int)" remove="true"/>
+        <modify-function signature="metadataStatistic(const QString&amp;,QgsStatisticalSummary::Statistic)" remove="true"/>
+        <modify-function signature="metadataClassStatistic(const QString&amp;,const QVariant&amp;,QgsStatisticalSummary::Statistic)" remove="true"/>
+        <add-function signature="identify(float,QgsGeometry,const QgsDoubleRange= QgsDoubleRange(),int= 1000 )" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    {
+      QVector<QMap<QString, QVariant>> res = %CPPSELF->identify( %1, %2, %3, %4 );
+      auto var =  PyList_New( res.size() );
+      %PYARG_0 = %CONVERTTOPYTHON[PyObject*](var);
+      for ( int i = 0; i < res.size(); ++i )
+      {
+        PyObject *dict = PyDict_New();
+        for ( QString key : res[i].keys() )
+        {
+          PyObject *keyObj = new QString( key );
+          PyObject *valObj = new QVariant( res[i][key] );
+          PyDict_SetItem( dict, keyObj, valObj );
+        }
+        PyList_SET_ITEM( %PYARG_0, i, dict );
+      }
+    }
+]]></inject-code>
+        </add-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:39 -->
     <value-type name="QgsPointCloudAttributeStatistics">
         <modify-function signature="cumulateStatistics(const QgsPointCloudAttributeStatistics&amp;)" remove="true"/>
@@ -4764,6 +4795,15 @@ return 0;
     <object-type name="QgsFieldFormatterRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstransactiongroup.h:31 -->
     <object-type name="QgsTransactionGroup"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/actions/qgsactionscope.h:47 -->
+    <value-type name="QgsActionScope">
+        <add-function signature="__hash__()" return-type="long">
+            <inject-code class="target" position="beginning"><![CDATA[
+    auto var =  qHash( *%CPPSELF );
+    %PYARG_0 = %CONVERTTOPYTHON[long](var);
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/actions/qgsactionmanager.h:51 -->
     <object-type name="QgsActionManager"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/actions/qgsactionscoperegistry.h:44 -->

@@ -123,6 +123,7 @@ class CORE_EXPORT QgsActionScope
      * \since QGIS 3.0
      */
     bool isValid() const;
+
 #ifdef SIP_RUN
     long __hash__();
     % MethodCode

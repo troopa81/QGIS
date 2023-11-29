@@ -137,7 +137,6 @@ QgsGlowEffect
 QgsShadowEffect
 QgsPaintEffectAbstractMetadata
 QgsPointCloudBlock
-QgsPointCloudDataProvider
 QgsPointCloudLayerExporter
 QgsPointCloudLayerExporterTask
 QgsPointCloudRenderer
@@ -152,7 +151,6 @@ QgsMapBoxGlStyleAbstractSource
 QgsVectorTileRenderer
 QgsDatabaseSchemaModel
 QgsReadWriteLocker
-QgsActionScope
 QgsProviderRegistry
 QgsVectorLayerFeatureCounter
 QgsVectorLayerExporterTask
