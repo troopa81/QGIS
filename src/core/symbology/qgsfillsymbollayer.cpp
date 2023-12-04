@@ -306,6 +306,13 @@ void QgsSimpleFillSymbolLayer::renderPolygon( const QPolygonF &points, const QVe
 
   applyDataDefinedSymbology( context, mBrush, mPen, mSelPen );
 
+  if ( mStrokeStyle == Qt::NoPen && fillColor.alpha() == 255 )
+  {
+    mPen.setStyle( Qt::SolidLine );
+    mPen.setWidthF( 0.2 );
+    mPen.setColor( fillColor );
+  }
+
   QPointF offset = mOffset;
 
   if ( mDataDefinedProperties.isActive( QgsSymbolLayer::PropertyOffset ) )
