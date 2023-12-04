@@ -10,6 +10,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - fix_polyline_artifact
     paths:
     - 'src/**'
     - 'external/**'
