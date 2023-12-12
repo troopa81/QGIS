@@ -103,6 +103,7 @@ done:
 %Feature HAVE_QTSERIALPORT
 %Feature ANDROID
 %Feature VECTOR_MAPPED_TYPE
+%Feature PYQT6
 
 %Include conversions.sip
 %Include qgsexception.sip

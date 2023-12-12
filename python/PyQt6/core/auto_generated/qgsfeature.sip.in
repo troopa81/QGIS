@@ -211,6 +211,8 @@ its attributes:
 %End
 
 
+    // TODO Make it work with Qt6
+%If( !PYQT6 )
     SIP_PYOBJECT attributeMap() const /TypeHint="Dict[str, Optional[object]]"/;
 %Docstring
 Returns the feature's attributes as a map of field name to value.
@@ -248,6 +250,7 @@ Returns the feature's attributes as a map of field name to value.
     }
 %End
 
+%End
     int attributeCount() const;
 %Docstring
 Returns the number of attributes attached to the feature.
