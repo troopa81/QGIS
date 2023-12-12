@@ -10,6 +10,7 @@ on:
       - master
       - release-**
       - queued_ltr_backports
+      - build_qt6_ci_pyqt
     paths:
     - 'src/**'
     - 'external/**'
