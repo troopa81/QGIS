@@ -34,13 +34,13 @@ length, and if applicable, precision.
 
   public:
 
-    QgsField( const QString &name = QString(),
-              QVariant::Type type = QVariant::Invalid,
-              const QString &typeName = QString(),
-              int len = 0,
-              int prec = 0,
-              const QString &comment = QString(),
-              QVariant::Type subType = QVariant::Invalid );
+ QgsField( const QString &name = QString(),
+                                QVariant::Type type = QVariant::Invalid,
+                                const QString &typeName = QString(),
+                                int len = 0,
+                                int prec = 0,
+                                const QString &comment = QString(),
+                                QVariant::Type subType = QVariant::Invalid );
 %Docstring
 Constructor. Constructs a new QgsField object.
 
@@ -57,6 +57,14 @@ Constructor. Constructs a new QgsField object.
                 all the elements don't need to have the same type, leave
                 this to QVariant.Invalid.
 %End
+
+    QgsField( const QString &name = QString(),
+              QMetaType::Type type = QMetaType::UnknownType,
+              const QString &typeName = QString(),
+              int len = 0,
+              int prec = 0,
+              const QString &comment = QString(),
+              QMetaType::Type subType = QMetaType::UnknownType );
 
     QgsField( const QgsField &other );
 %Docstring

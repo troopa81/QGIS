@@ -50,6 +50,12 @@ QgsField::QgsField( const QString &name, QVariant::Type type,
   d = new QgsFieldPrivate( name, type, subType, typeName, len, prec, comment );
 }
 
+QgsField::QgsField( const QString &name, QMetaType::Type type,
+                    const QString &typeName, int len, int prec, const QString &comment, QMetaType::Type subType )
+{
+  d = new QgsFieldPrivate( name, static_cast<QVariant::Type>( type ), static_cast<QVariant::Type>( subType ), typeName, len, prec, comment );
+}
+
 QgsField::QgsField( const QgsField &other ) //NOLINT
   : d( other.d )
 {

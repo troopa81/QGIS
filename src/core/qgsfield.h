@@ -83,13 +83,21 @@ class CORE_EXPORT QgsField
      *                all the elements don't need to have the same type, leave
      *                this to QVariant::Invalid.
      */
+    Q_DECL_DEPRECATED QgsField( const QString &name = QString(),
+                                QVariant::Type type = QVariant::Invalid,
+                                const QString &typeName = QString(),
+                                int len = 0,
+                                int prec = 0,
+                                const QString &comment = QString(),
+                                QVariant::Type subType = QVariant::Invalid );
+
     QgsField( const QString &name = QString(),
-              QVariant::Type type = QVariant::Invalid,
+              QMetaType::Type type = QMetaType::UnknownType,
               const QString &typeName = QString(),
               int len = 0,
               int prec = 0,
               const QString &comment = QString(),
-              QVariant::Type subType = QVariant::Invalid );
+              QMetaType::Type subType = QMetaType::UnknownType );
 
     /**
      * Copy constructor
