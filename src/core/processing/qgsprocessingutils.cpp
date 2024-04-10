@@ -804,23 +804,23 @@ QString QgsProcessingUtils::variantToPythonLiteral( const QVariant &value )
            r.crs().authid() );
   }
 
-  switch ( value.type() )
+  switch ( value.userType() )
   {
-    case QVariant::Bool:
+    case QMetaType::Type::Bool:
       return value.toBool() ? QStringLiteral( "True" ) : QStringLiteral( "False" );
 
-    case QVariant::Double:
+    case QMetaType::Type::Double:
       return QString::number( value.toDouble() );
 
-    case QVariant::Int:
-    case QVariant::UInt:
+    case QMetaType::Type::Int:
+    case QMetaType::Type::UInt:
       return QString::number( value.toInt() );
 
-    case QVariant::LongLong:
-    case QVariant::ULongLong:
+    case QMetaType::Type::LongLong:
+    case QMetaType::Type::ULongLong:
       return QString::number( value.toLongLong() );
 
-    case QVariant::List:
+    case QMetaType::Type::QVariantList:
     {
       QStringList parts;
       const QVariantList vl = value.toList();
@@ -831,7 +831,7 @@ QString QgsProcessingUtils::variantToPythonLiteral( const QVariant &value )
       return parts.join( ',' ).prepend( '[' ).append( ']' );
     }
 
-    case QVariant::Map:
+    case QMetaType::Type::QVariantMap:
     {
       const QVariantMap map = value.toMap();
       QStringList parts;
@@ -843,7 +843,7 @@ QString QgsProcessingUtils::variantToPythonLiteral( const QVariant &value )
       return parts.join( ',' ).prepend( '{' ).append( '}' );
     }
 
-    case QVariant::DateTime:
+    case QMetaType::Type::QDateTime:
     {
       const QDateTime dateTime = value.toDateTime();
       return QStringLiteral( "QDateTime(QDate(%1, %2, %3), QTime(%4, %5, %6))" )
@@ -1578,11 +1578,11 @@ QVariantMap QgsProcessingUtils::removePointerValuesFromMap( const QVariantMap &m
   QVariantMap res;
   for ( auto it = map.constBegin(); it != map.constEnd(); ++it )
   {
-    if ( it->type() == QVariant::Map )
+    if ( it->userType() == QMetaType::Type::QVariantMap )
     {
       res.insert( it.key(), removePointerValuesFromMap( it.value().toMap() ) );
     }
-    else if ( it->type() == QVariant::List )
+    else if ( it->userType() == QMetaType::Type::QVariantList )
     {
       QVariantList dest;
       const QVariantList source = it.value().toList();
@@ -1607,7 +1607,7 @@ QVariantMap QgsProcessingUtils::preprocessQgisProcessParameters( const QVariantM
   ok = true;
   for ( auto it = parameters.constBegin(); it != parameters.constEnd(); ++it )
   {
-    if ( it.value().type() == QVariant::Map )
+    if ( it.value().userType() == QMetaType::Type::QVariantMap )
     {
       const QVariantMap value = it.value().toMap();
       if ( value.value( QStringLiteral( "type" ) ).toString() == QLatin1String( "data_defined" ) )
@@ -1633,7 +1633,7 @@ QVariantMap QgsProcessingUtils::preprocessQgisProcessParameters( const QVariantM
         output.insert( it.key(), it.value() );
       }
     }
-    else if ( it.value().type() == QVariant::String )
+    else if ( it.value().userType() == QMetaType::Type::QString )
     {
       const QString stringValue = it.value().toString();
 

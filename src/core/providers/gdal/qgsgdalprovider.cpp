@@ -3343,22 +3343,22 @@ bool QgsGdalProvider::readNativeAttributeTable( QString *errorMessage )
         for ( int columnNumber = 0; columnNumber < GDALRATGetColumnCount( hRat ); ++columnNumber )
         {
           const Qgis::RasterAttributeTableFieldUsage usage { static_cast<Qgis::RasterAttributeTableFieldUsage>( GDALRATGetUsageOfCol( hRat, columnNumber ) ) };
-          QVariant::Type type = QVariant::Int;
+          QMetaType::Type type = QMetaType::Type::Int;
           switch ( GDALRATGetTypeOfCol( hRat, columnNumber ) )
           {
             case GFT_Integer:
             {
-              type = QVariant::Int;
+              type = QMetaType::Type::Int;
               break;
             }
             case GFT_Real:
             {
-              type = QVariant::Double;
+              type = QMetaType::Type::Double;
               break;
             }
             case GFT_String:
             {
-              type = QVariant::String;
+              type = QMetaType::Type::QString;
               break;
             }
 
@@ -3390,15 +3390,15 @@ bool QgsGdalProvider::readNativeAttributeTable( QString *errorMessage )
           {
             switch ( field.type )
             {
-              case QVariant::Int:
-              case QVariant::UInt:
-              case QVariant::LongLong:
-              case QVariant::ULongLong:
+              case QMetaType::Type::Int:
+              case QMetaType::Type::UInt:
+              case QMetaType::Type::LongLong:
+              case QMetaType::Type::ULongLong:
               {
                 rowData.push_back( GDALRATGetValueAsInt( hRat, rowIdx, colIdx ) );
                 break;
               }
-              case QVariant::Double:
+              case QMetaType::Type::Double:
               {
                 rowData.push_back( GDALRATGetValueAsDouble( hRat, rowIdx, colIdx ) );
                 break;
@@ -3499,15 +3499,15 @@ bool QgsGdalProvider::writeNativeAttributeTable( QString *errorMessage ) //#spel
       GDALRATFieldType fType { GFT_String };
       switch ( field.type )
       {
-        case QVariant::Int:
-        case QVariant::UInt:
-        case QVariant::LongLong:
-        case QVariant::ULongLong:
+        case QMetaType::Type::Int:
+        case QMetaType::Type::UInt:
+        case QMetaType::Type::LongLong:
+        case QMetaType::Type::ULongLong:
         {
           fType = GFT_Integer;
           break;
         }
-        case QVariant::Double:
+        case QMetaType::Type::Double:
         {
           fType = GFT_Real;
           break;

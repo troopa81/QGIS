@@ -3363,7 +3363,7 @@ QStringList QgsProject::readListEntry( const QString &scope,
   {
     value = property->value();
 
-    const bool valid = QVariant::StringList == value.type();
+    const bool valid = QMetaType::Type::QStringList == value.userType();
     if ( ok )
       *ok = valid;
 
@@ -3394,7 +3394,7 @@ QString QgsProject::readEntry( const QString &scope,
   {
     value = property->value();
 
-    const bool valid = value.canConvert( QVariant::String );
+    const bool valid = value.canConvert( QMetaType::Type::QString );
     if ( ok )
       *ok = valid;
 
@@ -3421,7 +3421,7 @@ int QgsProject::readNumEntry( const QString &scope, const QString &key, int def,
     value = property->value();
   }
 
-  const bool valid = value.canConvert( QVariant::Int );
+  const bool valid = value.canConvert( QMetaType::Type::Int );
 
   if ( ok )
   {
@@ -3447,7 +3447,7 @@ double QgsProject::readDoubleEntry( const QString &scope, const QString &key,
   {
     const QVariant value = property->value();
 
-    const bool valid = value.canConvert( QVariant::Double );
+    const bool valid = value.canConvert( QMetaType::Type::Double );
     if ( ok )
       *ok = valid;
 
@@ -3471,7 +3471,7 @@ bool QgsProject::readBoolEntry( const QString &scope, const QString &key, bool d
   {
     const QVariant value = property->value();
 
-    const bool valid = value.canConvert( QVariant::Bool );
+    const bool valid = value.canConvert( QMetaType::Type::Bool );
     if ( ok )
       *ok = valid;
 
