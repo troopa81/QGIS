@@ -96,7 +96,7 @@ class ProcessingHistoryNode : public QgsHistoryEntryGroup
     {
 
       const QVariant parameters = mEntry.entry.value( QStringLiteral( "parameters" ) );
-      if ( parameters.type() == QVariant::Map )
+      if ( parameters.userType() == QMetaType::Type::QVariantMap )
       {
         const QVariantMap parametersMap = parameters.toMap();
         mInputs = parametersMap.value( QStringLiteral( "inputs" ) ).toMap();

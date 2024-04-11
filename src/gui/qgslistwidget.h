@@ -35,7 +35,7 @@ class GUI_EXPORT QgsListModel : public QAbstractTableModel
     Q_OBJECT
   public:
 
-    explicit QgsListModel( QVariant::Type subType, QObject *parent = nullptr );
+    explicit QgsListModel( QMetaType::Type subType, QObject *parent = nullptr );
     void setList( const QVariantList &list );
     QVariantList list() const;
     bool valid() const;
@@ -51,7 +51,7 @@ class GUI_EXPORT QgsListModel : public QAbstractTableModel
 
   private:
     QVariantList mLines;
-    QVariant::Type mSubType;
+    QMetaType::Type mSubType;
 };
 ///@endcond
 #endif
@@ -70,7 +70,7 @@ class GUI_EXPORT QgsListWidget: public QgsTableWidgetBase
     /**
      * Constructor.
      */
-    explicit QgsListWidget( QVariant::Type subType, QWidget *parent = nullptr );
+    explicit QgsListWidget( QMetaType::Type subType, QWidget *parent = nullptr );
 
     /**
      * Set the initial value of the widget.
@@ -91,7 +91,7 @@ class GUI_EXPORT QgsListWidget: public QgsTableWidgetBase
 
   private:
     QgsListModel mModel;
-    QVariant::Type mSubType;
+    QMetaType::Type mSubType;
 };
 
 
