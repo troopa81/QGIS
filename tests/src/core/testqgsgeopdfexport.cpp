@@ -82,8 +82,8 @@ void TestQgsGeoPdfExport::testCollectingFeatures()
   QCOMPARE( geoPdfExporter.mVectorComponents.count(), 0 );
 
   QgsFields fields;
-  fields.append( QgsField( QStringLiteral( "a1" ), QVariant::Int ) );
-  fields.append( QgsField( QStringLiteral( "a2" ), QVariant::Int ) );
+  fields.append( QgsField( QStringLiteral( "a1" ), QMetaType::Type::Int ) );
+  fields.append( QgsField( QStringLiteral( "a2" ), QMetaType::Type::Int ) );
   QgsFeature f( fields );
 
   f.setAttributes( QgsAttributes() << 1 << 2 );
@@ -160,8 +160,8 @@ void TestQgsGeoPdfExport::testComposition()
   QCOMPARE( geoPdfExporter.mVectorComponents.count(), 0 );
 
   QgsFields fields;
-  fields.append( QgsField( QStringLiteral( "a1" ), QVariant::Int ) );
-  fields.append( QgsField( QStringLiteral( "a2" ), QVariant::Int ) );
+  fields.append( QgsField( QStringLiteral( "a1" ), QMetaType::Type::Int ) );
+  fields.append( QgsField( QStringLiteral( "a2" ), QMetaType::Type::Int ) );
   QgsFeature f( fields );
 
   f.setAttributes( QgsAttributes() << 1 << 2 );
@@ -399,8 +399,8 @@ void TestQgsGeoPdfExport::testGroups()
   QCOMPARE( geoPdfExporter.mVectorComponents.count(), 0 );
 
   QgsFields fields;
-  fields.append( QgsField( QStringLiteral( "a1" ), QVariant::Int ) );
-  fields.append( QgsField( QStringLiteral( "a2" ), QVariant::Int ) );
+  fields.append( QgsField( QStringLiteral( "a1" ), QMetaType::Type::Int ) );
+  fields.append( QgsField( QStringLiteral( "a2" ), QMetaType::Type::Int ) );
   QgsFeature f( fields );
 
   f.setAttributes( QgsAttributes() << 1 << 2 );
@@ -480,8 +480,8 @@ void TestQgsGeoPdfExport::testCustomGroups()
   TestGeoPdfExporter geoPdfExporter;
 
   QgsFields fields;
-  fields.append( QgsField( QStringLiteral( "a1" ), QVariant::Int ) );
-  fields.append( QgsField( QStringLiteral( "a2" ), QVariant::Int ) );
+  fields.append( QgsField( QStringLiteral( "a1" ), QMetaType::Type::Int ) );
+  fields.append( QgsField( QStringLiteral( "a2" ), QMetaType::Type::Int ) );
   QgsFeature f( fields );
 
   f.setAttributes( QgsAttributes() << 1 << 2 );

@@ -121,7 +121,7 @@ void TestQgsDxfExport::init()
   mPointLayerNoSymbols = new QgsVectorLayer( filename, QStringLiteral( "points" ), QStringLiteral( "ogr" ) );
   QVERIFY( mPointLayerNoSymbols->isValid() );
   mPointLayerNoSymbols->setRenderer( new QgsNullSymbolRenderer() );
-  mPointLayerNoSymbols->addExpressionField( QStringLiteral( "'A text with spaces'" ), QgsField( QStringLiteral( "Spacestest" ), QVariant::String ) );
+  mPointLayerNoSymbols->addExpressionField( QStringLiteral( "'A text with spaces'" ), QgsField( QStringLiteral( "Spacestest" ), QMetaType::Type::QString ) );
   QgsProject::instance()->addMapLayer( mPointLayerNoSymbols );
 
   //Point layer with geometry generator symbolizer
@@ -513,7 +513,7 @@ void TestQgsDxfExport::testMtext_data()
   QgsVectorLayer *pointLayerNoSymbols = new QgsVectorLayer( filename, QStringLiteral( "points" ), QStringLiteral( "ogr" ) );
   QVERIFY( pointLayerNoSymbols->isValid() );
   pointLayerNoSymbols->setRenderer( new QgsNullSymbolRenderer() );
-  pointLayerNoSymbols->addExpressionField( QStringLiteral( "'A text with spaces'" ), QgsField( QStringLiteral( "Spacestest" ), QVariant::String ) );
+  pointLayerNoSymbols->addExpressionField( QStringLiteral( "'A text with spaces'" ), QgsField( QStringLiteral( "Spacestest" ), QMetaType::Type::QString ) );
 
   QTest::newRow( "MText No Symbology" )
       << pointLayerNoSymbols
@@ -558,7 +558,7 @@ void TestQgsDxfExport::testMTextEscapeSpaces()
 
 void TestQgsDxfExport::testMTextEscapeLineBreaks()
 {
-  const int field = mPointLayerNoSymbols->addExpressionField( QStringLiteral( "'A text with ' || char(13) || char(10) || 'line break'" ), QgsField( QStringLiteral( "linebreaktest" ), QVariant::String ) );
+  const int field = mPointLayerNoSymbols->addExpressionField( QStringLiteral( "'A text with ' || char(13) || char(10) || 'line break'" ), QgsField( QStringLiteral( "linebreaktest" ), QMetaType::Type::QString ) );
 
   QgsPalLayerSettings settings;
   settings.fieldName = QStringLiteral( "linebreaktest" );
