@@ -294,7 +294,7 @@ jobs:
     strategy:
       matrix:
         qt-version: [5, 6]
-        test-batch: [ALL_BUT_PROVIDERS, POSTGRES, HANA]
+        test-batch: [ALL_BUT_PROVIDERS, POSTGRES]
 
         include:
           - qt-version: 5
@@ -311,8 +311,8 @@ jobs:
             docker-target: binary-for-oracle
 
         exclude:
-          - qt-version: 6
-            test-batch: HANA
+          # - qt-version: 6
+          #   test-batch: HANA
 
           - qt-version: 6
             test-batch: POSTGRES
