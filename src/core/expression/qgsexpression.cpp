@@ -125,6 +125,11 @@ QString QgsExpression::quotedValue( const QVariant &value, QMetaType::Type type 
 
 }
 
+QString QgsExpression::quotedValue( const QVariant &value, QVariant::Type type )
+{
+  return quotedValue( value, QgsVariantUtils::variantTypeToMetaType( type ) );
+}
+
 bool QgsExpression::isFunctionName( const QString &name )
 {
   return functionIndex( name ) != -1;
@@ -1160,6 +1165,11 @@ QString QgsExpression::createFieldEqualityExpression( const QString &fieldName, 
   return expr;
 }
 
+QString QgsExpression::createFieldEqualityExpression( const QString &fieldName, const QVariant &value, QVariant::Type fieldType )
+{
+  return createFieldEqualityExpression( fieldName, value, QgsVariantUtils::variantTypeToMetaType( fieldType ) );
+}
+
 bool QgsExpression::isFieldEqualityExpression( const QString &expression, QString &field, QVariant &value )
 {
   QgsExpression e( expression );
@@ -1429,6 +1439,3 @@ QList<const QgsExpressionNode *> QgsExpression::nodes() const
 
   return d->mRootNode->nodes();
 }
-
-
-
