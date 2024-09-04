@@ -2046,13 +2046,21 @@ bool QgsProject::readProjectFile( const QString &filename, Qgis::ProjectReadFlag
   QString projectString = textStream.readAll();
   projectFile.close();
 
-  for ( int i = 0; i < 32; i++ )
+  // check if we need to replace fontmarker invalid XML characters fixed in 3.34.1
+  const thread_local QRegularExpression re( "<qgis[^>]*version=\"([^\"]*)\"" );
+  const QRegularExpressionMatch match = re.match( projectString );
+  const QgsProjectVersion version = match.hasMatch() ? QgsProjectVersion( match.captured( 1 ) ) : QgsProjectVersion();
+
+  if ( version.isNull() || version < QgsProjectVersion( 3, 34, 1 ) )
   {
-    if ( i == 9 || i == 10 || i == 13 )
+    for ( int i = 0; i < 32; i++ )
     {
-      continue;
+      if ( i == 9 || i == 10 || i == 13 )
+      {
+        continue;
+      }
+      projectString.replace( QChar( i ), QStringLiteral( "%1%2%1" ).arg( FONTMARKER_CHR_FIX, QString::number( i ) ) );
     }
-    projectString.replace( QChar( i ), QStringLiteral( "%1%2%1" ).arg( FONTMARKER_CHR_FIX, QString::number( i ) ) );
   }
 
   // location of problem associated with errorMsg
