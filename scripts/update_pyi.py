@@ -9,9 +9,7 @@ from tokenize_rt import Offset, src_to_tokens, tokens_to_src, reversed_enumerate
 # import time
 # start = time.time()
 
-
 # TODO
-# deal with setNonIdentifiableLayers duplicate
 # Cmake things
 # do it for all classes/modules
 # do it for signal
@@ -68,55 +66,12 @@ for class_name, class_object in inspect.getmembers(qgis.core, predicate=inspect.
         # if inspect.ismethoddescriptor(func):
         #     print(func)
 
-        # documentation for setNonIdentifiableLayers aggregate the two overloaded method
-        # functions (need signal also)
-
-        # if function_name != "setNonIdentifiableLayers":
-        #     continue
-
-        # print(func.__doc__)
-
-        #(setNonIdentifiableLayers)(.*)(?=\1|$)
-
-        # Check if there is several function with the same name in documentation so
-        # we store their signature for later better identification
-        # for m in re.findall(r"(" + function_name + r")(.*?)\n(.*?)(?=\1|$)", func.__doc__, re.DOTALL):
-        #     print("--- {}".format(m))
-
-        # for m in re.finditer(r"(setNonIdentifiableLayers)(.*)(?=setNonIdentifiableLayers|$)", func.__doc__, re.MULTILINE|re.DOTALL):
-        #     print("--- {}".format(m))
-
-        # matches_start = list(re.finditer(f"{function_name}\\(self, ([^\\)]*)\\)\n", func.__doc__))
-        # for i, m in enumerate(matches_start):
-
-        #     signature = func.__doc__[m.start(0):m.end(0)]
-        #     description = func.__doc__[m.end(0):matches_start[i+1].start(0)] if i<len(matches_start)-1 else func.__doc__[m.end(0):]
-
-        #     print(signature)
-        #     print("-------")
-        #     print(description)
-        #     # print(func.__doc__[m.start(0):matches_start[i+1].start(0)] if i<len(matches_start)-1 else func.__doc__[m.start(0):])
-        #     print("-------")
-
-        # # TODO search with -> tutuwithnospace$
-        # overloaded_match = re.findall( f"{function_name}\\(self, ([^\\)]*)\\)\n(.*?)", func.__doc__, re.MULTILINE|re.DOTALL )
-        # if overloaded_match:
-        #     print(overloaded_match)
-
-        #matches_start = list(re.finditer(r"^" + function_name + r"(\(.*\)(?:$| -> .*))", func.__doc__))
-
-        # exit(0)
-
         if inspect.isbuiltin(func) and func.__doc__ and ".. deprecated:: " in func.__doc__:
 
             # Check if there is several function with the same name in documentation so
             # we store their signature for later better identification
 
             func_matches = list(re.finditer(r"^" + function_name + r"(\(.*\)(?:$| -> .*))", func.__doc__, re.MULTILINE))
-            # for m in matches_start:
-            #     print(m.group(1))
-
-            # functions = re.findall(r"(" + function_name + r")(.*?)\n(.*?)(?=\1|$)", func.__doc__, re.DOTALL)
             if len(func_matches) > 1:
                 messages = {}
                 for i, func_match in enumerate(func_matches):
@@ -133,15 +88,9 @@ for class_name, class_object in inspect.getmembers(qgis.core, predicate=inspect.
             else:
                 deprecated_functions[(class_name, function_name)] = get_deprecated_message(func.__doc__)
 
-# print(f"inspect: {(time.time()-start)*1000}")
-
-# print(deprecated_functions)
-
 filename = "/home/julien/work/QGIS/build/python/core/build/_core/_core.pyi"
 with open(filename, encoding='UTF-8') as f:
     contents = f.read()
-
-# print(f"read pyi: {(time.time()-start)*1000}")
 
 need_deprecated = {}
 
@@ -180,7 +129,5 @@ for i, token in reversed_enumerate(tokens):
 new_contents = tokens_to_src(tokens)
 with open("/tmp/qgis.pyi", 'w') as f:
     f.write(new_contents)
-
-print("coucou")
 
 # print(f"write content: {(time.time()-start)*1000}")
