@@ -28,6 +28,9 @@ def get_annotation_signature(_node, is_return):
     elif isinstance(_node, ast.Name):
         return _node.id
 
+    elif isinstance(_node, ast.Attribute):
+        return f"{get_annotation_signature(_node.value, is_return)}.{_node.attr}"
+
     elif isinstance(_node, ast.Constant):
         return _node.value
 
@@ -36,11 +39,13 @@ def get_annotation_signature(_node, is_return):
 
 
 def get_function_signature(_node: ast.FunctionDef):
+
+    print(f"-- name={_node.name}")
     arguments = []
     for a in _node.args.args:
         arguments.append(f"{a.arg}")
         if a.annotation:
-            arguments[-1] += ": " + get_annotation_signature(a.annotation, False)
+            arguments[-1] += ":" + get_annotation_signature(a.annotation, False)
 
     returns = get_annotation_signature(_node.returns, True)
 
@@ -88,7 +93,11 @@ for class_name, class_object in inspect.getmembers(qgis.core, predicate=inspect.
                     doc_start = func_match.end() + 1
                     doc_end = func_matches[i + 1].start() - 1 if i + 1 < len(func_matches) else None
                     doc = func.__doc__[doc_start:doc_end]
+
+                    # remove whitespace
                     signature = func_match.group(1).replace(" ", "")
+                    # remove default value
+                    signature = re.sub(r"=[^,)]*", "", signature)
 
                     if ".. deprecated:: " in doc:
                         messages[signature] = get_deprecated_message(doc)
