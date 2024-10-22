@@ -13,17 +13,26 @@ from tokenize_rt import Offset, src_to_tokens, tokens_to_src, reversed_enumerate
 # Cmake things
 # do it for all classes/modules
 # do it for signal
+# try to update the ast while walking it, see doc
 
 
-def get_annotation_signature(_node: ast.Subscript):
+def get_annotation_signature(_node, is_return):
 
-    slice_str = None
-    if isinstance(_node.slice, ast.Subscript):
-        slice_str = get_annotation_signature(_node.slice)
-    elif isinstance(_node.slice, ast.Name):
-        slice_str = _node.slice.id
+    if isinstance(_node, ast.Subscript):
+        slice_str = get_annotation_signature(_node.slice, is_return)
+        # When it comes to return typing sip write differently a tuple in pyi Tuple[bool, str]
+        # and in documentation (bool, str). So return the later form so we can match with doc
+        return ((f"({slice_str})" if slice_str else "") if is_return
+                else (_node.value.attr + f"[{slice_str}]" if slice_str else ""))
 
-    return _node.value.attr + f"[{slice_str}]" if slice_str else ""
+    elif isinstance(_node, ast.Name):
+        return _node.id
+
+    elif isinstance(_node, ast.Constant):
+        return _node.value
+
+    elif isinstance(_node, ast.Tuple):
+        return ",".join([get_annotation_signature(elt, is_return) for elt in _node.elts])
 
 
 def get_function_signature(_node: ast.FunctionDef):
@@ -31,14 +40,17 @@ def get_function_signature(_node: ast.FunctionDef):
     for a in _node.args.args:
         arguments.append(f"{a.arg}")
         if a.annotation:
-            arguments[-1] += ": " + get_annotation_signature(a.annotation)
+            arguments[-1] += ": " + get_annotation_signature(a.annotation, False)
 
-    return "(" + ", ".join(arguments) + ")"
+    returns = get_annotation_signature(_node.returns, True)
+
+    # No returns when returns is None
+    return "(" + ",".join(arguments) + ")" + (f"->{returns}" if returns else "")
 
 
 def get_deprecated_message(documentation: str):
 
-    deprecated_match = re.search("\\.\\. deprecated:: ([0-9.]*)(.*)", documentation, re.MULTILINE | re.DOTALL)
+    deprecated_match = re.search(r"\.\. deprecated:: ([0-9\.]*)(.*)", documentation, re.MULTILINE | re.DOTALL)
 
     if not deprecated_match:
         sys.stderr.write(f"Badly formatted deprecated instruction: {documentation}")
@@ -52,14 +64,12 @@ def get_deprecated_message(documentation: str):
     # remove :py:func: and :py:class: documentation instruction
     msg = re.sub(":py:(func|class):`~{0,1}([^`]*)`", "\\2", msg)
     msg = msg.strip()
-    return msg
+    return f"Since QGIS {version}" + (f". {msg}" if msg else "")
 
 
 deprecated_functions = {}
 
 for class_name, class_object in inspect.getmembers(qgis.core, predicate=inspect.isclass):
-    if class_name != "QgsProject":
-        continue
 
     for function_name, func in inspect.getmembers(class_object):
         # signal and other things
@@ -78,7 +88,7 @@ for class_name, class_object in inspect.getmembers(qgis.core, predicate=inspect.
                     doc_start = func_match.end() + 1
                     doc_end = func_matches[i + 1].start() - 1 if i + 1 < len(func_matches) else None
                     doc = func.__doc__[doc_start:doc_end]
-                    signature = func_match.group(1)
+                    signature = func_match.group(1).replace(" ", "")
 
                     if ".. deprecated:: " in doc:
                         messages[signature] = get_deprecated_message(doc)
@@ -87,6 +97,7 @@ for class_name, class_object in inspect.getmembers(qgis.core, predicate=inspect.
 
             else:
                 deprecated_functions[(class_name, function_name)] = get_deprecated_message(func.__doc__)
+
 
 filename = "/home/julien/work/QGIS/build/python/core/build/_core/_core.pyi"
 with open(filename, encoding='UTF-8') as f:
@@ -105,9 +116,9 @@ for parent in ast.walk(tree):
             if isinstance(deprecated_msg, dict):
                 signature = get_function_signature(node)
                 if signature not in deprecated_msg:
-                    print(node.name)
-                    sys.stderr.write(f"Cannot find deprecated signature '{signature}' in '{deprecated_msg.keys()}'")
-                    exit(1)
+                    available_signatures = "".join([f"- {signature}\n" for signature in deprecated_msg.keys()])
+                    sys.stderr.write(f"Cannot find deprecated signature '{signature}' for function '{parent.name}.{node.name}' in following signature:\n{available_signatures}")
+                    continue
 
                 deprecated_msg = deprecated_msg[get_function_signature(node)]
 
