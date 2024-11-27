@@ -195,6 +195,7 @@ Returns the area of the quadrilateral, or 0 if the quadrilateral is empty.
 %Docstring
 Returns the perimeter of the quadrilateral, or 0 if the quadrilateral is empty.
 %End
+
     SIP_PYOBJECT __repr__();
 %MethodCode
     QString str = QStringLiteral( "<QgsQuadrilateral: %1>" ).arg( sipCpp->toString() );

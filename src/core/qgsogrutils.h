@@ -397,7 +397,7 @@ class CORE_EXPORT QgsOgrUtils
     static std::unique_ptr< QgsSymbol > symbolFromStyleString( const QString &string, Qgis::SymbolType type ) SIP_FACTORY;
 
     /**
-     * Converts an OGR field type and sub type to the best matching QVariant::Type equivalent.
+     * Converts an OGR field type and sub type to the best matching QMetaType::Type equivalent.
      *
      * \param ogrType OGR field type
      * \param ogrSubType OGR field sub type

@@ -143,6 +143,7 @@ in here, they are extracted automatically from the :py:func:`~QgsActionScope.exp
 %Docstring
 Returns ``True`` if this scope is valid.
 %End
+
     long __hash__();
 %MethodCode
     sipRes = qHash( *sipCpp );

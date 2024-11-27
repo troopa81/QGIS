@@ -151,6 +151,7 @@ class CORE_EXPORT QgsActionScope
      * Returns TRUE if this scope is valid.
      */
     bool isValid() const;
+
 #ifdef SIP_RUN
     long __hash__();
     % MethodCode

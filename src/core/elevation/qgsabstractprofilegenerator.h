@@ -43,7 +43,7 @@ class CORE_EXPORT QgsProfileRenderContext
     /**
      * Constructor for QgsProfileRenderContext, with the specified embedded render \a context.
      */
-    QgsProfileRenderContext( QgsRenderContext &context );
+    QgsProfileRenderContext( const QgsRenderContext &context );
 
     /**
      * Returns a reference to the component QgsRenderContext.

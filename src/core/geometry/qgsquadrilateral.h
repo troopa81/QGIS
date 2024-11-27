@@ -210,6 +210,7 @@ class CORE_EXPORT QgsQuadrilateral
      * Returns the perimeter of the quadrilateral, or 0 if the quadrilateral is empty.
      */
     double perimeter() const SIP_HOLDGIL;
+
 #ifdef SIP_RUN
     SIP_PYOBJECT __repr__();
     % MethodCode

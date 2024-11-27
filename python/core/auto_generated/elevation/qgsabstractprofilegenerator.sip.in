@@ -24,7 +24,7 @@ Abstract base class for storage of elevation profiles.
 %End
   public:
 
-    QgsProfileRenderContext( QgsRenderContext &context );
+    QgsProfileRenderContext( const QgsRenderContext &context );
 %Docstring
 Constructor for QgsProfileRenderContext, with the specified embedded render ``context``.
 %End

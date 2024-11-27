@@ -18,7 +18,7 @@
 #include "qgsprofilesnapping.h"
 
 
-QgsProfileRenderContext::QgsProfileRenderContext( QgsRenderContext &context )
+QgsProfileRenderContext::QgsProfileRenderContext( const QgsRenderContext &context )
   : mRenderContext( context )
 {
 

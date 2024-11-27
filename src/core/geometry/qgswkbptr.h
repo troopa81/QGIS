@@ -136,7 +136,7 @@ class CORE_EXPORT QgsWkbPtr
 
 class CORE_EXPORT QgsConstWkbPtr
 {
-  protected:
+  private:
     mutable unsigned char *mP;
     unsigned char *mEnd;
     mutable bool mEndianSwap;
