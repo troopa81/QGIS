@@ -2,13 +2,6 @@
 
 add_subdirectory(typesystem_generator)
 
-
-set(_warnings "")
-string(REPLACE "-Werror" " " CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-message(${CMAKE_CXX_FLAGS})
-
-
-
 set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/qt-for-python)
 set (QGIS_PYTHON_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIRECTORY}/qgis)
 

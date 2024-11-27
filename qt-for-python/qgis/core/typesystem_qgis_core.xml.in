@@ -8,7 +8,12 @@
         typesystems -->
     <load-typesystem name="typesystem_core.xml" generate="no"/>
     <load-typesystem name="typesystem_gui.xml" generate="no"/>
+    <load-typesystem name="typesystem_widgets.xml" generate="no"/>
     <load-typesystem name="typesystem_xml.xml" generate="no"/>
+    <!--load-typesystem name="typesystem_3d.xml" generate="no"/-->
+
+    <load-typesystem name="${TYPESYSTEM_FILE}" generate="yes"/>
+
     <!--<load-typesystem name="typesystem_widgets.xml" generate="no"/>-->
 
     <!-- This is used in a public virtual pure function.
@@ -32,13 +37,13 @@
     <!-- DockWidgetBase contains an internal enum, so we declare it
          inside of the object-type -->
 
-    <enum-type name="QgsMapLayerType"/>
 
 <!--
     <typedef-type name="QgsFeatureList" source="QList&lt;QgsFeature&gt;" />
 -->
 
-    <value-type name="QgsFields">
+
+    <!--value-type name="QgsFields">
       <enum-type name="FieldOrigin"/>
         <add-function signature="__mgetitem__">
             <inject-code class="target" position="beginning">
@@ -65,7 +70,7 @@
 
       return pyResult;
     }
-    else if ( ( pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible( SbkPySide2_QtCoreTypeConverters[SBK_QSTRING_IDX], ( _key ) ) ) )
+    else if ( ( pythonToCpp = Shiboken::Conversions::isPythonToCppConvertible( SbkPySide6_QtCoreTypeConverters[SBK_QSTRING_IDX], ( _key ) ) ) )
     {
       ::QString keyName;
       pythonToCpp(_key, &keyName);
@@ -73,7 +78,7 @@
       const int fieldIdx = cppSelf->indexFromName( keyName );
       if ( fieldIdx == -1 )
       {
-        PyErr_SetString( PyExc_KeyError, keyName.toLatin1() ); 
+        PyErr_SetString( PyExc_KeyError, keyName.toLatin1() );
         return nullptr;
       }
 
@@ -109,7 +114,7 @@
 ]]>
           </inject-code>
         </modify-function>
-        
+
         <modify-function signature="remove(int)">
           <inject-code class="target" position="beginning">
 <![CDATA[
@@ -185,8 +190,6 @@
         </modify-function>
     </value-type>
     <object-type name="QgsProject">
-      <enum-type name="ReadFlag" flags="ReadFlags"/>
-      <enum-type name="FileFormat"/>
       <modify-function signature="attachedFile(const QString &amp;) const" remove="all"/>
       <modify-function signature="attachedFiles() const" remove="all"/>
       <modify-function signature="collectAttachedFiles(QMap&lt;QString,QString&gt; &amp;)" remove="all"/>
@@ -202,13 +205,13 @@
           <replace-type modified-type="QStringList"/>
         </modify-argument>
         <modify-argument index="2">
-          <replace-default-expression with="false"/> 
+          <replace-default-expression with="false"/>
         </modify-argument>
         <modify-argument index="3">
-          <replace-default-expression with="QString()"/> 
+          <replace-default-expression with="QString()"/>
         </modify-argument>
         <modify-argument index="4">
-          <replace-default-expression with="desktop"/> 
+          <replace-default-expression with="desktop"/>
         </modify-argument>
         <inject-code class='target' position='beginning'>
 <![CDATA[
@@ -222,22 +225,9 @@
       </modify-function>
     </object-type>
     <object-type name="QgsWkbTypes" >
-        <enum-type name="GeometryType"/>
-        <enum-type name="Type"/>
     </object-type>
 
     <object-type name="QgsUnitTypes">
-      <enum-type name="UnitType"/>
-      <enum-type name="DistanceUnit"/>
-      <enum-type name="DistanceUnitType"/>
-      <enum-type name="AreaUnit"/>
-      <enum-type name="VolumeUnit"/>
-      <enum-type name="AngleUnit"/>
-      <enum-type name="TemporalUnit"/>
-      <enum-type name="RenderUnit"/>
-      <enum-type name="LayoutUnit"/>
-      <enum-type name="LayoutUnitType"/>
-      <enum-type name="SystemOfMeasurement"/>
     </object-type>
 
     <value-type name="QgsFieldConstraints">
@@ -248,7 +238,6 @@
 
     <value-type name="QgsCoordinateReferenceSystem">
       <enum-type name="CrsType"/>
-      <enum-type name="Format"/>
       <enum-type name="IdentifierType"/>
       <enum-type name="WktVariant"/>
     </value-type>
@@ -287,18 +276,20 @@
     }
     else
     {
-      return Shiboken::Conversions::copyToPython(SbkPySide2_QtCoreTypeConverters[SBK_QVARIANT_IDX], &%1);
+      return Shiboken::Conversions::copyToPython(SbkPySide6_QtCoreTypeConverters[SBK_QVARIANT_IDX], &%1);
     }
 ]]>
         </inject-code>
       </modify-function>
-    </value-type>
+    </value-type-->
 
 
-@TYPESYSTEM_CONTENT@
 
 
-    <object-type name="QgsAbstractFeatureSource">
+<!-- TYPESYSTEM_CONTENT -->
+
+
+    <!--object-type name="QgsAbstractFeatureSource">
     </object-type>
 
     <object-type name="QgsMapLayer">
@@ -326,7 +317,33 @@
     </object-type>
 
     <object-type name="Qgis">
+      <enum-type name="UnitType"/>
+      <enum-type name="DistanceUnit"/>
+      <enum-type name="DistanceUnitType"/>
+      <enum-type name="AreaUnit"/>
+      <enum-type name="VolumeUnit"/>
+      <enum-type name="AngleUnit"/>
+      <enum-type name="TemporalUnit"/>
+      <enum-type name="RenderUnit"/>
+      <enum-type name="LayoutUnit"/>
+      <enum-type name="LayoutUnitType"/>
+      <enum-type name="SystemOfMeasurement"/>
+
       <enum-type name="DataType"/>
+      <enum-type name="GeometryOperationResult"/>
+      <enum-type name="GeometryValidityFlag"/>
+      <enum-type name="BufferSide"/>
+      <enum-type name="EndCapStyle"/>
+      <enum-type name="JoinStyle"/>
+      <enum-type name="GeometryValidationEngine"/>
+      <enum-type name="CrsDefinitionFormat"/>
+
+      <enum-type name="ProjectReadFlag" flags="ProjectReadFlags"/>
+      <enum-type name="ProjectFileFormat"/>
+      <enum-type name="LayerType"/>
+      <enum-type name="GeometryType"/>
+      <enum-type name="WkbType"/>
+
     </object-type>
 
     <value-type name="QgsExpressionContextScope">
@@ -335,15 +352,9 @@
     <object-type name="QgsFeatureSink">
       <enum-type name="Flag" flags="Flags"/>
       <enum-type name="SinkFlag" flags="SinkFlags"/>
-    </object-type>
+    </object-type-->
 
-    <value-type name="QgsGeometry">
-      <enum-type name="OperationResult"/>
-      <enum-type name="ValidityFlag"/>
-      <enum-type name="BufferSide"/>
-      <enum-type name="EndCapStyle"/>
-      <enum-type name="JoinStyle"/>
-      <enum-type name="ValidationMethod"/>
+    <!--value-type name="QgsGeometry">
         <add-function signature="__repr__" return-type="PyObject*">
             <inject-code class="target" position="beginning">
 <![CDATA[
@@ -357,11 +368,11 @@
         wkt = wkt.left( 1000 ) + QStringLiteral( "..." );
       str = QStringLiteral( "<QgsGeometry: %1>" ).arg( wkt );
     }
-    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() ); 
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
 ]]>
             </inject-code>
         </add-function>
-    </value-type>
+    </value-type-->
 <!--
     <value-type name="QgsInterval">
     </value-type>

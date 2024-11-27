@@ -890,6 +890,7 @@ else()
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050800)
 endif()
 
+set (WITH_PYSIDE FALSE CACHE BOOL "Enable (experimental) PySide support")
 if (WITH_PYSIDE)
 
   # Copied from git://code.qt.io/pyside/pyside-setup.git in shiboken6/cmake/ShibokenSetup.cmake
@@ -1180,6 +1181,9 @@ option(ENABLE_UNITY_BUILDS "Enable Unity builds, that is compiling several .cpp 
 set(MIN_PYTHON_VERSION "3.9")
 set(Python_FIND_FRAMEWORK "LAST")
 
+if (WITH_BINDINGS AND WITH_PYSIDE)
+  message(FATAL_ERROR "Cannot enable WITH_PYSIDE and WITH_BINDINGS together")
+endif()
 
 if (WITH_BINDINGS OR WITH_PYSIDE)
   find_package(Python ${MIN_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
@@ -1198,17 +1202,6 @@ endif()
 message("-- Found Python executable: ${Python_EXECUTABLE} (version ${Python_VERSION})")
 message("-- Python library: ${Python_LIBRARIES}")
 message("-- Python site-packages: ${Python_SITEARCH}")
-
-set (WITH_PYSIDE FALSE CACHE BOOL "Enable (experimental) PySide support")
-if (WITH_PYSIDE)
-  if (WITH_BINDINGS)
-    message(FATAL_ERROR "Cannot enable WITH_PYSIDE and WITH_BINDINGS together")
-  endif()
-  set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/qt-for-python)
-  set(QGIS_PYTHON_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIRECTORY}/qgis)
-  add_subdirectory(qt-for-python)
-  add_subdirectory(python/testing)
-endif()
 
 if (WITH_CORE AND WITH_BINDINGS)
   set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/python)
@@ -1299,6 +1292,11 @@ if (WITH_CORE)
 
   if (WITH_BINDINGS)
     add_subdirectory(python)
+  elseif (WITH_PYSIDE)
+    set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/qt-for-python)
+    set(QGIS_PYTHON_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIRECTORY}/qgis)
+    add_subdirectory(qt-for-python)
+    add_subdirectory(python/testing)
   endif()
 
   if (APPLE)
