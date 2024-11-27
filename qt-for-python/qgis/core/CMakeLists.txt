@@ -7,7 +7,17 @@ set(SNIPPET_FILE "${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/qgis_core.cpp")
 set(CLASSBLOCKLIST_FILE "${CMAKE_SOURCE_DIR}/qt-for-python/qgis/core/classBlockList.txt")
 
 set(TYPESYSTEM_GENERATOR_ARGS "")
-get_target_property(INCLUDE_DIRS qgis_core INCLUDE_DIRECTORIES)
+get_target_property(INCLUDE_DIRS qgis_core INTERFACE_INCLUDE_DIRECTORIES)
+
+# TODO would be better to get it directly from core (with get_target_property LINKED_LIBRARIES)
+# but get_target_property fails on some libs not being target
+foreach(LINKED_LIB GDAL::GDAL EXPAT::EXPAT)
+  get_target_property(LIB_INCLUDE_DIR ${LINKED_LIB} INTERFACE_INCLUDE_DIRECTORIES)
+  list(APPEND INCLUDE_DIRS ${LIB_INCLUDE_DIR})
+endforeach()
+
+list(APPEND INCLUDE_DIRS ${CMAKE_BINARY_DIR})
+
 list(TRANSFORM INCLUDE_DIRS PREPEND "-I")
 
 add_custom_target(update_pyside_bindings

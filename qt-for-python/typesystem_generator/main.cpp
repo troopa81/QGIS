@@ -797,7 +797,7 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
 
 void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &signature, const QStringList &body )
 {
-  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)\\s*(static\\s|)(\\w*)\\s*(\\*|)\\s*(.*);" ) );
+  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)\\s*(static\\s|)([\\w:]*)\\s+(\\*|)\\s*(.*);" ) );
   const QRegularExpressionMatch matchSignature = reSignature.match( signature );
 
   if ( !matchSignature.hasMatch() )
