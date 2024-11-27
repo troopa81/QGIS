@@ -46,7 +46,6 @@ from qgis.core import (
     QgsApplication,
     QgsFeatureRequest,
     QgsCoordinateReferenceSystem,
-    NULL,
     QgsVectorLayer,
     QgsRenderChecker,
     QgsMultiRenderChecker,
@@ -836,9 +835,9 @@ class QgisTestCase(unittest.TestCase):
                 in [QVariant.Int, QVariant.Double, QVariant.LongLong]
                 or isNumber
             ):
-                if not attr_expected == NULL:
+                if not attr_expected is None:
                     attr_expected = round(attr_expected, cmp["precision"])
-                if not attr_result == NULL:
+                if not attr_result is None:
                     attr_result = round(attr_result, cmp["precision"])
 
             if use_asserts:

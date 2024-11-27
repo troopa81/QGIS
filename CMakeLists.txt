@@ -67,6 +67,9 @@ set(COMPLETE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINO
 set(RELEASE_NAME "Master")
 project(qgis VERSION ${COMPLETE_VERSION})
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
 if (APPLE)
   set(QGIS_APP_NAME "QGIS")
 else()
@@ -773,7 +776,7 @@ if (PEDANTIC)
     endif()
 
     # disable warnings
-    set(_warnings "${_warnings} /wd4091 ")  # 'typedef': ignored on left of '' when no variable is declared (occurs in MS DbgHelp.h header)
+    set(_warnings "${_warning} /wd4091 ")  # 'typedef': ignored on left of '' when no variable is declared (occurs in MS DbgHelp.h header)
     set(_warnings "${_warnings} /wd4100 ")  # unused formal parameters
     set(_warnings "${_warnings} /wd4127 ")  # constant conditional expressions (used in Qt template classes)
     set(_warnings "${_warnings} /wd4190 ")  # 'identifier' has C-linkage specified, but returns UDT 'identifier2' which is incompatible with C
@@ -1142,7 +1145,7 @@ set(MIN_PYTHON_VERSION "3.9")
 set(Python_FIND_FRAMEWORK "LAST")
 
 
-if (WITH_BINDINGS)
+if (WITH_BINDINGS OR WITH_PYSIDE)
   find_package(Python ${MIN_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development)
 else()
   find_package(Python ${MIN_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter)
@@ -1159,6 +1162,17 @@ endif()
 message("-- Found Python executable: ${Python_EXECUTABLE} (version ${Python_VERSION})")
 message("-- Python library: ${Python_LIBRARIES}")
 message("-- Python site-packages: ${Python_SITEARCH}")
+
+set (WITH_PYSIDE FALSE CACHE BOOL "Enable (experimental) PySide support")
+if (WITH_PYSIDE)
+  if (WITH_BINDINGS)
+    message(FATAL_ERROR "Cannot enable WITH_PYSIDE and WITH_BINDINGS together")
+  endif()
+  set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/qt-for-python)
+  set(QGIS_PYTHON_OUTPUT_DIRECTORY ${PYTHON_OUTPUT_DIRECTORY}/qgis)
+  add_subdirectory(qt-for-python)
+  add_subdirectory(python/testing)
+endif()
 
 if (WITH_CORE AND WITH_BINDINGS)
   set(PYTHON_OUTPUT_DIRECTORY ${QGIS_OUTPUT_DIRECTORY}/python)
