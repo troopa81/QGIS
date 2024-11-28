@@ -1161,6 +1161,7 @@ namespace clang
         {
           const QString name = getCursorSpelling( cursor );
           d->m_currentArgument.reset( new _ArgumentModelItem( d->m_model, name ) );
+          d->setFileName( cursor, d->m_currentArgument.get() );
           d->m_currentArgument->setType( d->createTypeInfo( cursor ) );
           d->m_currentFunction->addArgument( d->m_currentArgument );
           QString defaultValueExpression = d->cursorValueExpression( this, cursor );
