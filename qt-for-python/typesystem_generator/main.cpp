@@ -102,7 +102,7 @@ class TypeSystemGenerator
     void formatXmlLocationComment( const CodeModelItem &i );
     void startXmlNamespace( const NamespaceModelItem &nsp );
     void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
-    bool loadSkipRanges();
+    bool loadSipCode();
     bool loadSnippet( const QString &snippetFileName );
     bool loadClassBlockList( const QString& classBlockListFileName );
     bool loadInjectedCode();
@@ -110,6 +110,8 @@ class TypeSystemGenerator
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
     bool isSkippedClass( CodeModelItem item ) const;
+    bool hasSipOut( ArgumentModelItem arg ) const;
+    void writeSipOut( ClassModelItem klass, FunctionModelItem fct );
     void addInjectCode( const QString &klass, const QString &signature, const QStringList &body );
 
     static bool isValueType( ClassModelItem klass );
@@ -122,6 +124,10 @@ class TypeSystemGenerator
     typedef QPair<int, int> SkipRange;
     typedef QList<SkipRange> SkipRanges;
     QMap<QString, SkipRanges> mSkipRanges;
+
+    // QMap<QPair<filename, line>, QList<startColumn>>
+    typedef QPair<QString, unsigned int> SipOutKey;
+    QMap<SipOutKey, QList<unsigned int>> mSipOuts;
 
     QMap<QString, QList<QString> > mNamespaceFiles;
     QMap<QString, QList<AddedFunction>> mAddedFunctions;
@@ -196,7 +202,7 @@ TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const Q
     mValid = loadClassBlockList( classBlockListFileName );
 
   if ( mValid )
-    mValid = loadSkipRanges();
+    mValid = loadSipCode();
 
   if ( mValid )
     mValid = loadInjectedCode();
@@ -246,11 +252,13 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
   for ( const auto &en : nsp->enums() )
     formatXmlEnum( en, flags );
 
-  if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
+  if ( ClassModelItem klass = std::dynamic_pointer_cast<_ClassModelItem>( nsp )  )
   {
-    const QMap<QString, ModifiedFunction> modifiedFunctions = sModifiedFunction.value( nsp->name() );
-    for ( const auto &fct : nsp->functions() )
+    const QMap<QString, ModifiedFunction> modifiedFunctions = sModifiedFunction.value( klass->name() );
+    for ( const auto &fct : klass->functions() )
     {
+      writeSipOut( klass, fct );
+
       // we should check if arguments and return type (arguments() and type() methods)
       // if there are not skipped to avoid useless removing and plenty of warnings
       // to do this we should parse the dom before and build a map of skipped object and check it here
@@ -475,9 +483,16 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
   return true;
 }
 
-bool TypeSystemGenerator::loadSkipRanges()
+bool TypeSystemGenerator::loadSipCode()
 {
   // collect #ifndef SIP_RUN
+
+  // Could have been done at clang parsing by adding a CXCursor_MacroExpansion case in Builder::startToken switch
+  // from clangbuilder.cpp (you also need to CXTranslationUnit_DetailedPreprocessingRecord flags to
+  // AbstractMetaBuilderPrivate::buildDom and include <clang-c/Index.h>)
+  // See https://stackoverflow.com/questions/16786767/obtain-original-unexpanded-macro-text-using-libclang
+  // But it requires more modification and is easier this way (maybe this way is slower though)
+  const QRegularExpression reSipOut( QStringLiteral( "SIP_OUT" ) );
 
   const QRegularExpression reIf( QStringLiteral( "^\\s*#if" ) );
   const QRegularExpression reEndIf( QStringLiteral( "^\\s*#endif" ) );
@@ -524,8 +539,17 @@ bool TypeSystemGenerator::loadSkipRanges()
 
       QRegularExpressionMatch match = reNamespace.match( line );
       if ( match.hasMatch() )
+
+      if ( QRegularExpressionMatch match = reNamespace.match( line ); match.hasMatch() )
       {
         mNamespaceFiles[match.captured( 1 )].append( QFileInfo( fileName ).fileName() );
+      }
+
+      QRegularExpressionMatchIterator matchIt = reSipOut.globalMatch( line );
+      while ( matchIt.hasNext() )
+      {
+        QRegularExpressionMatch match = matchIt.next();
+        mSipOuts[ QPair<QString, unsigned int>( fileName, numLine ) ].append( match.capturedStart() );
       }
 
       if ( reIfndef.match( line ).hasMatch() )
@@ -794,6 +818,176 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
 
   return true;
 }
+
+bool TypeSystemGenerator::hasSipOut( ArgumentModelItem arg ) const
+{
+  const QString fileName = arg->fileName();
+  if ( fileName.isEmpty() )
+    return false;
+
+  int lineStart = -1, lineEnd = -1, startCol = -1, endCol = -1;
+  arg->getStartPosition( &lineStart, &startCol );
+  arg->getEndPosition( &lineEnd, &endCol );
+  if ( lineStart < 0 || lineEnd < 0 || startCol < 0 || endCol < 0 || lineStart != lineEnd )
+    return false;
+
+  const SipOutKey sipOutKey( fileName, lineStart );
+  if ( !mSipOuts.contains( sipOutKey ) )
+    return false;
+
+  const unsigned start = startCol;
+  const unsigned end = endCol;
+  QList<unsigned int> cols = mSipOuts.value( sipOutKey );
+  return ( std::any_of( cols.constBegin(), cols.constEnd(), [start, end](unsigned int col)
+    {
+      return col >= start && col <= end;
+    }) );
+}
+
+void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem fct )
+{
+  // const bool debug = ( fct->fileName() == "/home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshlayer.h"  && fct->typeSystemSignature().contains( "loadDefaultStyle" ) )
+  //   || fct->typeSystemSignature().contains( "findShortestPath" )
+  //   || fct->typeSystemSignature().contains( "readProjectStorageMetadata" );
+
+  // if ( !debug )
+  //   return;
+
+  // TODO Bug PySide ? QgsArcGisPortalUtils::retrieveGroupContent is defined twice with different
+  // signature (one is deprecated) and so last arguments (%6, %7, %8, %9) ar not replace at code generation
+  // although they should be
+  if ( ( klass->name() == "QgsArcGisPortalUtils" )
+     || ( klass->name() == "QgsLayerDefinition" && fct->typeSystemSignature().contains( "loadLayerDefinition" )  ) )
+    return;
+
+  // TODO void  doesn't work. Maybe connected to the commented part on new return type
+  const bool isVoid = fct->type().isVoid();
+  if ( isVoid )
+    return;
+
+  for ( auto arg : fct->arguments())
+  {
+    const QString type = arg->type().qualifiedName().join("::");
+    // TODO deal with this type correctly
+    if ( type == "QVariantList" || type == "QgsPointSequence" )
+      return;
+  }
+
+  const QString fileName = fct->fileName();
+  const SipOutKey sipOutKey( fileName, fct->startLine() );
+
+  bool fctModified = false;
+  int iArg = 1;
+  const ArgumentList args = fct->arguments();
+  QStringList returnedCppTypes, returnedPythonTypes;
+  if ( !isVoid )
+  {
+    returnedCppTypes << fct->type().qualifiedName().join("::");
+    returnedPythonTypes << fct->type().qualifiedName().join(".");
+  }
+
+  for (auto it=args.begin(); it!=args.end(); ++it, ++iArg)
+  {
+    const ArgumentModelItem &arg = *it;
+    if ( !hasSipOut( arg ) )
+      continue;
+
+    // if ( debug )
+    // {
+    //   qDebug() << "arg fileName=" << arg->fileName() << "name=" << arg->name() << "referenceType=" << arg->type().referenceType();
+    // }
+
+    if ( !fctModified )
+    {
+      mWriter->writeStartElement( u"modify-function"_s );
+      const QString signature = fct->typeSystemSignature() + ( fct->isConstant() ? "const" : "" );
+      mWriter->writeAttribute( "signature", signature );
+      fctModified = true;
+    }
+
+    // remove argument
+    mWriter->writeStartElement( u"modify-argument"_s );
+    mWriter->writeAttribute( u"index"_s, QString::number( iArg ) );
+    mWriter->writeStartElement( u"remove-argument"_s );
+    mWriter->writeEndElement();
+    mWriter->writeEndElement();
+
+    returnedCppTypes << arg->type().qualifiedName().join("::");
+    returnedPythonTypes << arg->type().qualifiedName().join(".");
+  }
+
+  if ( !fctModified )
+    return;
+
+  Q_ASSERT( returnedCppTypes.count() > 0 && returnedCppTypes.count() == returnedPythonTypes.count() );
+
+  // TODO fix that: PyTuple is not considered as an entry type on QgsProjectStorage::readProjectStorageMetadata for instance
+  // this is how its done in PySide. It works with other method (like QgsMeshLayer::loadDefaultStyle) but I suspect
+  // it never gets to this line for reason I don't know
+
+  // // set new return type
+  // mWriter->writeStartElement( u"modify-argument"_s );
+  // mWriter->writeAttribute( u"index"_s, u"return"_s );
+
+  // const QString newReturnType = returnedPythonTypes.size() == 1 ? returnedPythonTypes.first() : QString( "Tuple[%1]" ).arg( returnedPythonTypes.join(",") );
+
+  // // set new return type
+  // mWriter->writeAttribute( u"pyi-type"_s, newReturnType );
+  // mWriter->writeStartElement( u"replace-type"_s );
+  // mWriter->writeAttribute( u"modified-type"_s, returnedPythonTypes.size() == 1 ? returnedPythonTypes.first() : u"PyTuple"_s );
+  // mWriter->writeEndElement();
+  // mWriter->writeEndElement();
+
+  // inject code to properly generate return type
+  mWriter->writeStartElement( u"inject-code"_s );
+  mWriter->writeAttribute( u"position"_s, u"beginning"_s );
+
+  QString code;
+  auto begin = returnedCppTypes.begin() + ( isVoid ? 0 : 1 );
+  int iOut = 1;
+  for ( auto it = begin; it != returnedCppTypes.end(); ++it, ++iOut )
+    code.append( QString( "%1 out%2_;\n" ).arg( *it ).arg( iOut ) );
+
+  code.append( "%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(" );
+  iArg = 1;
+  iOut = 1;
+  QStringList strArgs;
+  for (auto it=args.begin(); it!=args.end(); ++it, ++iArg)
+  {
+    const ArgumentModelItem &arg = *it;
+    const bool isReference = arg->type().referenceType() == ReferenceType::LValueReference;
+    strArgs << ( hasSipOut( arg ) ? QString( "%1out%2_" ).arg( isReference ? "" : "&" ).arg( iOut++ ) : ( "%" + QString::number( iArg ) ) );
+  }
+
+  code.append( strArgs.join( ",") );
+  code.append( ");\n" );
+
+  if ( returnedCppTypes.count() == 1 )
+  {
+    code.append( "%PYARG_0 = %CONVERTTOPYTHON[" + returnedCppTypes.first() + "](out1_));\n" );
+  }
+  else
+  {
+    code.append( QString( "%PYARG_0 = PyTuple_New(%1);\n" ).arg( returnedCppTypes.count() ) );
+    int iOut = 1;
+    int iArg = 0;
+    for ( auto it = returnedCppTypes.begin(); it != returnedCppTypes.end(); ++it, iArg++ )
+    {
+      if ( it == returnedCppTypes.begin() && !isVoid )
+        code.append( "PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));\n");
+      else
+        code.append("PyTuple_SET_ITEM(%PYARG_0, "
+                    + QString::number( iArg )
+                    + ", %CONVERTTOPYTHON[" + *it + "](out" + QString::number( iOut++ ) + "_));\n" );
+    }
+  }
+
+  mWriter->writeCDATA( code );
+  mWriter->writeEndElement();
+
+  mWriter->writeEndElement();
+}
+
 
 void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &signature, const QStringList &body )
 {
