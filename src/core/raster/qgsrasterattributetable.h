@@ -283,8 +283,9 @@ class CORE_EXPORT QgsRasterAttributeTable
 
     /**
      * Creates a new field from \a name, \a usage and \a type and appends it to the fields, optionally reporting any error in \a errorMessage, returns TRUE on success.
+     * \deprecated QGIS 3.40. Use the method with a QMetaType::Type argument instead.
      */
-    bool appendField( const QString &name, const Qgis::RasterAttributeTableFieldUsage usage, const QVariant::Type type, QString *errorMessage SIP_OUT = nullptr );
+    Q_DECL_DEPRECATED bool appendField( const QString &name, const Qgis::RasterAttributeTableFieldUsage usage, const QVariant::Type type, QString *errorMessage SIP_OUT = nullptr );
 
     /**
      * Appends a new \a field, optionally reporting any error in \a errorMessage, returns TRUE on success.
@@ -410,8 +411,9 @@ class CORE_EXPORT QgsRasterAttributeTable
 
     /**
      * Try to determine the field usage from its \a name and \a type.
+     * \deprecated QGIS 3.40. Use the method with a QMetaType::Type argument instead.
      */
-    static Qgis::RasterAttributeTableFieldUsage guessFieldUsage( const QString &name, const QVariant::Type type );
+    Q_DECL_DEPRECATED static Qgis::RasterAttributeTableFieldUsage guessFieldUsage( const QString &name, const QVariant::Type type );
 
     /**
     * Returns the (possibly empty) path of the file-based RAT, the path is set when a RAT is read or written from/to a file.

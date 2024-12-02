@@ -295,9 +295,13 @@ Create RGBA minimum and maximum fields and inserts them at ``position``, optiona
 Creates a new field from ``name``, ``usage`` and ``type`` and appends it to the fields, optionally reporting any error in ``errorMessage``, returns ``True`` on success.
 %End
 
-    bool appendField( const QString &name, const Qgis::RasterAttributeTableFieldUsage usage, const QVariant::Type type, QString *errorMessage /Out/ = 0 );
+ bool appendField( const QString &name, const Qgis::RasterAttributeTableFieldUsage usage, const QVariant::Type type, QString *errorMessage /Out/ = 0 );
 %Docstring
 Creates a new field from ``name``, ``usage`` and ``type`` and appends it to the fields, optionally reporting any error in ``errorMessage``, returns ``True`` on success.
+
+.. deprecated:: 3.40
+
+   Use the method with a QMetaType.Type argument instead.
 %End
 
     bool appendField( const QgsRasterAttributeTable::Field &field, QString *errorMessage /Out/ = 0 );
@@ -436,9 +440,13 @@ the current data are returned without any change.
 Try to determine the field usage from its ``name`` and ``type``.
 %End
 
-    static Qgis::RasterAttributeTableFieldUsage guessFieldUsage( const QString &name, const QVariant::Type type );
+ static Qgis::RasterAttributeTableFieldUsage guessFieldUsage( const QString &name, const QVariant::Type type );
 %Docstring
 Try to determine the field usage from its ``name`` and ``type``.
+
+.. deprecated:: 3.40
+
+   Use the method with a QMetaType.Type argument instead.
 %End
 
     QString filePath() const;
