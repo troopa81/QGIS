@@ -2,8 +2,8 @@
   "vcpkg-configuration": {
     "default-registry": {
       "kind": "git",
-      "baseline": "41626fd77bf42f29e8f7e43dc1f2f05780588cde",
-      "repository": "https://github.com/microsoft/vcpkg"
+      "baseline": "69312d0f4dbe489789fcf91270910622b6bebb52",
+      "repository": "C:/vcpkg"
     },
     "registries": [
       {
@@ -71,7 +71,47 @@
         "ossl"
       ]
     },
-    "qtbase",
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "brotli",
+        "concurrent",
+        {
+          "name": "dbus",
+          "platform": "!(static & windows)"
+        },
+        "default-features",
+        "dnslookup",
+        "doubleconversion",
+        "freetype",
+        "gui",
+        "harfbuzz",
+        "jpeg",
+        "network",
+        {
+          "name": "opengl",
+          "platform": "!ios"
+        },
+        {
+          "name": "openssl",
+          "platform": "!ios"
+        },
+        "pcre2",
+        "png",
+        {
+          "name": "securetransport",
+          "platform": "ios"
+        },
+        "sql",
+        "sql-psql",
+        "sql-sqlite",
+        "testlib",
+        "thread",
+        "widgets",
+        "zstd"
+      ]
+    },
     "qtkeychain-qt6",
     "qtlocation",
     "qtsvg",
