@@ -13,8 +13,8 @@ ccache -M 2.0G
 # export CCACHE_LOGFILE=/tmp/cache.debug
 ccache -z
 
-mkdir -p /usr/src/qgis/build-pyside6
-cd /usr/src/qgis/build-pyside6 || exit 1
+mkdir -p /root/QGIS/build
+cd /root/QGIS/build || exit 1
 
 CLANG_WARNINGS="-Wrange-loop-construct"
 
@@ -26,8 +26,8 @@ cmake -GNinja \
  -DENABLE_TESTING=ON \
  -DWITH_PYSIDE=ON \
  -DBUILD_WITH_QT6=ON \
- -DWITH_EPT=OFF \
- -DWITH_COPC=OFF \
+ -DWITH_EPT=ON \
+ -DWITH_COPC=ON \
  -DWITH_QUICK=OFF \
  -DWITH_3D=OFF \
  -DWITH_ANALYSIS=OFF \
@@ -59,10 +59,10 @@ cmake -GNinja \
  -DCMAKE_C_COMPILER=/bin/clang \
  -DCMAKE_CXX_COMPILER=/bin/clang++ \
  -DADD_CLAZY_CHECKS=ON \
- -DWERROR=FALSE \
+ -DWERROR=FALSE -Wno-dev \
  ..
 
-git config --global --add safe.directory /usr/src/qgis
+git config --global --add safe.directory /root/QGIS
 
 ninja qgis_core pycore pyutils pyqtcompat pytesting
 

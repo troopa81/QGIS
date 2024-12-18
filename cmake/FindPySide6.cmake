@@ -79,6 +79,7 @@ if (PYSIDE6_FOUND)
     find_path(PYSIDE_INCLUDE_DIR
         pyside.h
         PATHS ${PYSIDE6_BASEDIR}/include ${PYSIDE6_CUSTOM_PREFIX}/include/PySide6
+        /usr/include/PySide6
         NO_DEFAULT_PATH)
 
     # Platform specific library names
@@ -95,11 +96,13 @@ if (PYSIDE6_FOUND)
     find_file(PYSIDE_LIBRARY
         ${PYSIDE_LIBRARY_BASENAMES}
         PATHS ${PYSIDE6_BASEDIR} ${PYSIDE6_CUSTOM_PREFIX}/lib
+        /usr/lib64
         NO_DEFAULT_PATH)
 
     find_path(PYSIDE_TYPESYSTEMS
         typesystem_core.xml
         PATHS ${PYSIDE6_BASEDIR}/typesystems ${PYSIDE6_CUSTOM_PREFIX}/share/PySide6/typesystems
+        /usr/share/PySide6/typesystems
         NO_DEFAULT_PATH)
 endif()
 

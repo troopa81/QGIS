@@ -69,8 +69,10 @@ if(SHIBOKEN_BASEDIR)
     find_path(SHIBOKEN_INCLUDE_DIR
         shiboken.h
         PATHS ${SHIBOKEN_CUSTOM_PREFIX} ${SHIBOKEN_GENERATOR_BASEDIR}/include
-        NO_DEFAULT_PATH
-    )
+        # TODO find the appropiate way of finding shiboken on fedora and other linux distribution
+        /usr/include/shiboken6
+      )
+
     if(MSVC)
         set(SHIBOKEN_LIBRARY_BASENAMES "shiboken6.abi3.lib")
     elseif(CYGWIN)
@@ -90,18 +92,19 @@ if(SHIBOKEN_BASEDIR)
             libshiboken6.abi3.so.${SHIBOKEN_MACRO_VERSION}
             libshiboken6.abi3.so.${SHIBOKEN_MACRO_VERSION}.${SHIBOKEN_MICRO_VERSION}
             libshiboken6.abi3.so.${SHIBOKEN_VERSION}
+
+            # TODO find the appropiate way of finding shiboken on fedora and other linux distribution
+            libshiboken6.cpython-312-x86_64-linux-gnu.so.${SHIBOKEN_VERSION}
         )
     endif()
 
-    if(NOT SHIBOKEN_INCLUDE_DIR)
-        return()
-    endif()
     set(SHIBOKEN_SEARCH_PATHS ${SHIBOKEN_CUSTOM_PREFIX})
     list(APPEND SHIBOKEN_SEARCH_PATHS ${SHIBOKEN_BASEDIR})
     list(APPEND SHIBOKEN_SEARCH_PATHS ${SHIBOKEN_GENERATOR_BASEDIR})
     find_file(SHIBOKEN_LIBRARY
         ${SHIBOKEN_LIBRARY_BASENAMES}
         PATHS ${SHIBOKEN_SEARCH_PATHS}
+        /usr/lib64
         NO_DEFAULT_PATH)
 
     find_program(SHIBOKEN_BINARY
@@ -110,11 +113,9 @@ if(SHIBOKEN_BASEDIR)
         NO_DEFAULT_PATH
     )
 endif()
+
 if(SHIBOKEN_INCLUDE_DIR AND SHIBOKEN_LIBRARY AND SHIBOKEN_BINARY)
     set(SHIBOKEN_FOUND TRUE)
-endif()
-
-if(SHIBOKEN_FOUND)
 endif()
 
 if(MSVC)
