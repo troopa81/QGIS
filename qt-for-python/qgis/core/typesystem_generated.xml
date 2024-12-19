@@ -99,6 +99,9 @@
         <enum-type name="RasterResamplingStage"/>
         <enum-type name="RasterRendererFlag" flags="RasterRendererFlags"/>
         <enum-type name="RasterRendererCapability" flags="RasterRendererCapabilities"/>
+        <enum-type name="RasterRangeLimit"/>
+        <enum-type name="RasterRangeExtent"/>
+        <enum-type name="RasterRangeAccuracy"/>
         <enum-type name="RasterAttributeTableFieldUsage"/>
         <enum-type name="RasterAttributeTableType"/>
         <enum-type name="RasterExportType"/>
@@ -335,6 +338,8 @@
         <enum-type name="DocumentationApi"/>
         <enum-type name="DocumentationBrowser"/>
         <enum-type name="MouseHandlesAction"/>
+        <enum-type name="MeshRangeLimit"/>
+        <enum-type name="MeshRangeExtent"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsvector.h:29 -->
     <value-type name="QgsVector">
@@ -1870,6 +1875,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <value-type name="QgsLabelObstacleSettings">
         <enum-type name="ObstacleType"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgslabelingengine.h:43 -->
+    <value-type name="QgsLabelCandidate"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:188 -->
     <value-type name="QgsExpression">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:196 -->
@@ -2179,12 +2186,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <modify-function signature="thinningSettings()" remove="true"/>
         <modify-function signature="placementSettings()" remove="true"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgspallabeling.h:1033 -->
-    <value-type name="QgsLabelCandidate"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgspallabeling.h:1047 -->
-    <value-type name="QgsPalLabeling">
-        <modify-function signature="drawLabelCandidateRect(pal::LabelPosition*,QPainter*,const QgsMapToPixel*,QList*)" remove="true"/>
-    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgspallabeling.h:1035 -->
+    <value-type name="QgsPalLabeling"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgsvectorlayerlabeling.h:170 -->
     <object-type name="QgsVectorLayerSimpleLabeling">
         <modify-function signature="provider(QgsVectorLayer*)" remove="true"/>
@@ -2507,16 +2510,17 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](out1_));
         </modify-function>
         <modify-function signature="usageInformation()" remove="true"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterminmaxorigin.h:32 -->
-    <value-type name="QgsRasterMinMaxOrigin">
-        <enum-type name="Limits"/>
-        <enum-type name="Extent"/>
-        <enum-type name="StatAccuracy"/>
-    </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterrenderer.h:40 -->
-    <object-type name="QgsRasterRenderer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterminmaxorigin.h:33 -->
+    <value-type name="QgsRasterMinMaxOrigin"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterrenderer.h:41 -->
+    <object-type name="QgsRasterRenderer">
+        <modify-function signature="needsRefresh(const QgsRectangle&amp;)" remove="true"/>
+        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&amp;,const QList&amp;,bool)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsmultibandcolorrenderer.h:32 -->
-    <object-type name="QgsMultiBandColorRenderer"/>
+    <object-type name="QgsMultiBandColorRenderer">
+        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&amp;,const QList&amp;,bool)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrastershaderfunction.h:34 -->
     <value-type name="QgsRasterShaderFunction">
         <modify-function signature="shade(double,int*,int*,int*,int*)const">
@@ -2899,7 +2903,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrastershader.h:35 -->
     <object-type name="QgsRasterShader">
         <modify-function signature="rasterShaderFunction()" remove="true"/>
-        <modify-function signature="shade(double,int*,int*,int*,int*)">
+        <modify-function signature="shade(double,int*,int*,int*,int*)const">
             <modify-argument index="2">
                 <remove-argument/>
             </modify-argument>
@@ -2998,7 +3002,6 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterlayer.h:113 -->
         <value-type name="LayerOptions"/>
         <modify-function signature="refreshContrastEnhancement(const QgsRectangle&amp;)" remove="true"/>
-        <modify-function signature="refreshRendererIfNeeded(QgsRasterRenderer*,const QgsRectangle&amp;)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
     QString str = QStringLiteral( "<QgsRasterLayer: '%1' (%2)>" ).arg( %CPPSELF->name(), %CPPSELF->dataProvider() ? %CPPSELF->dataProvider()->name() : QStringLiteral( "Invalid" ) );
@@ -3057,7 +3060,7 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
     <value-type name="QgsVectorDataProviderTemporalCapabilities"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectordataprovider.h:58 -->
     <object-type name="QgsVectorDataProvider">
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectordataprovider.h:439 -->
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectordataprovider.h:446 -->
         <value-type name="NativeType"/>
         <modify-function signature="temporalCapabilities()" remove="true"/>
         <modify-function signature="elevationProperties()" remove="true"/>
@@ -3430,7 +3433,7 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[double](out4_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometryengine.h:67 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometryengine.h:73 -->
     <object-type name="QgsGeometryEngine">
         <enum-type name="EngineOperationResult"/>
     </object-type>
@@ -4160,7 +4163,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
             </add-function>
         </value-type>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/browser/qgsdataitem.h:596 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/browser/qgsdataitem.h:594 -->
     <object-type name="QgsErrorItem">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -4197,7 +4200,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/browser/qgsdirectoryitem.h:235 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/browser/qgsdirectoryitem.h:238 -->
     <object-type name="QgsDirectoryParamWidget"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/browser/qgsbrowserproxymodel.h:32 -->
     <object-type name="QgsBrowserProxyModel">
@@ -4330,7 +4333,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QStringList](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:33 -->
     <object-type name="QgsAbstractSensor">
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:78 -->
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:76 -->
         <value-type name="SensorData"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrelationmanager.h:35 -->
@@ -4606,7 +4609,7 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
     <value-type name="QgsStoredExpression">
         <enum-type name="Category"/>
         <modify-function signature="QgsStoredExpression()" remove="true"/>
-        <modify-function signature="QgsStoredExpression(QString,QString,QgsStoredExpression::Category)" remove="true"/>
+        <modify-function signature="QgsStoredExpression(const QString&amp;,const QString&amp;,QgsStoredExpression::Category)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsstoredexpressionmanager.h:92 -->
     <object-type name="QgsStoredExpressionManager"/>
@@ -6148,7 +6151,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsFeature](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitem.h:106 -->
     <object-type name="QgsLayoutItem">
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitem.h:521 -->
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitem.h:519 -->
         <value-type name="ExportLayerDetail"/>
         <enum-type name="ReferencePoint"/>
         <enum-type name="UndoCommand"/>
@@ -6401,9 +6404,9 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsReport"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:51 -->
     <object-type name="QgsLayerTreeModelLegendNode">
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:180 -->
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:178 -->
         <value-type name="ItemContext"/>
-        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:271 -->
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:269 -->
         <value-type name="ItemMetrics"/>
         <enum-type name="CustomRole"/>
         <enum-type name="NodeTypes"/>
@@ -6414,7 +6417,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:399 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:397 -->
     <object-type name="QgsSymbolLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6425,7 +6428,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:592 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:590 -->
     <object-type name="QgsSimpleLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6434,7 +6437,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:631 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:629 -->
     <object-type name="QgsImageLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6443,7 +6446,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:668 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:666 -->
     <object-type name="QgsRasterSymbolLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6452,7 +6455,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:730 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:728 -->
     <object-type name="QgsWmsLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6461,7 +6464,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:793 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:791 -->
     <object-type name="QgsDataDefinedSizeLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6470,7 +6473,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:825 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreemodellegendnode.h:823 -->
     <object-type name="QgsVectorLabelLegendNode">
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -6745,31 +6748,31 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <value-type name="QgsInterpolatedLineRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsinterpolatedlinerenderer.h:283 -->
     <object-type name="QgsInterpolatedLineSymbolLayer"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:40 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:39 -->
     <value-type name="QgsMeshRendererMeshSettings"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:93 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:92 -->
     <value-type name="QgsMeshRendererScalarSettings">
         <enum-type name="DataResamplingMethod"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:204 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:249 -->
     <value-type name="QgsMeshRendererVectorArrowSettings">
         <enum-type name="ArrowScalingMethod"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:323 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:368 -->
     <value-type name="QgsMeshRendererVectorStreamlineSettings">
         <enum-type name="SeedingStartPointsMethod"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:369 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:414 -->
     <value-type name="QgsMeshRendererVectorTracesSettings"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:407 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:452 -->
     <value-type name="QgsMeshRendererVectorWindBarbSettings">
         <enum-type name="WindSpeedUnit"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:487 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:532 -->
     <value-type name="QgsMeshRendererVectorSettings">
         <enum-type name="Symbology"/>
     </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:682 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshrenderersettings.h:727 -->
     <value-type name="QgsMeshRendererSettings"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshtimesettings.h:35 -->
     <value-type name="QgsMeshTimeSettings">
@@ -6815,6 +6818,22 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsMeshEditingError](out1_));
 ]]></inject-code>
         </modify-function>
         <modify-function signature="labeling()" remove="true"/>
+        <modify-function signature="minimumMaximumActiveScalarDataset(const QgsRectangle&amp;,const QgsMeshDatasetIndex&amp;,double&amp;,double&amp;)">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[double out1_;
+double out2_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_,out2_);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[double](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[double](out2_));
+]]></inject-code>
+        </modify-function>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
     QString str = QStringLiteral( "<QgsMeshLayer: '%1' (%2)>" ).arg( %CPPSELF->name(), %CPPSELF->dataProvider() ? %CPPSELF->dataProvider()->name() : QStringLiteral( "Invalid" ) );
@@ -7353,7 +7372,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsSingleSymbolRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmasksymbollayer.h:34 -->
     <object-type name="QgsMaskMarkerSymbolLayer"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerutils.h:37 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerutils.h:38 -->
     <value-type name="QgsMapLayerUtils"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrendereditemdetails.h:36 -->
     <value-type name="QgsRenderedItemDetails"/>
@@ -7556,7 +7575,17 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudattribute.h:140 -->
     <value-type name="QgsPointCloudAttributeCollection"/>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointclouddataprovider.h:43 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:39 -->
+    <value-type name="QgsPointCloudAttributeStatistics">
+        <modify-function signature="cumulateStatistics(const QgsPointCloudAttributeStatistics&amp;)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:67 -->
+    <value-type name="QgsPointCloudStatistics">
+        <modify-function signature="QgsPointCloudStatistics(int,const QMap&amp;)" remove="true"/>
+        <modify-function signature="availableClasses(const QString&amp;)" remove="true"/>
+        <modify-function signature="statisticsMap()" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointclouddataprovider.h:41 -->
     <object-type name="QgsPointCloudDataProvider">
         <enum-type name="Capability" flags="Capabilities"/>
         <enum-type name="PointCloudIndexGenerationState"/>
@@ -7564,8 +7593,6 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <modify-function signature="index()" remove="true"/>
         <modify-function signature="subIndexes()" remove="true"/>
         <modify-function signature="loadSubIndex(int)" remove="true"/>
-        <modify-function signature="metadataStatistic(const QString&amp;,Qgis::Statistic)" remove="true"/>
-        <modify-function signature="metadataClassStatistic(const QString&amp;,const QVariant&amp;,Qgis::Statistic)" remove="true"/>
         <modify-function signature="identify(QgsPointCloudIndex*,double,const QgsGeometry&amp;,const QgsDoubleRange&amp;,int)" remove="true"/>
         <add-function signature="identify(float,QgsGeometry,const QgsDoubleRange= QgsDoubleRange(),int= 1000 )" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -7588,16 +7615,6 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:39 -->
-    <value-type name="QgsPointCloudAttributeStatistics">
-        <modify-function signature="cumulateStatistics(const QgsPointCloudAttributeStatistics&amp;)" remove="true"/>
-    </value-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:61 -->
-    <value-type name="QgsPointCloudStatistics">
-        <modify-function signature="QgsPointCloudStatistics(int,const QMap&amp;)" remove="true"/>
-        <modify-function signature="availableClasses(const QString&amp;)" remove="true"/>
-        <modify-function signature="statisticsMap()" remove="true"/>
-    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayer.h:45 -->
     <object-type name="QgsPointCloudLayer">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayer.h:53 -->
@@ -7623,7 +7640,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
-    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudrenderer.h:42 -->
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudrenderer.h:43 -->
     <object-type name="QgsPointCloudRenderContext">
         <modify-function signature="renderContext()" remove="true"/>
         <modify-function signature="getAttribute(const char*,std::size_t,QgsPointCloudAttribute::DataType,T&amp;)" remove="true"/>
