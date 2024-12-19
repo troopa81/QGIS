@@ -3,7 +3,7 @@
     <system-include file-name="memory"/>
     <namespace-type name="std">
         <include file-name="memory" location="global"/>
-        <smart-pointer-type name="unique_ptr" type="unique" getter="get" reset-method="reset" instantiations="QgsClassificationMethod">
+        <smart-pointer-type name="unique_ptr" type="unique" getter="get" reset-method="reset" instantiations="QgsClassificationMethod,QgsLineString">
             <include file-name="memory" location="global"/>
         </smart-pointer-type>
     </namespace-type>

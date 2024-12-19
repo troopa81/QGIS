@@ -35,19 +35,6 @@ static const QStringList sSkippedFunctions = {
   QStringLiteral( "qt_getEnumName" )
 };
 
-static const QStringList sSkippedClasses = {
-  // Index -2 out of range for QgsDataItem::deleteLater()
-  // Issue in pyside-setup/sources/shiboken6/generator/shiboken/cppgenerator.cpp:1463
-  QStringLiteral( "QgsDataItem" ),
-
-  QStringLiteral( "QgsSpatialIndexKDBush" ),
-  QStringLiteral( "QgsSnappingConfig" ),
-
-  QStringLiteral( "QMetaTypeId" ),
-  QStringLiteral( "QPrivateSignal" ),
-  QStringLiteral( "QTypeInfo" )
-};
-
 struct ModifiedFunction
 {
     ModifiedFunction() {};
@@ -88,7 +75,9 @@ class TypeSystemGenerator
         QString snippetName;
     };
 
-    void writeSmartPointerTypes();
+    QSet<QString> getUniquePtrInstantiations( const ClassModelItem &nsp ) const;
+    QSet<QString> getUniquePtrInstantiations( const NamespaceModelItem &nsp ) const;
+    void writeSmartPointerTypes( const FileModelItem &dom );
     void formatXmlClass( const ClassModelItem &klass );
     void formatXmlEnum( const EnumModelItem &en, const QMap<QString, QString> &flags );
     void formatXmlScopeMembers( const ScopeModelItem &nsp );
@@ -103,6 +92,7 @@ class TypeSystemGenerator
     bool isQgis( CodeModelItem item ) const;
     bool isSkippedFunction( CodeModelItem item ) const;
     bool isSkippedClass( CodeModelItem item ) const;
+    bool isSkippedClassName( const QString &className ) const;
     bool hasSipOut( ArgumentModelItem arg ) const;
     void writeSipOut( ClassModelItem klass, FunctionModelItem fct );
     void addInjectCode( const QString &klass, const QString &signature, const QStringList &body );
@@ -289,6 +279,10 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   if ( isSkipped( klass ) )
     return;
 
+  if ( klass->name() == "QgsFeatureRenderer" )
+    qDebug() << "--- QgsFeatureRenderer isSkipped=" << isSkipped( klass );
+
+
   // const QStringList allowedClass =
   // {
   //   QStringLiteral( "Qgis" ),
@@ -298,9 +292,6 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
 
   // if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
   //   return;
-
-  if ( mClassBlockList.contains( klass->name() ) || mClassBlockList.contains( klass->enclosingScope()->name() ) )
-    return;
 
   // If there is at least one abstract method not skipped or no abstract method at all
   // shiboken will figure out the class is abstract and we wouldn't need to force abstract
@@ -456,7 +447,7 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
   mWriter->writeStartDocument();
   mWriter->writeStartElement( u"typesystem"_s );
   mWriter->writeAttribute( u"package"_s, u"core"_s );
-  writeSmartPointerTypes();
+  writeSmartPointerTypes( dom );
   mWriter->writeComment( u"Auto-generated "_s );
   for ( auto p : primitiveTypes )
   {
@@ -474,10 +465,65 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
   return true;
 }
 
-void TypeSystemGenerator::writeSmartPointerTypes()
+QSet<QString> TypeSystemGenerator::getUniquePtrInstantiations( const NamespaceModelItem &nsp ) const
+{
+  if ( isSkipped( nsp ) )
+    return QSet<QString>();
+
+  QSet<QString> result;
+  for ( const NamespaceModelItem &nestedNsp : nsp->namespaces() )
+  {
+    result.unite( getUniquePtrInstantiations( nestedNsp ) );
+  }
+
+  for ( const auto &klass : nsp->classes() )
+  {
+    if ( !useClass( klass ) || isSkipped( klass ) )
+      continue;
+
+    result.unite( getUniquePtrInstantiations( klass ) );
+  }
+
+  return result;
+}
+
+QSet<QString> TypeSystemGenerator::getUniquePtrInstantiations( const ClassModelItem &klass ) const
+{
+  if ( !useClass( klass ) || isSkippedClass( klass ) )
+    return QSet<QString>();
+
+  QSet<QString> result;
+
+  for ( const FunctionModelItem &fct : klass->functions() )
+  {
+    if ( fct->accessPolicy() == Access::Private || isSkipped( fct ) )
+      continue;
+
+    const QStringList type = fct->type().qualifiedName();
+    if ( type.count() == 2 && type.at( 0 ) == "std" && type.at( 1 ) == "unique_ptr" )
+    {
+      const QString &className = fct->type().instantiations().at( 0 ).qualifiedName().join( "::" );
+      if ( !isSkippedClassName( className ) )
+      {
+        result.insert( className );
+      }
+    }
+  }
+
+  for ( const auto &klass : klass->classes() )
+  {
+    result.unite( getUniquePtrInstantiations( klass ) );
+  }
+
+  return result;
+}
+
+void TypeSystemGenerator::writeSmartPointerTypes( const FileModelItem &dom )
 {
   // TODO not sure the 3 include file-name memory are usefull, but it was in the shared-ptr example
   // https://doc.qt.io/qtforpython-6/shiboken6/typesystem_specifying_types.html#smart-pointer-type
+
+  const QSet<QString> uniquePtrInstantiations = getUniquePtrInstantiations( dom );
 
   mWriter->writeStartElement( u"system-include"_s );
   mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
@@ -498,7 +544,7 @@ void TypeSystemGenerator::writeSmartPointerTypes()
   mWriter->writeAttribute( u"reset-method"_s, u"reset"_s );
 
   // TODO get it from all the std::unique_ptr
-  mWriter->writeAttribute( u"instantiations"_s, u"QgsClassificationMethod"_s );
+  mWriter->writeAttribute( u"instantiations"_s, QStringList( uniquePtrInstantiations.constBegin(), uniquePtrInstantiations.constEnd() ).join( "," ) );
 
   mWriter->writeStartElement( u"include"_s );
   mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
@@ -766,7 +812,12 @@ bool TypeSystemGenerator::isSkippedFunction( CodeModelItem item ) const
 bool TypeSystemGenerator::isSkippedClass( CodeModelItem item ) const
 {
   _ClassModelItem *klass = dynamic_cast<_ClassModelItem *>( item.get() );
-  return klass && ( sSkippedClasses.contains( klass->name() ) || klass->accessPolicy() == Access::Private );
+  return klass && ( isSkippedClassName( klass->name() ) || isSkippedClassName( klass->enclosingScope()->name() ) || klass->accessPolicy() == Access::Private );
+}
+
+bool TypeSystemGenerator::isSkippedClassName( const QString &className ) const
+{
+  return mClassBlockList.contains( className );
 }
 
 bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const

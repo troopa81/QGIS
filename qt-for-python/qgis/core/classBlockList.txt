@@ -169,3 +169,9 @@ QgsProjectFileTransform
 QgsLayoutAtlas
 QgsAbstractGeocoderLocatorFilter
 QgsReferencedRectangle
+QgsDataItem
+QgsSpatialIndexKDBush
+QgsSnappingConfig
+QMetaTypeId
+QPrivateSignal
+QTypeInfo

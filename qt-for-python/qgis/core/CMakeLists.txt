@@ -33,10 +33,29 @@ set(pyqgis_core_SRC
   # global module wrapper
   ${CMAKE_CURRENT_BINARY_DIR}/core/core_module_wrapper.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/core/core_python.h
-  ${CMAKE_CURRENT_BINARY_DIR}/core/std_unique_ptr_qgsclassificationmethod_wrapper.cpp
 )
 
 file(STRINGS ${TYPESYSTEM_FILE} TYPESYSTEM_CONTENT)
+
+# Parse typesystem to add all the std::unique_ptr instantiation to build
+foreach(LINE ${TYPESYSTEM_CONTENT})
+
+  # TODO ugly and fragile (fail if there are not on the same line)
+  string(REGEX MATCH "<smart-pointer-type.*instantiations=\"([^\"]*)\"" _ ${LINE} )
+  set( INSTANCIATIONS ${CMAKE_MATCH_1})
+  if ( INSTANCIATIONS )
+    string(TOLOWER ${INSTANCIATIONS} INSTANCIATIONS)
+    string(REPLACE "," ";" INSTANCIATIONS_LIST ${INSTANCIATIONS})
+    foreach(INSTANCIATION ${INSTANCIATIONS_LIST})
+
+      list(APPEND pyqgis_core_SRC
+        ${CMAKE_CURRENT_BINARY_DIR}/core/std_unique_ptr_${INSTANCIATION}_wrapper.cpp)
+
+    endforeach()
+    break()
+  endif()
+
+endforeach()
 
 # Parse typesystem file to generate the sources files to build
 list(FILTER TYPESYSTEM_CONTENT INCLUDE REGEX "namespace-type|value-type|object-type")
