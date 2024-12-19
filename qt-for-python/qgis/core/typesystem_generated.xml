@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="core">
+    <system-include file-name="memory"/>
+    <namespace-type name="std">
+        <include file-name="memory" location="global"/>
+        <smart-pointer-type name="unique_ptr" type="unique" getter="get" reset-method="reset" instantiations="QgsClassificationMethod">
+            <include file-name="memory" location="global"/>
+        </smart-pointer-type>
+    </namespace-type>
     <!--Auto-generated -->
     <primitive-type name="int"/>
     <primitive-type name="unsigned"/>

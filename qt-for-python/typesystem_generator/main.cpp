@@ -30,14 +30,12 @@ using namespace Qt::StringLiterals;
 
 static bool optJoinNamespaces = false;
 
-static const QStringList sSkippedFunctions =
-{
+static const QStringList sSkippedFunctions = {
   QStringLiteral( "qt_getEnumMetaObject" ),
   QStringLiteral( "qt_getEnumName" )
 };
 
-static const QStringList sSkippedClasses =
-{
+static const QStringList sSkippedClasses = {
   // Index -2 out of range for QgsDataItem::deleteLater()
   // Issue in pyside-setup/sources/shiboken6/generator/shiboken/cppgenerator.cpp:1463
   QStringLiteral( "QgsDataItem" ),
@@ -52,28 +50,23 @@ static const QStringList sSkippedClasses =
 
 struct ModifiedFunction
 {
-  ModifiedFunction() {};
-  ModifiedFunction( bool _isRemove ): isRemove( _isRemove ) {};
+    ModifiedFunction() {};
+    ModifiedFunction( bool _isRemove )
+      : isRemove( _isRemove ) {};
 
-  bool isRemove = false;
+    bool isRemove = false;
 };
 
-static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction =
-{
+static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction = {
   // remove because if SIP_RUN but needed to build a QgsFeature
   {
-    "QgsFeature", {
-      {"QgsFeature(QgsFeatureId)", ModifiedFunction( false ) }
-    }
+    "QgsFeature", { { "QgsFeature(QgsFeatureId)", ModifiedFunction( false ) } }
   },
 
   // QGsFeatureRequest::OrderBy
   // TODO should prefix with class name in case an other OrderBy is somewhere
   {
-    "OrderBy", {
-      {"value(qsizetype)const", ModifiedFunction( true )},
-      {"resize(qsizetype)", ModifiedFunction( true )}
-    }
+    "OrderBy", { { "value(qsizetype)const", ModifiedFunction( true ) }, { "resize(qsizetype)", ModifiedFunction( true ) } }
   }
 };
 
@@ -87,15 +80,15 @@ class TypeSystemGenerator
     bool isValid() const;
 
   private:
-
     struct AddedFunction
     {
-      QString returnType;
-      QString signature;
-      QString body;
-      QString snippetName;
+        QString returnType;
+        QString signature;
+        QString body;
+        QString snippetName;
     };
 
+    void writeSmartPointerTypes();
     void formatXmlClass( const ClassModelItem &klass );
     void formatXmlEnum( const EnumModelItem &en, const QMap<QString, QString> &flags );
     void formatXmlScopeMembers( const ScopeModelItem &nsp );
@@ -104,7 +97,7 @@ class TypeSystemGenerator
     void formatXmlNamespaceMembers( const NamespaceModelItem &nsp );
     bool loadSipCode();
     bool loadSnippet( const QString &snippetFileName );
-    bool loadClassBlockList( const QString& classBlockListFileName );
+    bool loadClassBlockList( const QString &classBlockListFileName );
     bool loadInjectedCode();
     bool isSkipped( CodeModelItem item ) const;
     bool isQgis( CodeModelItem item ) const;
@@ -154,8 +147,7 @@ static void formatDebugOutput( const FileModelItem &dom, bool verbose )
   std::cout << qPrintable( output ) << '\n';
 }
 
-static const char *primitiveTypes[] =
-{
+static const char *primitiveTypes[] = {
   "int", "unsigned", "short", "unsigned short", "long", "unsigned long",
   "float", "double"
 };
@@ -252,7 +244,7 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
   for ( const auto &en : nsp->enums() )
     formatXmlEnum( en, flags );
 
-  if ( ClassModelItem klass = std::dynamic_pointer_cast<_ClassModelItem>( nsp )  )
+  if ( ClassModelItem klass = std::dynamic_pointer_cast<_ClassModelItem>( nsp ) )
   {
     const QMap<QString, ModifiedFunction> modifiedFunctions = sModifiedFunction.value( klass->name() );
     for ( const auto &fct : klass->functions() )
@@ -330,8 +322,7 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   }
 
   formatXmlLocationComment( klass );
-  mWriter->writeStartElement( isValueType( klass ) ? u"value-type"_s
-                              : u"object-type"_s );
+  mWriter->writeStartElement( isValueType( klass ) ? u"value-type"_s : u"object-type"_s );
   mWriter->writeAttribute( nameAttribute(), klass->name() );
 
   if ( needForceAbstract )
@@ -373,7 +364,6 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   }
 
   mWriter->writeEndElement();
-
 }
 
 void TypeSystemGenerator::startXmlNamespace( const NamespaceModelItem &nsp )
@@ -466,6 +456,7 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
   mWriter->writeStartDocument();
   mWriter->writeStartElement( u"typesystem"_s );
   mWriter->writeAttribute( u"package"_s, u"core"_s );
+  writeSmartPointerTypes();
   mWriter->writeComment( u"Auto-generated "_s );
   for ( auto p : primitiveTypes )
   {
@@ -482,6 +473,42 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
 
   return true;
 }
+
+void TypeSystemGenerator::writeSmartPointerTypes()
+{
+  // TODO not sure the 3 include file-name memory are usefull, but it was in the shared-ptr example
+  // https://doc.qt.io/qtforpython-6/shiboken6/typesystem_specifying_types.html#smart-pointer-type
+
+  mWriter->writeStartElement( u"system-include"_s );
+  mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
+  mWriter->writeEndElement();
+
+  mWriter->writeStartElement( u"namespace-type"_s );
+  mWriter->writeAttribute( u"name"_s, u"std"_s );
+
+  mWriter->writeStartElement( u"include"_s );
+  mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
+  mWriter->writeAttribute( u"location"_s, u"global"_s );
+  mWriter->writeEndElement();
+
+  mWriter->writeStartElement( u"smart-pointer-type"_s );
+  mWriter->writeAttribute( u"name"_s, u"unique_ptr"_s );
+  mWriter->writeAttribute( u"type"_s, u"unique"_s );
+  mWriter->writeAttribute( u"getter"_s, u"get"_s );
+  mWriter->writeAttribute( u"reset-method"_s, u"reset"_s );
+
+  // TODO get it from all the std::unique_ptr
+  mWriter->writeAttribute( u"instantiations"_s, u"QgsClassificationMethod"_s );
+
+  mWriter->writeStartElement( u"include"_s );
+  mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
+  mWriter->writeAttribute( u"location"_s, u"global"_s );
+
+  mWriter->writeEndElement();
+  mWriter->writeEndElement();
+  mWriter->writeEndElement();
+}
+
 
 bool TypeSystemGenerator::loadSipCode()
 {
@@ -540,16 +567,16 @@ bool TypeSystemGenerator::loadSipCode()
       QRegularExpressionMatch match = reNamespace.match( line );
       if ( match.hasMatch() )
 
-      if ( QRegularExpressionMatch match = reNamespace.match( line ); match.hasMatch() )
-      {
-        mNamespaceFiles[match.captured( 1 )].append( QFileInfo( fileName ).fileName() );
-      }
+        if ( QRegularExpressionMatch match = reNamespace.match( line ); match.hasMatch() )
+        {
+          mNamespaceFiles[match.captured( 1 )].append( QFileInfo( fileName ).fileName() );
+        }
 
       QRegularExpressionMatchIterator matchIt = reSipOut.globalMatch( line );
       while ( matchIt.hasNext() )
       {
         QRegularExpressionMatch match = matchIt.next();
-        mSipOuts[ QPair<QString, unsigned int>( fileName, numLine ) ].append( match.capturedStart() );
+        mSipOuts[QPair<QString, unsigned int>( fileName, numLine )].append( match.capturedStart() );
       }
 
       if ( reIfndef.match( line ).hasMatch() )
@@ -588,7 +615,7 @@ bool TypeSystemGenerator::loadSipCode()
     }
 
     if ( !ranges.isEmpty() )
-      mSkipRanges[ fileName ] = ranges;
+      mSkipRanges[fileName] = ranges;
   }
 
   return true;
@@ -705,7 +732,7 @@ bool TypeSystemGenerator::loadSnippet( const QString &snippetFileName )
   return true;
 }
 
-bool TypeSystemGenerator::loadClassBlockList( const QString& classBlockListFileName )
+bool TypeSystemGenerator::loadClassBlockList( const QString &classBlockListFileName )
 {
   QFile file( classBlockListFileName );
   if ( !file.open( QIODevice::ReadOnly | QIODevice::Text ) )
@@ -792,7 +819,7 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
 
   bool copyContructorDefined = false;
   bool defaultConstructorDeleted = false;
-  for( const FunctionModelItem & f : functions )
+  for ( const FunctionModelItem &f : functions )
   {
     if ( f->isAbstract()
          || ( f->functionType() == CodeModel::CopyConstructor && f->isDeleted() ) )
@@ -838,10 +865,9 @@ bool TypeSystemGenerator::hasSipOut( ArgumentModelItem arg ) const
   const unsigned start = startCol;
   const unsigned end = endCol;
   QList<unsigned int> cols = mSipOuts.value( sipOutKey );
-  return ( std::any_of( cols.constBegin(), cols.constEnd(), [start, end](unsigned int col)
-    {
-      return col >= start && col <= end;
-    }) );
+  return ( std::any_of( cols.constBegin(), cols.constEnd(), [start, end]( unsigned int col ) {
+    return col >= start && col <= end;
+  } ) );
 }
 
 void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem fct )
@@ -857,7 +883,7 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
   // signature (one is deprecated) and so last arguments (%6, %7, %8, %9) ar not replace at code generation
   // although they should be
   if ( ( klass->name() == "QgsArcGisPortalUtils" )
-     || ( klass->name() == "QgsLayerDefinition" && fct->typeSystemSignature().contains( "loadLayerDefinition" )  ) )
+       || ( klass->name() == "QgsLayerDefinition" && fct->typeSystemSignature().contains( "loadLayerDefinition" ) ) )
     return;
 
   // TODO void  doesn't work. Maybe connected to the commented part on new return type
@@ -865,9 +891,9 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
   if ( isVoid )
     return;
 
-  for ( auto arg : fct->arguments())
+  for ( auto arg : fct->arguments() )
   {
-    const QString type = arg->type().qualifiedName().join("::");
+    const QString type = arg->type().qualifiedName().join( "::" );
     // TODO deal with this type correctly
     if ( type == "QVariantList" || type == "QgsPointSequence" )
       return;
@@ -882,11 +908,11 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
   QStringList returnedCppTypes, returnedPythonTypes;
   if ( !isVoid )
   {
-    returnedCppTypes << fct->type().qualifiedName().join("::");
-    returnedPythonTypes << fct->type().qualifiedName().join(".");
+    returnedCppTypes << fct->type().qualifiedName().join( "::" );
+    returnedPythonTypes << fct->type().qualifiedName().join( "." );
   }
 
-  for (auto it=args.begin(); it!=args.end(); ++it, ++iArg)
+  for ( auto it = args.begin(); it != args.end(); ++it, ++iArg )
   {
     const ArgumentModelItem &arg = *it;
     if ( !hasSipOut( arg ) )
@@ -912,8 +938,8 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
     mWriter->writeEndElement();
     mWriter->writeEndElement();
 
-    returnedCppTypes << arg->type().qualifiedName().join("::");
-    returnedPythonTypes << arg->type().qualifiedName().join(".");
+    returnedCppTypes << arg->type().qualifiedName().join( "::" );
+    returnedPythonTypes << arg->type().qualifiedName().join( "." );
   }
 
   if ( !fctModified )
@@ -952,14 +978,14 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
   iArg = 1;
   iOut = 1;
   QStringList strArgs;
-  for (auto it=args.begin(); it!=args.end(); ++it, ++iArg)
+  for ( auto it = args.begin(); it != args.end(); ++it, ++iArg )
   {
     const ArgumentModelItem &arg = *it;
     const bool isReference = arg->type().referenceType() == ReferenceType::LValueReference;
     strArgs << ( hasSipOut( arg ) ? QString( "%1out%2_" ).arg( isReference ? "" : "&" ).arg( iOut++ ) : ( "%" + QString::number( iArg ) ) );
   }
 
-  code.append( strArgs.join( ",") );
+  code.append( strArgs.join( "," ) );
   code.append( ");\n" );
 
   if ( returnedCppTypes.count() == 1 )
@@ -974,11 +1000,9 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
     for ( auto it = returnedCppTypes.begin(); it != returnedCppTypes.end(); ++it, iArg++ )
     {
       if ( it == returnedCppTypes.begin() && !isVoid )
-        code.append( "PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));\n");
+        code.append( "PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));\n" );
       else
-        code.append("PyTuple_SET_ITEM(%PYARG_0, "
-                    + QString::number( iArg )
-                    + ", %CONVERTTOPYTHON[" + *it + "](out" + QString::number( iOut++ ) + "_));\n" );
+        code.append( "PyTuple_SET_ITEM(%PYARG_0, " + QString::number( iArg ) + ", %CONVERTTOPYTHON[" + *it + "](out" + QString::number( iOut++ ) + "_));\n" );
     }
   }
 
@@ -1002,9 +1026,9 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
 
   // if we are on a class defined inside another one
   QString innerClass;
-  if ( klass.contains("::") )
+  if ( klass.contains( "::" ) )
   {
-    innerClass = klass.split("::").last();
+    innerClass = klass.split( "::" ).last();
   }
 
   AddedFunction func;
@@ -1035,8 +1059,7 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
     func.returnType.replace( "SIP_PYOBJECT", "PyObject*" );
     func.returnType.replace( "SIP_PYLIST", "PyObject*" );
 
-    if ( !func.returnType.startsWith( "Qgs" ) && !func.returnType.startsWith( "Q" ) &&
-         !( QStringList() << QStringLiteral( "long" ) << QStringLiteral( "PyObject*" ) << QStringLiteral( "int" ) << QStringLiteral( "bool" ) << QStringLiteral( "double" ) << QStringLiteral( "float" ) ).contains( func.returnType ) )
+    if ( !func.returnType.startsWith( "Qgs" ) && !func.returnType.startsWith( "Q" ) && !( QStringList() << QStringLiteral( "long" ) << QStringLiteral( "PyObject*" ) << QStringLiteral( "int" ) << QStringLiteral( "bool" ) << QStringLiteral( "double" ) << QStringLiteral( "float" ) ).contains( func.returnType ) )
     {
       // wild guess, it's maybe an enum...
       func.returnType = klass + "::" + func.returnType;
@@ -1089,8 +1112,7 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
          || func.body.contains( QStringLiteral( "QgsMultiPolygonXY" ) )
          || func.body.contains( QStringLiteral( "QgsAbstractGeometry" ) )
          || func.body.contains( QStringLiteral( "QgsMultiPolylineXY" ) )
-         || func.body.contains( QStringLiteral( "QVector<QgsPointXY>" ) )
-       )
+         || func.body.contains( QStringLiteral( "QVector<QgsPointXY>" ) ) )
     {
       qWarning() << "Added function skipped (contains non binded type) in klass=" << klass << "signature:" << signature;
       return;
@@ -1114,7 +1136,7 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
       func.body.replace( QString( "a%1Wrapper == Py_None" ).arg( i ), QStringLiteral( "!%" ) + QString::number( i + 1 ) + QStringLiteral( ".isValid()" ) );
       func.body.replace( QString( "a%1->" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) + QStringLiteral( "." ) );
       func.body.replace( QString( "*a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) );
-      func.body.replace( QString( "a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) ) ;
+      func.body.replace( QString( "a%1" ).arg( i ), QStringLiteral( "%" ) + QString::number( i + 1 ) );
     }
 
     func.body.replace( "sipRes = true;", "Py_RETURN_TRUE;" );
@@ -1176,44 +1198,29 @@ int main( int argc, char **argv )
   QCommandLineParser parser;
   parser.setSingleDashWordOptionMode( QCommandLineParser::ParseAsLongOptions );
   parser.setOptionsAfterPositionalArgumentsMode( QCommandLineParser::ParseAsPositionalArguments );
-  const QString description =
-    QString::fromLatin1( descriptionFormat ).arg( QLatin1StringView( qVersion() ),
-        clang::libClangVersion().toString() );
+  const QString description = QString::fromLatin1( descriptionFormat ).arg( QLatin1StringView( qVersion() ), clang::libClangVersion().toString() );
   parser.setApplicationDescription( description );
   parser.addHelpOption();
   parser.addVersionOption();
-  QCommandLineOption verboseOption( u"verbose"_s,
-                                    u"Display verbose output about types"_s );
+  QCommandLineOption verboseOption( u"verbose"_s, u"Display verbose output about types"_s );
   parser.addOption( verboseOption );
-  QCommandLineOption debugOption( u"debug"_s,
-                                  u"Display debug output"_s );
+  QCommandLineOption debugOption( u"debug"_s, u"Display debug output"_s );
   parser.addOption( debugOption );
-  QCommandLineOption outputFileOption( u"output-file"_s,
-                                       u"Output file. Default to stdout. Incompatible with debug option)"_s,
-                                       u"file"_s );
+  QCommandLineOption outputFileOption( u"output-file"_s, u"Output file. Default to stdout. Incompatible with debug option)"_s, u"file"_s );
   parser.addOption( outputFileOption );
 
-  QCommandLineOption snippetFileOption( u"snippet-file"_s,
-                                        u"Snippet file. Default to empty"_s,
-                                        u"file"_s );
+  QCommandLineOption snippetFileOption( u"snippet-file"_s, u"Snippet file. Default to empty"_s, u"file"_s );
   parser.addOption( snippetFileOption );
 
-  QCommandLineOption classBlockListFileOption( u"class-block-list-file"_s,
-                                        u"class block list file. Default to empty"_s,
-                                        u"file"_s );
+  QCommandLineOption classBlockListFileOption( u"class-block-list-file"_s, u"class block list file. Default to empty"_s, u"file"_s );
   parser.addOption( classBlockListFileOption );
 
-  QCommandLineOption joinNamespacesOption( {u"j"_s, u"join-namespaces"_s},
-      u"Join namespaces"_s );
+  QCommandLineOption joinNamespacesOption( { u"j"_s, u"join-namespaces"_s }, u"Join namespaces"_s );
   parser.addOption( joinNamespacesOption );
 
-  QCommandLineOption languageLevelOption( u"std"_s,
-                                          languageLevelDescription(),
-                                          u"level"_s );
+  QCommandLineOption languageLevelOption( u"std"_s, languageLevelDescription(), u"level"_s );
   parser.addOption( languageLevelOption );
-  parser.addPositionalArgument( u"argument"_s,
-                                u"C++ compiler argument"_s,
-                                u"argument(s)"_s );
+  parser.addPositionalArgument( u"argument"_s, u"C++ compiler argument"_s, u"argument(s)"_s );
 
   parser.process( app );
   const QStringList &positionalArguments = parser.positionalArguments();
@@ -1221,8 +1228,7 @@ int main( int argc, char **argv )
     parser.showHelp( 1 );
 
   QByteArrayList arguments;
-  std::transform( positionalArguments.cbegin(), positionalArguments.cend(),
-                  std::back_inserter( arguments ), QFile::encodeName );
+  std::transform( positionalArguments.cbegin(), positionalArguments.cend(), std::back_inserter( arguments ), QFile::encodeName );
 
   LanguageLevel level = LanguageLevel::Default;
   if ( parser.isSet( languageLevelOption ) )

@@ -33,6 +33,7 @@ set(pyqgis_core_SRC
   # global module wrapper
   ${CMAKE_CURRENT_BINARY_DIR}/core/core_module_wrapper.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/core/core_python.h
+  ${CMAKE_CURRENT_BINARY_DIR}/core/std_unique_ptr_qgsclassificationmethod_wrapper.cpp
 )
 
 file(STRINGS ${TYPESYSTEM_FILE} TYPESYSTEM_CONTENT)
