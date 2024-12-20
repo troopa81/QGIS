@@ -9,6 +9,7 @@ file (MAKE_DIRECTORY ${QGIS_PYTHON_OUTPUT_DIRECTORY})
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${QGIS_PYTHON_OUTPUT_DIRECTORY})
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${QGIS_PYTHON_OUTPUT_DIRECTORY})
 
+set(QGIS_PYTHON_DIR ${Python_SITEARCH}/qgis)
 
 # Macro to byte-compile a target's staged Python resource(s)
 macro(PY_COMPILE TARGET_NAME RESOURCE_PATHS)
@@ -21,6 +22,13 @@ macro(PY_COMPILE TARGET_NAME RESOURCE_PATHS)
     )
   endif()
 endmacro(PY_COMPILE)
+
+# Plugin utilities files to copy to staging or install
+set(PY_FILES
+  ${CMAKE_SOURCE_DIR}/python/__init__.py
+  ${CMAKE_SOURCE_DIR}/python/utils.py
+  ${CMAKE_SOURCE_DIR}/python/user.py
+)
 
 add_custom_target(pyutils ALL)
 install(FILES ${PY_FILES} DESTINATION "${QGIS_PYTHON_DIR}")

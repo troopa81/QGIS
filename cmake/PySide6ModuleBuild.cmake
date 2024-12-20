@@ -143,10 +143,11 @@ macro(CREATE_PYTHON_BINDINGS
             ${TARGET_LINK_LIBRARIES}
             PySide6::pyside6
             Shiboken6::libshiboken
-        )
-        target_compile_definitions(${TARGET_NAME}
-            PRIVATE Py_LIMITED_API=0x03050000
-        )
+          )
+        # break on fedora with shiboken 6.7.2
+        # target_compile_definitions(${TARGET_NAME}
+        #     PRIVATE Py_LIMITED_API=0x03050000
+        # )
         if(APPLE)
             set_property(TARGET ${TARGET_NAME} APPEND PROPERTY
                 LINK_FLAGS "-undefined dynamic_lookup")
