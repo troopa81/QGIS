@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <typesystem package="core">
+    <load-typesystem name="typesystem_primitive.xml" generate="yes"/>
     <system-include file-name="memory"/>
     <namespace-type name="std">
         <include file-name="memory" location="global"/>
@@ -28,6 +29,8 @@
     <namespace-type name="QgsHstoreUtils">
         <include file-name="qgshstoreutils.h"/>
     </namespace-type>
+    <value-type name="QgsDateRange"/>
+    <value-type name="QgsDateTimeRange"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgis.h:53 -->
     <value-type name="Qgis">
         <enum-type name="AuthConfigurationStorageCapability" flags="AuthConfigurationStorageCapabilities"/>
@@ -377,6 +380,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[double](out1_));
 PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[double](out2_));
 ]]></inject-code>
         </modify-function>
+        <modify-function signature="pointOnLineWithDistance(double,double,double,double,double,double&amp;,double&amp;,double*,double*,double*,double*,double*,double*)" remove="true"/>
         <modify-function signature="skewLinesProjection(const QgsVector3D&amp;,const QgsVector3D&amp;,const QgsVector3D&amp;,const QgsVector3D&amp;,QgsVector3D&amp;,double)">
             <modify-argument index="5">
                 <remove-argument/>
@@ -527,6 +531,14 @@ return 0;
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsspatialindexkdbushdata.h:32 -->
     <value-type name="QgsSpatialIndexKDBushData"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsspatialindexkdbush.h:54 -->
+    <value-type name="QgsSpatialIndexKDBush">
+        <modify-function signature="QgsSpatialIndexKDBush(QgsFeatureIterator&amp;,const std::function&lt;bool (const QgsFeature &amp;)&gt;&amp;,QgsFeedback*)" remove="true"/>
+        <modify-function signature="intersects(const QgsRectangle&amp;,const std::function&lt;void (QgsSpatialIndexKDBushData)&gt;&amp;)" remove="true"/>
+        <modify-function signature="within(const QgsPointXY&amp;,double,const std::function&lt;void (QgsSpatialIndexKDBushData)&gt;&amp;)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsgeometrysimplifier.h:34 -->
+    <object-type name="QgsAbstractGeometrySimplifier"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsgeometrysimplifier.h:70 -->
     <object-type name="QgsTopologyPreservingSimplifier"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaptopixelgeometrysimplifier.h:39 -->
@@ -620,6 +632,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QStringList](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterviewport.h:34 -->
     <value-type name="QgsRasterViewPort"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgscontrastenhancementfunction.h:32 -->
+    <value-type name="QgsContrastEnhancementFunction"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgslinearminmaxenhancement.h:29 -->
+    <value-type name="QgsLinearMinMaxEnhancement"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeedback.h:43 -->
     <object-type name="QgsFeedback"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgserror.h:32 -->
@@ -744,13 +760,15 @@ PyTuple_SET_ITEM(%PYARG_0, 6, %CONVERTTOPYTHON[int](out6_));
     <value-type name="QgsCoordinateTransform">
         <modify-function signature="transformInPlace(float&amp;,float&amp;,double&amp;,Qgis::TransformDirection)" remove="true"/>
         <modify-function signature="transformInPlace(float&amp;,float&amp;,float&amp;,Qgis::TransformDirection)" remove="true"/>
+        <modify-function signature="transformInPlace(QVector&lt;float&gt;&amp;,QVector&lt;float&gt;&amp;,QVector&lt;float&gt;&amp;,Qgis::TransformDirection)" remove="true"/>
+        <modify-function signature="transformInPlace(QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,Qgis::TransformDirection)" remove="true"/>
         <modify-function signature="invalidateCache(bool)" remove="true"/>
-        <modify-function signature="setCustomMissingRequiredGridHandler(const std::function&amp;)" remove="true"/>
-        <modify-function signature="setCustomMissingPreferredGridHandler(const std::function&amp;)" remove="true"/>
-        <modify-function signature="setCustomCoordinateOperationCreationErrorHandler(const std::function&amp;)" remove="true"/>
-        <modify-function signature="setCustomMissingGridUsedByContextHandler(const std::function&amp;)" remove="true"/>
-        <modify-function signature="setFallbackOperationOccurredHandler(const std::function&amp;)" remove="true"/>
-        <modify-function signature="setDynamicCrsToDynamicCrsWarningHandler(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setCustomMissingRequiredGridHandler(const std::function&lt;void (const QgsCoordinateReferenceSystem &amp;, const QgsCoordinateReferenceSystem &amp;, const QgsDatumTransform::GridDetails &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="setCustomMissingPreferredGridHandler(const std::function&lt;void (const QgsCoordinateReferenceSystem &amp;, const QgsCoordinateReferenceSystem &amp;, const QgsDatumTransform::TransformDetails &amp;, const QgsDatumTransform::TransformDetails &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="setCustomCoordinateOperationCreationErrorHandler(const std::function&lt;void (const QgsCoordinateReferenceSystem &amp;, const QgsCoordinateReferenceSystem &amp;, const QString &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="setCustomMissingGridUsedByContextHandler(const std::function&lt;void (const QgsCoordinateReferenceSystem &amp;, const QgsCoordinateReferenceSystem &amp;, const QgsDatumTransform::TransformDetails &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="setFallbackOperationOccurredHandler(const std::function&lt;void (const QgsCoordinateReferenceSystem &amp;, const QgsCoordinateReferenceSystem &amp;, const QString &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="setDynamicCrsToDynamicCrsWarningHandler(const std::function&lt;void (const QgsCoordinateReferenceSystem &amp;, const QgsCoordinateReferenceSystem &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="removeFromCacheObjectsBelongingToCurrentThread(void*)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -770,6 +788,11 @@ PyTuple_SET_ITEM(%PYARG_0, 6, %CONVERTTOPYTHON[int](out6_));
         <modify-function signature="nodes()" remove="true"/>
         <modify-function signature="setCachedStaticValue(const QVariant&amp;)" remove="true"/>
         <modify-function signature="cloneTo(QgsExpressionNode*)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpressionfunction.h:40 -->
+    <object-type name="QgsExpressionFunction">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpressionfunction.h:53 -->
+        <value-type name="Parameter"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgseditorwidgetsetup.h:27 -->
     <value-type name="QgsEditorWidgetSetup"/>
@@ -960,7 +983,7 @@ PyTuple_SET_ITEM(%PYARG_0, 6, %CONVERTTOPYTHON[int](out6_));
         <modify-function signature="attributeMap()" remove="true"/>
         <modify-function signature="setAttribute(int,const QVariant&amp;)" remove="true"/>
         <modify-function signature="deleteAttribute(int)" remove="true"/>
-        <modify-function signature="setGeometry(std::unique_ptr)" remove="true"/>
+        <modify-function signature="setGeometry(std::unique_ptr&lt;QgsAbstractGeometry&gt;)" remove="true"/>
         <modify-function signature="setAttribute(const QString&amp;,const QVariant&amp;)" remove="true"/>
         <modify-function signature="deleteAttribute(const QString&amp;)" remove="true"/>
         <modify-function signature="attribute(const QString&amp;)" remove="true"/>
@@ -1134,8 +1157,8 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="parts_begin()" remove="true"/>
         <modify-function signature="parts_end()" remove="true"/>
         <modify-function signature="parts()" remove="true"/>
@@ -1173,11 +1196,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgspoint.h:48 -->
     <object-type name="QgsPoint">
-        <modify-function signature="QgsPoint(double,double,double,double,Qgis::WkbType)" remove="true"/>
-        <modify-function signature="QgsPoint(const QgsPointXY&amp;)" remove="true"/>
-        <modify-function signature="QgsPoint(QPointF)" remove="true"/>
+        <!-- <modify-function signature="QgsPoint(double,double,double,double,Qgis::WkbType)" remove="true"/> -->
+        <!-- <modify-function signature="QgsPoint(const QgsPointXY&amp;)" remove="true"/> -->
+        <!-- <modify-function signature="QgsPoint(QPointF)" remove="true"/> -->
         <modify-function signature="QgsPoint(Qgis::WkbType,double,double,double,double)" remove="true"/>
-        <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function,std::function,std::function,std::function)" remove="true"/>
+        <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function&lt;bool (double, double, double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double)&gt;)" remove="true"/>
         <modify-function signature="rx()" remove="true"/>
         <modify-function signature="ry()" remove="true"/>
         <modify-function signature="rz()" remove="true"/>
@@ -1226,8 +1249,8 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -1259,7 +1282,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
             </add-function>
         </value-type>
         <modify-function signature="operator=(const QgsGeometry&amp;)" remove="true"/>
-        <modify-function signature="QgsGeometry(std::unique_ptr)" remove="true"/>
+        <modify-function signature="QgsGeometry(std::unique_ptr&lt;QgsAbstractGeometry&gt;)" remove="true"/>
         <modify-function signature="fromWkb(unsigned char*,int)" remove="true"/>
         <modify-function signature="vertices_begin()" remove="true"/>
         <modify-function signature="vertices_end()" remove="true"/>
@@ -1325,8 +1348,8 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[int](out2_));
 PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="splitGeometry(const QVector&amp;,QVector&amp;,bool,QVector&amp;,bool)" remove="true"/>
-        <modify-function signature="splitGeometry(const QgsPointSequence&amp;,QVector&amp;,bool,QgsPointSequence&amp;,bool,bool)" remove="true"/>
+        <modify-function signature="splitGeometry(const QVector&lt;QgsPointXY&gt;&amp;,QVector&lt;QgsGeometry&gt;&amp;,bool,QVector&lt;QgsPointXY&gt;&amp;,bool)" remove="true"/>
+        <modify-function signature="splitGeometry(const QgsPointSequence&amp;,QVector&lt;QgsGeometry&gt;&amp;,bool,QgsPointSequence&amp;,bool,bool)" remove="true"/>
         <modify-function signature="makeDifferenceInPlace(const QgsGeometry&amp;)" remove="true"/>
         <modify-function signature="orientedMinimumBoundingBox(double&amp;,double&amp;,double&amp;,double&amp;)const">
             <modify-argument index="1">
@@ -1394,7 +1417,7 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsGeometry](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="randomPointsInPolygon(int,const std::function&amp;,unsigned long,QgsFeedback*,int)" remove="true"/>
+        <modify-function signature="randomPointsInPolygon(int,const std::function&lt;bool (const QgsPointXY &amp;)&gt;&amp;,unsigned long,QgsFeedback*,int)" remove="true"/>
         <modify-function signature="randomPointsInPolygon(int,unsigned long,QgsFeedback*)" remove="true"/>
         <modify-function signature="asJsonObject(int)" remove="true"/>
         <modify-function signature="asPoint()" remove="true"/>
@@ -1414,8 +1437,8 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsVertexId](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="compare(const QgsPolylineXY&amp;,const QgsPolylineXY&amp;,double)" remove="true"/>
         <modify-function signature="compare(const QgsPolygonXY&amp;,const QgsPolygonXY&amp;,double)" remove="true"/>
         <modify-function signature="compare(const QgsMultiPolygonXY&amp;,const QgsMultiPolygonXY&amp;,double)" remove="true"/>
@@ -1435,6 +1458,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsVertexId](out1_));
 ]]></inject-code>
         </add-function>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:42 -->
+    <object-type name="QgsScopedExpressionFunction"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:114 -->
     <value-type name="QgsExpressionContextScope">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsexpressioncontext.h:121 -->
@@ -1471,7 +1496,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaptopixel.h:36 -->
     <value-type name="QgsMapToPixel">
         <modify-function signature="transformInPlace(float&amp;,float&amp;)" remove="true"/>
-        <modify-function signature="transformInPlace(QVector&amp;,QVector&amp;)" remove="true"/>
+        <modify-function signature="transformInPlace(QVector&lt;T&gt;&amp;,QVector&lt;T&gt;&amp;)" remove="true"/>
         <modify-function signature="setParameters(double,double,double,int,int,double,bool*)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsscalecalculator.h:34 -->
@@ -1575,13 +1600,15 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <modify-function signature="copyTo(QgsServerWmsDimensionProperties*)" remove="true"/>
         <modify-function signature="reset()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerserverproperties.h:272 -->
+    <object-type name="QgsMapLayerServerProperties"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerserverproperties.h:518 -->
     <object-type name="QgsVectorLayerServerProperties"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgspathresolver.h:30 -->
     <value-type name="QgsPathResolver">
-        <modify-function signature="setPathPreprocessor(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setPathPreprocessor(const std::function&lt;QString (const QString &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="removePathPreprocessor(const QString&amp;)" remove="true"/>
-        <modify-function signature="setPathWriter(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setPathWriter(const std::function&lt;QString (const QString &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="removePathWriter(const QString&amp;)" remove="true"/>
         <add-function signature="removePathPreprocessor(const QString&amp;)">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -1877,6 +1904,22 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgslabelingengine.h:43 -->
     <value-type name="QgsLabelCandidate"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsinterval.h:45 -->
+    <value-type name="QgsInterval">
+        <modify-function signature="QgsInterval(std::chrono::milliseconds)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str;
+    if ( ! %CPPSELF->isValid() )
+      str = QStringLiteral( "<QgsInterval: invalid>" );
+    else if ( %CPPSELF->originalUnit() != Qgis::TemporalUnit::Unknown )
+      str = QStringLiteral( "<QgsInterval: %1 %2>" ).arg( %CPPSELF->originalDuration() ).arg( QgsUnitTypes::toString( %CPPSELF->originalUnit() ) );
+    else
+      str = QStringLiteral( "<QgsInterval: %1 seconds>" ).arg( %CPPSELF->seconds() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:188 -->
     <value-type name="QgsExpression">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpression.h:196 -->
@@ -1950,10 +1993,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
             <modify-function signature="value(qsizetype)const" remove="true"/>
         </value-type>
         <modify-function signature="referenceGeometryEngine()" remove="true"/>
-        <modify-function signature="setInvalidGeometryCallback(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setInvalidGeometryCallback(const std::function&lt;void (const QgsFeature &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="invalidGeometryCallback(const QgsFeature&amp;)" remove="true"/>
         <modify-function signature="limit()" remove="true"/>
-        <modify-function signature="setTransformErrorCallback(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setTransformErrorCallback(const std::function&lt;void (const QgsFeature &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="transformErrorCallback(const QgsFeature&amp;)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeaturerequest.h:1036 -->
@@ -2106,6 +2149,23 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <value-type name="QgsLegendSymbolItem"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrenderer.h:62 -->
     <value-type name="QgsSymbolLevelItem"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrenderer.h:105 -->
+    <object-type name="QgsFeatureRenderer">
+        <enum-type name="Property"/>
+        <enum-type name="Capability" flags="Capabilities"/>
+        <modify-function signature="legendKeyToExpression(const QString&amp;,QgsVectorLayer*,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="dataDefinedProperties()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapunitscale.h:36 -->
     <value-type name="QgsMapUnitScale"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsstringutils.h:37 -->
@@ -2188,6 +2248,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgspallabeling.h:1035 -->
     <value-type name="QgsPalLabeling"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgsvectorlayerlabeling.h:40 -->
+    <object-type name="QgsAbstractVectorLayerLabeling">
+        <modify-function signature="provider(QgsVectorLayer*)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgsvectorlayerlabeling.h:170 -->
     <object-type name="QgsVectorLayerSimpleLabeling">
         <modify-function signature="provider(QgsVectorLayer*)" remove="true"/>
@@ -2202,7 +2266,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
             <modify-function signature="findRuleByKey(const QString&amp;)" remove="true"/>
             <modify-function signature="createSubProviders(QgsVectorLayer*,QgsRuleBasedLabeling::RuleToProviderMap&amp;,QgsRuleBasedLabelProvider*)" remove="true"/>
             <modify-function signature="subProviderIds(QStringList&amp;)" remove="true"/>
-            <modify-function signature="prepare(QgsRenderContext&amp;,QSet&amp;,QgsRuleBasedLabeling::RuleToProviderMap&amp;)" remove="true"/>
+            <modify-function signature="prepare(QgsRenderContext&amp;,QSet&lt;QString&gt;&amp;,QgsRuleBasedLabeling::RuleToProviderMap&amp;)" remove="true"/>
             <modify-function signature="registerFeature(const QgsFeature&amp;,QgsRenderContext&amp;,QgsRuleBasedLabeling::RuleToProviderMap&amp;,const QgsGeometry&amp;,const QgsSymbol*)" remove="true"/>
         </object-type>
         <modify-function signature="rootRule()" remove="true"/>
@@ -2299,6 +2363,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[double](out1_));
     <object-type name="QgsColorScheme">
         <enum-type name="SchemeFlag" flags="SchemeFlags"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorscheme.h:138 -->
+    <object-type name="QgsGplColorScheme"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorscheme.h:165 -->
     <object-type name="QgsUserColorScheme"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorscheme.h:218 -->
@@ -2317,6 +2383,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[double](out1_));
     <object-type name="QgsLimitedRandomColorRamp"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorrampimpl.h:486 -->
     <object-type name="QgsRandomColorRamp"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorrampimpl.h:532 -->
+    <object-type name="QgsPresetSchemeColorRamp"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorrampimpl.h:603 -->
     <object-type name="QgsColorBrewerColorRamp"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorrampimpl.h:704 -->
@@ -2515,11 +2583,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[int](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterrenderer.h:41 -->
     <object-type name="QgsRasterRenderer">
         <modify-function signature="needsRefresh(const QgsRectangle&amp;)" remove="true"/>
-        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&amp;,const QList&amp;,bool)" remove="true"/>
+        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&lt;double&gt;&amp;,const QList&lt;double&gt;&amp;,bool)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsmultibandcolorrenderer.h:32 -->
     <object-type name="QgsMultiBandColorRenderer">
-        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&amp;,const QList&amp;,bool)" remove="true"/>
+        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&lt;double&gt;&amp;,const QList&lt;double&gt;&amp;,bool)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrastershaderfunction.h:34 -->
     <value-type name="QgsRasterShaderFunction">
@@ -2722,6 +2790,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <modify-function signature="readBlock(int,int,int,void*)" remove="true"/>
         <modify-function signature="readBlock(int,const QgsRectangle&amp;,int,int,void*,QgsRasterBlockFeedback*)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgscliptominmaxenhancement.h:33 -->
+    <value-type name="QgsClipToMinMaxEnhancement"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasternuller.h:32 -->
     <object-type name="QgsRasterNuller">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasternuller.h:37 -->
@@ -2786,6 +2856,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterresampler.h:33 -->
     <object-type name="QgsRasterResampler"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterresampler.h:94 -->
+    <object-type name="QgsRasterResamplerV2"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsbilinearrasterresampler.h:33 -->
     <object-type name="QgsBilinearRasterResampler"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsraster.h:31 -->
@@ -2798,6 +2870,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <enum-type name="Flag" flags="Flags"/>
         <enum-type name="SubTaskDependency"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:393 -->
+    <object-type name="QgsTaskManager">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:410 -->
+        <value-type name="TaskDefinition"/>
+        <modify-function signature="dependencies(long)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstaskmanager.h:670 -->
     <object-type name="QgsTaskWithSerialSubTasks"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterfilewriter.h:40 -->
@@ -2806,10 +2884,18 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <value-type name="FilterFormatDetails"/>
         <enum-type name="RasterFormatOption" flags="RasterFormatOptions"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterfilewritertask.h:38 -->
+    <object-type name="QgsRasterFileWriterTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgshillshaderenderer.h:35 -->
     <object-type name="QgsHillshadeRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsbrightnesscontrastfilter.h:31 -->
     <object-type name="QgsBrightnessContrastFilter"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterpipe.h:49 -->
+    <value-type name="QgsRasterPipe">
+        <enum-type name="Property"/>
+        <modify-function signature="QgsRasterPipe(const QgsRasterPipe&amp;)" remove="true"/>
+        <modify-function signature="dataDefinedProperties()" remove="true"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterprojector.h:50 -->
     <object-type name="QgsRasterProjector">
         <enum-type name="Precision"/>
@@ -2956,20 +3042,35 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
 ]]></inject-code>
         </modify-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgslinearminmaxenhancementwithclip.h:30 -->
+    <value-type name="QgsLinearMinMaxEnhancementWithClip"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterchecker.h:32 -->
     <value-type name="QgsRasterChecker">
         <modify-function signature="compare(const QString&amp;,Qgis::DataType,Qgis::DataType,QString&amp;,bool&amp;)" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgssinglebandgrayrenderer.h:35 -->
+    <object-type name="QgsSingleBandGrayRenderer">
+        <enum-type name="Gradient"/>
+        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&lt;double&gt;&amp;,const QList&lt;double&gt;&amp;,bool)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterdrawer.h:37 -->
     <value-type name="QgsRasterDrawer">
         <modify-function signature="drawImage(QPainter*,QgsRasterViewPort*,const QImage&amp;,int,int,const QgsMapToPixel*)" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayertemporalproperties.h:43 -->
+    <object-type name="QgsMapLayerTemporalProperties">
+        <modify-function signature="calculateTemporalExtent(QgsMapLayer*)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterlayertemporalproperties.h:38 -->
     <object-type name="QgsRasterLayerTemporalProperties">
         <modify-function signature="calculateTemporalExtent(QgsMapLayer*)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterresamplefilter.h:32 -->
     <object-type name="QgsRasterResampleFilter"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgssinglebandpseudocolorrenderer.h:34 -->
+    <object-type name="QgsSingleBandPseudoColorRenderer">
+        <modify-function signature="refresh(const QgsRectangle&amp;,const QList&lt;double&gt;&amp;,const QList&lt;double&gt;&amp;,bool)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrastertransparency.h:33 -->
     <value-type name="QgsRasterTransparency">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrastertransparency.h:44 -->
@@ -3002,6 +3103,8 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasterlayer.h:113 -->
         <value-type name="LayerOptions"/>
         <modify-function signature="refreshContrastEnhancement(const QgsRectangle&amp;)" remove="true"/>
+        <modify-function signature="defaultContrastEnhancementSettings(QgsContrastEnhancement::ContrastEnhancementAlgorithm&amp;,Qgis::RasterRangeLimit&amp;)" remove="true"/>
+        <modify-function signature="computeMinMax(int,const QgsRasterMinMaxOrigin&amp;,Qgis::RasterRangeLimit,const QgsRectangle&amp;,int,double&amp;,double&amp;)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
     QString str = QStringLiteral( "<QgsRasterLayer: '%1' (%2)>" ).arg( %CPPSELF->name(), %CPPSELF->dataProvider() ? %CPPSELF->dataProvider()->name() : QStringLiteral( "Invalid" ) );
@@ -3009,6 +3112,8 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/raster/qgsrasteridentifyresult.h:30 -->
+    <value-type name="QgsRasterIdentifyResult"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractproviderconnection.h:42 -->
     <object-type name="QgsAbstractProviderConnection"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsstatisticalsummary.h:44 -->
@@ -3022,6 +3127,21 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrelationcontext.h:31 -->
     <value-type name="QgsRelationContext"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrelation.h:43 -->
+    <value-type name="QgsRelation">
+        <modify-function signature="addFieldPair(const QgsRelation::FieldPair&amp;)" remove="true"/>
+        <modify-function signature="fieldPairs()" remove="true"/>
+        <add-function signature="fieldPairs()" return-type="QMap&lt; QString, QString &gt;">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const QList< QgsRelation::FieldPair > &pairs = %CPPSELF->fieldPairs();
+    auto sbkRes = new QMap< QString, QString >();
+    for ( const QgsRelation::FieldPair &pair : pairs )
+    {
+      sbkRes->insert( pair.first, pair.second );
+    }
+    %PYARG_0 = %CONVERTTOPYTHON[QMap< QString, QString > *](sbkRes);]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsfeatureiterator.h:28 -->
     <object-type name="QgsAbstractFeatureIterator">
         <enum-type name="CompileStatus"/>
@@ -3065,6 +3185,60 @@ PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[int](out4_));
         <modify-function signature="temporalCapabilities()" remove="true"/>
         <modify-function signature="elevationProperties()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgscurve.h:34 -->
+    <object-type name="QgsCurve" disable-wrapper="true">
+        <modify-function signature="nextVertex(QgsVertexId&amp;,QgsPoint&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPoint out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="pointAt(int,QgsPoint&amp;,Qgis::VertexType&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPoint out1_;
+Qgis::VertexType out2_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_,out2_);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[Qgis::VertexType](out2_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="isValid(QString&amp;,Qgis::GeometryValidityFlags)const">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(out1_,%2);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
+        <modify-function signature="splitCurveAtVertex(int)" remove="true"/>
+        <modify-function signature="snapToGridPrivate(double,double,double,double,const QVector&lt;double&gt;&amp;,const QVector&lt;double&gt;&amp;,const QVector&lt;double&gt;&amp;,const QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,bool)" remove="true"/>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return %CPPSELF->numPoints();
+]]></inject-code>
+        </add-function>
+        <add-function signature="__bool__()" return-type="int">
+            <inject-code class="target" position="beginning"><![CDATA[
+    Py_RETURN_TRUE;
+]]></inject-code>
+        </add-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgscurvepolygon.h:34 -->
     <object-type name="QgsCurvePolygon">
         <modify-function signature="fuzzyHelper(const QgsAbstractGeometry&amp;,double,bool)" remove="true"/>
@@ -3105,8 +3279,8 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
         <add-function signature="removeInteriorRing(int)" return-type="bool">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -3150,12 +3324,14 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
     <value-type name="QgsLayerMetadataProviderResult"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractlayermetadataprovider.h:173 -->
     <value-type name="QgsLayerMetadataSearchResults"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/metadata/qgsabstractlayermetadataprovider.h:214 -->
+    <object-type name="QgsAbstractLayerMetadataProvider"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:47 -->
     <object-type name="QgsAbstractDatabaseProviderConnection">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdatabaseproviderconnection.h:87 -->
         <value-type name="QueryResult">
             <modify-function signature="appendColumn(const QString&amp;)" remove="true"/>
-            <modify-function signature="QueryResult(std::shared_ptr)" remove="true"/>
+            <modify-function signature="QueryResult(std::shared_ptr&lt;QgsAbstractDatabaseProviderConnection::QueryResult::QueryResultIterator&gt;)" remove="true"/>
             <modify-function signature="QueryResult()" remove="true"/>
             <add-function signature="__iter__()" return-type="QgsAbstractDatabaseProviderConnection::QueryResult*">
                 <inject-code class="target" position="beginning"><![CDATA[
@@ -3240,8 +3416,8 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsVertexId](out2_));
 PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="splitCurveAtVertex(int)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
@@ -3256,9 +3432,9 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgslinestring.h:44 -->
     <object-type name="QgsLineString">
-        <modify-function signature="QgsLineString(const QVector&amp;)" remove="true"/>
-        <modify-function signature="QgsLineString(const QVector&amp;)" remove="true"/>
-        <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function,std::function,std::function,std::function)" remove="true"/>
+        <modify-function signature="QgsLineString(const QVector&lt;QgsPoint&gt;&amp;)" remove="true"/>
+        <modify-function signature="QgsLineString(const QVector&lt;QgsPointXY&gt;&amp;)" remove="true"/>
+        <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function&lt;bool (double, double, double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double)&gt;)" remove="true"/>
         <modify-function signature="pointN(int)" remove="true"/>
         <modify-function signature="xAt(int)" remove="true"/>
         <modify-function signature="yAt(int)" remove="true"/>
@@ -3277,7 +3453,7 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
         <modify-function signature="setZAt(int,double)" remove="true"/>
         <modify-function signature="setMAt(int,double)" remove="true"/>
         <modify-function signature="setPoints(size_t,const double*,const double*,const double*,const double*)" remove="true"/>
-        <modify-function signature="visitPointsByRegularDistance(double,const std::function&amp;)" remove="true"/>
+        <modify-function signature="visitPointsByRegularDistance(double,const std::function&lt;bool (double, double, double, double, double, double, double, double, double, double, double, double)&gt;&amp;)" remove="true"/>
         <modify-function signature="isValid(QString&amp;,Qgis::GeometryValidityFlags)const">
             <modify-argument index="1">
                 <remove-argument/>
@@ -3312,8 +3488,8 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsVertexId](out2_));
 PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
         <modify-function signature="lineLocatePointByM(double,double&amp;,double&amp;,double&amp;,double&amp;,bool)const">
             <modify-argument index="2">
@@ -3478,6 +3654,7 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </modify-function>
+        <modify-function signature="writeAsVectorFormat(QgsVectorLayer*,const QString&amp;,const QString&amp;,const QgsCoordinateReferenceSystem&amp;,const QString&amp;,bool,QString*,const QStringList&amp;,const QStringList&amp;,bool,QString*,Qgis::FeatureSymbologyExport,double,const QgsRectangle*,Qgis::WkbType,bool,bool,const QgsAttributeList&amp;,QgsVectorFileWriter::FieldValueConverter*,QString*)" remove="true"/>
         <modify-function signature="writeAsVectorFormat(QgsVectorLayer*,const QString&amp;,const QString&amp;,const QgsCoordinateTransform&amp;,const QString&amp;,bool,QString*,const QStringList&amp;,const QStringList&amp;,bool,QString*,Qgis::FeatureSymbologyExport,double,const QgsRectangle*,Qgis::WkbType,bool,bool,const QgsAttributeList&amp;,QgsVectorFileWriter::FieldValueConverter*,QString*)">
             <modify-argument index="7">
                 <remove-argument/>
@@ -3489,6 +3666,7 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </modify-function>
+        <modify-function signature="writeAsVectorFormat(QgsVectorLayer*,const QString&amp;,const QString&amp;,const QgsCoordinateTransform&amp;,const QString&amp;,bool,QString*,const QStringList&amp;,const QStringList&amp;,bool,QString*,Qgis::FeatureSymbologyExport,double,const QgsRectangle*,Qgis::WkbType,bool,bool,const QgsAttributeList&amp;,QgsVectorFileWriter::FieldValueConverter*,QString*)" remove="true"/>
         <modify-function signature="writeAsVectorFormat(QgsVectorLayer*,const QString&amp;,const QgsVectorFileWriter::SaveVectorOptions&amp;,QString*,QString*,QString*)">
             <modify-argument index="5">
                 <remove-argument/>
@@ -3500,6 +3678,8 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </modify-function>
+        <modify-function signature="writeAsVectorFormat(QgsVectorLayer*,const QString&amp;,const QgsVectorFileWriter::SaveVectorOptions&amp;,QString*,QString*,QString*)" remove="true"/>
+        <modify-function signature="QgsVectorFileWriter(const QString&amp;,const QString&amp;,const QgsFields&amp;,Qgis::WkbType,const QgsCoordinateReferenceSystem&amp;,const QString&amp;,const QStringList&amp;,const QStringList&amp;,QString*,Qgis::FeatureSymbologyExport,QgsVectorFileWriter::FieldValueConverter*,const QString&amp;,QgsVectorFileWriter::ActionOnExistingFile,QString*,const QgsCoordinateTransformContext&amp;,QgsFeatureSink::SinkFlags,QgsVectorFileWriter::FieldNameSource,bool,bool,const QgsAbstractDatabaseProviderConnection*)" remove="true"/>
         <modify-function signature="writeAsVectorFormatV2(QgsVectorLayer*,const QString&amp;,const QgsCoordinateTransformContext&amp;,const QgsVectorFileWriter::SaveVectorOptions&amp;,QString*,QString*,QString*)">
             <modify-argument index="7">
                 <remove-argument/>
@@ -3560,10 +3740,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsjsonutils.h:44 -->
     <value-type name="QgsJsonExporter">
+        <modify-function signature="exportFeatureToJsonObject(const QgsFeature&amp;,const QVariantMap&amp;,const QVariant&amp;)" remove="true"/>
         <modify-function signature="exportFeaturesToJsonObject(const QgsFeatureList&amp;)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsjsonutils.h:320 -->
     <value-type name="QgsJsonUtils">
+        <modify-function signature="exportAttributesToJsonObject(const QgsFeature&amp;,QgsVectorLayer*,const QVector&lt;QVariant&gt;&amp;,bool)" remove="true"/>
         <modify-function signature="geometryFromGeoJson(const nlohmann::json&amp;)" remove="true"/>
         <modify-function signature="jsonFromVariant(const QVariant&amp;)" remove="true"/>
         <modify-function signature="parseJson(const std::string&amp;)" remove="true"/>
@@ -3572,6 +3754,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <modify-function signature="jsonToVariant(const nlohmann::json&amp;)" remove="true"/>
         <modify-function signature="addCrsInfo(nlohmann::json&amp;,const QgsCoordinateReferenceSystem&amp;)" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/scalebar/qgsscalebarrenderer.h:37 -->
+    <object-type name="QgsScaleBarRenderer">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/scalebar/qgsscalebarrenderer.h:69 -->
+        <value-type name="ScaleBarContext"/>
+        <enum-type name="Flag" flags="Flags"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/scalebar/qgssteppedlinescalebarrenderer.h:30 -->
     <object-type name="QgsSteppedLineScaleBarRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/scalebar/qgsticksscalebarrenderer.h:28 -->
@@ -3594,6 +3782,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsSingleBoxScaleBarRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/3d/qgs3drendererregistry.h:67 -->
     <value-type name="Qgs3DRendererRegistry"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/3d/qgs3dsymbolregistry.h:41 -->
+    <object-type name="Qgs3DSymbolAbstractMetadata">
+        <modify-function signature="createSymbolWidget(QgsVectorLayer*)" remove="true"/>
+        <modify-function signature="createFeatureHandler(QgsVectorLayer*,const QgsAbstract3DSymbol*)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/3d/qgs3dsymbolregistry.h:183 -->
     <object-type name="Qgs3DSymbolRegistry">
         <modify-function signature="createHandlerForSymbol(QgsVectorLayer*,const QgsAbstract3DSymbol*)" remove="true"/>
@@ -3614,6 +3807,27 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsMessageLogNotifyBlocker"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmessagelog.h:131 -->
     <object-type name="QgsMessageLogConsole"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentry.h:44 -->
+    <object-type name="QgsSettingsEntryBase"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:28 -->
+    <object-type name="QgsSettingsEntryVariant"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:126 -->
+    <object-type name="QgsSettingsEntryString"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:230 -->
+    <object-type name="QgsSettingsEntryStringList"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:304 -->
+    <object-type name="QgsSettingsEntryBool"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:378 -->
+    <object-type name="QgsSettingsEntryInteger"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:562 -->
+    <object-type name="QgsSettingsEntryDouble"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:693 -->
+    <object-type name="QgsSettingsEntryColor">
+        <modify-function signature="copyValueFromKeys(const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,bool)" remove="true"/>
+        <modify-function signature="copyValueToKeys(const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentryimpl.h:796 -->
+    <object-type name="QgsSettingsEntryVariantMap"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstranslationcontext.h:35 -->
     <value-type name="QgsTranslationContext"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsapplication.h:98 -->
@@ -3648,6 +3862,44 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <value-type name="QgsNetworkRequestParameters">
         <enum-type name="RequestAttributes"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnetworkaccessmanager.h:256 -->
+    <object-type name="QgsNetworkAccessManager">
+        <extra-includes>
+            <include file-name="pysidesignal.h" location="global"/>
+        </extra-includes>
+        <modify-function signature="setSslErrorHandler(std::unique_ptr&lt;QgsSslErrorHandler&gt;)" remove="true"/>
+        <modify-function signature="setAuthHandler(std::unique_ptr&lt;QgsNetworkAuthenticationHandler&gt;)" remove="true"/>
+        <modify-function signature="cacheDisabled()" remove="true"/>
+        <modify-function signature="setCacheDisabled(bool)" remove="true"/>
+        <modify-function signature="setRequestPreprocessor(const std::function&lt;void (QNetworkRequest *)&gt;&amp;)" remove="true"/>
+        <modify-function signature="removeRequestPreprocessor(const QString&amp;)" remove="true"/>
+        <modify-function signature="setReplyPreprocessor(const std::function&lt;void (const QNetworkRequest &amp;, QNetworkReply *)&gt;&amp;)" remove="true"/>
+        <modify-function signature="removeReplyPreprocessor(const QString&amp;)" remove="true"/>
+        <modify-function signature="sslErrorsOccurred(QNetworkReply*,const QList&lt;QSslError&gt;&amp;)" remove="true"/>
+        <modify-function signature="sslErrorsHandled(QNetworkReply*)" remove="true"/>
+        <modify-function signature="authRequestOccurred(QNetworkReply*,QAuthenticator*)" remove="true"/>
+        <modify-function signature="authRequestHandled(QNetworkReply*)" remove="true"/>
+        <add-function signature="removeRequestPreprocessor(const QString&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( !QgsNetworkAccessManager::removeRequestPreprocessor( %1 ) )
+    {
+      PyErr_SetString( PyExc_KeyError, QStringLiteral( "No processor with id %1 exists." ).arg( %1 ).toUtf8().constData() );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="removeReplyPreprocessor(const QString&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( !QgsNetworkAccessManager::removeReplyPreprocessor( %1 ) )
+    {
+      PyErr_SetString( PyExc_KeyError, QStringLiteral( "No processor with id %1 exists." ).arg( %1 ).toUtf8().constData() );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnetworkcontentfetchertask.h:47 -->
+    <object-type name="QgsNetworkContentFetcherTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsabstractcontentcache.h:51 -->
     <object-type name="QgsAbstractContentCacheEntry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsabstractcontentcache.h:132 -->
@@ -3802,7 +4054,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <modify-function signature="setFieldSplitPolicy(int,Qgis::FieldDomainSplitPolicy)" remove="true"/>
         <modify-function signature="setFieldDuplicatePolicy(int,Qgis::FieldDuplicatePolicy)" remove="true"/>
         <modify-function signature="weakRelations()" remove="true"/>
-        <modify-function signature="setWeakRelations(const QList&amp;)" remove="true"/>
+        <modify-function signature="setWeakRelations(const QList&lt;QgsWeakRelation&gt;&amp;)" remove="true"/>
         <modify-function signature="editBuffer()" remove="true"/>
         <modify-function signature="allowCommit()" remove="true"/>
         <modify-function signature="setAllowCommit(bool)" remove="true"/>
@@ -3815,6 +4067,28 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:52 -->
     <object-type name="QgsVectorLayerFeatureSource"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:154 -->
+    <object-type name="QgsVectorLayerFeatureIterator">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:173 -->
+        <value-type name="FetchJoinInfo"/>
+        <modify-function signature="setInterruptionChecker(QgsFeedback*)" remove="true"/>
+        <modify-function signature="rewindEditBuffer()" remove="true"/>
+        <modify-function signature="prepareJoin(int)" remove="true"/>
+        <modify-function signature="prepareExpression(int)" remove="true"/>
+        <modify-function signature="prepareFields()" remove="true"/>
+        <modify-function signature="prepareField(int)" remove="true"/>
+        <modify-function signature="fetchNextAddedFeature(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="fetchNextChangedGeomFeature(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="fetchNextChangedAttributeFeature(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="useAddedFeature(const QgsFeature&amp;,QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="useChangedAttributeFeature(QgsFeatureId,const QgsGeometry&amp;,QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="nextFeatureFid(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="addJoinedAttributes(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="addVirtualAttributes(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="addExpressionAttribute(QgsFeature&amp;,int)" remove="true"/>
+        <modify-function signature="updateChangedAttributes(QgsFeature&amp;)" remove="true"/>
+        <modify-function signature="updateFeatureGeometry(QgsFeature&amp;)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeatureiterator.h:369 -->
     <object-type name="QgsVectorLayerSelectedFeatureSource"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometryutils.h:37 -->
@@ -4075,7 +4349,7 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[bool](out2_));
         <modify-function signature="QgsProviderMetadata(const QString&amp;,const QString&amp;,const QgsProviderMetadata::CreateDataProviderFunction&amp;)" remove="true"/>
         <modify-function signature="supportedLayerTypes()" remove="true"/>
         <modify-function signature="createFunction()" remove="true"/>
-        <modify-function signature="createEmptyLayer(const QString&amp;,const QgsFields&amp;,Qgis::WkbType,const QgsCoordinateReferenceSystem&amp;,bool,QMap&amp;,QString&amp;,const QMap*)" remove="true"/>
+        <modify-function signature="createEmptyLayer(const QString&amp;,const QgsFields&amp;,Qgis::WkbType,const QgsCoordinateReferenceSystem&amp;,bool,QMap&lt;int, int&gt;&amp;,QString&amp;,const QMap&lt;QString, QVariant&gt;*)" remove="true"/>
         <modify-function signature="createDatabase(const QString&amp;,QString&amp;)">
             <modify-argument index="2">
                 <remove-argument/>
@@ -4136,6 +4410,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataset.h:492 -->
     <value-type name="QgsMeshDatasetMetadata"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataset.h:557 -->
+    <object-type name="QgsMeshDataset"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataset.h:591 -->
+    <object-type name="QgsMeshDatasetGroup">
+        <enum-type name="Type"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataset.h:855 -->
     <value-type name="QgsMeshDatasetGroupTreeItem"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataprovidertemporalcapabilities.h:35 -->
@@ -4149,6 +4429,14 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <value-type name="QgsMesh">
         <enum-type name="ElementType"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataprovider.h:139 -->
+    <object-type name="QgsMeshDataSourceInterface"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataprovider.h:214 -->
+    <object-type name="QgsMeshDatasetSourceInterface"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshdataprovider.h:439 -->
+    <object-type name="QgsMeshDataProvider">
+        <modify-function signature="temporalCapabilities()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/expression/qgsexpressioncontextutils.h:47 -->
     <value-type name="QgsExpressionContextUtils"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmimedatautils.h:37 -->
@@ -4264,6 +4552,14 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstolerance.h:32 -->
     <value-type name="QgsTolerance"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingconfig.h:36 -->
+    <value-type name="QgsSnappingConfig">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingconfig.h:107 -->
+        <value-type name="IndividualLayerSettings"/>
+        <enum-type name="SnappingType"/>
+        <enum-type name="ScaleDependencyMode"/>
+        <modify-function signature="individualLayerSettings()" remove="true"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectversion.h:32 -->
     <value-type name="QgsProjectVersion"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectproperty.h:49 -->
@@ -4336,6 +4632,21 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QStringList](out1_));
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsabstractsensor.h:76 -->
         <value-type name="SensorData"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgspolymorphicrelation.h:49 -->
+    <value-type name="QgsPolymorphicRelation">
+        <modify-function signature="addFieldPair(const QgsRelation::FieldPair&amp;)" remove="true"/>
+        <modify-function signature="fieldPairs()" remove="true"/>
+        <add-function signature="fieldPairs()" return-type="QMap&lt; QString, QString &gt;">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const QList< QgsRelation::FieldPair > &pairs = %CPPSELF->fieldPairs();
+    auto sbkRes = new QMap< QString, QString >();
+    for ( const QgsRelation::FieldPair &pair : pairs )
+    {
+      sbkRes->insert( pair.first, pair.second );
+    }
+    %PYARG_0 = %CONVERTTOPYTHON[QMap< QString, QString > *](sbkRes);]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrelationmanager.h:35 -->
     <object-type name="QgsRelationManager"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapthemecollection.h:43 -->
@@ -4416,6 +4727,7 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </modify-function>
+        <modify-function signature="createEmbeddedLayer(const QString&amp;,const QString&amp;,QList&lt;QDomNode&gt;&amp;,bool,Qgis::ProjectReadFlags)" remove="true"/>
         <modify-function signature="layoutManager()" remove="true"/>
         <modify-function signature="viewsManager()" remove="true"/>
         <modify-function signature="bookmarkManager()" remove="true"/>
@@ -4459,6 +4771,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QStringList](out1_));
         </modify-function>
         <modify-function signature="setError(const QString&amp;)" remove="true"/>
         <modify-function signature="clearError()" remove="true"/>
+        <modify-function signature="addLayer(const QDomElement&amp;,QList&lt;QDomNode&gt;&amp;,QgsReadWriteContext&amp;,Qgis::ProjectReadFlags,QgsDataProvider*)" remove="true"/>
         <modify-function signature="initializeEmbeddedSubtree(const QString&amp;,QgsLayerTreeGroup*,Qgis::ProjectReadFlags)" remove="true"/>
         <modify-function signature="loadEmbeddedNodes(QgsLayerTreeGroup*,Qgis::ProjectReadFlags)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
@@ -4559,6 +4872,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QStringList](out1_));
     <value-type name="QgsNumericFormatContext">
         <enum-type name="Interpretation"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/numericformats/qgsnumericformat.h:278 -->
+    <object-type name="QgsNumericFormat"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/numericformats/qgsbasicnumericformat.h:31 -->
     <object-type name="QgsBasicNumericFormat">
         <enum-type name="RoundingType"/>
@@ -4769,6 +5084,36 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaskidprovider.h:39 -->
     <value-type name="QgsMaskIdProvider"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:296 -->
+    <object-type name="QgsMapRendererJob">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:378 -->
+        <value-type name="Error"/>
+        <modify-function signature="labelSink()" remove="true"/>
+        <modify-function signature="setLabelSink(QgsLabelSink*)" remove="true"/>
+        <modify-function signature="labelingEngineFeedback()" remove="true"/>
+        <modify-function signature="perLayerRenderingTime()" remove="true"/>
+        <modify-function signature="setLayerRenderingTimeHints(const QHash&lt;QString, int&gt;&amp;)" remove="true"/>
+        <modify-function signature="prepareLabelCache()" remove="true"/>
+        <modify-function signature="prepareJobs(QPainter*,QgsLabelingEngine*,bool)" remove="true"/>
+        <modify-function signature="prepareLabelingJob(QPainter*,QgsLabelingEngine*,bool)" remove="true"/>
+        <modify-function signature="prepareSecondPassJobs(std::vector&lt;LayerRenderJob&gt;&amp;,LabelRenderJob&amp;)" remove="true"/>
+        <modify-function signature="participatingLabelLayers(QgsLabelingEngine*)" remove="true"/>
+        <modify-function signature="initSecondPassJobs(std::vector&lt;LayerRenderJob&gt;&amp;,LabelRenderJob&amp;)" remove="true"/>
+        <modify-function signature="composeImage(const QgsMapSettings&amp;,const std::vector&lt;LayerRenderJob&gt;&amp;,const LabelRenderJob&amp;,const QgsMapRendererCache*)" remove="true"/>
+        <modify-function signature="layerImageToBeComposed(const QgsMapSettings&amp;,const LayerRenderJob&amp;,const QgsMapRendererCache*)" remove="true"/>
+        <modify-function signature="layerElevationToBeComposed(const QgsMapSettings&amp;,const LayerRenderJob&amp;,const QgsMapRendererCache*)" remove="true"/>
+        <modify-function signature="composeSecondPass(std::vector&lt;LayerRenderJob&gt;&amp;,LabelRenderJob&amp;,bool)" remove="true"/>
+        <modify-function signature="logRenderingTime(const std::vector&lt;LayerRenderJob&gt;&amp;,const std::vector&lt;LayerRenderJob&gt;&amp;,const LabelRenderJob&amp;)" remove="true"/>
+        <modify-function signature="cleanupJobs(std::vector&lt;LayerRenderJob&gt;&amp;)" remove="true"/>
+        <modify-function signature="cleanupSecondPassJobs(std::vector&lt;LayerRenderJob&gt;&amp;)" remove="true"/>
+        <modify-function signature="cleanupLabelJob(LabelRenderJob&amp;)" remove="true"/>
+        <modify-function signature="drawLabeling(const QgsMapSettings&amp;,QgsRenderContext&amp;,QgsLabelingEngine*,QPainter*)" remove="true"/>
+        <modify-function signature="drawLabeling(QgsRenderContext&amp;,QgsLabelingEngine*,QPainter*)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererjob.h:705 -->
+    <object-type name="QgsMapRendererQImageJob"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprenderercustompainterjob.h:31 -->
+    <object-type name="QgsMapRendererAbstractCustomPainterJob"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprenderercustompainterjob.h:62 -->
     <object-type name="QgsMapRendererCustomPainterJob">
         <modify-function signature="jobs()" remove="true"/>
@@ -4785,9 +5130,16 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/annotations/qgsannotation.h:52 -->
     <object-type name="QgsAnnotation"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/annotations/qgsannotationmanager.h:46 -->
-    <object-type name="QgsAnnotationManager"/>
+    <object-type name="QgsAnnotationManager">
+        <modify-function signature="readXmlAndUpgradeToAnnotationLayerItems(const QDomElement&amp;,const QgsReadWriteContext&amp;,QgsAnnotationLayer*,const QgsCoordinateTransformContext&amp;)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmapdecoration.h:33 -->
     <object-type name="QgsMapDecoration"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprenderertask.h:43 -->
+    <object-type name="QgsMapRendererTask">
+        <enum-type name="ErrorType"/>
+        <modify-function signature="QgsMapRendererTask(const QgsMapSettings&amp;,const QString&amp;,const QString&amp;,bool,QgsTask::Flags,bool,const QgsAbstractGeospatialPdfExporter::ExportDetails&amp;)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/maprenderer/qgsmaprendererparalleljob.h:31 -->
     <object-type name="QgsMapRendererParallelJob">
         <modify-function signature="renderLayerStatic(LayerRenderJob&amp;)" remove="true"/>
@@ -4817,8 +5169,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsRunProcess"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsrunprocess.h:109 -->
     <object-type name="QgsBlockingProcess">
-        <modify-function signature="setStdOutHandler(const std::function&amp;)" remove="true"/>
-        <modify-function signature="setStdErrHandler(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setStdOutHandler(const std::function&lt;void (const QByteArray &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="setStdErrHandler(const std::function&lt;void (const QByteArray &amp;)&gt;&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsvectorfilewritertask.h:34 -->
+    <object-type name="QgsVectorFileWriterTask">
+        <modify-function signature="completed(const QString&amp;,const QString&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscadutils.h:33 -->
     <value-type name="QgsCadUtils">
@@ -4829,7 +5185,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscadutils.h:99 -->
         <value-type name="AlignMapPointContext">
             <modify-function signature="dump()" remove="true"/>
-            <modify-function signature="setLockedSnapVertices(const QQueue&amp;)" remove="true"/>
+            <modify-function signature="setLockedSnapVertices(const QQueue&lt;QgsPointLocator::Match&gt;&amp;)" remove="true"/>
             <modify-function signature="lockedSnapVertices()" remove="true"/>
         </value-type>
     </value-type>
@@ -4906,6 +5262,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QList](out1_));
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/locator/qgslocatorfilter.h:124 -->
         <value-type name="ResultAction"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/locator/qgslocatorfilter.h:175 -->
+    <object-type name="QgsLocatorFilter">
+        <enum-type name="Priority"/>
+        <enum-type name="Flag" flags="Flags"/>
+        <modify-function signature="setActivePrefix(const QString&amp;)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingstree.h:30 -->
     <value-type name="QgsSettingsTree"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/locator/qgslocator.h:60 -->
@@ -5003,6 +5365,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QList](out1_));
         <value-type name="Context"/>
         <enum-type name="GMLVersion"/>
         <enum-type name="FilterVersion"/>
+        <modify-function signature="expressionToOgcFilter(const QgsExpression&amp;,QDomDocument&amp;,QgsOgcUtils::GMLVersion,QgsOgcUtils::FilterVersion,const QString&amp;,const QString&amp;,const QString&amp;,const QString&amp;,bool,bool,QString*,const QMap&lt;QString, QString&gt;&amp;,const QMap&lt;QString, QString&gt;&amp;)" remove="true"/>
+        <modify-function signature="SQLStatementToOgcFilter(const QgsSQLStatement&amp;,QDomDocument&amp;,QgsOgcUtils::GMLVersion,QgsOgcUtils::FilterVersion,const QList&lt;QgsOgcUtils::LayerProperties&gt;&amp;,bool,bool,const QMap&lt;QString, QString&gt;&amp;,QString*,const QMap&lt;QString, QString&gt;&amp;,const QMap&lt;QString, QString&gt;&amp;)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsselectioncontext.h:29 -->
     <value-type name="QgsSelectionContext"/>
@@ -5035,10 +5399,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QList](out1_));
         <enum-type name="CertTrustPolicy"/>
         <enum-type name="CertUsageType"/>
         <enum-type name="ConstraintGroup"/>
-        <modify-function signature="certsGroupedByOrg(const QList&amp;)" remove="true"/>
-        <modify-function signature="sslConfigsGroupedByOrg(const QList&amp;)" remove="true"/>
+        <modify-function signature="certsGroupedByOrg(const QList&lt;QSslCertificate&gt;&amp;)" remove="true"/>
+        <modify-function signature="sslConfigsGroupedByOrg(const QList&lt;QgsAuthConfigSslServer&gt;&amp;)" remove="true"/>
+        <modify-function signature="getCertDistinguishedName(const QSslCertificate&amp;,const QCA::Certificate&amp;,bool)" remove="true"/>
         <modify-function signature="qtCertToQcaCert(const QSslCertificate&amp;)" remove="true"/>
-        <modify-function signature="qtCertsToQcaCollection(const QList&amp;)" remove="true"/>
+        <modify-function signature="qtCertsToQcaCollection(const QList&lt;QSslCertificate&gt;&amp;)" remove="true"/>
         <modify-function signature="qcaKeyBundle(const QString&amp;,const QString&amp;)" remove="true"/>
         <modify-function signature="qcaValidityMessage(QCA::Validity)" remove="true"/>
         <modify-function signature="qcaSignatureAlgorithm(QCA::SignatureAlgorithm)" remove="true"/>
@@ -5046,6 +5411,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QList](out1_));
         <modify-function signature="certificateUsageTypeString(QgsAuthCertUtils::CertUsageType)" remove="true"/>
         <modify-function signature="sslErrorEnumStrings()" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthmethod.h:38 -->
+    <object-type name="QgsAuthMethod">
+        <enum-type name="Expansion" flags="Expansions"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/auth/qgsauthmanager.h:70 -->
     <object-type name="QgsAuthManager">
         <enum-type name="MessageLevel"/>
@@ -5127,6 +5496,24 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsProjectGpsSettings"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:38 -->
     <value-type name="QgsReferencedGeometryBase"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:71 -->
+    <value-type name="QgsReferencedRectangle">
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsReferencedRectangle: %1 (%2)>" ).arg( %CPPSELF->asWktCoordinates(), %CPPSELF->crs().authid() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:110 -->
+    <value-type name="QgsReferencedPointXY">
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsReferencedPointXY: %1 (%2)>" ).arg( %CPPSELF->asWkt(), %CPPSELF->crs().authid() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsreferencedgeometry.h:148 -->
     <value-type name="QgsReferencedGeometry">
         <add-function signature="__repr__()" return-type="PyObject*">
@@ -5156,6 +5543,19 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectstorageregistry.h:34 -->
     <value-type name="QgsProjectStorageRegistry"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreenode.h:76 -->
+    <object-type name="QgsLayerTreeNode">
+        <enum-type name="NodeType"/>
+        <modify-function signature="children()" remove="true"/>
+        <modify-function signature="abandonChildren()" remove="true"/>
+        <modify-function signature="makeOrphan()" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsLayerTreeNode: %1>" ).arg( %CPPSELF->name() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerrenderer.h:51 -->
     <object-type name="QgsMapLayerRenderer">
         <modify-function signature="renderContext()" remove="true"/>
@@ -5187,6 +5587,30 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslegendpatchshape.h:33 -->
     <value-type name="QgsLegendPatchShape"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreelayer.h:42 -->
+    <object-type name="QgsLayerTreeLayer">
+        <enum-type name="LegendNodesSplitBehavior"/>
+        <modify-function signature="QgsLayerTreeLayer(const QgsLayerTreeLayer&amp;)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsLayerTreeLayer: %1>" ).arg( %CPPSELF->name() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertree.h:31 -->
+    <object-type name="QgsLayerTree">
+        <modify-function signature="toGroup(QgsLayerTreeNode*)" remove="true"/>
+        <modify-function signature="toLayer(QgsLayerTreeNode*)" remove="true"/>
+        <modify-function signature="toLayer(const QgsLayerTreeNode*)" remove="true"/>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    // override parent QgsLayerTreeGroup __repr__ and resort back to default repr for QgsLayerTree -- there's no extra useful context we can show
+    QString str = QStringLiteral( "<qgis._core.QgsLayerTree object at 0x%1>" ).arg( reinterpret_cast<quintptr>( %CPPSELF ), 2 * QT_POINTER_SIZE, 16, QLatin1Char( '0' ) );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectservervalidator.h:33 -->
     <value-type name="QgsProjectServerValidator">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/project/qgsprojectservervalidator.h:62 -->
@@ -5483,6 +5907,104 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </modify-function>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsgeometrycollection.h:36 -->
+    <object-type name="QgsGeometryCollection">
+        <modify-function signature="fuzzyHelper(const QgsAbstractGeometry&amp;,double,bool)" remove="true"/>
+        <modify-function signature="geometryN(int)" remove="true"/>
+        <modify-function signature="geometryN(int)" remove="true"/>
+        <modify-function signature="removeGeometry(int)" remove="true"/>
+        <modify-function signature="asJsonObject(int)" remove="true"/>
+        <modify-function signature="closestSegment(const QgsPoint&amp;,QgsPoint&amp;,QgsVertexId&amp;,int*,double)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPoint out1_;
+QgsVertexId out2_;
+int out3_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_,out2_,&out3_,%5);
+%PYARG_0 = PyTuple_New(4);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsVertexId](out2_));
+PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="nextVertex(QgsVertexId&amp;,QgsPoint&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPoint out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="isValid(QString&amp;,Qgis::GeometryValidityFlags)const">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(out1_,%2);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return %CPPSELF->numGeometries();
+]]></inject-code>
+        </add-function>
+        <add-function signature="__bool__()" return-type="int">
+            <inject-code class="target" position="beginning"><![CDATA[
+    Py_RETURN_TRUE;
+]]></inject-code>
+        </add-function>
+        <add-function signature="removeGeometry(int)" return-type="bool">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numGeometries();
+    if ( %1 < 0 || %1 >= count )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      return PyBool_FromLong( %CPPSELF->removeGeometry( %1 ) );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__delitem__(int)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const int count = %CPPSELF->numGeometries();
+    if ( %1 >= 0 && %1 < count )
+      %CPPSELF->removeGeometry( %1 );
+    else if ( %1 < 0 && %1 >= -count )
+      %CPPSELF->removeGeometry( count + %1 );
+    else
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__iter__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    auto var = new QgsGeometryPartIterator( %CPPSELF );
+    %PYARG_0 = %CONVERTTOPYTHON[QgsGeometryPartIterator *](var);
+]]></inject-code>
+        </add-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsmultisurface.h:31 -->
     <object-type name="QgsMultiSurface">
         <modify-function signature="surfaceN(int)" remove="true"/>
@@ -5518,7 +6040,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgscircularstring.h:33 -->
     <object-type name="QgsCircularString">
-        <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function,std::function,std::function,std::function)" remove="true"/>
+        <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function&lt;bool (double, double, double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double)&gt;)" remove="true"/>
         <modify-function signature="asJsonObject(int)" remove="true"/>
         <modify-function signature="isValid(QString&amp;,Qgis::GeometryValidityFlags)const">
             <modify-argument index="1">
@@ -5552,8 +6074,8 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsVertexId](out2_));
 PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
-        <modify-function signature="transformVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
+        <modify-function signature="transformVertices(const std::function&lt;QgsPoint (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="splitCurveAtVertex(int)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
@@ -5566,6 +6088,99 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgscircle.h:42 -->
+    <value-type name="QgsCircle">
+        <modify-function signature="intersections(const QgsCircle&amp;,QgsPoint&amp;,QgsPoint&amp;,bool)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPoint out1_;
+QgsPoint out2_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_,out2_,%4);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPoint](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsPoint](out2_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="tangentToPoint(const QgsPointXY&amp;,QgsPointXY&amp;,QgsPointXY&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPointXY out1_;
+QgsPointXY out2_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_,out2_);
+%PYARG_0 = PyTuple_New(3);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPointXY](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsPointXY](out2_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="outerTangents(const QgsCircle&amp;,QgsPointXY&amp;,QgsPointXY&amp;,QgsPointXY&amp;,QgsPointXY&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="5">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPointXY out1_;
+QgsPointXY out2_;
+QgsPointXY out3_;
+QgsPointXY out4_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_,out2_,out3_,out4_);
+%PYARG_0 = PyTuple_New(5);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPointXY](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsPointXY](out2_));
+PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QgsPointXY](out3_));
+PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[QgsPointXY](out4_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="innerTangents(const QgsCircle&amp;,QgsPointXY&amp;,QgsPointXY&amp;,QgsPointXY&amp;,QgsPointXY&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <modify-argument index="5">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsPointXY out1_;
+QgsPointXY out2_;
+QgsPointXY out3_;
+QgsPointXY out4_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_,out2_,out3_,out4_);
+%PYARG_0 = PyTuple_New(5);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsPointXY](out1_));
+PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QgsPointXY](out2_));
+PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QgsPointXY](out3_));
+PyTuple_SET_ITEM(%PYARG_0, 4, %CONVERTTOPYTHON[QgsPointXY](out4_));
+]]></inject-code>
+        </modify-function>
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    QString str = QStringLiteral( "<QgsCircle: %1>" ).arg( %CPPSELF->toString() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgstriangle.h:32 -->
     <object-type name="QgsTriangle">
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
@@ -5623,9 +6238,9 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[int](out3_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgsmultipoint.h:28 -->
     <object-type name="QgsMultiPoint">
-        <modify-function signature="QgsMultiPoint(const QVector&amp;)" remove="true"/>
-        <modify-function signature="QgsMultiPoint(const QVector&amp;)" remove="true"/>
-        <modify-function signature="QgsMultiPoint(const QVector&amp;)" remove="true"/>
+        <modify-function signature="QgsMultiPoint(const QVector&lt;QgsPoint&gt;&amp;)" remove="true"/>
+        <modify-function signature="QgsMultiPoint(const QVector&lt;QgsPoint*&gt;&amp;)" remove="true"/>
+        <modify-function signature="QgsMultiPoint(const QVector&lt;QgsPointXY&gt;&amp;)" remove="true"/>
         <modify-function signature="pointN(int)" remove="true"/>
         <modify-function signature="pointN(int)" remove="true"/>
         <modify-function signature="asJsonObject(int)" remove="true"/>
@@ -5640,7 +6255,7 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="filterVertices(const std::function&amp;)" remove="true"/>
+        <modify-function signature="filterVertices(const std::function&lt;bool (const QgsPoint &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="cast(const QgsAbstractGeometry*)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -5676,8 +6291,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsclipper.h:50 -->
     <value-type name="QgsClipper">
         <enum-type name="Boundary"/>
-        <modify-function signature="trimPolygon(QVector&amp;,QVector&amp;,QVector&amp;,const QgsBox3D&amp;)" remove="true"/>
-        <modify-function signature="clipped3dLine(const QVector&amp;,const QVector&amp;,const QVector&amp;,QVector&amp;,QVector&amp;,QVector&amp;,const QgsBox3D&amp;)" remove="true"/>
+        <modify-function signature="trimPolygon(QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,const QgsBox3D&amp;)" remove="true"/>
+        <modify-function signature="clipped3dLine(const QVector&lt;double&gt;&amp;,const QVector&lt;double&gt;&amp;,const QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,QVector&lt;double&gt;&amp;,const QgsBox3D&amp;)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/painting/qgspainting.h:31 -->
     <value-type name="QgsPainting">
@@ -5844,8 +6459,24 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsProcessingParameterPoint"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:1913 -->
     <object-type name="QgsProcessingParameterGeometry"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:1982 -->
+    <object-type name="QgsProcessingParameterFile"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2078 -->
     <object-type name="QgsProcessingParameterMatrix"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2163 -->
+    <object-type name="QgsProcessingParameterMultipleLayers">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2246 -->
     <object-type name="QgsProcessingParameterNumber"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2342 -->
@@ -5860,6 +6491,20 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsProcessingParameterScale"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2664 -->
     <object-type name="QgsProcessingParameterRange"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2716 -->
+    <object-type name="QgsProcessingParameterRasterLayer">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2762 -->
     <object-type name="QgsProcessingParameterEnum"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:2868 -->
@@ -5870,8 +6515,78 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsProcessingParameterExpression"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3028 -->
     <value-type name="QgsProcessingParameterLimitedDataTypes"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3061 -->
+    <object-type name="QgsProcessingParameterVectorLayer">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3103 -->
+    <object-type name="QgsProcessingParameterMeshLayer">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3138 -->
+    <object-type name="QgsProcessingParameterMapLayer">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3178 -->
     <object-type name="QgsProcessingParameterField"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3285 -->
+    <object-type name="QgsProcessingParameterFeatureSource">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3326 -->
+    <object-type name="QgsProcessingDestinationParameter">
+        <modify-function signature="isSupportedOutputValue(const QVariant&amp;,QgsProcessingContext&amp;,QString&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3447 -->
     <object-type name="QgsProcessingParameterFeatureSink"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:3544 -->
@@ -5902,6 +6617,20 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsProcessingParameterDatabaseSchema"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:4401 -->
     <object-type name="QgsProcessingParameterDatabaseTable"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:4494 -->
+    <object-type name="QgsProcessingParameterPointCloudLayer">
+        <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameters.h:4529 -->
     <object-type name="QgsProcessingParameterAnnotationLayer">
         <modify-function signature="valueAsString(const QVariant&amp;,QgsProcessingContext&amp;,bool&amp;)const">
@@ -6055,6 +6784,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsNetworkContentFetcherRegistry">
         <modify-function signature="localFile(const QString&amp;)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingutils.h:49 -->
+    <object-type name="QgsSnappingUtils">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssnappingutils.h:121 -->
+        <value-type name="LayerConfig"/>
+        <enum-type name="IndexingStrategy"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsstringstatisticalsummary.h:43 -->
     <value-type name="QgsStringStatisticalSummary"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/painting/qgsmaskpaintdevice.h:63 -->
@@ -6136,6 +6871,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsFeature](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutundocommand.h:33 -->
     <object-type name="QgsAbstractLayoutUndoCommand"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutundocommand.h:126 -->
+    <object-type name="QgsLayoutUndoObjectInterface"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutmeasurement.h:32 -->
     <value-type name="QgsLayoutMeasurement">
         <add-function signature="__repr__()" return-type="PyObject*">
@@ -6158,6 +6895,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsFeature](out1_));
         <enum-type name="Flag" flags="Flags"/>
         <enum-type name="ExportLayerBehavior"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemregistry.h:44 -->
+    <object-type name="QgsLayoutItemAbstractMetadata"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemregistry.h:186 -->
+    <object-type name="QgsLayoutMultiFrameAbstractMetadata"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemregistry.h:324 -->
     <object-type name="QgsLayoutItemRegistry">
         <enum-type name="ItemType"/>
@@ -6172,6 +6913,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsFeature](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutnortharrowhandler.h:32 -->
     <object-type name="QgsLayoutNorthArrowHandler">
         <enum-type name="NorthMode"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgsmasterlayoutinterface.h:41 -->
+    <object-type name="QgsMasterLayoutInterface">
+        <enum-type name="Type"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutmanager.h:43 -->
     <object-type name="QgsLayoutManager"/>
@@ -6193,6 +6938,22 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsFeature](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapgrid.h:45 -->
     <object-type name="QgsLayoutItemMapGridStack"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapgrid.h:138 -->
+    <object-type name="QgsLayoutItemMapGrid">
+        <enum-type name="GridUnit"/>
+        <enum-type name="GridStyle"/>
+        <enum-type name="DisplayMode"/>
+        <enum-type name="AnnotationPosition"/>
+        <enum-type name="AnnotationDirection"/>
+        <enum-type name="AnnotationFormat"/>
+        <enum-type name="BorderSide"/>
+        <enum-type name="FrameStyle"/>
+        <enum-type name="TickLengthMode"/>
+        <enum-type name="FrameSideFlag" flags="FrameSideFlags"/>
+        <enum-type name="AnnotationCoordinate"/>
+        <modify-function signature="lineSymbol()" remove="true"/>
+        <modify-function signature="markerSymbol()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapoverview.h:41 -->
     <object-type name="QgsLayoutItemMapOverviewStack"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemmapoverview.h:124 -->
@@ -6209,6 +6970,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsFeature](out1_));
         <enum-type name="MapItemFlag" flags="MapItemFlags"/>
         <enum-type name="PartType"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemnodeitem.h:28 -->
+    <object-type name="QgsLayoutNodesItem"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitempolygon.h:29 -->
     <object-type name="QgsLayoutItemPolygon"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgsabstractlayoutiterator.h:29 -->
@@ -6344,8 +7107,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsLayout">
         <enum-type name="ZValues"/>
         <enum-type name="UndoCommand"/>
-        <modify-function signature="layoutItems(QList&amp;)" remove="true"/>
-        <modify-function signature="layoutObjects(QList&amp;)" remove="true"/>
+        <modify-function signature="layoutItems(QList&lt;T*&gt;&amp;)" remove="true"/>
+        <modify-function signature="layoutObjects(QList&lt;T*&gt;&amp;)" remove="true"/>
         <modify-function signature="renderContext()" remove="true"/>
         <modify-function signature="reportContext()" remove="true"/>
         <modify-function signature="snapper()" remove="true"/>
@@ -6369,6 +7132,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsPrintLayout"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayouteffect.h:36 -->
     <object-type name="QgsLayoutEffect"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutmultiframe.h:47 -->
+    <object-type name="QgsLayoutMultiFrame">
+        <enum-type name="ResizeMode"/>
+        <enum-type name="UndoCommand"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemhtml.h:36 -->
     <object-type name="QgsLayoutItemHtml">
         <enum-type name="ContentMode"/>
@@ -6377,8 +7145,23 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsLayoutUndoStack"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayouttable.h:72 -->
     <value-type name="QgsLayoutTableStyle"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayouttable.h:106 -->
+    <object-type name="QgsLayoutTable">
+        <enum-type name="HeaderHAlignment"/>
+        <enum-type name="HeaderMode"/>
+        <enum-type name="EmptyTableMode"/>
+        <enum-type name="WrapBehavior"/>
+        <enum-type name="CellStyleGroup"/>
+        <modify-function signature="headerLabels()" remove="true"/>
+        <modify-function signature="drawVerticalGridLines(QgsLayoutItemRenderContext&amp;,const QMap&lt;int, double&gt;&amp;,int,int,bool,bool)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemtexttable.h:29 -->
     <object-type name="QgsLayoutItemTextTable"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitempicture.h:34 -->
+    <object-type name="QgsLayoutItemPicture">
+        <enum-type name="ResizeMode"/>
+        <enum-type name="NorthMode"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoututils.h:36 -->
     <value-type name="QgsLayoutUtils"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutreportcontext.h:31 -->
@@ -6486,7 +7269,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsLayerTreeModel">
         <enum-type name="Flag" flags="Flags"/>
         <modify-function signature="createTemporaryRenderContext()" remove="true"/>
-        <modify-function signature="tryBuildLegendTree(const QList&amp;)" remove="true"/>
+        <modify-function signature="tryBuildLegendTree(const QList&lt;QgsLayerTreeModelLegendNode*&gt;&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemlegend.h:42 -->
+    <object-type name="QgsLegendModel">
+        <modify-function signature="layerLegendNodes(QgsLayerTreeLayer*,bool)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutitemlegend.h:111 -->
     <object-type name="QgsLayoutItemLegend">
@@ -6568,7 +7355,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayoutpagecollection.h:39 -->
     <object-type name="QgsLayoutPageCollection">
         <modify-function signature="page(int)" remove="true"/>
-        <modify-function signature="itemsOnPage(QList&amp;,int)" remove="true"/>
+        <modify-function signature="itemsOnPage(QList&lt;T*&gt;&amp;,int)" remove="true"/>
         <modify-function signature="guides()" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layout/qgslayouttablecolumn.h:36 -->
@@ -6703,6 +7490,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <modify-function signature="QgsBalloonCallout(const QgsBalloonCallout&amp;)" remove="true"/>
         <modify-function signature="operator=(const QgsBalloonCallout&amp;)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/callouts/qgscalloutsregistry.h:39 -->
+    <object-type name="QgsCalloutAbstractMetadata"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/callouts/qgscalloutsregistry.h:110 -->
     <object-type name="QgsCalloutMetadata">
         <modify-function signature="createFunction()" remove="true"/>
@@ -6738,6 +7527,24 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsSymbolRenderContext">
         <modify-function signature="renderContext()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayer.h:54 -->
+    <object-type name="QgsSymbolLayer">
+        <enum-type name="Property"/>
+        <modify-function signature="dataDefinedProperties()" remove="true"/>
+        <modify-function signature="QgsSymbolLayer(const QgsSymbolLayer&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayer.h:764 -->
+    <object-type name="QgsMarkerSymbolLayer">
+        <enum-type name="HorizontalAnchorPoint"/>
+        <enum-type name="VerticalAnchorPoint"/>
+        <modify-function signature="QgsMarkerSymbolLayer(const QgsMarkerSymbolLayer&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayer.h:1083 -->
+    <object-type name="QgsLineSymbolLayer">
+        <enum-type name="RenderRingFilter"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayer.h:1279 -->
+    <object-type name="QgsFillSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsinterpolatedlinerenderer.h:36 -->
     <value-type name="QgsInterpolatedLineColor">
         <enum-type name="ColoringMethod"/>
@@ -6846,7 +7653,9 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[double](out2_));
         <modify-function signature="calculateTemporalExtent(QgsMapLayer*)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshtracerenderer.h:599 -->
-    <value-type name="QgsMeshVectorTraceAnimationGenerator"/>
+    <value-type name="QgsMeshVectorTraceAnimationGenerator">
+        <modify-function signature="QgsMeshVectorTraceAnimationGenerator(const QgsTriangularMesh&amp;,const QgsMeshDataBlock&amp;,const QgsMeshDataBlock&amp;,bool,const QgsRenderContext&amp;,const QgsRectangle&amp;,double,const QgsMeshRendererVectorSettings&amp;)" remove="true"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/mesh/qgsmeshadvancedediting.h:38 -->
     <object-type name="QgsMeshAdvancedEditing" force-abstract="true" disable-wrapper="true">
         <modify-function signature="apply(QgsMeshEditor*)" remove="true"/>
@@ -6869,11 +7678,11 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[double](out2_));
     <object-type name="QgsMeshEditor">
         <modify-function signature="QgsMeshEditor(QgsMesh*,QgsTriangularMesh*,QObject*)" remove="true"/>
         <modify-function signature="resetTriangularMesh(QgsTriangularMesh*)" remove="true"/>
-        <modify-function signature="faceCanBeAddedWithNewVertices(const QList&amp;,const QList&amp;)" remove="true"/>
-        <modify-function signature="addFaces(const QVector&amp;)" remove="true"/>
-        <modify-function signature="addFaceWithNewVertices(const QList&amp;,const QList&amp;)" remove="true"/>
-        <modify-function signature="addVertices(const QVector&amp;,double)" remove="true"/>
-        <modify-function signature="canBeTransformed(const QList&amp;,const std::function&amp;)" remove="true"/>
+        <modify-function signature="faceCanBeAddedWithNewVertices(const QList&lt;int&gt;&amp;,const QList&lt;QgsMeshVertex&gt;&amp;)" remove="true"/>
+        <modify-function signature="addFaces(const QVector&lt;QgsMeshFace&gt;&amp;)" remove="true"/>
+        <modify-function signature="addFaceWithNewVertices(const QList&lt;int&gt;&amp;,const QList&lt;QgsMeshVertex&gt;&amp;)" remove="true"/>
+        <modify-function signature="addVertices(const QVector&lt;QgsMeshVertex&gt;&amp;,double)" remove="true"/>
+        <modify-function signature="canBeTransformed(const QList&lt;int&gt;&amp;,const std::function&lt;QgsMeshVertex (int)&gt;&amp;)" remove="true"/>
         <modify-function signature="vertexCirculator(int)" remove="true"/>
         <modify-function signature="topologicalMesh()" remove="true"/>
         <modify-function signature="triangularMesh()" remove="true"/>
@@ -6884,6 +7693,10 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[double](out2_));
     <value-type name="QgsValidityCheckResult">
         <enum-type name="Type"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/validity/qgsabstractvaliditycheck.h:92 -->
+    <object-type name="QgsAbstractValidityCheck">
+        <enum-type name="Type"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/validity/qgsvaliditycheckregistry.h:36 -->
     <object-type name="QgsValidityCheckRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/validity/qgsvaliditycheckcontext.h:35 -->
@@ -6976,7 +7789,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/settings/qgssettingsentrygroup.h:38 -->
     <value-type name="QgsSettingsEntryGroup">
-        <modify-function signature="QgsSettingsEntryGroup(QList,bool)" remove="true"/>
+        <modify-function signature="QgsSettingsEntryGroup(QList&lt;const QgsSettingsEntryBase*&gt;,bool)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdiagramrenderer.h:59 -->
     <value-type name="QgsDiagramLayerSettings">
@@ -6996,6 +7809,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdiagramrenderer.h:716 -->
     <value-type name="QgsDiagramInterpolationSettings"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdiagramrenderer.h:738 -->
+    <object-type name="QgsDiagramRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdiagramrenderer.h:874 -->
     <object-type name="QgsSingleCategoryDiagramRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdiagramrenderer.h:910 -->
@@ -7013,6 +7828,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsauxiliarystorage.h:282 -->
+    <value-type name="QgsAuxiliaryStorage"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgselevationutils.h:32 -->
     <value-type name="QgsElevationUtils"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslocaldefaultsettings.h:40 -->
@@ -7093,8 +7910,62 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QString](out3_));
     <value-type name="QgsTextBlockFormat">
         <enum-type name="BooleanValue"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextblock.h:36 -->
+    <value-type name="QgsTextBlock">
+        <modify-function signature="append(QgsTextFragment&amp;&amp;)" remove="true"/>
+        <modify-function signature="insert(int,const QgsTextFragment&amp;)" remove="true"/>
+        <modify-function signature="insert(int,QgsTextFragment&amp;&amp;)" remove="true"/>
+        <modify-function signature="at(int)" remove="true"/>
+        <modify-function signature="begin()" remove="true"/>
+        <modify-function signature="end()" remove="true"/>
+        <add-function signature="insert(int,const QgsTextFragment&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 > %CPPSELF->size() )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      %CPPSELF->insert( %1, %2 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return %CPPSELF->size();
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextrenderer.h:41 -->
     <value-type name="QgsTextRenderer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextdocument.h:40 -->
+    <value-type name="QgsTextDocument">
+        <modify-function signature="append(QgsTextBlock&amp;&amp;)" remove="true"/>
+        <modify-function signature="insert(int,const QgsTextBlock&amp;)" remove="true"/>
+        <modify-function signature="insert(int,QgsTextBlock&amp;&amp;)" remove="true"/>
+        <modify-function signature="at(int)" remove="true"/>
+        <modify-function signature="begin()" remove="true"/>
+        <modify-function signature="end()" remove="true"/>
+        <add-function signature="insert(int,const QgsTextBlock&amp;)">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( %1 < 0 || %1 > %CPPSELF->size() )
+    {
+      PyErr_SetString( PyExc_IndexError, QByteArray::number( %1 ) );
+      return nullptr;
+    }
+    else
+    {
+      %CPPSELF->insert( %1, %2 );
+    }
+]]></inject-code>
+        </add-function>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return %CPPSELF->size();
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextdocumentmetrics.h:43 -->
     <value-type name="QgsTextDocumentRenderContext"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/textrenderer/qgstextdocumentmetrics.h:96 -->
@@ -7104,15 +7975,15 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QString](out3_));
         <modify-function signature="convertFromOldLabelUnit(int)" remove="true"/>
         <modify-function signature="readColor(QgsVectorLayer*,const QString&amp;,const QColor&amp;,bool)" remove="true"/>
         <modify-function signature="generateCurvedTextPlacement(const QgsPrecalculatedTextMetrics&amp;,const QPolygonF&amp;,double,QgsTextRendererUtils::LabelLineDirection,double,double,QgsTextRendererUtils::CurvedTextFlags)" remove="true"/>
-        <modify-function signature="generateCurvedTextPlacement(const QgsPrecalculatedTextMetrics&amp;,const double*,const double*,int,const std::vector&amp;,double,QgsTextRendererUtils::LabelLineDirection,double,double,QgsTextRendererUtils::CurvedTextFlags)" remove="true"/>
-        <modify-function signature="generateCurvedTextPlacementPrivate(const QgsPrecalculatedTextMetrics&amp;,const double*,const double*,int,const std::vector&amp;,double,QgsTextRendererUtils::LabelLineDirection,QgsTextRendererUtils::CurvedTextFlags,double,double,bool)" remove="true"/>
+        <modify-function signature="generateCurvedTextPlacement(const QgsPrecalculatedTextMetrics&amp;,const double*,const double*,int,const std::vector&lt;double&gt;&amp;,double,QgsTextRendererUtils::LabelLineDirection,double,double,QgsTextRendererUtils::CurvedTextFlags)" remove="true"/>
+        <modify-function signature="generateCurvedTextPlacementPrivate(const QgsPrecalculatedTextMetrics&amp;,const double*,const double*,int,const std::vector&lt;double&gt;&amp;,double,QgsTextRendererUtils::LabelLineDirection,QgsTextRendererUtils::CurvedTextFlags,double,double,bool)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslayernotesutils.h:31 -->
     <value-type name="QgsLayerNotesUtils"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsspatialindex.h:67 -->
     <object-type name="QgsSpatialIndex">
         <enum-type name="Flag" flags="Flags"/>
-        <modify-function signature="QgsSpatialIndex(const QgsFeatureIterator&amp;,const std::function&amp;,QgsSpatialIndex::Flags)" remove="true"/>
+        <modify-function signature="QgsSpatialIndex(const QgsFeatureIterator&amp;,const std::function&lt;bool (const QgsFeature &amp;)&gt;&amp;,QgsSpatialIndex::Flags)" remove="true"/>
         <modify-function signature="geometry(QgsFeatureId)" remove="true"/>
         <modify-function signature="featureInfo(const QgsFeature&amp;,SpatialIndex::Region&amp;,QgsFeatureId&amp;)" remove="true"/>
     </object-type>
@@ -7167,6 +8038,132 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QString](out3_));
         <enum-type name="HeadType"/>
         <enum-type name="ArrowType"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayerutils.h:60 -->
+    <value-type name="QgsSymbolLayerUtils">
+        <modify-function signature="decodeCoordinateReference(const QString&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="decodeArrowHeadType(const QVariant&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="decodeArrowType(const QVariant&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="decodeMarkerClipMode(const QString&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="decodeLineClipMode(const QString&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="toPoint(const QVariant&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="toSize(const QVariant&amp;,bool*)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="loadSymbol(const QDomElement&amp;,const QgsReadWriteContext&amp;)" remove="true"/>
+        <modify-function signature="lineToSld(QDomDocument&amp;,QDomElement&amp;,Qt::PenStyle,const QColor&amp;,double,const Qt::PenJoinStyle*,const Qt::PenCapStyle*,const QVector&lt;qreal&gt;*,double)" remove="true"/>
+        <modify-function signature="lineFromSld(QDomElement&amp;,Qt::PenStyle&amp;,QColor&amp;,double&amp;,Qt::PenJoinStyle*,Qt::PenCapStyle*,QVector&lt;qreal&gt;*,double*)" remove="true"/>
+        <modify-function signature="colorFromMimeData(const QMimeData*,bool&amp;)">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="rotateWholeSymbol(double,const QgsProperty&amp;)" remove="true"/>
+        <modify-function signature="scaleWholeSymbol(double,const QgsProperty&amp;)" remove="true"/>
+        <modify-function signature="scaleWholeSymbol(double,double,const QgsProperty&amp;)" remove="true"/>
+    </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrendererrange.h:36 -->
+    <value-type name="QgsRendererRange">
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const QString str = %CPPSELF->label().isEmpty()
+                        ? QStringLiteral( "<QgsRendererRange: %1 - %2>" ).arg( %CPPSELF->lowerValue() ).arg( %CPPSELF->upperValue() )
+                        : QStringLiteral( "<QgsRendererRange: %1 - %2 (%3)>" ).arg( %CPPSELF->lowerValue() ).arg( %CPPSELF->upperValue() ).arg( %CPPSELF->label() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+        <add-function signature="__getitem__(int)" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( _i == 0 )
+    {
+      return Py_BuildValue( "d", %CPPSELF->lowerValue() );
+    }
+    else if ( _i == 1 )
+    {
+      return Py_BuildValue( "d", %CPPSELF->upperValue() );
+    }
+    else
+    {
+      QString msg = QString( "Bad index: %1" ).arg( _i );
+      PyErr_SetString( PyExc_IndexError, msg.toLatin1().constData() );
+return 0;
+    }
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrendererrange.h:209 -->
     <value-type name="QgsRendererRangeLabelFormat"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgs25drenderer.h:30 -->
@@ -7228,6 +8225,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <modify-function signature="cleanDefaultStyle()" remove="true"/>
         <modify-function signature="triggerIconRebuild()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyle.h:1347 -->
+    <object-type name="QgsStyleEntityInterface"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyle.h:1395 -->
     <object-type name="QgsStyleSymbolEntity"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyle.h:1427 -->
@@ -7240,16 +8239,42 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsStyleLegendPatchShapeEntity"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyle.h:1548 -->
     <object-type name="QgsStyleSymbol3DEntity"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyleentityvisitor.h:33 -->
+    <value-type name="QgsStyleEntityVisitorInterface">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyleentityvisitor.h:60 -->
+        <value-type name="StyleLeaf"/>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstyleentityvisitor.h:110 -->
+        <value-type name="Node"/>
+        <enum-type name="NodeType"/>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsembeddedsymbolrenderer.h:35 -->
     <object-type name="QgsEmbeddedSymbolRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsgeometrygeneratorsymbollayer.h:32 -->
     <object-type name="QgsGeometryGeneratorSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfeaturerenderergenerator.h:31 -->
+    <object-type name="QgsFeatureRendererGenerator"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:45 -->
+    <object-type name="QgsSimpleMarkerSymbolLayerBase"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:175 -->
+    <object-type name="QgsSimpleMarkerSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:430 -->
+    <object-type name="QgsFilledMarkerSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:491 -->
+    <object-type name="QgsSvgMarkerSymbolLayer">
+        <modify-function signature="QgsSvgMarkerSymbolLayer(const QgsSvgMarkerSymbolLayer&amp;)" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:679 -->
+    <object-type name="QgsRasterMarkerSymbolLayer">
+        <modify-function signature="fetchImage(QgsRenderContext&amp;,const QString&amp;,QSize,bool,double)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:853 -->
     <object-type name="QgsFontMarkerSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmarkersymbollayer.h:1077 -->
     <object-type name="QgsAnimatedMarkerSymbolLayer">
         <modify-function signature="fetchImage(QgsRenderContext&amp;,const QString&amp;,QSize,bool,double)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayerregistry.h:36 -->
+    <object-type name="QgsSymbolLayerAbstractMetadata"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgssymbollayerregistry.h:109 -->
     <object-type name="QgsSymbolLayerMetadata">
         <modify-function signature="createFunction()" remove="true"/>
@@ -7268,16 +8293,29 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgscolorbrewerpalette.h:29 -->
     <value-type name="QgsColorBrewerPalette"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:44 -->
+    <object-type name="QgsSimpleLineSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:554 -->
+    <object-type name="QgsTemplatedLineSymbolLayerBase"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:917 -->
     <object-type name="QgsMarkerLineSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:1011 -->
     <object-type name="QgsHashedLineSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:1146 -->
+    <object-type name="QgsAbstractBrushedLineSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:1203 -->
     <object-type name="QgsRasterLineSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:1286 -->
     <object-type name="QgsLineburstSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgslinesymbollayer.h:1379 -->
     <object-type name="QgsFilledLineSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgspointdistancerenderer.h:41 -->
+    <object-type name="QgsPointDistanceRenderer">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgspointdistancerenderer.h:46 -->
+        <value-type name="GroupedFeature"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgspointclusterrenderer.h:30 -->
+    <object-type name="QgsPointClusterRenderer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmergedfeaturerenderer.h:40 -->
     <object-type name="QgsMergedFeatureRenderer">
         <enum-type name="GeometryOperation"/>
@@ -7285,6 +8323,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsellipsesymbollayer.h:31 -->
     <object-type name="QgsEllipseSymbolLayer">
         <enum-type name="Shape"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrendererregistry.h:41 -->
+    <object-type name="QgsRendererAbstractMetadata">
+        <enum-type name="LayerType" flags="LayerTypes"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrendererregistry.h:143 -->
     <object-type name="QgsRendererMetadata">
@@ -7297,6 +8339,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsRendererRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsnullsymbolrenderer.h:32 -->
     <object-type name="QgsNullSymbolRenderer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgspointdisplacementrenderer.h:30 -->
+    <object-type name="QgsPointDisplacementRenderer">
+        <enum-type name="Placement"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstylemodel.h:130 -->
     <object-type name="QgsStyleModel">
         <enum-type name="Column"/>
@@ -7305,7 +8351,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsstylemodel.h:268 -->
     <object-type name="QgsStyleProxyModel">
-        <modify-function signature="setEntityFilters(const QList&amp;)" remove="true"/>
+        <modify-function signature="setEntityFilters(const QList&lt;QgsStyle::StyleEntity&gt;&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsmapinfosymbolconverter.h:35 -->
     <value-type name="QgsMapInfoSymbolConversionContext"/>
@@ -7333,10 +8379,14 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsCptCityBrowserModel">
         <enum-type name="ViewType"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:44 -->
+    <object-type name="QgsSimpleFillSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:208 -->
     <object-type name="QgsGradientFillSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:484 -->
     <object-type name="QgsShapeburstFillSymbolLayer"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:756 -->
+    <object-type name="QgsImageFillSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:855 -->
     <object-type name="QgsRasterFillSymbolLayer"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsfillsymbollayer.h:1172 -->
@@ -7362,7 +8412,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/symbology/qgsrulebasedrenderer.h:149 -->
         <object-type name="Rule">
             <enum-type name="RenderResult"/>
-            <modify-function signature="setNormZLevels(const QMap&amp;)" remove="true"/>
+            <modify-function signature="setNormZLevels(const QMap&lt;int, int&gt;&amp;)" remove="true"/>
         </object-type>
         <enum-type name="FeatureFlags"/>
     </object-type>
@@ -7417,7 +8467,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <modify-function signature="operator=(const QgsLegendRenderer&amp;)" remove="true"/>
         <modify-function signature="QgsLegendRenderer(QgsLegendRenderer&amp;&amp;)" remove="true"/>
         <modify-function signature="createComponentGroupList(QgsLayerTreeGroup*,QgsRenderContext&amp;,double)" remove="true"/>
-        <modify-function signature="setColumns(QList&amp;)" remove="true"/>
+        <modify-function signature="setColumns(QList&lt;QgsLegendRenderer::LegendComponentGroup&gt;&amp;)" remove="true"/>
         <modify-function signature="spaceAboveGroup(const QgsLegendRenderer::LegendComponentGroup&amp;)" remove="true"/>
         <modify-function signature="exportLegendToJson(const QgsRenderContext&amp;,QgsLayerTreeGroup*)" remove="true"/>
         <modify-function signature="paintAndDetermineSize(QgsRenderContext&amp;)" remove="true"/>
@@ -7450,14 +8500,22 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
         <enum-type name="FlipType"/>
         <enum-type name="LineOperationDirection"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsgloweffect.h:37 -->
+    <object-type name="QgsGlowEffect">
+        <enum-type name="GlowColorType"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsgloweffect.h:297 -->
     <object-type name="QgsOuterGlowEffect"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsgloweffect.h:328 -->
     <object-type name="QgsInnerGlowEffect"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsshadoweffect.h:35 -->
+    <object-type name="QgsShadowEffect"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsshadoweffect.h:254 -->
     <object-type name="QgsDropShadowEffect"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgsshadoweffect.h:284 -->
     <object-type name="QgsInnerShadowEffect"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgspainteffectregistry.h:39 -->
+    <object-type name="QgsPaintEffectAbstractMetadata"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgspainteffectregistry.h:172 -->
     <object-type name="QgsPaintEffectRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/effects/qgscoloreffect.h:34 -->
@@ -7475,6 +8533,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsGeocoderInterface">
         <enum-type name="Flag" flags="Flags"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geocoding/qgsabstractgeocoderlocatorfilter.h:39 -->
+    <object-type name="QgsAbstractGeocoderLocatorFilter"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geocoding/qgsnominatimgeocoder.h:36 -->
     <object-type name="QgsNominatimGeocoder"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geocoding/qgsgooglemapsgeocoder.h:40 -->
@@ -7565,6 +8625,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <value-type name="QgsPointCloudAttribute">
         <enum-type name="DataType"/>
         <modify-function signature="convertValueToDouble(const char*)" remove="true"/>
+        <modify-function signature="getPointXYZ(const char*,int,std::size_t,int,QgsPointCloudAttribute::DataType,int,QgsPointCloudAttribute::DataType,int,QgsPointCloudAttribute::DataType,const QgsVector3D&amp;,const QgsVector3D&amp;,double&amp;,double&amp;,double&amp;)" remove="true"/>
         <modify-function signature="getAttributeMap(const char*,std::size_t,const QgsPointCloudAttributeCollection&amp;)" remove="true"/>
         <add-function signature="__repr__()" return-type="PyObject*">
             <inject-code class="target" position="beginning"><![CDATA[
@@ -7575,13 +8636,15 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudattribute.h:140 -->
     <value-type name="QgsPointCloudAttributeCollection"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudblock.h:38 -->
+    <value-type name="QgsPointCloudBlock"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:39 -->
     <value-type name="QgsPointCloudAttributeStatistics">
         <modify-function signature="cumulateStatistics(const QgsPointCloudAttributeStatistics&amp;)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudstatistics.h:67 -->
     <value-type name="QgsPointCloudStatistics">
-        <modify-function signature="QgsPointCloudStatistics(int,const QMap&amp;)" remove="true"/>
+        <modify-function signature="QgsPointCloudStatistics(int,const QMap&lt;QString, QgsPointCloudAttributeStatistics&gt;&amp;)" remove="true"/>
         <modify-function signature="availableClasses(const QString&amp;)" remove="true"/>
         <modify-function signature="statisticsMap()" remove="true"/>
     </value-type>
@@ -7640,11 +8703,20 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudlayerexporter.h:353 -->
+    <object-type name="QgsPointCloudLayerExporterTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudrenderer.h:43 -->
     <object-type name="QgsPointCloudRenderContext">
         <modify-function signature="renderContext()" remove="true"/>
         <modify-function signature="getAttribute(const char*,std::size_t,QgsPointCloudAttribute::DataType,T&amp;)" remove="true"/>
         <modify-function signature="triangulationData()" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudrenderer.h:321 -->
+    <object-type name="QgsPointCloudRenderer">
+        <modify-function signature="identify(QgsPointCloudLayer*,const QgsRenderContext&amp;,const QgsGeometry&amp;,double)" remove="true"/>
+        <modify-function signature="prepare()" remove="true"/>
+        <modify-function signature="drawPointToElevationMap(double,double,double,QgsPointCloudRenderContext&amp;)" remove="true"/>
+        <modify-function signature="drawPointToElevationMap(double,double,double,int,QgsPointCloudRenderContext&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudattributebyramprenderer.h:61 -->
     <object-type name="QgsPointCloudAttributeByRampRenderer">
@@ -7661,6 +8733,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudclassifiedrenderer.h:164 -->
     <object-type name="QgsPointCloudClassifiedRenderer">
         <modify-function signature="prepare()" remove="true"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudrendererregistry.h:46 -->
+    <object-type name="QgsPointCloudRendererAbstractMetadata">
+        <modify-function signature="createRendererWidget(QgsPointCloudLayer*,QgsStyle*,QgsPointCloudRenderer*)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/pointcloud/qgspointcloudrendererregistry.h:126 -->
     <object-type name="QgsPointCloudRendererMetadata">
@@ -7683,10 +8759,14 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgshistogram.h:36 -->
     <value-type name="QgsHistogram"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsproxyprogresstask.h:37 -->
+    <object-type name="QgsProxyProgressTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsproxyprogresstask.h:97 -->
     <object-type name="QgsScopedProxyProgressTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsuserprofile.h:34 -->
     <value-type name="QgsUserProfile"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgssensorregistry.h:31 -->
+    <object-type name="QgsSensorAbstractMetadata"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgssensorregistry.h:131 -->
     <object-type name="QgsSensorRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgssensormodel.h:32 -->
@@ -7694,6 +8774,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <enum-type name="Column"/>
         <enum-type name="CustomRole"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsiodevicesensor.h:40 -->
+    <object-type name="QgsIODeviceSensor"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsiodevicesensor.h:85 -->
     <object-type name="QgsTcpSocketSensor"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/sensor/qgsiodevicesensor.h:156 -->
@@ -7745,6 +8827,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsProfilePlotRenderer">
         <enum-type name="enum_442"/>
         <enum-type name="enum_443"/>
+        <modify-function signature="QgsProfilePlotRenderer(std::vector&lt;std::unique_ptr&lt;QgsAbstractProfileGenerator&gt; &gt;,const QgsProfileRequest&amp;)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsterrainprovider.h:40 -->
     <object-type name="QgsAbstractTerrainProvider">
@@ -7760,6 +8843,40 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsMeshTerrainProvider">
         <modify-function signature="operator=(const QgsMeshTerrainProvider&amp;)" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilepoint.h:30 -->
+    <value-type name="QgsProfilePoint">
+        <add-function signature="__repr__()" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    const QString str = %CPPSELF->isEmpty()
+                        ? QStringLiteral( "<QgsProfilePoint: EMPTY>" )
+                        : QStringLiteral( "<QgsProfilePoint: %1, %2>" ).arg( %CPPSELF->distance() ).arg( %CPPSELF->elevation() );
+    %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+        </add-function>
+        <add-function signature="__len__()">
+            <inject-code class="target" position="beginning"><![CDATA[
+    return 2;
+]]></inject-code>
+        </add-function>
+        <add-function signature="__getitem__(int)" return-type="PyObject*">
+            <inject-code class="target" position="beginning"><![CDATA[
+    if ( _i == 0 )
+    {
+      return Py_BuildValue( "d", %CPPSELF->distance() );
+    }
+    else if ( _i == 1 )
+    {
+      return Py_BuildValue( "d", %CPPSELF->elevation() );
+    }
+    else
+    {
+      QString msg = QString( "Bad index: %1" ).arg( _i );
+      PyErr_SetString( PyExc_IndexError, msg.toLatin1().constData() );
+return 0;
+    }
+]]></inject-code>
+        </add-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilesnapping.h:30 -->
     <value-type name="QgsProfileSnapContext"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/elevation/qgsprofilesnapping.h:56 -->
@@ -7845,6 +8962,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsmapboxglstyleconverter.h:41 -->
     <value-type name="QgsMapBoxGlStyleConversionContext"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsmapboxglstyleconverter.h:174 -->
+    <object-type name="QgsMapBoxGlStyleAbstractSource"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsmapboxglstyleconverter.h:227 -->
     <object-type name="QgsMapBoxGlStyleRasterSource"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsmapboxglstyleconverter.h:292 -->
@@ -7970,6 +9089,10 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QString](out3_));
         <modify-function signature="setFeatures(const QgsVectorTileFeatures&amp;)" remove="true"/>
         <modify-function signature="features()" remove="true"/>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsvectortilerenderer.h:122 -->
+    <object-type name="QgsVectorTileRenderer">
+        <modify-function signature="usedAttributes(const QgsRenderContext&amp;)" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsvectortilewriter.h:76 -->
     <value-type name="QgsVectorTileWriter">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vectortile/qgsvectortilewriter.h:88 -->
@@ -7985,6 +9108,10 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QString](out3_));
     <object-type name="QgsFieldFormatterRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstransactiongroup.h:31 -->
     <object-type name="QgsTransactionGroup"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdatabaseschemamodel.h:42 -->
+    <object-type name="QgsDatabaseSchemaModel">
+        <enum-type name="CustomRole"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/actions/qgsactionscope.h:48 -->
     <value-type name="QgsActionScope">
         <add-function signature="__hash__()" return-type="long">
@@ -8030,6 +9157,64 @@ PyTuple_SET_ITEM(%PYARG_0, 3, %CONVERTTOPYTHON[QString](out3_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsprovidersublayermodel.h:379 -->
     <object-type name="QgsProviderSublayerProxyModel"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsproviderregistry.h:57 -->
+    <value-type name="QgsProviderRegistry">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsproviderregistry.h:390 -->
+        <value-type name="ProviderCandidateDetails">
+            <add-function signature="__repr__()" return-type="PyObject*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        QString str = QStringLiteral( "<QgsProviderRegistry.ProviderCandidateDetails: %1>" ).arg( %CPPSELF->metadata()->key() );
+        %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+            </add-function>
+        </value-type>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsproviderregistry.h:458 -->
+        <value-type name="UnusableUriDetails">
+            <add-function signature="__repr__()" return-type="PyObject*">
+                <inject-code class="target" position="beginning"><![CDATA[
+        QString str = QStringLiteral( "<QgsProviderRegistry.UnusableUriDetails: %1>" ).arg( %CPPSELF->warning );
+        %PYARG_0 = PyUnicode_FromString( str.toUtf8().constData() );
+]]></inject-code>
+            </add-function>
+        </value-type>
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsproviderregistry.h:517 -->
+        <object-type name="UnusableUriHandlerInterface"/>
+        <enum-type name="WidgetMode"/>
+        <modify-function signature="createEmptyLayer(const QString&amp;,const QString&amp;,const QgsFields&amp;,Qgis::WkbType,const QgsCoordinateReferenceSystem&amp;,bool,QMap&lt;int, int&gt;&amp;,QString&amp;,const QMap&lt;QString, QVariant&gt;*)" remove="true"/>
+        <modify-function signature="styleExists(const QString&amp;,const QString&amp;,const QString&amp;,QString&amp;)">
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,%3,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="saveLayerMetadata(const QString&amp;,const QString&amp;,const QgsLayerMetadata&amp;,QString&amp;)">
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,%3,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="handleUnusableUri(const QString&amp;,QgsProviderRegistry::UnusableUriDetails&amp;)const">
+            <modify-argument index="2">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QgsProviderRegistry::UnusableUriDetails out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsProviderRegistry::UnusableUriDetails](out1_));
+]]></inject-code>
+        </modify-function>
+    </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsabstractdbtablemodel.h:28 -->
     <object-type name="QgsAbstractDbTableModel"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/providers/qgsprovidersublayertask.h:46 -->
@@ -8160,6 +9345,11 @@ PyTuple_SET_ITEM(%PYARG_0, 2, %CONVERTTOPYTHON[QString](out2_));
     <object-type name="QgsTextDiagram">
         <enum-type name="Shape"/>
         <enum-type name="Orientation"/>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerfeaturecounter.h:33 -->
+    <object-type name="QgsVectorLayerFeatureCounter">
+        <modify-function signature="symbolFeatureCountMap()" remove="true"/>
+        <modify-function signature="symbolFeatureIdMap()" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerjoinbuffer.h:37 -->
     <object-type name="QgsVectorLayerJoinBuffer">
@@ -8314,7 +9504,7 @@ PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
 PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QgsVectorLayerUtils::QgsDuplicateFeatureContext](out1_));
 ]]></inject-code>
         </modify-function>
-        <modify-function signature="getFeatureSource(QPointer,QgsFeedback*)" remove="true"/>
+        <modify-function signature="getFeatureSource(QPointer&lt;QgsVectorLayer&gt;,QgsFeedback*)" remove="true"/>
         <modify-function signature="labelMasks(const QgsVectorLayer*)" remove="true"/>
         <modify-function signature="symbolLayerMasks(const QgsVectorLayer*)" remove="true"/>
         <modify-function signature="impactsCascadeFeatures(const QgsVectorLayer*,const QgsFeatureIds&amp;,const QgsProject*,QgsVectorLayerUtils::QgsDuplicateFeatureContext&amp;,QgsVectorLayerUtils::CascadedFeatureFlags)">
@@ -8379,6 +9569,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </modify-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerexporter.h:176 -->
+    <object-type name="QgsVectorLayerExporterTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/vector/qgsvectorlayerelevationproperties.h:38 -->
     <object-type name="QgsVectorLayerElevationProperties"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgssldexportcontext.h:28 -->
@@ -8399,6 +9591,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </modify-function>
     </value-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparametertype.h:33 -->
+    <object-type name="QgsProcessingParameterType"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparametermeshdataset.h:34 -->
     <object-type name="QgsProcessingParameterMeshDatasetGroups"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparametermeshdataset.h:145 -->
@@ -8560,16 +9754,93 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
         <enum-type name="Flag" flags="Flags"/>
         <enum-type name="ProcessArgumentFlag" flags="ProcessArgumentFlags"/>
         <modify-function signature="expressionContext()" remove="true"/>
-        <modify-function signature="setInvalidGeometryCallback(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setInvalidGeometryCallback(const std::function&lt;void (const QgsFeature &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="invalidGeometryCallback(const QgsFeature&amp;,QgsFeatureSource*)" remove="true"/>
         <modify-function signature="defaultInvalidGeometryCallbackForCheck(const QgsFeature&amp;,Qgis::InvalidGeometryCheck,QgsFeatureSource*)" remove="true"/>
-        <modify-function signature="setTransformErrorCallback(const std::function&amp;)" remove="true"/>
+        <modify-function signature="setTransformErrorCallback(const std::function&lt;void (const QgsFeature &amp;)&gt;&amp;)" remove="true"/>
         <modify-function signature="transformErrorCallback(const QgsFeature&amp;)" remove="true"/>
         <modify-function signature="modelInitialRunConfig()" remove="true"/>
         <modify-function signature="takeModelInitialRunConfig()" remove="true"/>
-        <modify-function signature="setModelInitialRunConfig(std::unique_ptr)" remove="true"/>
+        <modify-function signature="setModelInitialRunConfig(std::unique_ptr&lt;QgsProcessingModelInitialRunConfig&gt;)" remove="true"/>
         <modify-function signature="modelResult()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingcontext.h:855 -->
+    <object-type name="QgsProcessingLayerPostProcessorInterface"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingalgorithm.h:50 -->
+    <object-type name="QgsProcessingAlgorithm">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingalgorithm.h:313 -->
+        <value-type name="VectorProperties"/>
+        <modify-function signature="canExecute(QString*)const">
+            <modify-argument index="1">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="checkParameterValues(const QVariantMap&amp;,QgsProcessingContext&amp;,QString*)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="run(const QVariantMap&amp;,QgsProcessingContext&amp;,QgsProcessingFeedback*,bool*,const QVariantMap&amp;,bool)const">
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,%3,&out1_,%5,%6);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="asQgisProcessCommand(const QVariantMap&amp;,QgsProcessingContext&amp;,bool&amp;)const">
+            <modify-argument index="3">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[bool out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="addParameter(std::unique_ptr&lt;QgsProcessingParameterDefinition&gt;,bool)" remove="true"/>
+        <modify-function signature="addOutput(std::unique_ptr&lt;QgsProcessingOutputDefinition&gt;)" remove="true"/>
+        <modify-function signature="parameterAsSink(const QVariantMap&amp;,const QString&amp;,QgsProcessingContext&amp;,QString&amp;,const QgsFields&amp;,Qgis::WkbType,const QgsCoordinateReferenceSystem&amp;,QgsFeatureSink::SinkFlags,const QVariantMap&amp;,const QStringList&amp;,const QStringList&amp;)const">
+            <modify-argument index="4">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,%3,out1_,%5,%6,%7,%8,%9,%10,%11);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+        <modify-function signature="parameterAsCompatibleSourceLayerPathAndLayerName(const QVariantMap&amp;,const QString&amp;,QgsProcessingContext&amp;,const QStringList&amp;,const QString&amp;,QgsProcessingFeedback*,QString*)const">
+            <modify-argument index="7">
+                <remove-argument/>
+            </modify-argument>
+            <inject-code position="beginning"><![CDATA[QString out1_;
+%RETURN_TYPE retval_ = %CPPSELF.%FUNCTION_NAME(%1,%2,%3,%4,%5,%6,&out1_);
+%PYARG_0 = PyTuple_New(2);
+PyTuple_SET_ITEM(%PYARG_0, 0, %CONVERTTOPYTHON[%RETURN_TYPE](retval_));
+PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+]]></inject-code>
+        </modify-function>
+    </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingalgorithm.h:1163 -->
+    <object-type name="QgsProcessingFeatureBasedAlgorithm"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingprovider.h:34 -->
     <object-type name="QgsProcessingProvider">
         <modify-function signature="isSupportedOutputValue(const QVariant&amp;,const QgsProcessingDestinationParameter*,QgsProcessingContext&amp;,QString&amp;)const">
@@ -8600,6 +9871,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingbatch.h:32 -->
     <object-type name="QgsProcessingBatchFeedback"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingalgrunnertask.h:34 -->
+    <object-type name="QgsProcessingAlgRunnerTask"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparameterfieldmap.h:31 -->
     <object-type name="QgsProcessingParameterFieldMapping"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingregistry.h:35 -->
@@ -8608,6 +9881,10 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
     <object-type name="QgsProcessingRegistry"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/qgsprocessingparametervectortilewriterlayers.h:44 -->
     <object-type name="QgsProcessingParameterVectorTileWriterLayers"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelcomponent.h:35 -->
+    <object-type name="QgsProcessingModelComponent">
+        <modify-function signature="comment()" remove="true"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelchildparametersource.h:33 -->
     <value-type name="QgsProcessingModelChildParameterSource"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/processing/models/qgsprocessingmodelcomment.h:33 -->
@@ -8677,6 +9954,11 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[bool](out1_));
 ]]></inject-code>
         </modify-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreeregistrybridge.h:44 -->
+    <object-type name="QgsLayerTreeRegistryBridge">
+        <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/layertree/qgslayertreeregistrybridge.h:54 -->
+        <value-type name="InsertionPoint"/>
+    </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslayerdefinition.h:45 -->
     <value-type name="QgsLayerDefinition">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgslayerdefinition.h:137 -->
@@ -8730,8 +10012,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <value-type name="QgsPlotDefaultSettings"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsanimatedicon.h:30 -->
     <object-type name="QgsAnimatedIcon">
-        <modify-function signature="connectFrameChanged(const typename QtPrivate::FunctionPointer::Object*,Func1)" remove="true"/>
-        <modify-function signature="disconnectFrameChanged(const typename QtPrivate::FunctionPointer::Object*,Func1)" remove="true"/>
+        <modify-function signature="connectFrameChanged(const typename QtPrivate::FunctionPointer::Object&lt;Func1&gt;*,Func1)" remove="true"/>
+        <modify-function signature="disconnectFrameChanged(const typename QtPrivate::FunctionPointer::Object&lt;Func1&gt;*,Func1)" remove="true"/>
     </object-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscachedfeatureiterator.h:34 -->
     <object-type name="QgsCachedFeatureIterator"/>
@@ -8745,6 +10027,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsUserProfileManager">
         <modify-function signature="updateLastProfileName()" remove="true"/>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerlegend.h:46 -->
+    <object-type name="QgsMapLayerLegend"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerlegend.h:102 -->
     <value-type name="QgsMapLayerLegendUtils"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsmaplayerlegend.h:233 -->
@@ -8767,7 +10051,7 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     <object-type name="QgsDatabaseFilterProxyModel"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgscolorschemeregistry.h:33 -->
     <value-type name="QgsColorSchemeRegistry">
-        <modify-function signature="schemes(QList&amp;)" remove="true"/>
+        <modify-function signature="schemes(QList&lt;T*&gt;&amp;)" remove="true"/>
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgslabeling.h:31 -->
     <value-type name="QgsLabeling"/>
@@ -8783,8 +10067,8 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
     </value-type>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/labeling/qgslabelsearchtree.h:46 -->
     <object-type name="QgsLabelSearchTree">
-        <modify-function signature="label(const QgsPointXY&amp;,QList&amp;)" remove="true"/>
-        <modify-function signature="labelsInRect(const QgsRectangle&amp;,QList&amp;)" remove="true"/>
+        <modify-function signature="label(const QgsPointXY&amp;,QList&lt;QgsLabelPosition*&gt;&amp;)" remove="true"/>
+        <modify-function signature="labelsInRect(const QgsRectangle&amp;,QList&lt;QgsLabelPosition*&gt;&amp;)" remove="true"/>
         <modify-function signature="insertLabel(pal::LabelPosition*,QgsFeatureId,const QString&amp;,const QString&amp;,const QFont&amp;,bool,bool,const QString&amp;,bool,long long)" remove="true"/>
         <modify-function signature="insertCallout(const QgsCalloutPosition&amp;)" remove="true"/>
         <modify-function signature="groupedLabelPositions(long long)" remove="true"/>
@@ -8861,8 +10145,12 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
 ]]></inject-code>
         </add-function>
     </object-type>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/annotations/qgsannotationitemregistry.h:41 -->
+    <object-type name="QgsAnnotationItemAbstractMetadata"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/annotations/qgsannotationitemregistry.h:142 -->
     <object-type name="QgsAnnotationItemRegistry"/>
+    <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgstemporalnavigationobject.h:39 -->
+    <object-type name="QgsTemporalNavigationObject"/>
     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdatadefinedsizelegend.h:41 -->
     <value-type name="QgsDataDefinedSizeLegend">
         <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/qgsdatadefinedsizelegend.h:70 -->

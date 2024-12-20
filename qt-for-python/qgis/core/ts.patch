@@ -40,6 +40,19 @@ index 2d4e0d1fa96..435758ef277 100644
      </object-type>
      <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/network/qgsnetworkreply.h:28 -->
      <value-type name="QgsNetworkReplyContent">
+@@ -1184,9 +1184,9 @@ PyTuple_SET_ITEM(%PYARG_0, 1, %CONVERTTOPYTHON[QString](out1_));
+     </value-type>
+     <!-- /home/julien/work/QGIS/.worktrees/qt-for-python-qt6/src/core/geometry/qgspoint.h:48 -->
+     <object-type name="QgsPoint">
+-        <modify-function signature="QgsPoint(double,double,double,double,Qgis::WkbType)" remove="true"/>
+-        <modify-function signature="QgsPoint(const QgsPointXY&amp;)" remove="true"/>
+-        <modify-function signature="QgsPoint(QPointF)" remove="true"/>
++        <!-- <modify-function signature="QgsPoint(double,double,double,double,Qgis::WkbType)" remove="true"/> -->
++        <!-- <modify-function signature="QgsPoint(const QgsPointXY&amp;)" remove="true"/> -->
++        <!-- <modify-function signature="QgsPoint(QPointF)" remove="true"/> -->
+         <modify-function signature="QgsPoint(Qgis::WkbType,double,double,double,double)" remove="true"/>
+         <modify-function signature="fuzzyHelper(double,const QgsAbstractGeometry&amp;,bool,bool,std::function&lt;bool (double, double, double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double, double, double)&gt;,std::function&lt;bool (double, double, double, double, double)&gt;)" remove="true"/>
+         <modify-function signature="rx()" remove="true"/>
 @@ -4601,14 +4601,14 @@ return 0;
      {
        QVector<QMap<QString, QVariant>> res = %CPPSELF->identify( %1, %2, %3, %4 );

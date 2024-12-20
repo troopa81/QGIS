@@ -77,9 +77,9 @@ static QString getTypeSystemSignature( const FunctionModelItem &fct )
 class TypeSystemGenerator
 {
   public:
-    TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName, const QString &classBlockListFileName );
+    TypeSystemGenerator( const FileModelItem dom, const QString &outputFileName, const QString &snippetFileName, const QString &classBlockListFileName );
 
-    bool formatXmlOutput( const FileModelItem &dom );
+    bool formatXmlOutput();
     bool isValid() const;
 
   private:
@@ -113,8 +113,9 @@ class TypeSystemGenerator
     void writeSipOut( ClassModelItem klass, FunctionModelItem fct );
     void addInjectCode( const QString &klass, const QString &signature, const QStringList &body );
 
-    static bool isValueType( ClassModelItem klass );
+    bool isValueType( ClassModelItem klass );
 
+    FileModelItem mDom; // root ast node
     bool mValid = true;
     std::unique_ptr<QFile> mOutputFile;
     QString mOutputStr;
@@ -179,7 +180,8 @@ static bool hasMembers( const NamespaceModelItem &nsp )
   return std::any_of( classes.cbegin(), classes.cend(), useClass );
 }
 
-TypeSystemGenerator::TypeSystemGenerator( const QString &outputFileName, const QString &snippetFileName, const QString &classBlockListFileName )
+TypeSystemGenerator::TypeSystemGenerator( const FileModelItem dom, const QString &outputFileName, const QString &snippetFileName, const QString &classBlockListFileName )
+  : mDom( dom )
 {
   mOutputFile = std::make_unique<QFile>( outputFileName );
   if ( !mOutputFile->open( QIODevice::WriteOnly | QIODevice::Text ) )
@@ -294,10 +296,6 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
 {
   if ( isSkipped( klass ) )
     return;
-
-  if ( klass->name() == "QgsFeatureRenderer" )
-    qDebug() << "--- QgsFeatureRenderer isSkipped=" << isSkipped( klass );
-
 
   // const QStringList allowedClass =
   // {
@@ -454,7 +452,7 @@ void TypeSystemGenerator::formatXmlNamespaceMembers( const NamespaceModelItem &n
   formatXmlScopeMembers( nsp );
 }
 
-bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
+bool TypeSystemGenerator::formatXmlOutput()
 {
   if ( !mValid )
     return false;
@@ -463,7 +461,7 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
   mWriter->writeStartDocument();
   mWriter->writeStartElement( u"typesystem"_s );
   mWriter->writeAttribute( u"package"_s, u"core"_s );
-  writeSmartPointerTypes( dom );
+  writeSmartPointerTypes( mDom );
   mWriter->writeComment( u"Auto-generated "_s );
   for ( auto p : primitiveTypes )
   {
@@ -471,7 +469,7 @@ bool TypeSystemGenerator::formatXmlOutput( const FileModelItem &dom )
     mWriter->writeAttribute( nameAttribute(), QLatin1StringView( p ) );
     mWriter->writeEndElement();
   }
-  formatXmlNamespaceMembers( dom );
+  formatXmlNamespaceMembers( mDom );
   mWriter->writeEndElement();
   mWriter->writeEndDocument();
 
@@ -540,6 +538,8 @@ void TypeSystemGenerator::writeSmartPointerTypes( const FileModelItem &dom )
   // https://doc.qt.io/qtforpython-6/shiboken6/typesystem_specifying_types.html#smart-pointer-type
 
   const QSet<QString> uniquePtrInstantiations = getUniquePtrInstantiations( dom );
+  QStringList instantiations( uniquePtrInstantiations.constBegin(), uniquePtrInstantiations.constEnd() );
+  instantiations.sort();
 
   mWriter->writeStartElement( u"system-include"_s );
   mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
@@ -559,8 +559,7 @@ void TypeSystemGenerator::writeSmartPointerTypes( const FileModelItem &dom )
   mWriter->writeAttribute( u"getter"_s, u"get"_s );
   mWriter->writeAttribute( u"reset-method"_s, u"reset"_s );
 
-  // TODO get it from all the std::unique_ptr
-  mWriter->writeAttribute( u"instantiations"_s, QStringList( uniquePtrInstantiations.constBegin(), uniquePtrInstantiations.constEnd() ).join( "," ) );
+  mWriter->writeAttribute( u"instantiations"_s, instantiations.join( "," ) );
 
   mWriter->writeStartElement( u"include"_s );
   mWriter->writeAttribute( u"file-name"_s, u"memory"_s );
@@ -882,6 +881,12 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
   // - A copy constructor exist (default or user defined)
   // TODO and maybe that child classes are not object type ?
 
+  // settingsType() should be pure virtual and is not because of SIP
+  // BUT if we make it virtual pure only for SBK it fails weirdly because generated code try to
+  // explicit call the pure function. Which is not happening with other similar class...
+  if ( klass->name() == QStringLiteral( "QgsSettingsEntryBase" ) )
+    return false;
+
   const auto functions = klass->functions();
   if ( klass->name() == QStringLiteral( "QObject" ) )
     return false;
@@ -906,10 +911,17 @@ bool TypeSystemGenerator::isValueType( ClassModelItem klass )
   if ( !copyContructorDefined && defaultConstructorDeleted )
     return false;
 
-
   for ( auto parent : klass->baseClasses() )
   {
-    if ( parent.klass && !isValueType( parent.klass ) )
+    ClassModelItem parentClass = parent.klass;
+    if ( !parentClass )
+    {
+      // Probably a template, search for it!
+      const QString nameWoBracket = parent.name.left( parent.name.indexOf( "<" ) );
+      parentClass = mDom->findClass( nameWoBracket );
+    }
+
+    if ( parentClass && !isValueType( parentClass ) )
       return false;
   }
 
@@ -1106,6 +1118,7 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
   func.signature = matchSignature.captured( 5 );
   func.signature.replace( "SIP_PYOBJECT", "PyObject*" );
   func.signature.replace( "SIP_PYLIST", "PyObject*" );
+  func.signature.replace( QRegularExpression( "\\/TypeHint=[^\\/]*\\/" ), "" );
 
   // replace SIP anotation [..]
   func.signature.replace( QRegularExpression( "\\[.*\\]" ), "" );
@@ -1333,10 +1346,6 @@ int main( int argc, char **argv )
     classBlockListFileName = parser.value( classBlockListFileOption ).toUtf8();
   }
 
-  TypeSystemGenerator generator( outputFileName, snippetFileName, classBlockListFileName );
-  if ( !generator.isValid() )
-    return -3;
-
   const FileModelItem dom = AbstractMetaBuilderPrivate::buildDom( arguments, true, level, 0 );
   if ( !dom )
   {
@@ -1345,11 +1354,15 @@ int main( int argc, char **argv )
     return -2;
   }
 
+  TypeSystemGenerator generator( dom, outputFileName, snippetFileName, classBlockListFileName );
+  if ( !generator.isValid() )
+    return -3;
+
   if ( parser.isSet( debugOption ) )
     formatDebugOutput( dom, parser.isSet( verboseOption ) );
   else
   {
-    if ( !generator.formatXmlOutput( dom ) )
+    if ( !generator.formatXmlOutput() )
       return -4;
   }
 
