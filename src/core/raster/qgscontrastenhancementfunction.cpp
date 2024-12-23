@@ -29,16 +29,6 @@ QgsContrastEnhancementFunction::QgsContrastEnhancementFunction( Qgis::DataType d
 {
 }
 
-QgsContrastEnhancementFunction::QgsContrastEnhancementFunction( const QgsContrastEnhancementFunction &f )
-  : mMaximumValue( f.mMaximumValue )
-  , mMinimumValue( f.mMinimumValue )
-  , mMinimumMaximumRange( f.mMinimumMaximumRange )
-  , mQgsRasterDataType( f.mQgsRasterDataType )
-  , mMaximumValuePossible( f.mMaximumValuePossible )
-  , mMinimumValuePossible( f.mMinimumValuePossible )
-{
-}
-
 int QgsContrastEnhancementFunction::enhance( double value )
 {
   if ( mQgsRasterDataType == Qgis::DataType::Byte )
