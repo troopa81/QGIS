@@ -67,7 +67,7 @@ class CORE_EXPORT QgsSimpleMarkerSymbolLayerBase : public QgsMarkerSymbolLayer
     QgsSimpleMarkerSymbolLayerBase( Qgis::MarkerShape shape = Qgis::MarkerShape::Circle,
                                     double size = DEFAULT_SIMPLEMARKER_SIZE,
                                     double angle = DEFAULT_SIMPLEMARKER_ANGLE,
-                                    Qgis::ScaleMethod scaleMethod = DEFAULT_SCALE_METHOD );
+                                    Qgis::ScaleMethod scaleMethod = Qgis::ScaleMethod::ScaleDiameter );
 
     ~QgsSimpleMarkerSymbolLayerBase() override;
 
@@ -189,10 +189,10 @@ class CORE_EXPORT QgsSimpleMarkerSymbolLayer : public QgsSimpleMarkerSymbolLayer
     QgsSimpleMarkerSymbolLayer( Qgis::MarkerShape shape = Qgis::MarkerShape::Circle,
                                 double size = DEFAULT_SIMPLEMARKER_SIZE,
                                 double angle = DEFAULT_SIMPLEMARKER_ANGLE,
-                                Qgis::ScaleMethod scaleMethod = DEFAULT_SCALE_METHOD,
+                                Qgis::ScaleMethod scaleMethod = Qgis::ScaleMethod::ScaleDiameter,
                                 const QColor &color = DEFAULT_SIMPLEMARKER_COLOR,
                                 const QColor &strokeColor = DEFAULT_SIMPLEMARKER_BORDERCOLOR,
-                                Qt::PenJoinStyle penJoinStyle = DEFAULT_SIMPLEMARKER_JOINSTYLE );
+                                Qt::PenJoinStyle penJoinStyle = Qt::BevelJoin );
 
     ~QgsSimpleMarkerSymbolLayer() override;
 
@@ -441,7 +441,7 @@ class CORE_EXPORT QgsFilledMarkerSymbolLayer : public QgsSimpleMarkerSymbolLayer
     QgsFilledMarkerSymbolLayer( Qgis::MarkerShape shape = Qgis::MarkerShape::Circle,
                                 double size = DEFAULT_SIMPLEMARKER_SIZE,
                                 double angle = DEFAULT_SIMPLEMARKER_ANGLE,
-                                Qgis::ScaleMethod scaleMethod = DEFAULT_SCALE_METHOD );
+                                Qgis::ScaleMethod scaleMethod = Qgis::ScaleMethod::ScaleDiameter );
 
     ~QgsFilledMarkerSymbolLayer() override;
 
@@ -495,7 +495,7 @@ class CORE_EXPORT QgsSvgMarkerSymbolLayer : public QgsMarkerSymbolLayer
     QgsSvgMarkerSymbolLayer( const QString &path,
                              double size = DEFAULT_SVGMARKER_SIZE,
                              double angle = DEFAULT_SVGMARKER_ANGLE,
-                             Qgis::ScaleMethod scaleMethod = DEFAULT_SCALE_METHOD );
+                             Qgis::ScaleMethod scaleMethod = Qgis::ScaleMethod::ScaleDiameter );
     QgsSvgMarkerSymbolLayer( const QgsSvgMarkerSymbolLayer &other ) SIP_SKIP;
 
     ~QgsSvgMarkerSymbolLayer() override;
@@ -683,7 +683,7 @@ class CORE_EXPORT QgsRasterMarkerSymbolLayer : public QgsMarkerSymbolLayer
     QgsRasterMarkerSymbolLayer( const QString &path = QString(),
                                 double size = DEFAULT_SVGMARKER_SIZE,
                                 double angle = DEFAULT_SVGMARKER_ANGLE,
-                                Qgis::ScaleMethod scaleMethod = DEFAULT_SCALE_METHOD );
+                                Qgis::ScaleMethod scaleMethod = Qgis::ScaleMethod::ScaleDiameter );
 
     ~QgsRasterMarkerSymbolLayer() override;
 

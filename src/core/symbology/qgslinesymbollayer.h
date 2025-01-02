@@ -52,7 +52,7 @@ class CORE_EXPORT QgsSimpleLineSymbolLayer : public QgsLineSymbolLayer
      */
     QgsSimpleLineSymbolLayer( const QColor &color = DEFAULT_SIMPLELINE_COLOR,
                               double width = DEFAULT_SIMPLELINE_WIDTH,
-                              Qt::PenStyle penStyle = DEFAULT_SIMPLELINE_PENSTYLE );
+                              Qt::PenStyle penStyle = Qt::SolidLine );
 
     ~QgsSimpleLineSymbolLayer() override;
 

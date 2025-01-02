@@ -45,11 +45,11 @@ class CORE_EXPORT QgsSimpleFillSymbolLayer : public QgsFillSymbolLayer
 {
   public:
     QgsSimpleFillSymbolLayer( const QColor &color = DEFAULT_SIMPLEFILL_COLOR,
-                              Qt::BrushStyle style = DEFAULT_SIMPLEFILL_STYLE,
+                              Qt::BrushStyle style = Qt::SolidPattern,
                               const QColor &strokeColor = DEFAULT_SIMPLEFILL_BORDERCOLOR,
-                              Qt::PenStyle strokeStyle = DEFAULT_SIMPLEFILL_BORDERSTYLE,
+                              Qt::PenStyle strokeStyle = Qt::SolidLine,
                               double strokeWidth = DEFAULT_SIMPLEFILL_BORDERWIDTH,
-                              Qt::PenJoinStyle penJoinStyle = DEFAULT_SIMPLEFILL_JOINSTYLE
+                              Qt::PenJoinStyle penJoinStyle = Qt::BevelJoin
                             );
 
     ~QgsSimpleFillSymbolLayer() override;
