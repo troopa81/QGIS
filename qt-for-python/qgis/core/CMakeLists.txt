@@ -155,14 +155,52 @@ CREATE_PYTHON_BINDINGS(
 
 add_dependencies(pycore pyqgis)
 
-set(PY_FILES __init__.py)
-foreach(pyfile ${PY_FILES})
-  add_custom_command(TARGET pycore
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${QGIS_PYTHON_OUTPUT_DIRECTORY}/core"
-    COMMAND ${CMAKE_COMMAND} -E copy ${pyfile} "${QGIS_PYTHON_OUTPUT_DIRECTORY}/core"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-    DEPENDS ${pyfile}
-  )
-  PY_COMPILE(pyutils "${QGIS_PYTHON_OUTPUT_DIRECTORY}/${pyfile}")
+
+# COPIED from SIP directory
+# concat auto_additions/*.py in _module_/__init__.py
+set(BINDING_FILES_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(module "core")
+set(module_name "core")
+
+file(GLOB PY_FILES_AUTO_ADDITIONS ${BINDING_FILES_ROOT_DIR}/auto_additions/*.py)
+set(MONKEYPATCH_INJECTIONS "")
+foreach(pyfile ${PY_FILES_AUTO_ADDITIONS})
+  file(READ ${pyfile} CONTENTS)
+  string(APPEND MONKEYPATCH_INJECTIONS "${CONTENTS}")
 endforeach(pyfile)
+configure_file(${BINDING_FILES_ROOT_DIR}/__init__.py.in ${QGIS_PYTHON_OUTPUT_DIRECTORY}/${module_name}/__init__.py @ONLY)
+install(FILES ${QGIS_PYTHON_OUTPUT_DIRECTORY}/${module_name}/__init__.py DESTINATION "${QGIS_PYTHON_DIR}/${module_name}")
+
+file(GLOB PY_FILES ${BINDING_FILES_ROOT_DIR}/*.py)
+install(FILES ${PY_FILES} DESTINATION "${QGIS_PYTHON_DIR}/${module_name}")
+file(GLOB PY_FILES_ADDITIONS ${BINDING_FILES_ROOT_DIR}/additions/*.py)
+
+install(FILES ${PY_FILES_ADDITIONS} DESTINATION "${QGIS_PYTHON_DIR}/${module_name}/additions")
+set(PY_FILES ${PY_FILES} ${PY_FILES_ADDITIONS})
+foreach(pyfile ${PY_FILES})
+  file(RELATIVE_PATH rel_pyfile ${BINDING_FILES_ROOT_DIR} ${pyfile})
+  get_filename_component(subdir ${rel_pyfile} DIRECTORY)
+
+  add_custom_command(TARGET py${module}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${QGIS_PYTHON_OUTPUT_DIRECTORY}/${module}/${subdir}"
+    COMMAND ${CMAKE_COMMAND} -E copy ${pyfile} "${QGIS_PYTHON_OUTPUT_DIRECTORY}/${module}/${subdir}"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    # DEPENDS ${PY_FILES}
+  )
+endforeach(pyfile)
+PY_COMPILE(py${module} "${QGIS_PYTHON_OUTPUT_DIRECTORY}/${module_name}")
+
+
+
+# set(PY_FILES __init__.py)
+# foreach(pyfile ${PY_FILES})
+#   add_custom_command(TARGET pycore
+#     POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E make_directory "${QGIS_PYTHON_OUTPUT_DIRECTORY}/core"
+#     COMMAND ${CMAKE_COMMAND} -E copy ${pyfile} "${QGIS_PYTHON_OUTPUT_DIRECTORY}/core"
+#     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#     DEPENDS ${pyfile}
+#   )
+#   PY_COMPILE(pyutils "${QGIS_PYTHON_OUTPUT_DIRECTORY}/${pyfile}")
+# endforeach(pyfile)
