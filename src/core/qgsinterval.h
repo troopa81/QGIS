@@ -49,17 +49,17 @@ class CORE_EXPORT QgsInterval
     // YEAR const value taken from postgres query
     // SELECT EXTRACT(EPOCH FROM interval '1 year')
     //! Seconds per year (average)
-    static const int YEARS = 31557600;
+    static const int YEARS;
     //! Seconds per month, based on 30 day month
-    static const int MONTHS = 60 * 60 * 24 * 30;
+    static const int MONTHS;
     //! Seconds per week
-    static const int WEEKS = 60 * 60 * 24 * 7;
+    static const int WEEKS;
     //! Seconds per day
-    static const int DAY = 60 * 60 * 24;
+    static const int DAY;
     //! Seconds per hour
-    static const int HOUR = 60 * 60;
+    static const int HOUR;
     //! Seconds per minute
-    static const int MINUTE = 60;
+    static const int MINUTE;
 
     /**
      * Default constructor for QgsInterval. Creates an invalid interval.

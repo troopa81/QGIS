@@ -35,6 +35,14 @@
 #include <QPolygonF>
 #include <QUuid>
 
+// Configuration of selected symbology implementation
+//! Whether styles for selected features ignore symbol alpha
+const bool QgsSymbolLayer::SELECTION_IS_OPAQUE = true;
+//! Whether fill styles for selected features also highlight symbol stroke
+const bool QgsSymbolLayer::SELECT_FILL_BORDER = false;
+//! Whether fill styles for selected features uses symbol layer style
+const bool QgsSymbolLayer::SELECT_FILL_STYLE = false;
+
 QgsPropertiesDefinition QgsSymbolLayer::sPropertyDefinitions;
 
 void QgsSymbolLayer::initPropertyDefinitions()

@@ -702,11 +702,11 @@ class CORE_EXPORT QgsSymbolLayer
 
     // Configuration of selected symbology implementation
     //! Whether styles for selected features ignore symbol alpha
-    static const bool SELECTION_IS_OPAQUE = true;
+    static const bool SELECTION_IS_OPAQUE;
     //! Whether fill styles for selected features also highlight symbol stroke
-    static const bool SELECT_FILL_BORDER = false;
+    static const bool SELECT_FILL_BORDER;
     //! Whether fill styles for selected features uses symbol layer style
-    static const bool SELECT_FILL_STYLE = false;
+    static const bool SELECT_FILL_STYLE;
 
     /**
      * Restores older data defined properties from string map.

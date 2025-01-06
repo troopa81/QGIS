@@ -30,6 +30,13 @@
  * See details in QEP #17
  ****************************************************************************/
 
+const int QgsInterval::YEARS = 31557600;
+const int QgsInterval::MONTHS = 60 * 60 * 24 * 30;
+const int QgsInterval::WEEKS = 60 * 60 * 24 * 7;
+const int QgsInterval::DAY = 60 * 60 * 24;
+const int QgsInterval::HOUR = 60 * 60;
+const int QgsInterval::MINUTE = 60;
+
 QgsInterval::QgsInterval( double seconds )
   : mSeconds( seconds )
   , mValid( true )

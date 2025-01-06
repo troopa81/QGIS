@@ -411,7 +411,7 @@ class CORE_EXPORT QgsSimpleMarkerSymbolLayer : public QgsSimpleMarkerSymbolLayer
     bool mUsingCache = false;
 
     //! Maximum width/height of cache image
-    static const int MAXIMUM_CACHE_WIDTH = 3000;
+    static const int MAXIMUM_CACHE_WIDTH;
 
   private:
     // cppcheck-suppress unusedPrivateFunction

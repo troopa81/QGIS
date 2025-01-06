@@ -43,6 +43,8 @@
 
 static constexpr int MAX_FONT_CHARACTER_SIZE_IN_PIXELS = 500;
 
+const int QgsSimpleMarkerSymbolLayer::MAXIMUM_CACHE_WIDTH = 3000;
+
 //////
 
 
