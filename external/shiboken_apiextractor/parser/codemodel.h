@@ -137,6 +137,7 @@ class _CodeModelItem
 
     void getStartPosition( int *line, int *column );
     int startLine() const { return m_startLine; }
+    int endLine() const { return m_endLine; }
     void setStartPosition( int line, int column );
 
     void getEndPosition( int *line, int *column );
