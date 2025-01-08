@@ -1097,7 +1097,7 @@ void TypeSystemGenerator::writeSipOut( ClassModelItem klass, FunctionModelItem f
 
 void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &signature, const QStringList &body )
 {
-  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)\\s*(static\\s|)([\\w:]*)\\s+(\\*|)\\s*(.*);" ) );
+  const QRegularExpression reSignature( QStringLiteral( "^\\s*(virtual\\s|)\\s*(static\\s|)(.*?)\\s+(\\*|)([\\w]+\\(.*\\).*);" ) );
   const QRegularExpressionMatch matchSignature = reSignature.match( signature );
 
   if ( !matchSignature.hasMatch() )
@@ -1241,9 +1241,25 @@ void TypeSystemGenerator::addInjectCode( const QString &klass, const QString &si
       func.body.replace( QRegularExpression( "sipConvertFromNewType\\(\\s*(new\\s+.*),\\s*\\w+\\s*,\\s*\\w+\\s*\\)" ), "\\1" );
 
       // replace pointer return instruction
-      func.body.replace( QRegularExpression( "([ ]*)sipRes = new\\s+([\\w<>]+)(.*)" ), "\\1auto var = new \\2\\3\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);" );
+      QRegularExpression reReturnNew( "([ ]*)sipRes = new\\s+(.*?)(\\(.*\\));" );
+      if ( func.body.count( "sipRes" ) > 1 )
+      {
+        // several use of sipRes, need to use a variable before updating PYARG_0
+        if ( QRegularExpressionMatch match = reReturnNew.match( func.body ); match.hasMatch() )
+        {
+          func.body.replace( reReturnNew, "\\1auto sbkRes = new \\2\\3;" );
+          func.body.replace( "sipRes", "sbkRes" );
+          func.body.append( QString( "%1%PYARG_0 = %CONVERTTOPYTHON[%2 *](sbkRes);" ).arg( match.captured( 1 ) ).arg( match.captured( 2 ) ) );
+        }
+      }
+      else
+      {
+        // only one use of sipRes, update directly PYARG_0
+        func.body.replace( reReturnNew, "\\1auto var = new \\2\\3;\n\\1%PYARG_0 = %CONVERTTOPYTHON[\\2 *](var);" );
+      }
 
       // replace value return instruction
+      // TODO we should probably do like above with return new
       func.body.replace( QRegularExpression( "([ ]*)sipRes =(.*)" ), QString( "\\1auto var = \\2\n\\1%PYARG_0 = %CONVERTTOPYTHON[%1](var);" ).arg( func.returnType ) );
     }
     func.body.replace( "sipRes", "%PYARG_0" );
