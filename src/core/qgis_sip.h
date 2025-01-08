@@ -126,6 +126,11 @@
 #define SIP_SKIP
 
 /*
+  * discard line with Shiboken generation
+  */
+#define SBK_SKIP
+
+/*
   * force a private line to be written
   */
 #define SIP_FORCE

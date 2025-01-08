@@ -471,10 +471,12 @@ class CORE_EXPORT QgsSymbolLayerUtils
                            Qt::PenStyle penStyle, const QColor &color, double width = -1,
                            const Qt::PenJoinStyle *penJoinStyle = nullptr, const Qt::PenCapStyle *penCapStyle = nullptr,
                            const QVector<qreal> *customDashPattern = nullptr, double dashOffset = 0.0 ) SIP_SKIP;
+
+    // Shiboken issue with Qt::PenJoinStyle *
     static bool lineFromSld( QDomElement &element,
                              Qt::PenStyle &penStyle, QColor &color, double &width,
                              Qt::PenJoinStyle *penJoinStyle = nullptr, Qt::PenCapStyle *penCapStyle = nullptr,
-                             QVector<qreal> *customDashPattern = nullptr, double *dashOffset = nullptr );
+                             QVector<qreal> *customDashPattern = nullptr, double *dashOffset = nullptr ) SBK_SKIP;
 
     static void externalGraphicToSld( QDomDocument &doc, QDomElement &element,
                                       const QString &path, const QString &mime,
