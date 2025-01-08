@@ -57,6 +57,22 @@ static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction = 
   }
 };
 
+static QString getTypeSystemSignature( const FunctionModelItem &fct )
+{
+  QString result;
+  QTextStream str( &result );
+  str << fct->name() << '(';
+  const ArgumentList args = fct->arguments();
+  for ( qsizetype a = 0, size = args.size(); a < size; ++a )
+  {
+    if ( a )
+      str << ',';
+    str << args.at( a )->type().toString();
+  }
+  str << ')';
+
+  return result;
+}
 
 class TypeSystemGenerator
 {
@@ -249,7 +265,7 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
       if ( !modifiedFunctions.contains( fct->typeSystemSignature() ) && isQgis( fct ) && isSkipped( fct ) && !isSkippedFunction( fct ) )
       {
         mWriter->writeStartElement( u"modify-function"_s );
-        mWriter->writeAttribute( "signature", fct->typeSystemSignature() );
+        mWriter->writeAttribute( "signature", getTypeSystemSignature( fct ) );
         mWriter->writeAttribute( "remove", "true" );
         mWriter->writeEndElement();
       }
@@ -572,6 +588,7 @@ bool TypeSystemGenerator::loadSipCode()
   const QRegularExpression reElse( QStringLiteral( "^\\s*#else" ) );
   const QRegularExpression reIfndef( QStringLiteral( "^\\s*#ifndef\\s*SIP_RUN" ) );
   const QRegularExpression reSipSkip( QStringLiteral( "SIP_SKIP" ) );
+  const QRegularExpression reSbkSkip( QStringLiteral( "SBK_SKIP" ) );
   const QRegularExpression reSipNoFile( QStringLiteral( "^\\s*#define\\s*SIP_NO_FILE" ) );
   const QRegularExpression reNamespace( QStringLiteral( "^\\s*namespace\\s*(\\w+)" ) );
   const QRegularExpression reMethodCode( QStringLiteral( "^\\s*% MethodCode" ) );
@@ -652,7 +669,7 @@ bool TypeSystemGenerator::loadSipCode()
         sipRunLine = -1;
         sipRunIf = -1;
       }
-      else if ( reSipSkip.match( line ).hasMatch() )
+      else if ( reSipSkip.match( line ).hasMatch() || reSbkSkip.match( line ).hasMatch() )
       {
         ranges << SkipRange( numLine, numLine );
       }
@@ -832,7 +849,8 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
   if ( isSkippedFunction( item ) || isSkippedClass( item ) )
     return true;
 
-  const int line = item->startLine();
+  const int startLine = item->startLine();
+  const int endLine = item->endLine();
   if ( mSkipRanges.contains( fileName ) )
   {
     const SkipRanges ranges = mSkipRanges[fileName];
@@ -841,7 +859,8 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
 
     for ( SkipRange range : ranges )
     {
-      if ( range.first <= line && range.second >= line )
+      if ( ( range.first <= startLine && range.second >= startLine )
+           || ( range.first <= endLine && range.second >= endLine ) )
         return true;
     }
   }
