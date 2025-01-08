@@ -44,6 +44,15 @@ struct ModifiedFunction
     bool isRemove = false;
 };
 
+
+
+// for some wrapper pysidesignal.h is not included while it needs it
+// so here we list exception until we understand why
+static const QStringList sNeedSignalInclude = {
+  "QgsNetworkAccessManager"
+};
+
+
 static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction = {
   // remove because if SIP_RUN but needed to build a QgsFeature
   {
@@ -329,6 +338,16 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   formatXmlLocationComment( klass );
   mWriter->writeStartElement( isValueType( klass ) ? u"value-type"_s : u"object-type"_s );
   mWriter->writeAttribute( nameAttribute(), klass->name() );
+
+  if ( sNeedSignalInclude.contains( klass->name() ) )
+  {
+    mWriter->writeStartElement( u"extra-includes"_s );
+    mWriter->writeStartElement( u"include"_s );
+    mWriter->writeAttribute( u"file-name"_s, u"pysidesignal.h"_s );
+    mWriter->writeAttribute( u"location"_s, u"global"_s );
+    mWriter->writeEndElement();
+    mWriter->writeEndElement();
+  }
 
   if ( needForceAbstract )
   {
