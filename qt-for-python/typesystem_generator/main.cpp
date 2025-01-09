@@ -44,7 +44,7 @@ struct ModifiedFunction
     bool isRemove = false;
 };
 
-
+static const QRegularExpression sReFlag( QStringLiteral( "^QFlags<(\\w+)::(\\w+)>$" ) );
 
 // for some wrapper pysidesignal.h is not included while it needs it
 // so here we list exception until we understand why
@@ -52,6 +52,12 @@ static const QStringList sNeedSignalInclude = {
   "QgsNetworkAccessManager"
 };
 
+static const QStringList sSkippedTypeDef = {
+  "QtGadgetHelper",
+  "qgssize" // because unsigned long long is unknown even if we add it in primitive-type list. TODO fix this
+};
+
+static const QStringList sContainerClasses = { "QMap", "QPair", "QList", "QVector", "QMultiMap", "QHash", "QSet" };
 
 static const QMap<QString, QMap<QString, ModifiedFunction>> sModifiedFunction = {
   // remove because if SIP_RUN but needed to build a QgsFeature
@@ -103,6 +109,7 @@ class TypeSystemGenerator
     QSet<QString> getUniquePtrInstantiations( const ClassModelItem &nsp ) const;
     QSet<QString> getUniquePtrInstantiations( const NamespaceModelItem &nsp ) const;
     void writeSmartPointerTypes( const FileModelItem &dom );
+    void formatXmlTypeDef( const TypeDefModelItem &typeDef );
     void formatXmlClass( const ClassModelItem &klass );
     void formatXmlEnum( const EnumModelItem &en, const QMap<QString, QString> &flags );
     void formatXmlScopeMembers( const ScopeModelItem &nsp );
@@ -238,6 +245,11 @@ void TypeSystemGenerator::formatXmlEnum( const EnumModelItem &en, const QMap<QSt
 
 void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
 {
+  for ( const TypeDefModelItem &typeDef : nsp->typeDefs() )
+  {
+    formatXmlTypeDef( typeDef );
+  }
+
   for ( const auto &klass : nsp->classes() )
   {
     if ( useClass( klass ) )
@@ -247,10 +259,9 @@ void TypeSystemGenerator::formatXmlScopeMembers( const ScopeModelItem &nsp )
   QMap<QString, QString> flags;
   if ( dynamic_cast<_ClassModelItem *>( nsp.get() ) )
   {
-    const QRegularExpression reFlag( QStringLiteral( "^QFlags<(\\w+)::(\\w+)>$" ) );
     for ( const auto &td : nsp->typeDefs() )
     {
-      const QRegularExpressionMatch match = reFlag.match( td->type().toString() );
+      const QRegularExpressionMatch match = sReFlag.match( td->type().toString() );
       if ( match.hasMatch() && match.captured( 1 ) == nsp->name() )
       {
         flags[match.captured( 2 )] = td->name();
@@ -299,6 +310,28 @@ void TypeSystemGenerator::formatXmlLocationComment( const CodeModelItem &i )
   QString comment;
   QTextStream( &comment ) << ' ' << i->fileName() << ':' << i->startLine() << ' ';
   mWriter->writeComment( comment );
+}
+
+void TypeSystemGenerator::formatXmlTypeDef( const TypeDefModelItem &typeDef )
+{
+  if ( isSkipped( typeDef ) || sSkippedTypeDef.contains( typeDef->name() )
+       || typeDef->accessPolicy() == Access::Private
+       || sReFlag.match( typeDef->type().toString() ).hasMatch() // we deal with flags else where directly in <enum>
+     )
+    return;
+
+  const QString typeDefinition = typeDef->type().toString();
+  const QString typeDefinitionWoBracket = typeDefinition.left( typeDefinition.indexOf( "<" ) );
+
+  // we need to wrap typedef which reference a QGIS template class
+  if ( typeDefinition != typeDefinitionWoBracket && !sContainerClasses.contains( typeDefinitionWoBracket ) )
+  {
+    // Qgis classes aliases -> map with value/object type
+    ClassModelItem relatedClass = mDom->findClass( typeDefinitionWoBracket );
+    mWriter->writeStartElement( !relatedClass || isValueType( relatedClass ) ? u"value-type"_s : u"object-type"_s );
+    mWriter->writeAttribute( nameAttribute(), typeDef->name() );
+    mWriter->writeEndElement();
+  }
 }
 
 void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
@@ -847,7 +880,9 @@ bool TypeSystemGenerator::isSkippedFunction( CodeModelItem item ) const
 bool TypeSystemGenerator::isSkippedClass( CodeModelItem item ) const
 {
   _ClassModelItem *klass = dynamic_cast<_ClassModelItem *>( item.get() );
-  return klass && ( isSkippedClassName( klass->name() ) || isSkippedClassName( klass->enclosingScope()->name() ) || klass->accessPolicy() == Access::Private );
+  return klass && ( isSkippedClassName( klass->name() )
+                    || isSkippedClassName( klass->enclosingScope()->name() )
+                    || klass->accessPolicy() == Access::Private );
 }
 
 bool TypeSystemGenerator::isSkippedClassName( const QString &className ) const
@@ -861,10 +896,7 @@ bool TypeSystemGenerator::isSkipped( CodeModelItem item ) const
   if ( fileName.isEmpty() )
     return false;
 
-  if ( !isQgis( item ) )
-    return true;
-
-  if ( isSkippedFunction( item ) || isSkippedClass( item ) )
+  if ( !isQgis( item ) || isSkippedFunction( item ) || isSkippedClass( item ) )
     return true;
 
   const int startLine = item->startLine();
