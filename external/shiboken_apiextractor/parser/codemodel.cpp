@@ -1263,6 +1263,16 @@ void _TypeDefModelItem::formatDebug( QDebug &d ) const
 }
 #endif // !QT_NO_DEBUG_STREAM
 
+Access _TypeDefModelItem::accessPolicy() const
+{
+  return m_accessPolicy;
+}
+
+void _TypeDefModelItem::setAccessPolicy( Access accessPolicy )
+{
+  m_accessPolicy = accessPolicy;
+}
+
 // ---------------------------------------------------------------------------
 
 _TemplateTypeAliasModelItem::_TemplateTypeAliasModelItem( CodeModel *model, int kind )

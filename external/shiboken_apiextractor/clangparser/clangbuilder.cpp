@@ -631,6 +631,7 @@ namespace clang
   {
     const QString target = getCursorSpelling( cursor );
     auto item = std::make_shared<_TypeDefModelItem>( m_model, target );
+    item->setAccessPolicy( accessPolicy( clang_getCXXAccessSpecifier( cursor ) ) );
     setFileName( cursor, item.get() );
     item->setType( createTypeInfo( cxType ) );
     item->setScope( m_scope );

@@ -596,12 +596,16 @@ class _TypeDefModelItem: public _CodeModelItem
     TypeInfo type() const;
     void setType( const TypeInfo &type );
 
+    Access accessPolicy() const;
+    void setAccessPolicy( Access accessPolicy );
+
 #ifndef QT_NO_DEBUG_STREAM
     void formatDebug( QDebug &d ) const override;
 #endif
 
   private:
     TypeInfo m_type;
+    Access m_accessPolicy;
 };
 
 class _TemplateTypeAliasModelItem : public _CodeModelItem
