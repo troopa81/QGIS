@@ -36,3 +36,8 @@ QVariant.Double = float
 QVariant.DateTime = QDateTime
 
 NULL = None
+
+QT_VERSION_STR=qVersion()
+elts = QT_VERSION_STR.split(".")
+QT_VERSION=(int(elts[0])<<16) + (int(elts[1])<<8) + int(elts[2])
+del elts # only temporary, don't want to keep in module
