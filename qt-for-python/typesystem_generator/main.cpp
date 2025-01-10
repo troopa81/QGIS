@@ -339,18 +339,8 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   if ( isSkipped( klass ) )
     return;
 
-  // const QStringList allowedClass =
-  // {
-  //   QStringLiteral( "Qgis" ),
-
-  //   QStringLiteral( "QgsQuadrilateral" )
-  // };
-
-  // if ( !allowedClass.contains( klass->name() ) && !allowedClass.contains( klass->enclosingScope()->name() ) )
-  //   return;
-
-  // If there is at least one abstract method not skipped or no abstract method at all
-  // shiboken will figure out the class is abstract and we wouldn't need to force abstract
+  // Shiboken should detect if a class is abstract but sometimes it fails to
+  // Sometimes it's because the pure method is SIP_SKIP, sometimes not and it still fails, so we force it...
   bool needForceAbstract = false;
   for ( auto fct : klass->functions() )
   {
@@ -385,6 +375,12 @@ void TypeSystemGenerator::formatXmlClass( const ClassModelItem &klass )
   if ( needForceAbstract )
   {
     mWriter->writeAttribute( u"force-abstract"_s, "true" );
+  }
+
+  // TODO Why QgsCurve need it ?
+  // if we force it for any abstract class if would fail QgsExpressionNode (among others probably)
+  if ( needForceAbstract || klass->name() == "QgsCurve" )
+  {
     mWriter->writeAttribute( u"disable-wrapper"_s, "true" ); // see https://bugreports.qt.io/browse/PYSIDE-2445
   }
 
@@ -513,6 +509,12 @@ bool TypeSystemGenerator::formatXmlOutput()
   mWriter->writeStartDocument();
   mWriter->writeStartElement( u"typesystem"_s );
   mWriter->writeAttribute( u"package"_s, u"core"_s );
+
+  mWriter->writeStartElement( u"load-typesystem"_s );
+  mWriter->writeAttribute( u"name"_s, u"typesystem_primitive.xml"_s );
+  mWriter->writeAttribute( u"generate"_s, u"yes"_s );
+  mWriter->writeEndElement();
+
   writeSmartPointerTypes( mDom );
   mWriter->writeComment( u"Auto-generated "_s );
   for ( auto p : primitiveTypes )

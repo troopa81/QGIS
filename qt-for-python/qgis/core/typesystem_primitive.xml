@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<typesystem package="core">
+  <!-- Why we need this and not the other ? shall we generate for other typedef ? -->
+  <primitive-type name="QgsFeatureIds" type="set">
+    <include file-name="QSet" location="global"/>
+    <conversion-rule>
+      <native-to-target>
+        <insert-template name="shiboken_conversion_cppsequence_to_pyset">
+          <replace from="%INTYPE_0" to="qint64"/>
+        </insert-template>
+      </native-to-target>
+      <target-to-native>
+        <add-conversion type="PySequence">
+          <insert-template name="shiboken_conversion_pyiterable_to_cppsetcontainer">
+            <replace from="%OUTTYPE_0" to="qint64"/>
+          </insert-template>
+        </add-conversion>
+      </target-to-native>
+    </conversion-rule>
+  </primitive-type>
+</typesystem>
