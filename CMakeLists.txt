@@ -1285,6 +1285,11 @@ set (TEST_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests/testdata")
 add_subdirectory(doc)
 
 if (WITH_CORE)
+
+  if (WITH_PYSIDE)
+    add_compile_definitions(SBK)
+  endif()
+
   add_subdirectory(src)
   add_subdirectory(images)
   add_subdirectory(resources)

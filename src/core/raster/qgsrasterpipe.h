@@ -71,7 +71,11 @@ class CORE_EXPORT QgsRasterPipe
 
     ~QgsRasterPipe();
 
+#ifdef SBK
+    QgsRasterPipe &operator=( const QgsRasterPipe &rh );
+#else
     QgsRasterPipe &operator=( const QgsRasterPipe &rh ) = delete;
+#endif
 
     /**
      * Moves the pipe to another \a thread.
@@ -324,5 +328,3 @@ class CORE_EXPORT QgsRasterPipe
 };
 
 #endif
-
-

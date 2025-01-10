@@ -54,6 +54,35 @@ QgsRasterPipe::QgsRasterPipe( const QgsRasterPipe &pipe )
   mDataDefinedProperties = pipe.mDataDefinedProperties;
 }
 
+#ifdef SBK
+
+QgsRasterPipe &QgsRasterPipe::operator=( const QgsRasterPipe &pipe )
+{
+  for ( int i = 0; i < pipe.size(); i++ )
+  {
+    QgsRasterInterface *interface = pipe.at( i );
+    QgsRasterInterface *clone = interface->clone();
+
+    Qgis::RasterPipeInterfaceRole role = interfaceRole( clone );
+    QgsDebugMsgLevel( QStringLiteral( "cloned interface with role %1" ).arg( qgsEnumValueToKey( role ) ), 4 );
+    if ( i > 0 )
+    {
+      clone->setInput( mInterfaces.at( i - 1 ) );
+    }
+    mInterfaces.append( clone );
+    if ( role != Qgis::RasterPipeInterfaceRole::Unknown )
+    {
+      mRoleMap.insert( role, i );
+    }
+  }
+  setResamplingStage( pipe.resamplingStage() );
+  mDataDefinedProperties = pipe.mDataDefinedProperties;
+
+  return *this;
+}
+
+#endif
+
 QgsRasterPipe::~QgsRasterPipe()
 {
   const auto constMInterfaces = mInterfaces;

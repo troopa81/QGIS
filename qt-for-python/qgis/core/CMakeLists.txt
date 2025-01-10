@@ -21,7 +21,7 @@ list(APPEND INCLUDE_DIRS ${CMAKE_BINARY_DIR})
 list(TRANSFORM INCLUDE_DIRS PREPEND "-I")
 
 add_custom_target(update_pyside_bindings
-    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" --snippet-file=${SNIPPET_FILE} --class-block-list-file ${CLASSBLOCKLIST_FILE} -- ${INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h
+    COMMAND $<TARGET_FILE:typesystem_generator> --output-file="${TYPESYSTEM_FILE}" --snippet-file=${SNIPPET_FILE} --class-block-list-file ${CLASSBLOCKLIST_FILE} -- -DSBK ${INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR}/qgis_core_global.h
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS typesystem_generator
   )
