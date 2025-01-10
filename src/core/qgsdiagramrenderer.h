@@ -778,7 +778,7 @@ class CORE_EXPORT QgsDiagramRenderer
     /**
      * Renders the diagram for a specified feature at a specific position in the passed render context.
      */
-    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = QgsPropertyCollection() ) const;
+    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = {} ) const;
 
     void setDiagram( QgsDiagram *d SIP_TRANSFER );
     QgsDiagram *diagram() const { return mDiagram.get(); }
@@ -1019,7 +1019,7 @@ class CORE_EXPORT QgsStackedDiagramRenderer : public QgsDiagramRenderer
      * passed render context, taking all renderers and their own diagrams into account.
      * Diagram rendering is delegated to renderer's diagram.
      */
-    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = QgsPropertyCollection() ) const override;
+    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = {} ) const override;
 
     //! Returns list with all diagram settings in the renderer
     QList<QgsDiagramSettings> diagramSettings() const override;

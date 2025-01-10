@@ -714,7 +714,7 @@ Returns the set of any fields required for diagram rendering
 :param context: expression context the diagrams will be drawn using
 %End
 
-    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = QgsPropertyCollection() ) const;
+    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = {} ) const;
 %Docstring
 Renders the diagram for a specified feature at a specific position in the passed render context.
 %End
@@ -981,7 +981,7 @@ the rendered diagram is given by a combination of subrenderers.
 Returns size of the diagram for a feature in map units. Returns an invalid QSizeF in case of error
 %End
 
-    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = QgsPropertyCollection() ) const;
+    virtual void renderDiagram( const QgsFeature &feature, QgsRenderContext &c, QPointF pos, const QgsPropertyCollection &properties = {} ) const;
 %Docstring
 Renders the diagram for a specified feature at a specific position in the
 passed render context, taking all renderers and their own diagrams into account.

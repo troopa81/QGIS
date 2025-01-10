@@ -65,7 +65,7 @@ class CORE_EXPORT QgsVectorDataProvider : public QgsDataProvider, public QgsFeat
   public:
 
     //! Bitmask of all provider's editing capabilities
-    static const int EditingCapabilities = static_cast< int >( Qgis::VectorProviderCapability::EditingCapabilities );
+    static constexpr int EditingCapabilities = static_cast< int >( Qgis::VectorProviderCapability::EditingCapabilities );
 
     /**
      * Constructor for a vector data provider.
