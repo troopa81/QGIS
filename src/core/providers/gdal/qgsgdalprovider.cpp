@@ -120,6 +120,7 @@ QgsGdalProvider::QgsGdalProvider( const QString &uri, const QgsError &error )
   , mpLightRefCounter( new QAtomicInt( 1 ) )
   , mUpdate( false )
 {
+  QgsMessageLog::logMessage( QStringLiteral( "------------- Ctor ONE" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
   mGeoTransform[0] = 0;
   mGeoTransform[1] = 1;
   mGeoTransform[2] = 0;
@@ -137,6 +138,7 @@ QgsGdalProvider::QgsGdalProvider( const QString &uri, const ProviderOptions &opt
   , mpLightRefCounter( new QAtomicInt( 1 ) )
   , mUpdate( update )
 {
+  QgsMessageLog::logMessage( QStringLiteral( "------------- Ctor TWO" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
   mGeoTransform[0] = 0;
   mGeoTransform[1] = 1;
   mGeoTransform[2] = 0;
@@ -174,11 +176,15 @@ QgsGdalProvider::QgsGdalProvider( const QString &uri, const ProviderOptions &opt
   mGdalDataset = nullptr;
   if ( dataset )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- DatasetNotNULL" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
+    QMutexLocker locker( mpMutex );
     mGdalBaseDataset = dataset;
     initBaseDataset();
   }
   else
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- InitIfNeeded about to Start" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
+    QMutexLocker locker( mpMutex );
     ( void )initIfNeeded();
   }
 }
@@ -197,8 +203,11 @@ QgsGdalProvider::QgsGdalProvider( const QgsGdalProvider &other )
                                mDriverName == QLatin1String( "PostGISRaster" ) ||
                                CSLTestBoolean( CPLGetConfigOption( "QGIS_GDAL_FORCE_USE_SAME_DATASET", "FALSE" ) ) );
 
+
+  QgsMessageLog::logMessage( QStringLiteral( "------------- CopyConstrutor" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
   if ( forceUseSameDataset )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- forceUseSameDataset" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
     ++ ( *other.mpRefCounter );
     // cppcheck-suppress copyCtorPointerCopying
     mpRefCounter = other.mpRefCounter;
@@ -211,6 +220,7 @@ QgsGdalProvider::QgsGdalProvider( const QgsGdalProvider &other )
   }
   else
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- DontUseSameDataset" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
 
     ++ ( *other.mpLightRefCounter );
 
@@ -222,12 +232,14 @@ QgsGdalProvider::QgsGdalProvider( const QgsGdalProvider &other )
 
     if ( getCachedGdalHandles( const_cast<QgsGdalProvider *>( &other ), mGdalBaseDataset, mGdalDataset ) )
     {
+      QgsMessageLog::logMessage( QStringLiteral( "------------- CachedHandles OK" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
       QgsDebugMsgLevel( QStringLiteral( "recycling already opened dataset" ), 5 );
       mHasInit = true;
       mValid = other.mValid;
     }
     else
     {
+      QgsMessageLog::logMessage( QStringLiteral( "------------- CachedHandles NOK" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
       QgsDebugMsgLevel( QStringLiteral( "will need to open new dataset" ), 5 );
       mHasInit = false;
       mValid = false;
@@ -413,7 +425,7 @@ QgsGdalProvider::~QgsGdalProvider()
   QMutexLocker locker( sGdalProviderMutex() );
 
   if ( mGdalTransformerArg )
-    GDALDestroyTransformer( mGdalTransformerArg );
+    GDALDestroyGenImgProjTransformer( mGdalTransformerArg );
 
   int lightRefCounter = -- ( *mpLightRefCounter );
   int refCounter = -- ( *mpRefCounter );
@@ -3341,6 +3353,8 @@ bool QgsGdalProvider::initIfNeeded()
 
   if ( !mGdalBaseDataset )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- ErrorGdalOpen" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
+
     QString msg = QStringLiteral( "Cannot open GDAL dataset %1:\n%2" ).arg( dataSourceUri(), QString::fromUtf8( CPLGetLastErrorMsg() ) );
     appendError( ERRMSG( msg ) );
     return false;
@@ -3350,6 +3364,9 @@ bool QgsGdalProvider::initIfNeeded()
   // Set INTERPOLATE option for VR BAG
   if ( QString( GDALGetDriverShortName( GDALGetDatasetDriver( mGdalBaseDataset ) ) ) == QLatin1String( "BAG" ) && QString{ GDALGetMetadataItem( mGdalBaseDataset, "HAS_SUPERGRIDS", nullptr ) } == QLatin1String( "TRUE" ) )
   {
+
+    QgsMessageLog::logMessage( QStringLiteral( "------------- INTERPOLATE" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
+
     QVariantMap parts = decodeGdalUri( gdalUri );
     QStringList openOptions = parts.value( QStringLiteral( "openOptions" ) ).toStringList();
     bool hasModeOption = false;
@@ -3673,6 +3690,8 @@ void QgsGdalProvider::initBaseDataset()
        || GDALGetGCPCount( mGdalBaseDataset ) > 0
        || GDALGetMetadata( mGdalBaseDataset, "RPC" ) )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- warpedVRT" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
+
     QgsDebugMsgLevel( QStringLiteral( "Creating Warped VRT." ), 2 );
 
     gdal::warp_options_unique_ptr psWarpOptions( GDALCreateWarpOptions() );
@@ -3727,6 +3746,8 @@ void QgsGdalProvider::initBaseDataset()
 
   if ( !mGdalTransformerArg )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- mGdalTransformerArg" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
+
     CPLPushErrorHandler( showErrorsExceptTransformationAlreadyNorthUp );
     mGdalTransformerArg = GDALCreateGenImgProjTransformer( mGdalBaseDataset, nullptr, nullptr, nullptr, TRUE, 1.0, 0 );
     CPLPopErrorHandler();
@@ -3751,6 +3772,7 @@ void QgsGdalProvider::initBaseDataset()
   GDALRasterBandH myGDALBand = GDALGetRasterBand( mGdalDataset, 1 ); //just use the first band
   if ( !myGDALBand )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- NoBand" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
     QString msg = QString::fromUtf8( CPLGetLastErrorMsg() );
 
     // if there are no subdatasets, then close the dataset
@@ -3779,29 +3801,36 @@ void QgsGdalProvider::initBaseDataset()
   QString crsWkt;
   if ( OGRSpatialReferenceH spatialRefSys = GDALGetSpatialRef( mGdalDataset ) )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 1" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
     crsWkt = QgsOgrUtils::OGRSpatialReferenceToWkt( spatialRefSys );
   }
   if ( crsWkt.isEmpty() )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 2" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
     if ( OGRSpatialReferenceH spatialRefSys = GDALGetGCPSpatialRef( mGdalDataset ) )
     {
+      QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 3" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
       crsWkt = QgsOgrUtils::OGRSpatialReferenceToWkt( spatialRefSys );
     }
   }
   if ( !crsWkt.isEmpty() )
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 4" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
     mCrs = QgsCoordinateReferenceSystem::fromWkt( crsWkt );
   }
   else
   {
+    QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 5" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
     if ( mGdalBaseDataset != mGdalDataset &&
          GDALGetMetadata( mGdalBaseDataset, "RPC" ) )
     {
+      QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 6" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
       // Warped VRT of RPC is in EPSG:4326
       mCrs = QgsCoordinateReferenceSystem::fromOgcWmsCrs( QStringLiteral( "EPSG:4326" ) );
     }
     else
     {
+      QgsMessageLog::logMessage( QStringLiteral( "------------- SpatialRefSys 7" ), QStringLiteral( "Server" ), Qgis::MessageLevel::Info );
       QgsDebugMsgLevel( QStringLiteral( "No valid CRS identified" ), 2 );
     }
   }
@@ -4809,4 +4838,3 @@ QIcon QgsGdalProviderMetadata::icon() const
 }
 
 ///@endcond
-
