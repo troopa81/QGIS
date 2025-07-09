@@ -8,7 +8,7 @@ except (NameError, AttributeError):
     pass
 try:
     QgsTemplatedLineSymbolLayerBase.setCommonProperties = staticmethod(QgsTemplatedLineSymbolLayerBase.setCommonProperties)
-    QgsTemplatedLineSymbolLayerBase.__virtual_methods__ = ['renderPolygonStroke', 'outputUnit', 'setMapUnitScale', 'mapUnitScale', 'renderPolylineInterval']
+    QgsTemplatedLineSymbolLayerBase.__virtual_methods__ = ['renderPolygonStroke', 'outputUnit', 'setMapUnitScale', 'mapUnitScale']
     QgsTemplatedLineSymbolLayerBase.__abstract_methods__ = ['setSymbolLineAngle', 'symbolAngle', 'setSymbolAngle', 'renderSymbol']
     QgsTemplatedLineSymbolLayerBase.__overridden_methods__ = ['renderPolyline', 'setOutputUnit', 'properties', 'canCauseArtifactsBetweenAdjacentTiles', 'startFeatureRender', 'stopFeatureRender']
     QgsTemplatedLineSymbolLayerBase.__group__ = ['symbology']

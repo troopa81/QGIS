@@ -2079,13 +2079,25 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineVertex( const QPolygonF &poi
     double x, y, z;
     QPointF mapPoint;
     int pointNum = 0;
-    const int numPoints = context.renderContext().geometry()->nCoordinates();
-    while ( context.renderContext().geometry()->nextVertex( vId, vPoint ) )
+    const QgsAbstractGeometry *geom = context.renderContext().geometry();
+    const int numPoints = geom->nCoordinates();
+    const QgsCurve *curve = dynamic_cast<const QgsCurve *>( geom );
+    QgsVertexId previousVId;
+    double distance = 0;
+    BlankSegmentsScanner blankSegmentsScanner( points, blankSegments );
+    while ( geom->nextVertex( vId, vPoint ) )
     {
       if ( context.renderContext().renderingStopped() )
         break;
 
       scope->addVariable( QgsExpressionContextScope::StaticVariable( QgsExpressionContext::EXPR_GEOMETRY_POINT_NUM, ++pointNum, true ) );
+
+      if ( curve && !blankSegments.isEmpty() )
+      {
+        // compute distance
+        distance += previousVId.isValid() ? curve->distanceBetweenVertices( previousVId, vId ) : 0;
+        previousVId = vId;
+      }
 
       if ( pointNum == 1 && placement == Qgis::MarkerLinePlacement::InnerVertices )
         continue;
@@ -2107,6 +2119,15 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineVertex( const QPolygonF &poi
         mapPoint.setX( x );
         mapPoint.setY( y );
         mtp.transformInPlace( mapPoint.rx(), mapPoint.ry() );
+
+        if ( !blankSegments.isEmpty() )
+        {
+          // TODO we need to convert geom coord from geom coord sys to map coord sys if different
+          const double distanceInPixel = rc.convertToPainterUnits( distance, Qgis::RenderUnit::MapUnits );
+          if ( blankSegmentsScanner.insideBlankSegment( distanceInPixel ) )
+            continue;
+        }
+
         if ( rotateSymbols() )
         {
           double angle = context.renderContext().geometry()->vertexAngle( vId );

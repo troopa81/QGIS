@@ -993,6 +993,13 @@ Returns the unit for for blank segments start and end distances
 
 
 
+    void copyTemplateSymbolProperties( QgsTemplatedLineSymbolLayerBase *destLayer ) const;
+%Docstring
+Copies all common properties of this layer to another templated symbol
+layer.
+%End
+
+
 
   protected:
 
@@ -1045,7 +1052,6 @@ Sets all common symbol properties in the ``destLayer``, using the
 settings serialized in the ``properties`` map.
 %End
 
-    virtual void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double averageAngleOver );
 
 };
 
