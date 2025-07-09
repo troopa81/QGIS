@@ -1078,6 +1078,8 @@ class CORE_EXPORT QgsSymbol
 
     Q_DISABLE_COPY( QgsSymbol )
 
+
+    friend class QgsTemplatedLineSymbolLayerBase;
 };
 
 #endif

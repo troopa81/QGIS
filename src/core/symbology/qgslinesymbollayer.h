@@ -815,7 +815,12 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     void startFeatureRender( const QgsFeature &feature, QgsRenderContext &context ) override;
     void stopFeatureRender( const QgsFeature &feature, QgsRenderContext &context ) override;
 
+
+
   protected:
+
+    virtual void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double averageAngleOver );
+
 
     /**
      * Sets the line \a angle modification for the symbol's angle. This angle is added to
@@ -862,7 +867,6 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
 
   private:
 
-    void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double averageAngleOver );
     void renderPolylineVertex( const QPolygonF &points, QgsSymbolRenderContext &context, Qgis::MarkerLinePlacement placement = Qgis::MarkerLinePlacement::Vertex );
     void renderPolylineCentral( const QPolygonF &points, QgsSymbolRenderContext &context, double averageAngleOver );
     double markerAngle( const QPolygonF &points, bool isRing, int vertex );
@@ -1463,5 +1467,3 @@ class CORE_EXPORT QgsFilledLineSymbolLayer : public QgsLineSymbolLayer
 };
 
 #endif
-
-

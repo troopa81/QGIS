@@ -14,6 +14,7 @@
  ***************************************************************************/
 
 #include "qgslinesymbollayer.h"
+#include "qgsclipper.h"
 #include "qgscurvepolygon.h"
 #include "qgsdxfexport.h"
 #include "qgssymbollayerutils.h"
@@ -35,6 +36,7 @@
 #include "qgsgeos.h"
 #include "qgspolygon.h"
 #include "qgssldexportcontext.h"
+#include "qgis.h"
 #include <algorithm>
 #include <QPainter>
 #include <QDomDocument>
@@ -1391,7 +1393,7 @@ void QgsTemplatedLineSymbolLayerBase::renderPolyline( const QPolygonF &points, Q
   }
   else
   {
-    context.renderContext().setGeometry( nullptr ); //always use segmented geometry with offset
+    // context.renderContext().setGeometry( nullptr ); //always use segmented geometry with offset
     QList<QPolygonF> mline = ::offsetLine( points, context.renderContext().convertToPainterUnits( offset, mOffsetUnit, mOffsetMapUnitScale ), context.originalGeometryType() != Qgis::GeometryType::Unknown ? context.originalGeometryType() : Qgis::GeometryType::Line );
 
     for ( int part = 0; part < mline.count(); ++part )
@@ -1837,6 +1839,116 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
     // not averaging line angle -- always use exact section angle
     int pointNum = 0;
     QPointF lastPt = points[0];
+
+    // // double testMin = rc.convertMetersToMapUnits( 142 );
+    // // double testMax = rc.convertMetersToMapUnits( 360 );
+
+    // double testMin = rc.convertMetersToMapUnits( 1100 );
+    // double testMax = rc.convertMetersToMapUnits( 1300 );
+
+    // double outsideLength = 0;
+    // if ( rc.geometry() )
+    // {
+
+    //   const QgsRectangle e = rc.extent();
+    //   const double cw = e.width() / 10;
+    //   const double ch = e.height() / 10;
+    //   const QgsRectangle clipRect( e.xMinimum() - cw, e.yMinimum() - ch, e.xMaximum() + cw, e.yMaximum() + ch );
+
+    //   QgsVertexIterator vit = rc.geometry()->vertices();
+    //   QgsPoint previous = vit.next();
+    //   double currentLength = 0;
+    //   bool previousInside =  clipRect.contains( previous );
+    //   while ( vit.hasNext() )
+    //   {
+    //     if ( currentLength > testMin )
+    //       break;
+
+    //     const QgsPoint pt = vit.next();
+
+    //     const double currentDistance = pt.distance( previous );
+
+    //     bool inside = clipRect.contains( pt );
+    //     if ( previousInside != inside )
+    //     {
+    //       double x0 = previous.x();
+    //       double y0 = previous.y();
+    //       double x1 = pt.x();
+    //       double y1 = pt.y();
+    //       QgsClipper::clipLineSegment( clipRect.xMinimum(), clipRect.xMaximum(), clipRect.yMinimum(), clipRect.yMaximum(),
+    //                                    x0, y0, x1, y1 );
+
+    //       const double insideDistance = QgsPointXY( x0, y0 ).distance( x1, y1 );
+    //       const double outsideDistance = currentDistance - insideDistance;
+    //       testMin = std::max( testMin - outsideDistance, 0. );
+    //       testMax = std::max( testMax - outsideDistance, 0. );
+    //     }
+    //     else if ( !previousInside && !inside )
+    //     {
+    //       testMin -= currentDistance;
+    //       testMax -= currentDistance;
+    //     }
+    //     else
+    //     {
+    //       currentLength += currentDistance;
+    //     }
+
+    //     // double x0 = previous.x();
+    //     // double y0 = previous.y();
+    //     // double x1 = pt.x();
+    //     // double y1 = pt.y();
+    //     // QgsClipper::clipLineSegment( clipRect.xMinimum(), clipRect.xMaximum(), clipRect.yMinimum(), clipRect.yMaximum(),
+    //     //                              x0, y0, x1, y1 );
+
+    //     // outsideLength += pt.distance( previous ) - QgsPointXY( x0, y0 ).distance( x1, y1 );
+
+    //     previousInside = inside;
+    //     previous = pt;
+    //   }
+
+
+    //   // TODO last iteration should not substract more than what remains to testMin
+    //   // testMin -= outsideLength;
+    //   // testMax -= outsideLength;
+    // }
+
+    // testMin = rc.convertFromMapUnits( testMin, Qgis::RenderUnit::Pixels );
+    // testMax = rc.convertFromMapUnits( testMax, Qgis::RenderUnit::Pixels );
+
+    // qDebug() << "--- outsideLength=" << outsideLength << "testMin=" << testMin << "testMax=" << testMax
+    //          << " nbPoints=" << points.count() << " lengthLeft=" << lengthLeft;
+
+    // qDebug() << "----- point[ 0 ] =" << points.at(0);
+
+    // ------------- strategy colineaire
+
+    // last 2 points
+    // const QgsLineString line( QVector<QgsPointXY>() << QgsPointXY(0.4676885730649798,44.23074123536714097)
+    //                           << QgsPointXY(0.46096716177242886, 44.22592442873703078) );
+
+    // // middle last segment
+    // const QgsLineString line( QVector<QgsPointXY>() << QgsPointXY(0.46237724328331192, 44.22693494418906823)
+    //                           << QgsPointXY( 0.46545989684907585, 44.22914408531845254) );
+    // QPolygonF noMarkersLine = QgsSymbol::_getLineString( context.renderContext(), line );
+
+
+    // line with angle
+    const QgsLineString line( QVector<QgsPointXY>()
+                              << QgsPointXY( 0.46704374039683699, 44.23155102522945725 )
+                              << QgsPointXY( 0.4676885730649798, 44.23074123536714097 )
+                              << QgsPointXY( 0.46715641079582942, 44.23035986862215907 ) );
+    QPolygonF noMarkersLine = QgsSymbol::_getLineString( context.renderContext(), line );
+
+    // TODO replace mOffset with data defined
+    QList<QPolygonF> noMarkersLines = ::offsetLine( points, context.renderContext().convertToPainterUnits( mOffset, mOffsetUnit, mOffsetMapUnitScale ), context.originalGeometryType() != Qgis::GeometryType::Unknown ? context.originalGeometryType() : Qgis::GeometryType::Line );
+
+    // // polygone with angle
+    // const QgsLineString line( QVector<QgsPointXY>()
+    //                           << QgsPointXY( 0.48983407818260211, 44.2274462885007793 )
+    //                           << QgsPointXY( 0.49058663291375382, 44.22729996658303264 )
+    //                           << QgsPointXY( 0.49032300175398402, 44.22784724201336815 ) );
+    // QPolygonF noMarkersLine = QgsSymbol::_getLineString( context.renderContext(), line );
+
     for ( int i = 1; i < points.count(); ++i )
     {
       if ( context.renderContext().renderingStopped() )
@@ -1844,12 +1956,83 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
 
       const QPointF &pt = points[i];
 
+      // qDebug() << "----- point[" << i << "] =" << pt;
+
       if ( lastPt == pt ) // must not be equal!
         continue;
+
+      // if ( qgsDoubleNear( noMarkersLine.at(1).x(), pt.x(), 0.01 )
+      //      && qgsDoubleNear( noMarkersLine.at(1).y(), pt.y(), 0.01 )
+      //      && qgsDoubleNear( noMarkersLine.at(0).x(), lastPt.x(), 0.01 )
+      //      && qgsDoubleNear( noMarkersLine.at(0).y(), lastPt.y(), 0.01 ) )
+      //   continue;
+
+      auto isColinear = []( QgsPointXY p1, QgsPointXY p2, QgsPointXY p3 ) -> bool
+      {
+        // code from qgsgeometryutils_base.cpp
+        const double dx21 = p2.x() - p1.x();
+        const double dy21 = p2.y() - p1.y();
+        const double dx31 = p3.x() - p1.x();
+        const double dy31 = p3.y() - p1.y();
+
+        // 2*Cross product, d<0 means clockwise and d>0 counterclockwise sweeping angle
+        const double d = 2 * ( dx21 * dy31 - dx31 * dy21 );
+
+        // Est-ce que l'on devrait pas normaliser les vecteurs pour réduire l'erreur
+
+        // Autre méthode plus rapide pour déterminer si des points son colinéaires le produit scalaire
+        // à l'air moins précise que l'autre. A tester
+        // https://stackoverflow.com/questions/4083807/collinear-points
+        // (lastPt.x() - pt.x() )*(noMarkersLine.at(0).y() - pt.y())-(noMarkersLine.at(0).x()-pt.x())*(lastPt.y()-pt.y())
+
+        qDebug() << "d=" << d;
+
+
+        // Check colinearity, Cross product = 0
+        return qgsDoubleNear( std::fabs( d ), 0.0, 0.0001 );
+      };
 
       // for each line, find out dx and dy, and length
       MyLine l( lastPt, pt );
       QPointF diff = l.diffForInterval( painterUnitInterval );
+
+      // const double lVecX = (pt.x() - lastPt.x()) / l.length();
+      // const double lVecY = (pt.y() - lastPt.y()) / l.length();
+      // const double noMarker1VecLength = QgsPointXY( noMarkersLine.at(1) ).distance( lastPt );
+      // const double noMarker1VecX = (noMarkersLine.at(1).x() - lastPt.x())/noMarker1VecLength;
+      // const double noMarker1VecY = (noMarkersLine.at(1).y() - lastPt.y())/noMarker1VecLength;
+
+      // if ( qgsDoubleNear( lVecX * noMarker1VecY - lVecY * noMarker1VecX, 0.0, 0.00000000001 ) )
+      // {
+      //   const double noMarker0VecX = noMarkersLine.at(0).x() - lastPt.x();
+      //   const double noMarker0VecY = noMarkersLine.at(0).y() - lastPt.y();
+      //   if ( qgsDoubleNear( lVecX * noMarker0VecY - lVecY * noMarker0VecX, 0.0, 0.00000000001 ) )
+      //   {
+      //     continue;
+      //   }
+      // }
+
+      double start = -1, end = -1;
+      // double noSLDistance = 0;
+      for ( QPolygonF noMarkersLine : noMarkersLines )
+      {
+        for ( int i = 1; i < noMarkersLine.count(); i++ )
+        {
+          if ( isColinear( pt, lastPt, noMarkersLine.at( i ) )
+               && isColinear( pt, lastPt, noMarkersLine.at( i - 1 ) ) )
+          {
+            // TODO orders points seems wrong
+            start = QgsPointXY( noMarkersLine.at( i ) ).distance( lastPt );
+            end = QgsPointXY( noMarkersLine.at( i - 1 ) ).distance( lastPt );
+
+            // TODO orders points seems wrong
+            if ( start > end )
+              std::swap( start, end );
+
+            // noSLDistance = QgsPointXY( noMarkersLine.at(1) ).distance( noMarkersLine.at(0) );
+          }
+        }
+      }
 
       // if there's some length left from previous line
       // use only the rest for the first point in new line segment
@@ -1863,16 +2046,30 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
         setSymbolLineAngle( l.angle() * 180 / M_PI );
       }
 
+      double currentLength = 0;
+
+      // TODO would be better to no go through the loop when we are in no SL area
+
       // while we're not at the end of line segment, draw!
       while ( lengthLeft > painterUnitInterval )
       {
         // "c" is 1 for regular point or in interval (0,1] for begin of line segment
         lastPt += c * diff;
         lengthLeft -= painterUnitInterval;
-        scope->addVariable( QgsExpressionContextScope::StaticVariable( QgsExpressionContext::EXPR_GEOMETRY_POINT_NUM, ++pointNum, true ) );
-        renderSymbol( lastPt, context.feature(), rc, -1, useSelectedColor );
+
+        if ( ( start == -1 && end == -1 ) || currentLength < start || currentLength > end )
+        {
+          scope->addVariable( QgsExpressionContextScope::StaticVariable( QgsExpressionContext::EXPR_GEOMETRY_POINT_NUM, ++pointNum, true ) );
+          renderSymbol( lastPt, context.feature(), rc, -1, useSelectedColor );
+        }
+
+        currentLength += painterUnitInterval;
+
         c = 1; // reset c (if wasn't 1 already)
       }
+
+      // testMin -= l.length();
+      // testMax -= l.length();
 
       lastPt = pt;
     }

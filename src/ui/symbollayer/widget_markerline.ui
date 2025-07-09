@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>385</width>
-    <height>465</height>
+    <height>732</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,13 +23,6 @@
    <property name="bottomMargin">
     <number>1</number>
    </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Marker placement</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0" colspan="3">
     <layout class="QGridLayout" name="gridLayout_3">
      <property name="leftMargin">
@@ -96,7 +89,7 @@
          <property name="value">
           <double>1.000000000000000</double>
          </property>
-         <property name="showClearButton" stdset="0">
+         <property name="showClearButton">
           <bool>false</bool>
          </property>
         </widget>
@@ -163,115 +156,11 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="1" colspan="2">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="0" column="2">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="0" column="1">
-    <widget class="QgsPropertyOverrideButton" name="mPlacementDDBtn">
-     <property name="text">
-      <string>…</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0" colspan="3">
     <layout class="QGridLayout" name="gridLayout">
      <property name="topMargin">
       <number>0</number>
      </property>
-     <item row="3" column="4">
-      <widget class="QgsPropertyOverrideButton" name="mAverageAngleDDBtn">
-       <property name="text">
-        <string>…</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="4">
-      <widget class="QgsPropertyOverrideButton" name="mLineOffsetDDBtn">
-       <property name="text">
-        <string>…</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QgsDoubleSpinBox" name="spinOffset">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="decimals">
-        <number>6</number>
-       </property>
-       <property name="minimum">
-        <double>-999999999.000000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>999999999.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.200000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="2">
-      <widget class="QgsDoubleSpinBox" name="mSpinAverageAngleLength">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="decimals">
-        <number>6</number>
-       </property>
-       <property name="maximum">
-        <double>10000000.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.200000000000000</double>
-       </property>
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="3">
-      <widget class="QgsUnitSelectionWidget" name="mOffsetUnitWidget" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::TabFocus</enum>
-       </property>
-      </widget>
-     </item>
      <item row="1" column="2">
       <widget class="QgsDoubleSpinBox" name="mSpinOffsetAlongLine">
        <property name="sizePolicy">
@@ -297,6 +186,57 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="2">
+      <widget class="QgsDoubleSpinBox" name="spinOffset">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="decimals">
+        <number>6</number>
+       </property>
+       <property name="minimum">
+        <double>-999999999.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>999999999.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.200000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QgsUnitSelectionWidget" name="mOffsetAlongLineUnitWidget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>20</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::TabFocus</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item row="3" column="3">
       <widget class="QgsUnitSelectionWidget" name="mAverageAngleUnit" native="true">
        <property name="minimumSize">
@@ -317,19 +257,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="3">
-      <widget class="QgsUnitSelectionWidget" name="mOffsetAlongLineUnitWidget" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>20</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::TabFocus</enum>
-       </property>
-      </widget>
-     </item>
      <item row="5" column="0" colspan="2">
       <widget class="QLabel" name="mRingsLabel">
        <property name="text">
@@ -337,10 +264,16 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="5">
-      <widget class="QCheckBox" name="chkRotateMarker">
-       <property name="text">
-        <string>Rotate marker to follow line direction</string>
+     <item row="4" column="3">
+      <widget class="QgsUnitSelectionWidget" name="mOffsetUnitWidget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::TabFocus</enum>
        </property>
       </widget>
      </item>
@@ -351,38 +284,12 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Offset along line</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="1">
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>Average angle over</string>
        </property>
       </widget>
-     </item>
-     <item row="3" column="0">
-      <spacer name="horizontalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>10</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="5" column="2" colspan="3">
-      <widget class="QComboBox" name="mRingFilterComboBox"/>
      </item>
      <item row="0" column="0" colspan="5">
       <widget class="QCheckBox" name="mCheckPlaceOnEveryPart">
@@ -394,11 +301,257 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="4">
+      <widget class="QgsPropertyOverrideButton" name="mLineOffsetDDBtn">
+       <property name="text">
+        <string>…</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QgsDoubleSpinBox" name="mSpinAverageAngleLength">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="decimals">
+        <number>6</number>
+       </property>
+       <property name="maximum">
+        <double>10000000.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.200000000000000</double>
+       </property>
+       <property name="value">
+        <double>1.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Offset along line</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2" colspan="3">
+      <widget class="QComboBox" name="mRingFilterComboBox"/>
+     </item>
+     <item row="3" column="4">
+      <widget class="QgsPropertyOverrideButton" name="mAverageAngleDDBtn">
+       <property name="text">
+        <string>…</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="5">
+      <widget class="QCheckBox" name="chkRotateMarker">
+       <property name="text">
+        <string>Rotate marker to follow line direction</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0" colspan="5">
+      <widget class="QgsCollapsibleGroupBox" name="mGroupBox">
+       <property name="title">
+        <string>Manual marker edition</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerPan">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionPan.svg</normaloff>:/images/themes/default/mActionPan.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerAdd">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/symbologyAdd.svg</normaloff>:/images/themes/default/symbologyAdd.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerDelete">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mIconDelete.svg</normaloff>:/images/themes/default/mIconDelete.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerRestore">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionUndo.svg</normaloff>:/images/themes/default/mActionUndo.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerMove">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionMoveFeatureCopyPoint.svg</normaloff>:/images/themes/default/mActionMoveFeatureCopyPoint.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerRotate">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionRotateFeature.svg</normaloff>:/images/themes/default/mActionRotateFeature.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mManuelMarkerEdit">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionToggleEditing.svg</normaloff>:/images/themes/default/mActionToggleEditing.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Marker placement</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QgsPropertyOverrideButton" name="mPlacementDDBtn">
+     <property name="text">
+      <string>…</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="1" colspan="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>QgsCollapsibleGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header>qgscollapsiblegroupbox.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>QgsDoubleSpinBox</class>
    <extends>QDoubleSpinBox</extends>
@@ -441,6 +594,8 @@
   <tabstop>mLineOffsetDDBtn</tabstop>
   <tabstop>mRingFilterComboBox</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../images/images.qrc"/>
+ </resources>
  <connections/>
 </ui>

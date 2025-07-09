@@ -289,6 +289,22 @@ void QgsSimpleMarkerSymbolLayerBase::renderPoint( QPointF point, QgsSymbolRender
   {
     path = transform.map( mPath );
   }
+
+  // if ( mColor == Qt::green )
+  // {
+
+  //   QgsPointXY mycenter( 300,300);
+  //   QRectF myRect(mycenter.x() - 80/2,
+  //                 mycenter.y() - 80/2,
+  //                 mycenter.x() + 80/2,
+  //                 mycenter.y() + 80/2);
+
+  //   QPainterPath mypath;
+  //   mypath.moveTo(point.x(), point.y());
+  //   mypath.arcTo(myRect, 0.0, 360.0);
+  //   p->fillPath(mypath, Qt::green);
+  // }
+
   draw( context, symbol, polygon, path );
 }
 
@@ -4356,4 +4372,3 @@ QImage QgsAnimatedMarkerSymbolLayer::fetchImage( QgsRenderContext &context, cons
   bool cached = false;
   return QgsApplication::imageCache()->pathAsImage( path, size, preserveAspectRatio, opacity, cached, context.flags() & Qgis::RenderContextFlag::RenderBlocking, 96, movieFrame );
 }
-
