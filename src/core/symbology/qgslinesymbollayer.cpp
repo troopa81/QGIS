@@ -1290,6 +1290,16 @@ void QgsTemplatedLineSymbolLayerBase::setPlacement( Qgis::MarkerLinePlacement pl
 
 QgsTemplatedLineSymbolLayerBase::~QgsTemplatedLineSymbolLayerBase() = default;
 
+
+Qgis::SymbolLayerFlags QgsTemplatedLineSymbolLayerBase::flags() const
+{
+  // TODO do it only if we want fixed SL during interval or
+  // if we have defined no SL zone length
+  return QgsLineSymbolLayer::flags()
+         | Qgis::SymbolLayerFlag::DisableFeatureClipping;
+}
+
+
 void QgsTemplatedLineSymbolLayerBase::renderPolyline( const QPolygonF &points, QgsSymbolRenderContext &context )
 {
   const bool useSelectedColor = shouldRenderUsingSelectionColor( context );
@@ -1834,9 +1844,17 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
   }
   else
   {
+
+    double testMin = rc.convertMetersToMapUnits( 1100 );
+    double testMax = rc.convertMetersToMapUnits( 1300 );
+
+    testMin = rc.convertFromMapUnits( testMin, Qgis::RenderUnit::Pixels );
+    testMax = rc.convertFromMapUnits( testMax, Qgis::RenderUnit::Pixels );
+
     // not averaging line angle -- always use exact section angle
     int pointNum = 0;
     QPointF lastPt = points[0];
+    double currentLength = 0;
     for ( int i = 1; i < points.count(); ++i )
     {
       if ( context.renderContext().renderingStopped() )
@@ -1869,9 +1887,19 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
         // "c" is 1 for regular point or in interval (0,1] for begin of line segment
         lastPt += c * diff;
         lengthLeft -= painterUnitInterval;
-        scope->addVariable( QgsExpressionContextScope::StaticVariable( QgsExpressionContext::EXPR_GEOMETRY_POINT_NUM, ++pointNum, true ) );
-        renderSymbol( lastPt, context.feature(), rc, -1, useSelectedColor );
+
+        if ( currentLength < testMin || currentLength > testMax )
+        {
+          scope->addVariable( QgsExpressionContextScope::StaticVariable( QgsExpressionContext::EXPR_GEOMETRY_POINT_NUM, ++pointNum, true ) );
+          renderSymbol( lastPt, context.feature(), rc, -1, useSelectedColor );
+        }
+        else
+        {
+          int a = 0;
+        }
         c = 1; // reset c (if wasn't 1 already)
+
+        currentLength += painterUnitInterval;
       }
 
       lastPt = pt;

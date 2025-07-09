@@ -817,6 +817,8 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
 
   protected:
 
+    Qgis::SymbolLayerFlags flags() const override;
+
     /**
      * Sets the line \a angle modification for the symbol's angle. This angle is added to
      * the symbol's rotation and data defined rotation before rendering the symbol, and
@@ -1463,5 +1465,3 @@ class CORE_EXPORT QgsFilledLineSymbolLayer : public QgsLineSymbolLayer
 };
 
 #endif
-
-

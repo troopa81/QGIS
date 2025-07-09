@@ -974,6 +974,9 @@ direction is averaged when calculating individual symbol angles.
 
   protected:
 
+    virtual Qgis::SymbolLayerFlags flags() const;
+
+
     virtual void setSymbolLineAngle( double angle ) = 0;
 %Docstring
 Sets the line ``angle`` modification for the symbol's angle. This angle
@@ -1694,8 +1697,6 @@ round, etc).
   private:
     QgsFilledLineSymbolLayer( const QgsFilledLineSymbolLayer & );
 };
-
-
 
 /************************************************************************
  * This file has been generated automatically from                      *
