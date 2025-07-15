@@ -312,10 +312,16 @@ QRectF QgsSimpleMarkerSymbolLayerBase::bounds( QPointF point, QgsSymbolRenderCon
   if ( !qgsDoubleNear( angle, 0.0 ) )
     transform.rotate( angle );
 
-  return transform.mapRect( QRectF( -scaledSize / 2.0,
-                                    -scaledSize / 2.0,
-                                    scaledSize,
-                                    scaledSize ) );
+  if ( mShape == Qgis::MarkerShape::HalfSquare )
+    return transform.mapRect( QRectF( -scaledSize / 2.0,
+                                      -scaledSize / 2.0,
+                                      scaledSize / 2.0,
+                                      scaledSize ) );
+  else
+    return transform.mapRect( QRectF( -scaledSize / 2.0,
+                                      -scaledSize / 2.0,
+                                      scaledSize,
+                                      scaledSize ) );
 }
 
 Qgis::MarkerShape QgsSimpleMarkerSymbolLayerBase::decodeShape( const QString &name, bool *ok )
@@ -4356,4 +4362,3 @@ QImage QgsAnimatedMarkerSymbolLayer::fetchImage( QgsRenderContext &context, cons
   bool cached = false;
   return QgsApplication::imageCache()->pathAsImage( path, size, preserveAspectRatio, opacity, cached, context.flags() & Qgis::RenderContextFlag::RenderBlocking, 96, movieFrame );
 }
-
