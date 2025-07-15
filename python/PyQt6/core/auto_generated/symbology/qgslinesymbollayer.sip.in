@@ -1045,6 +1045,7 @@ Sets all common symbol properties in the ``destLayer``, using the
 settings serialized in the ``properties`` map.
 %End
 
+    virtual void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double averageAngleOver );
 
 };
 
