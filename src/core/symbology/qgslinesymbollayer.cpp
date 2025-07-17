@@ -1606,6 +1606,7 @@ void QgsTemplatedLineSymbolLayerBase::copyTemplateSymbolProperties( QgsTemplated
   destLayer->setAverageAngleMapUnitScale( mAverageAngleLengthMapUnitScale );
   destLayer->setRingFilter( mRingFilter );
   destLayer->setPlaceOnEveryPart( mPlaceOnEveryPart );
+  destLayer->setDisabledMarkers( mDisabledMarkers );
   copyDataDefinedProperties( destLayer );
   copyPaintEffect( destLayer );
 }
@@ -1691,6 +1692,18 @@ void QgsTemplatedLineSymbolLayerBase::setCommonProperties( QgsTemplatedLineSymbo
 
   destLayer->restoreOldDataDefinedProperties( properties );
 }
+
+
+void QgsTemplatedLineSymbolLayerBase::setDisabledMarkers( QList<int> disabledMarkers )
+{
+  mDisabledMarkers = disabledMarkers;
+}
+
+const QList<int> &QgsTemplatedLineSymbolLayerBase::disabledMarkers() const
+{
+  return mDisabledMarkers;
+}
+
 
 void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double averageOver )
 {
@@ -1845,16 +1858,17 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
   else
   {
 
-    double testMin = rc.convertMetersToMapUnits( 1100 );
-    double testMax = rc.convertMetersToMapUnits( 1300 );
+    // double testMin = rc.convertMetersToMapUnits( 1100 );
+    // double testMax = rc.convertMetersToMapUnits( 1300 );
 
-    testMin = rc.convertFromMapUnits( testMin, Qgis::RenderUnit::Pixels );
-    testMax = rc.convertFromMapUnits( testMax, Qgis::RenderUnit::Pixels );
+    // testMin = rc.convertFromMapUnits( testMin, Qgis::RenderUnit::Pixels );
+    // testMax = rc.convertFromMapUnits( testMax, Qgis::RenderUnit::Pixels );
 
     // not averaging line angle -- always use exact section angle
     int pointNum = 0;
+    int absolutePointNum = 0; // other one is screen visible point num
     QPointF lastPt = points[0];
-    double currentLength = 0;
+    // double currentLength = 0;
     for ( int i = 1; i < points.count(); ++i )
     {
       if ( context.renderContext().renderingStopped() )
@@ -1888,18 +1902,17 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineInterval( const QPolygonF &p
         lastPt += c * diff;
         lengthLeft -= painterUnitInterval;
 
-        if ( currentLength < testMin || currentLength > testMax )
+        // sort array and avoid contains
+        if ( !mDisabledMarkers.contains( absolutePointNum ) )
         {
           scope->addVariable( QgsExpressionContextScope::StaticVariable( QgsExpressionContext::EXPR_GEOMETRY_POINT_NUM, ++pointNum, true ) );
           renderSymbol( lastPt, context.feature(), rc, -1, useSelectedColor );
         }
-        else
-        {
-          int a = 0;
-        }
+
+        absolutePointNum++;
         c = 1; // reset c (if wasn't 1 already)
 
-        currentLength += painterUnitInterval;
+        // currentLength += painterUnitInterval;
       }
 
       lastPt = pt;

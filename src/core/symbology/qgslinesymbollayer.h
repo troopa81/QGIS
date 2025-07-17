@@ -815,6 +815,9 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     void startFeatureRender( const QgsFeature &feature, QgsRenderContext &context ) override;
     void stopFeatureRender( const QgsFeature &feature, QgsRenderContext &context ) override;
 
+    void setDisabledMarkers( QList<int> disabledMarkers );
+    const QList<int> &disabledMarkers() const;
+
   protected:
 
     Qgis::SymbolLayerFlags flags() const override;
@@ -908,6 +911,7 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     QPointF mFinalVertex;
     bool mCurrentFeatureIsSelected = false;
     double mFeatureSymbolOpacity = 1;
+    QList<int> mDisabledMarkers;
 
     friend class TestQgsMarkerLineSymbol;
 

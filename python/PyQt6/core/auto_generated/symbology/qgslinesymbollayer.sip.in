@@ -972,6 +972,9 @@ direction is averaged when calculating individual symbol angles.
     virtual void stopFeatureRender( const QgsFeature &feature, QgsRenderContext &context );
 
 
+    void setDisabledMarkers( QList<int> disabledMarkers );
+    const QList<int> &disabledMarkers() const;
+
   protected:
 
     virtual Qgis::SymbolLayerFlags flags() const;
