@@ -17,6 +17,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qgselevationprofile.h"
 #include <QObject>
 #include <QAction>
 #include <QApplication>
@@ -6498,6 +6499,16 @@ bool QgisApp::addProject( const QString &projectFile )
         {
           QgsAppLayerHandling::resolveVectorLayerDependencies( vl );
         }
+      }
+    }
+
+    {
+      QgsScopedRuntimeProfile profile( tr( "Load profile widget" ), QStringLiteral( "projectload" ) );
+
+      for ( QgsElevationProfile *elevationProfile : QgsProject::instance()->elevationProfileManager()->elevationProfiles() )
+      {
+        QgsElevationProfileWidget *widget = new QgsElevationProfileWidget( *elevationProfile );
+        widget->setMainCanvas( mMapCanvas );
       }
     }
 
@@ -13259,7 +13270,10 @@ QgsElevationProfileWidget *QgisApp::createNewElevationProfile()
     counter++;
   }
 
-  QgsElevationProfileWidget *widget = new QgsElevationProfileWidget( title );
+  QgsElevationProfile *elevationProfile = new QgsElevationProfile( title );
+  QgsProject::instance()->elevationProfileManager()->addElevationProfile( elevationProfile );
+
+  QgsElevationProfileWidget *widget = new QgsElevationProfileWidget( *elevationProfile );
   widget->setMainCanvas( mMapCanvas );
   return widget;
 }

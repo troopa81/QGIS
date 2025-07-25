@@ -143,9 +143,9 @@ void QgsElevationProfileLayersDialog::filterVisible( bool enabled )
 }
 
 
-QgsElevationProfileWidget::QgsElevationProfileWidget( const QString &name )
+QgsElevationProfileWidget::QgsElevationProfileWidget( QgsElevationProfile &elevationProfile )
   : QWidget( nullptr )
-  , mCanvasName( name )
+  , mElevationProfile( elevationProfile )
   , mLayerTree( new QgsLayerTree() )
   , mLayerTreeBridge( new QgsLayerTreeRegistryBridge( mLayerTree.get(), QgsProject::instance(), this ) )
 {
@@ -478,7 +478,7 @@ QgsElevationProfileWidget::QgsElevationProfileWidget( const QString &name )
   } );
   setLayout( layout );
 
-  mDockableWidgetHelper = new QgsDockableWidgetHelper( mCanvasName, this, QgisApp::instance(), mCanvasName, QStringList(), QgsDockableWidgetHelper::OpeningMode::RespectSetting, true, Qt::DockWidgetArea::BottomDockWidgetArea, QgsDockableWidgetHelper::Option::RaiseTab );
+  mDockableWidgetHelper = new QgsDockableWidgetHelper( elevationProfile.name(), this, QgisApp::instance(), elevationProfile.name(), QStringList(), QgsDockableWidgetHelper::OpeningMode::RespectSetting, true, Qt::DockWidgetArea::BottomDockWidgetArea, QgsDockableWidgetHelper::Option::RaiseTab );
 
   QToolButton *toggleButton = mDockableWidgetHelper->createDockUndockToolButton();
   toggleButton->setToolTip( tr( "Dock Elevation Profile View" ) );
@@ -517,7 +517,7 @@ QgsElevationProfileWidget::~QgsElevationProfileWidget()
 
 void QgsElevationProfileWidget::setCanvasName( const QString &name )
 {
-  mCanvasName = name;
+  mElevationProfile.setName( name );
   mDockableWidgetHelper->setWindowTitle( name );
 }
 

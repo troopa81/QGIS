@@ -15,6 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qgselevationprofilemanager.h"
 #include "qgsproject.h"
 #include "moc_qgsproject.cpp"
 
@@ -365,6 +366,7 @@ QgsProject::QgsProject( QObject *parent, Qgis::ProjectCapabilities capabilities 
   , m3DViewsManager( new QgsMapViewsManager( this ) )
   , mBookmarkManager( QgsBookmarkManager::createProjectBasedManager( this ) )
   , mSensorManager( new QgsSensorManager( this ) )
+  , mElevationProfileManager( std::make_unique<QgsElevationProfileManager>() )
   , mViewSettings( new QgsProjectViewSettings( this ) )
   , mStyleSettings( new QgsProjectStyleSettings( this ) )
   , mTimeSettings( new QgsProjectTimeSettings( this ) )
@@ -2546,6 +2548,9 @@ bool QgsProject::readProjectFile( const QString &filename, Qgis::ProjectReadFlag
   profile.switchTask( tr( "Loading sensors" ) );
   mSensorManager->readXml( doc->documentElement(), *doc );
 
+  profile.switchTask( tr( "Loading elevation profiles" ) );
+  mElevationProfileManager->readXml( doc->documentElement(), *doc );
+
   // reassign change dependencies now that all layers are loaded
   QMap<QString, QgsMapLayer *> existingMaps = mapLayers();
   for ( QMap<QString, QgsMapLayer *>::iterator it = existingMaps.begin(); it != existingMaps.end(); ++it )
@@ -3478,6 +3483,11 @@ bool QgsProject::writeProjectFile( const QString &filename )
   }
 
   {
+    const QDomElement elevationProfileElem = mElevationProfileManager->writeXml( *doc );
+    qgisNode.appendChild( elevationProfileElem );
+  }
+
+  {
     const QDomElement viewSettingsElem = mViewSettings->writeXml( *doc, context );
     qgisNode.appendChild( viewSettingsElem );
   }
@@ -4332,6 +4342,20 @@ QgsSensorManager *QgsProject::sensorManager()
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
   return mSensorManager;
+}
+
+const QgsElevationProfileManager *QgsProject::elevationProfileManager() const
+{
+  QGIS_PROTECT_QOBJECT_THREAD_ACCESS_NON_FATAL
+
+  return mElevationProfileManager.get();
+}
+
+QgsElevationProfileManager *QgsProject::elevationProfileManager()
+{
+  QGIS_PROTECT_QOBJECT_THREAD_ACCESS
+
+  return mElevationProfileManager.get();
 }
 
 const QgsProjectViewSettings *QgsProject::viewSettings() const

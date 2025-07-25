@@ -34,6 +34,7 @@
 #include <QStringList>
 #include <QTranslator>
 
+#include "qgselevationprofilemanager.h"
 #include "qgssnappingconfig.h"
 #include "qgsprojectversion.h"
 #include "qgsexpressioncontextgenerator.h"
@@ -54,7 +55,6 @@
 #include "qgsvectorlayereditbuffergroup.h"
 #include "qgselevationshadingrenderer.h"
 #include "qgsabstractsensor.h"
-
 #include "qgsrelationmanager.h"
 #include "qgsmapthemecollection.h"
 
@@ -895,6 +895,17 @@ class CORE_EXPORT QgsProject : public QObject, public QgsExpressionContextGenera
      * \since QGIS 3.32
      */
     QgsSensorManager *sensorManager();
+
+    /**
+     * TODO
+     * \note not available in Python bindings
+     */
+    const QgsElevationProfileManager *elevationProfileManager() const SIP_SKIP;
+
+    /**
+     * TODO
+     */
+    QgsElevationProfileManager *elevationProfileManager();
 
     /**
      * Returns the project's view settings, which contains settings and properties
@@ -2488,6 +2499,8 @@ class CORE_EXPORT QgsProject : public QObject, public QgsExpressionContextGenera
     QgsBookmarkManager *mBookmarkManager = nullptr;
 
     QgsSensorManager *mSensorManager = nullptr;
+
+    std::unique_ptr<QgsElevationProfileManager> mElevationProfileManager;
 
     QgsProjectViewSettings *mViewSettings = nullptr;
 

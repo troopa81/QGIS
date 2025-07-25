@@ -17,6 +17,7 @@
 #ifndef QGSELEVATIONPROFILEWIDGET_H
 #define QGSELEVATIONPROFILEWIDGET_H
 
+#include "qgselevationprofile.h"
 #include "qmenu.h"
 #include "qgsdockwidget.h"
 #include "qgis_app.h"
@@ -96,13 +97,16 @@ class QgsElevationProfileWidget : public QWidget
     static const QgsSettingsEntryColor *settingBackgroundColor;
     static const QgsSettingsEntryBool *settingShowSubsections;
 
-    QgsElevationProfileWidget( const QString &name );
+    QgsElevationProfileWidget( QgsElevationProfile &elevationProfile );
     ~QgsElevationProfileWidget();
 
     QgsDockableWidgetHelper *dockableWidgetHelper() { return mDockableWidgetHelper; }
 
+    // TODO still usefull ?
     void setCanvasName( const QString &name );
-    QString canvasName() const { return mCanvasName; }
+
+    // TODO still usefull ?
+    QString canvasName() const { return mElevationProfile.name(); }
 
     void setMainCanvas( QgsMapCanvas *canvas );
 
@@ -139,9 +143,9 @@ class QgsElevationProfileWidget : public QWidget
     void editSubsectionsSymbology();
 
   private:
+    QgsElevationProfile &mElevationProfile;
     QgsElevationProfileCanvas *mCanvas = nullptr;
 
-    QString mCanvasName;
     QgsMapCanvas *mMainCanvas = nullptr;
 
     QProgressBar *mProgressPendingJobs = nullptr;

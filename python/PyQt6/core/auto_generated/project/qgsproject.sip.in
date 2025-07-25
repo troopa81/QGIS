@@ -14,7 +14,6 @@
 
 
 
-
 class QgsProject : QObject, QgsExpressionContextGenerator, QgsExpressionContextScopeGenerator, QgsProjectTranslator
 {
 %Docstring(signature="appended")
@@ -931,6 +930,12 @@ Returns the project's sensor manager, which manages sensors within the
 project.
 
 .. versionadded:: 3.32
+%End
+
+
+    QgsElevationProfileManager *elevationProfileManager();
+%Docstring
+TODO
 %End
 
 
