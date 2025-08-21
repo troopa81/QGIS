@@ -78,88 +78,110 @@ FoundSymbolLayer findSymbolLayer( QgsSymbol *symbol, const QString slId )
 
 
 QgsMapToolBlankAreaRubberBand::QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas )
-  : QgsMapCanvasItem( canvas )
+  : mMapCanvas( canvas )
+  , mBlankAreasRubberBand( std::make_unique<QgsRubberBand>( canvas ) )
+  , mStartEndRubberBand( std::make_unique<QgsRubberBand>( canvas, Qgis::GeometryType::Point ) )
 {
-  // TODO update correctly item size accoring to what is displayed
-  mItemSize = mMapCanvas->size();
+  mBlankAreasRubberBand->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+  mBlankAreasRubberBand->setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
+
+  mStartEndRubberBand->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+  mStartEndRubberBand->setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
+  mStartEndRubberBand->setIcon( QgsRubberBand::IconType::ICON_BOX );
 }
 
-void QgsMapToolBlankAreaRubberBand::paint( QPainter *painter )
-{
-  // Probleme de partir de la géométrie et pas du rendu:
-  // - on a pas exactement ce qui va être rendu (quid si le symbol fait des rotations avant, si y a des
-  // geom generator...
-  // - C'est galère de récupérer tous les points: toutes les méthodes _getPolygon[...]
+// void QgsMapToolBlankAreaRubberBand::paint( QPainter *painter )
+// {
+//   // Probleme de partir de la géométrie et pas du rendu:
+//   // - on a pas exactement ce qui va être rendu (quid si le symbol fait des rotations avant, si y a des
+//   // geom generator...
+//   // - C'est galère de récupérer tous les points: toutes les méthodes _getPolygon[...]
 
 
-  // il faut
-  // - le layer
-  // - le symbol layer
-  // - les data defined pour afficher celles définies et sur quelles features
-  // --> il va falloir passer en revue toutes les features pour évaluer toute les data defined properties
-  // --> Est-ce que l'on met du cache ? Oui map fid -> data define properties et geom ? invalidaiton du cache ?
-  // invalidation cache: quand le layer change dataChanged() / l'extent visualisé change ?
-  // Methode collectBlankAreas qui remplit une liste de fid/geom(avec offset)/blankArea si defined
+//   // il faut
+//   // - le layer
+//   // - le symbol layer
+//   // - les data defined pour afficher celles définies et sur quelles features
+//   // --> il va falloir passer en revue toutes les features pour évaluer toute les data defined properties
+//   // --> Est-ce que l'on met du cache ? Oui map fid -> data define properties et geom ? invalidaiton du cache ?
+//   // invalidation cache: quand le layer change dataChanged() / l'extent visualisé change ?
+//   // Methode collectBlankAreas qui remplit une liste de fid/geom(avec offset)/blankArea si defined
 
 
-  // on applique le code de renderPolylineInterval dans maptool_test.py pour trouver la plus proche feature
-  // pour la création
+//   // on applique le code de renderPolylineInterval dans maptool_test.py pour trouver la plus proche feature
+//   // pour la création
 
-  // on pourrait éventuellement utiliser un index
+//   // on pourrait éventuellement utiliser un index
 
-  // Solution qgsmaptoolpointsymbol : il faut cliquer sur la feature avant de pouvoir éditer
-  // Choisit un symbole (sauf sur le rule based) alors qu'on peut avoir plusieurs symbol layers
+//   // Solution qgsmaptoolpointsymbol : il faut cliquer sur la feature avant de pouvoir éditer
+//   // Choisit un symbole (sauf sur le rule based) alors qu'on peut avoir plusieurs symbol layers
 
 
-  switch ( mCurrentDisplay )
-  {
-    case CurrentDisplay::BlankArea:
-    {
-      QPainterPath path;
-      path.moveTo( mCurrentBlankArea.at( 0 ) );
-      for ( int i = 0; i < mCurrentBlankArea.count(); i++ )
-      {
-        path.lineTo( mCurrentBlankArea.at( i ) );
-      }
+//   switch ( mCurrentDisplay )
+//   {
+//     case CurrentDisplay::BlankArea:
+//     {
+//       QPainterPath path;
+//       path.moveTo( mCurrentBlankArea.at( 0 ) );
+//       for ( int i = 0; i < mCurrentBlankArea.count(); i++ )
+//       {
+//         path.lineTo( mCurrentBlankArea.at( i ) );
+//       }
 
-      // TODO need to save/restore ?
-      painter->save();
+//       // TODO need to save/restore ?
+//       painter->save();
 
-      painter->setPen( QPen( Qt::GlobalColor::red ) );
-      painter->setBrush( QBrush() );
-      painter->drawPath( path );
-      // painter->drawText(QPointF(50, 50), f"si={startIndex} ei={endIndex}");
-      painter->restore();
-      break;
-    }
-    case CurrentDisplay::Position:
+//       painter->setPen( QPen( Qt::GlobalColor::red ) );
+//       painter->setBrush( QBrush() );
+//       painter->drawPath( path );
+//       // painter->drawText(QPointF(50, 50), f"si={startIndex} ei={endIndex}");
+//       painter->restore();
+//       break;
+//     }
+//     case CurrentDisplay::Position:
 
-      // TODO need to save/restore ?
-      painter->save();
+//       // TODO need to save/restore ?
+//       painter->save();
 
-      painter->setPen( QPen( Qt::GlobalColor::red ) );
-      painter->setBrush( QBrush( Qt::GlobalColor::red ) );
-      painter->drawEllipse( mCurrentPosition, 4, 4 );
-      // painter->drawText(QPointF(bestPx, bestPy), f"d={distance}")
-      painter->restore();
+//       painter->setPen( QPen( Qt::GlobalColor::red ) );
+//       painter->setBrush( QBrush( Qt::GlobalColor::red ) );
+//       painter->drawEllipse( mCurrentPosition, 4, 4 );
+//       // painter->drawText(QPointF(bestPx, bestPy), f"d={distance}")
+//       painter->restore();
 
-      break;
+//       break;
 
-    case CurrentDisplay::None:
-      break;
-  }
-}
+//     case CurrentDisplay::None:
+//       break;
+//   }
+// }
 
 void QgsMapToolBlankAreaRubberBand::setCurrentBlankArea( const QList<QPointF> &points )
 {
-  mCurrentBlankArea = points;
-  mCurrentDisplay = CurrentDisplay::BlankArea;
+  const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
+  mBlankAreasRubberBand->reset();
+  mStartEndRubberBand->reset( Qgis::GeometryType::Point );
+
+  const QgsPointXY firstPoint = m2p.toMapCoordinates( points.at( 0 ).x(), points.at( 0 ).y() );
+  mBlankAreasRubberBand->addPoint( firstPoint, false );
+  mStartEndRubberBand->addPoint( firstPoint, false );
+
+  for ( int i = 1; i < points.size() - 1; i++ )
+  {
+    const QgsPointXY point = m2p.toMapCoordinates( points.at( i ).x(), points.at( i ).y() );
+    mBlankAreasRubberBand->addPoint( point, false );
+  }
+
+  const QgsPointXY lastPoint = m2p.toMapCoordinates( points.at( points.size() - 1 ).x(), points.at( points.size() - 1 ).y() );
+  mBlankAreasRubberBand->addPoint( lastPoint );
+  mStartEndRubberBand->addPoint( lastPoint );
 }
 
 void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
 {
-  mCurrentPosition = point;
-  mCurrentDisplay = CurrentDisplay::Position;
+  mStartEndRubberBand->reset( Qgis::GeometryType::Point );
+  const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
+  mStartEndRubberBand->addPoint( m2p.toMapCoordinates( point.x(), point.y() ) );
 }
 
 
@@ -195,7 +217,7 @@ void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
 
 QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, const QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer )
   : QgsMapTool( canvas )
-  , mRubberBand( std::make_unique<QgsRubberBand>( canvas ) )
+  , mRubberBand( std::make_unique<QgsMapToolBlankAreaRubberBand>( canvas ) )
   , mLayer( layer )
   , mSymbolLayer( symbolLayer )
 {
@@ -239,10 +261,6 @@ QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, const 
   {
     mPoints = newSymbolLayer->getRenderedPoints();
   }
-
-  mRubberBand->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
-  // mRubberBand->setStrokeColor( QgsSettingsRegistryCore::settingsDigitizingLineWidth->value() );
-  mRubberBand->setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
 }
 
 QgsMapToolEditBlankAreas::~QgsMapToolEditBlankAreas()
@@ -350,17 +368,11 @@ void QgsMapToolEditBlankAreas::canvasMoveEvent( QgsMapMouseEvent *e )
       pointsToDraw << QPointF( endPx, endPy );
     }
 
-
-    const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
-    mRubberBand->reset();
-    for ( QPointF point : pointsToDraw )
-    {
-      mRubberBand->addPoint( m2p.toMapCoordinates( point.x(), point.y() ), false );
-    }
-    // TODO isVisible needed ? is it the best way to update the points ? a setPoints method maybe would be great ?
-    mRubberBand->setVisible( true );
-    mRubberBand->updatePosition();
-    mRubberBand->update();
+    mRubberBand->setCurrentBlankArea( pointsToDraw );
+  }
+  else
+  {
+    mRubberBand->setCurrentPosition( QPointF( mCurrentPx, mCurrentPy ) );
   }
 }
 

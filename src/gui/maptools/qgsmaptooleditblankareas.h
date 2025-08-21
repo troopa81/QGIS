@@ -25,16 +25,14 @@ class QgsLineSymbolLayer;
 class QgsSymbol;
 class QgsRubberBand;
 
-// TODO Remove ?
+// TODO Rename ? It's not actually a rubberband, its more a container of rubber band , no? (et virer "MapTool")
 // TODO do we have to expose it in header
-class QgsMapToolBlankAreaRubberBand : public QgsMapCanvasItem
+class QgsMapToolBlankAreaRubberBand
 {
   public:
     QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas );
 
-    void paint( QPainter *painter ) override;
-
-    // TODO
+    // TODO coords are in screen ref (is it better to convert them before ? )
     void setCurrentBlankArea( const QList<QPointF> &points );
 
     // TODO
@@ -51,9 +49,9 @@ class QgsMapToolBlankAreaRubberBand : public QgsMapCanvasItem
 
     QPointF mCurrentPosition;
 
-    // TODO rename mCurrentBlankAreaPoints ?
-    QList<QPointF> mCurrentBlankArea;
-    CurrentDisplay mCurrentDisplay = CurrentDisplay::None;
+    QgsMapCanvas *mMapCanvas = nullptr;
+    std::unique_ptr<QgsRubberBand> mBlankAreasRubberBand;
+    std::unique_ptr<QgsRubberBand> mStartEndRubberBand;
 };
 
 /**
@@ -77,7 +75,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapTool
     void canvasPressEvent( QgsMapMouseEvent *e ) override;
 
   private:
-    std::unique_ptr<QgsRubberBand> mRubberBand;
+    std::unique_ptr<QgsMapToolBlankAreaRubberBand> mRubberBand;
     const QgsVectorLayer *mLayer = nullptr;
     QgsLineSymbolLayer *mSymbolLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
