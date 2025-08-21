@@ -884,11 +884,6 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     virtual void renderSymbol( const QPointF &point, const QgsFeature *feature, QgsRenderContext &context, int layer = -1, bool selected = false ) = 0;
 
     /**
-     * Copies all common properties of this layer to another templated symbol layer.
-     */
-    void copyTemplateSymbolProperties( QgsTemplatedLineSymbolLayerBase *destLayer ) const;
-
-    /**
      * Sets all common symbol properties in the \a destLayer, using the settings
      * serialized in the \a properties map.
      */

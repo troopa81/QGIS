@@ -45,6 +45,7 @@
 #include "qgsiconutils.h"
 #include "qgslinearreferencingsymbollayer.h"
 #include "qgsnumericformatselectorwidget.h"
+#include "qgsmaptooleditblankareas.h"
 
 #include <QAbstractButton>
 #include <QButtonGroup>
@@ -1931,7 +1932,12 @@ QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *
       emit changed();
     }
   } );
+
+
+  connect( mEditBlankAreasBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlanAreas );
 }
+
+QgsMarkerLineSymbolLayerWidget::~QgsMarkerLineSymbolLayerWidget() = default;
 
 void QgsMarkerLineSymbolLayerWidget::setSymbolLayer( QgsSymbolLayer *layer )
 {
@@ -2127,6 +2133,24 @@ void QgsMarkerLineSymbolLayerWidget::setAverageAngle( double val )
   }
 }
 
+void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlanAreas( bool toggled )
+{
+  if ( !mMapToolEditBlanAreas && toggled )
+  {
+    // TODO if context changes, we have to delete/reset the maptool because mapCanvas may have changed
+    mMapToolEditBlanAreas = std::make_unique<QgsMapToolEditBlankAreas>( context().mapCanvas(), vectorLayer(), mLayer );
+  }
+
+  if ( toggled )
+  {
+    // TODO on destructor remove maptool if set
+    context().mapCanvas()->setMapTool( mMapToolEditBlanAreas.get() );
+  }
+  else if ( mMapToolEditBlanAreas.get() )
+  {
+    context().mapCanvas()->unsetMapTool( mMapToolEditBlanAreas.get() );
+  }
+}
 
 ///////////
 

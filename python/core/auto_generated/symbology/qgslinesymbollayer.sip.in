@@ -999,8 +999,6 @@ Copies all common properties of this layer to another templated symbol
 layer.
 %End
 
-
-
   protected:
 
     virtual void setSymbolLineAngle( double angle ) = 0;
@@ -1038,12 +1036,6 @@ indicates that all symbol layers should be rendered.
 If ``selected`` is ``True`` then the symbol will be drawn using the
 "selected feature" style and colors instead of the symbol's normal
 style.
-%End
-
-    void copyTemplateSymbolProperties( QgsTemplatedLineSymbolLayerBase *destLayer ) const;
-%Docstring
-Copies all common properties of this layer to another templated symbol
-layer.
 %End
 
     static void setCommonProperties( QgsTemplatedLineSymbolLayerBase *destLayer, const QVariantMap &properties );

@@ -28,6 +28,7 @@
 class QgsVectorLayer;
 class QgsMarkerSymbol;
 class QgsLineSymbol;
+class QgsMapToolEditBlankAreas;
 
 /**
  * \ingroup gui
@@ -468,6 +469,8 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
      */
     QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *vl, QWidget *parent SIP_TRANSFERTHIS = nullptr );
 
+    virtual ~QgsMarkerLineSymbolLayerWidget();
+
     /**
      * Creates a new QgsMarkerLineSymbolLayerWidget.
      * \param vl associated vector layer
@@ -487,6 +490,8 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
   protected:
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
+    std::unique_ptr<QgsMapToolEditBlankAreas> mMapToolEditBlanAreas;
+
   private slots:
     void setRotate();
     void setOffset();
@@ -496,6 +501,7 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
     void mOffsetAlongLineUnitWidget_changed();
     void averageAngleUnitChanged();
     void setAverageAngle( double val );
+    void toggleMapToolEditBlanAreas( bool toggled );
 };
 
 

@@ -418,13 +418,16 @@
          </spacer>
         </item>
         <item>
-         <widget class="QToolButton" name="mBlankAreasToolButton">
+         <widget class="QToolButton" name="mEditBlankAreasBtn">
           <property name="text">
            <string/>
           </property>
           <property name="icon">
            <iconset resource="../../../images/images.qrc">
             <normaloff>:/images/themes/default/mActionRemoveAllFromOverview.svg</normaloff>:/images/themes/default/mActionRemoveAllFromOverview.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
