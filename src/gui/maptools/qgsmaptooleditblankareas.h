@@ -68,7 +68,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapTool
     /**
      * TODO
      */
-    QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer );
+    QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankAreaFieldIndex );
 
     ~QgsMapToolEditBlankAreas();
 
@@ -88,8 +88,9 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapTool
     QgsLineSymbolLayer *mSymbolLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
     QPolygonF mPoints; // TODO don't this need, don't we ?
-    int mBlankAreasAttributeIndex = -1;
+    int mBlankAreasFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
+    QString mCurrentBlankAreas; // TODO remove this when we will use current rubber band blank areas to serialize
     QPointF mCurrentPt;
     QPointF mFirstPt;
     int mCurrentIndex = -1;

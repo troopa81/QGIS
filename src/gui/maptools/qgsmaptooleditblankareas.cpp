@@ -215,24 +215,17 @@ void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
 
 // }
 
-QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer )
+QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankAreaFieldIndex )
   : QgsMapTool( canvas )
   , mRubberBand( std::make_unique<QgsMapToolBlankAreaRubberBand>( canvas ) )
   , mLayer( layer )
   , mSymbolLayer( symbolLayer )
+  , mBlankAreasFieldIndex( blankAreaFieldIndex )
 {
   // TODO what happen with other renderer
   // TODO deal with errors
   const QgsSingleSymbolRenderer *renderer = dynamic_cast<const QgsSingleSymbolRenderer *>( mLayer->renderer() );
   mSymbol.reset( renderer->symbol()->clone() );
-
-
-  const QgsProperty blankAreasProperty = mSymbolLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankAreas );
-  // TODO shall never been otherwise here, maybe better to chech before and take the field name as a parameter
-  if ( blankAreasProperty && blankAreasProperty.isActive() && blankAreasProperty.propertyType() == Qgis::PropertyType::Field )
-  {
-    mBlankAreasAttributeIndex = mLayer->fields().indexFromName( blankAreasProperty.field() );
-  }
 
   // search and replace symbol layer in clone
   FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayer->id() );
@@ -255,6 +248,7 @@ QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVec
   mCurrentFeatureId = 1;
   QgsFeature feature;
   feature = mLayer->getFeature( mCurrentFeatureId );
+  mCurrentBlankAreas = feature.attribute( mBlankAreasFieldIndex ).toString();
 
   QgsRenderContext context = QgsRenderContext::fromMapSettings( canvas->mapSettings() );
   QgsCoordinateTransform tranform( canvas->mapSettings().layerTransform( mLayer ) );
@@ -427,8 +421,7 @@ std::pair<double, double> QgsMapToolEditBlankAreas::getStartEndDistance() const
     endDistance += d;
   }
 
-  d = distanceFct( mPoints.at( endIndex ), endPt );
-  endDistance += d;
+  endDistance += startIndex == endIndex ? distanceFct( startPt, endPt ) : distanceFct( mPoints.at( endIndex - 1 ), endPt );
 
   QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
 
@@ -442,11 +435,13 @@ std::pair<double, double> QgsMapToolEditBlankAreas::getStartEndDistance() const
 
 void QgsMapToolEditBlankAreas::addNewBlankArea( double startDistance, double endDistance )
 {
-  // TODO shall we use a property type list
-  QString strBlankAreas = mSymbolLayer->dataDefinedProperties().valueAsString( QgsSymbolLayer::Property::BlankAreas, QgsExpressionContext(), QString() );
+  if ( mBlankAreasFieldIndex < 0 || mBlankAreasFieldIndex >= mLayer->fields().count() )
+    return;
 
   QList<double> blankAreas;
-  for ( QString strBlankArea : strBlankAreas.split( "," ) )
+  // TODO this code exists already on qgslinesymbollayer
+  // TODO shall we use a property type list
+  for ( QString strBlankArea : mCurrentBlankAreas.split( ",", Qt::SkipEmptyParts ) )
   {
     // TODO deal with error
     blankAreas << strBlankArea.toDouble();
@@ -461,14 +456,14 @@ void QgsMapToolEditBlankAreas::addNewBlankArea( double startDistance, double end
     strBlankAreaList << QString::number( blankArea );
   }
 
-  mSymbolLayer->dataDefinedProperties().setProperty( QgsSymbolLayer::Property::BlankAreas, strBlankAreaList.join( "," ) );
-
-  QString strNewBlankAreas = strBlankAreaList.join( "," );
+  const QString strNewBlankAreas = strBlankAreaList.join( "," );
 
   mLayer->beginEditCommand( tr( "Add blank area" ) );
-  if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasAttributeIndex, strNewBlankAreas ) )
+  if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasFieldIndex, strNewBlankAreas ) )
   {
+    mCurrentBlankAreas = strNewBlankAreas;
     mLayer->endEditCommand();
+    mLayer->triggerRepaint();
   }
   else
   {

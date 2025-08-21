@@ -1935,7 +1935,7 @@ QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *
   } );
 
 
-  connect( mEditBlankAreasBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlanAreas );
+  connect( mEditBlankAreasBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankAreas );
 }
 
 QgsMarkerLineSymbolLayerWidget::~QgsMarkerLineSymbolLayerWidget() = default;
@@ -2137,37 +2137,43 @@ void QgsMarkerLineSymbolLayerWidget::setAverageAngle( double val )
   }
 }
 
-void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlanAreas( bool toggled )
+void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankAreas( bool toggled )
 {
-  if ( !mMapToolEditBlanAreas && toggled )
+  if ( mMapToolEditBlankAreas )
   {
-    // TODO if context changes, we have to delete/reset the maptool because mapCanvas may have changed
-    mMapToolEditBlanAreas = std::make_unique<QgsMapToolEditBlankAreas>( context().mapCanvas(), vectorLayer(), mLayer );
+    context().mapCanvas()->unsetMapTool( mMapToolEditBlankAreas.get() );
+    mMapToolEditBlankAreas.reset();
   }
 
   if ( toggled )
   {
-    // TODO on destructor remove maptool if set
-    context().mapCanvas()->setMapTool( mMapToolEditBlanAreas.get() );
-  }
-  else if ( mMapToolEditBlanAreas.get() )
-  {
-    context().mapCanvas()->unsetMapTool( mMapToolEditBlanAreas.get() );
+    // TODO if context changes, we have to delete/reset the maptool because mapCanvas may have changed
+    mMapToolEditBlankAreas = std::make_unique<QgsMapToolEditBlankAreas>( context().mapCanvas(), vectorLayer(), mLayer, blankAreasFieldIndex() );
+
+    // TODO on destructor remove maptool if set (to check, it looks ok)
+    context().mapCanvas()->setMapTool( mMapToolEditBlankAreas.get() );
   }
 }
 
 void QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget()
 {
-  const QgsProperty blankAreasProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankAreas );
-  mEditBlankAreasBtn->setEnabled( blankAreasProperty && blankAreasProperty.isActive() && blankAreasProperty.propertyType() == Qgis::PropertyType::Field );
-
+  mEditBlankAreasBtn->setEnabled( blankAreasFieldIndex() > -1 );
   QString tooltip = tr( "Tool to create blank areas where marker lines won't be displayed" );
   if ( !mEditBlankAreasBtn->isEnabled() )
   {
-    tooltip += QStringLiteral( "<br/>" ) + tr( "This tool is disabled because no field property has been set" );
+    tooltip += QStringLiteral( "<br/><br/>" ) + tr( "This tool is disabled because no valid field property has been set" );
   }
 
   mEditBlankAreasBtn->setToolTip( tooltip );
+}
+
+int QgsMarkerLineSymbolLayerWidget::blankAreasFieldIndex() const
+{
+  const QgsProperty blankAreasProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankAreas );
+  return blankAreasProperty && blankAreasProperty.isActive()
+             && blankAreasProperty.propertyType() == Qgis::PropertyType::Field
+           ? vectorLayer()->fields().indexFromName( blankAreasProperty.field() )
+           : -1;
 }
 
 ///////////

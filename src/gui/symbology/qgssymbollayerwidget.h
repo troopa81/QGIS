@@ -491,7 +491,7 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
   protected:
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
-    std::unique_ptr<QgsMapToolEditBlankAreas> mMapToolEditBlanAreas;
+    std::unique_ptr<QgsMapToolEditBlankAreas> mMapToolEditBlankAreas;
 
   private slots:
     void setRotate();
@@ -502,8 +502,14 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
     void mOffsetAlongLineUnitWidget_changed();
     void averageAngleUnitChanged();
     void setAverageAngle( double val );
-    void toggleMapToolEditBlanAreas( bool toggled );
+    void toggleMapToolEditBlankAreas( bool toggled );
+
+    // TODO
     void updateBlankAreaWidget();
+
+  private:
+    // TODO returns -1 if no dd property field has been set
+    int blankAreasFieldIndex() const;
 };
 
 
