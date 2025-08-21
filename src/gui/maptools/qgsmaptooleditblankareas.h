@@ -18,6 +18,7 @@
 
 #include "qgsmaptool.h"
 #include "qgsmapcanvasitem.h"
+#include "qgsfeatureid.h"
 
 class QgsMapToolBlankAreaRubberBand;
 class QgsVectorLayer;
@@ -67,7 +68,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapTool
     /**
      * TODO
      */
-    QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, const QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer );
+    QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer );
 
     ~QgsMapToolEditBlankAreas();
 
@@ -75,16 +76,22 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapTool
     void canvasPressEvent( QgsMapMouseEvent *e ) override;
 
   private:
+    // TODO returns start/end info and set in correct order (in points order)
+    void getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const;
+    // TODO compute and return current blank area start and end distance
+    std::pair<double, double> getStartEndDistance() const;
+    // TODO
+    void addNewBlankArea( double startDistance, double endDistance );
+
     std::unique_ptr<QgsMapToolBlankAreaRubberBand> mRubberBand;
-    const QgsVectorLayer *mLayer = nullptr;
+    QgsVectorLayer *mLayer = nullptr;
     QgsLineSymbolLayer *mSymbolLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
     QPolygonF mPoints; // TODO don't this need, don't we ?
-
-    double mCurrentPx = 0;
-    double mCurrentPy = 0;
-    double mFirstPx = 0;
-    double mFirstPy = 0;
+    int mBlankAreasAttributeIndex = -1;
+    QgsFeatureId mCurrentFeatureId = FID_NULL;
+    QPointF mCurrentPt;
+    QPointF mFirstPt;
     int mCurrentIndex = -1;
     int mFirstIndex = -1;
 };

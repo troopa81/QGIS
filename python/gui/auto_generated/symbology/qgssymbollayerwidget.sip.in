@@ -50,10 +50,7 @@ associated map canvas and expression contexts.
 .. seealso:: :py:func:`setContext`
 %End
 
-    const QgsVectorLayer *vectorLayer() const;
-%Docstring
-Returns the vector layer associated with the widget.
-%End
+    QgsVectorLayer *vectorLayer() const;
 
   protected:
     void registerDataDefinedButton( QgsPropertyOverrideButton *button, QgsSymbolLayer::Property key );

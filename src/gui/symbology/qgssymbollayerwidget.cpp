@@ -14,6 +14,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qgspropertyoverridebutton.h"
 #include "qgssymbollayerwidget.h"
 #include "moc_qgssymbollayerwidget.cpp"
 
@@ -1998,9 +1999,12 @@ void QgsMarkerLineSymbolLayerWidget::setSymbolLayer( QgsSymbolLayer *layer )
   registerDataDefinedButton( mPlacementDDBtn, QgsSymbolLayer::Property::Placement );
   registerDataDefinedButton( mOffsetAlongLineDDBtn, QgsSymbolLayer::Property::OffsetAlongLine );
   registerDataDefinedButton( mAverageAngleDDBtn, QgsSymbolLayer::Property::AverageAngleLength );
+  registerDataDefinedButton( mBlankAreasDDButton, QgsSymbolLayer::Property::BlankAreas );
 
-  // TODO connect to appropriate property
-  registerDataDefinedButton( mBlankAreasDDButton, QgsSymbolLayer::Property::AverageAngleLength );
+  connect( mBlankAreasDDButton, &QgsPropertyOverrideButton::changed, this, &QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget );
+  connect( mBlankAreasDDButton, &QgsPropertyOverrideButton::createAuxiliaryField, this, &QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget );
+
+  updateBlankAreaWidget();
 }
 
 QgsSymbolLayer *QgsMarkerLineSymbolLayerWidget::symbolLayer()
@@ -2150,6 +2154,20 @@ void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlanAreas( bool toggled )
   {
     context().mapCanvas()->unsetMapTool( mMapToolEditBlanAreas.get() );
   }
+}
+
+void QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget()
+{
+  const QgsProperty blankAreasProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankAreas );
+  mEditBlankAreasBtn->setEnabled( blankAreasProperty && blankAreasProperty.isActive() && blankAreasProperty.propertyType() == Qgis::PropertyType::Field );
+
+  QString tooltip = tr( "Tool to create blank areas where marker lines won't be displayed" );
+  if ( !mEditBlankAreasBtn->isEnabled() )
+  {
+    tooltip += QStringLiteral( "<br/>" ) + tr( "This tool is disabled because no field property has been set" );
+  }
+
+  mEditBlankAreasBtn->setToolTip( tooltip );
 }
 
 ///////////

@@ -215,7 +215,7 @@ void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
 
 // }
 
-QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, const QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer )
+QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer )
   : QgsMapTool( canvas )
   , mRubberBand( std::make_unique<QgsMapToolBlankAreaRubberBand>( canvas ) )
   , mLayer( layer )
@@ -225,6 +225,14 @@ QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, const 
   // TODO deal with errors
   const QgsSingleSymbolRenderer *renderer = dynamic_cast<const QgsSingleSymbolRenderer *>( mLayer->renderer() );
   mSymbol.reset( renderer->symbol()->clone() );
+
+
+  const QgsProperty blankAreasProperty = mSymbolLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankAreas );
+  // TODO shall never been otherwise here, maybe better to chech before and take the field name as a parameter
+  if ( blankAreasProperty && blankAreasProperty.isActive() && blankAreasProperty.propertyType() == Qgis::PropertyType::Field )
+  {
+    mBlankAreasAttributeIndex = mLayer->fields().indexFromName( blankAreasProperty.field() );
+  }
 
   // search and replace symbol layer in clone
   FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayer->id() );
@@ -244,8 +252,9 @@ QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, const 
 
   // TODO to be move when we would know what feature is edited
 
+  mCurrentFeatureId = 1;
   QgsFeature feature;
-  mLayer->getFeatures().nextFeature( feature );
+  feature = mLayer->getFeature( mCurrentFeatureId );
 
   QgsRenderContext context = QgsRenderContext::fromMapSettings( canvas->mapSettings() );
   QgsCoordinateTransform tranform( canvas->mapSettings().layerTransform( mLayer ) );
@@ -314,8 +323,7 @@ void QgsMapToolEditBlankAreas::canvasMoveEvent( QgsMapMouseEvent *e )
     if ( minDistance == -1 || distance < minDistance )
     {
       minDistance = distance;
-      mCurrentPx = Px;
-      mCurrentPy = Py;
+      mCurrentPt = QPointF( Px, Py );
       mCurrentIndex = i;
     }
   }
@@ -327,65 +335,143 @@ void QgsMapToolEditBlankAreas::canvasMoveEvent( QgsMapMouseEvent *e )
   {
     QList<QPointF> pointsToDraw;
 
-    int startIndex = -1;
-    int endIndex = -1;
-    if ( mFirstIndex == mCurrentIndex )
+    int startIndex = -1, endIndex = -1;
+    QPointF startPt, endPt;
+    getStartEnd( startIndex, endIndex, startPt, endPt );
+
+    pointsToDraw << startPt;
+    if ( startIndex != endIndex )
     {
-      QPointF firstPoint( mCurrentPx, mCurrentPy );
-      QPointF secondPoint( mFirstPx, mFirstPy );
-
-      if ( distanceFct( firstPoint, mPoints.at( mFirstIndex ) ) < distanceFct( secondPoint, mPoints.at( mFirstIndex ) ) )
-      {
-        std::swap( firstPoint, secondPoint );
-      }
-
-      pointsToDraw << firstPoint << secondPoint;
-      startIndex = mFirstIndex;
-      endIndex = mFirstIndex;
-    }
-    else
-    {
-      startIndex = mFirstIndex;
-      double startPx = mFirstPx;
-      double startPy = mFirstPy;
-      endIndex = mCurrentIndex;
-      double endPx = mCurrentPx;
-      double endPy = mCurrentPy;
-
-      if ( startIndex > endIndex )
-      {
-        std::swap( startIndex, endIndex );
-        std::swap( startPx, endPx );
-        std::swap( startPy, endPy );
-      }
-
-      pointsToDraw << QPointF( startPx, startPy );
       for ( int i = startIndex; i < endIndex; i++ )
       {
         pointsToDraw << mPoints.at( i );
       }
-
-      pointsToDraw << QPointF( endPx, endPy );
     }
+    pointsToDraw << endPt;
 
     mRubberBand->setCurrentBlankArea( pointsToDraw );
   }
   else
   {
-    mRubberBand->setCurrentPosition( QPointF( mCurrentPx, mCurrentPy ) );
+    mRubberBand->setCurrentPosition( mCurrentPt );
   }
 }
 
 void QgsMapToolEditBlankAreas::canvasPressEvent( QgsMapMouseEvent * )
 {
+  // finish creating a blank area
   if ( mFirstIndex > -1 )
   {
+    const std::pair<double, double> startEndDistance = getStartEndDistance();
+    addNewBlankArea( startEndDistance.first, startEndDistance.second );
     mFirstIndex = -1;
   }
+  // currently creating a blank area
   else
   {
     mFirstIndex = mCurrentIndex;
-    mFirstPx = mCurrentPx;
-    mFirstPy = mCurrentPy;
+    mFirstPt = mCurrentPt;
+  }
+}
+
+void QgsMapToolEditBlankAreas::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
+{
+  startIndex = mFirstIndex;
+  endIndex = mCurrentIndex;
+  if ( mFirstIndex == mCurrentIndex )
+  {
+    startPt = mCurrentPt;
+    endPt = mFirstPt;
+
+    if ( distanceFct( startPt, mPoints.at( mFirstIndex ) ) < distanceFct( endPt, mPoints.at( mFirstIndex ) ) )
+    {
+      std::swap( startPt, endPt );
+    }
+  }
+  else
+  {
+    startPt = mFirstPt;
+    endPt = mCurrentPt;
+
+    if ( startIndex > endIndex )
+    {
+      std::swap( startIndex, endIndex );
+      std::swap( startPt, endPt );
+    }
+  }
+}
+
+std::pair<double, double> QgsMapToolEditBlankAreas::getStartEndDistance() const
+{
+  int startIndex = -1, endIndex = -1;
+  QPointF startPt, endPt;
+  getStartEnd( startIndex, endIndex, startPt, endPt );
+
+  double startDistance = 0;
+  double endDistance = 0;
+  double d = 0;
+  for ( int i = 1; i < startIndex; i++ )
+  {
+    d = distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
+    startDistance += d;
+    endDistance += d;
+  }
+
+  d = distanceFct( mPoints.at( startIndex - 1 ), startPt );
+  startDistance += d;
+  endDistance += d;
+
+  for ( int i = startIndex + 1; i < endIndex; i++ )
+  {
+    d = distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
+    endDistance += d;
+  }
+
+  d = distanceFct( mPoints.at( endIndex ), endPt );
+  endDistance += d;
+
+  QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
+
+  // TODO use combobox unit
+  startDistance = renderContext.convertToMapUnits( startDistance, Qgis::RenderUnit::Pixels );
+  endDistance = renderContext.convertToMapUnits( endDistance, Qgis::RenderUnit::Pixels );
+
+  return std::pair<double, double>( startDistance, endDistance );
+}
+
+
+void QgsMapToolEditBlankAreas::addNewBlankArea( double startDistance, double endDistance )
+{
+  // TODO shall we use a property type list
+  QString strBlankAreas = mSymbolLayer->dataDefinedProperties().valueAsString( QgsSymbolLayer::Property::BlankAreas, QgsExpressionContext(), QString() );
+
+  QList<double> blankAreas;
+  for ( QString strBlankArea : strBlankAreas.split( "," ) )
+  {
+    // TODO deal with error
+    blankAreas << strBlankArea.toDouble();
+  }
+
+  blankAreas << startDistance << endDistance;
+  std::sort( blankAreas.begin(), blankAreas.end() );
+
+  QStringList strBlankAreaList;
+  for ( double blankArea : blankAreas )
+  {
+    strBlankAreaList << QString::number( blankArea );
+  }
+
+  mSymbolLayer->dataDefinedProperties().setProperty( QgsSymbolLayer::Property::BlankAreas, strBlankAreaList.join( "," ) );
+
+  QString strNewBlankAreas = strBlankAreaList.join( "," );
+
+  mLayer->beginEditCommand( tr( "Add blank area" ) );
+  if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasAttributeIndex, strNewBlankAreas ) )
+  {
+    mLayer->endEditCommand();
+  }
+  else
+  {
+    mLayer->destroyEditCommand();
   }
 }

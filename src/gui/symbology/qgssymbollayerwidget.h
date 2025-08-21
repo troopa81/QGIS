@@ -69,7 +69,8 @@ class GUI_EXPORT QgsSymbolLayerWidget : public QWidget, protected QgsExpressionC
     /**
      * Returns the vector layer associated with the widget.
      */
-    const QgsVectorLayer *vectorLayer() const { return mVectorLayer; }
+    // TODO remove const, is it OK?
+    QgsVectorLayer *vectorLayer() const { return mVectorLayer; }
 
   protected:
     /**
@@ -502,6 +503,7 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
     void averageAngleUnitChanged();
     void setAverageAngle( double val );
     void toggleMapToolEditBlanAreas( bool toggled );
+    void updateBlankAreaWidget();
 };
 
 
