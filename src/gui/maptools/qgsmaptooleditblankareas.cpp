@@ -79,8 +79,8 @@ FoundSymbolLayer findSymbolLayer( QgsSymbol *symbol, const QString slId )
 
 QgsMapToolBlankAreaRubberBand::QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas )
   : mMapCanvas( canvas )
-  , mBlankAreasRubberBand( std::make_unique<QgsRubberBand>( canvas ) )
-  , mStartEndRubberBand( std::make_unique<QgsRubberBand>( canvas, Qgis::GeometryType::Point ) )
+  , mBlankAreasRubberBand( new QgsRubberBand( canvas ) )
+  , mStartEndRubberBand( new QgsRubberBand( canvas, Qgis::GeometryType::Point ) )
 {
   mBlankAreasRubberBand->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
   mBlankAreasRubberBand->setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
@@ -184,28 +184,6 @@ void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
   mStartEndRubberBand->addPoint( m2p.toMapCoordinates( point.x(), point.y() ) );
 }
 
-
-void QgsMapToolBlankAreaRubberBand::setVisible( bool isVisible )
-{
-  // TODO if maptool is part of appmaptools https://github.com/qgis/QGIS/blob/9943d6cb284b7114d7e2e9053833c7bf05a1403a/src/app/maptools/qgsappmaptools.cpp#L83
-  // there is no need to remove them because maptool are deleted before canvas and it doesn't crash
-  // This is because here maptool is destroyed with widget, after canvas
-  // if we make map tool part of the appmaptool, we need a way to set the symbol layer:
-  // - on feature click with a drop down list if there is several marker line (beurk!)
-  // - on the widget and the button stay where it is (but we have no way to select the map tool from app)
-  // -> It has to stay the way it is I think!
-  if ( !isVisible )
-  {
-    mMapCanvas->scene()->removeItem( mStartEndRubberBand.get() );
-    mMapCanvas->scene()->removeItem( mBlankAreasRubberBand.get() );
-  }
-  else
-  {
-    mMapCanvas->scene()->addItem( mStartEndRubberBand.get() );
-    mMapCanvas->scene()->addItem( mBlankAreasRubberBand.get() );
-  }
-}
-
 // void QgsMapToolBlankAreaRubberBand::collectBlankAreas()
 // {
 //   if ( !mMapCanvas  )
@@ -289,11 +267,6 @@ QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVec
 
 QgsMapToolEditBlankAreas::~QgsMapToolEditBlankAreas()
 {
-}
-
-void QgsMapToolEditBlankAreas::deactivate()
-{
-  mRubberBand->setVisible( false );
 }
 
 

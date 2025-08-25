@@ -21,6 +21,7 @@
 #include "qgis_sip.h"
 #include "qgssymbolwidgetcontext.h"
 #include "qgssymbollayer.h"
+#include "qobjectuniqueptr.h"
 
 #include <QWidget>
 #include <QStandardItemModel>
@@ -492,7 +493,7 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
     // map canvas is owner of maptool
-    QPointer<QgsMapToolEditBlankAreas> mMapToolEditBlankAreas;
+    QObjectUniquePtr<QgsMapToolEditBlankAreas> mMapToolEditBlankAreas;
 
   private slots:
     void setRotate();
