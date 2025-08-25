@@ -39,6 +39,9 @@ class QgsMapToolBlankAreaRubberBand
     // TODO
     void setCurrentPosition( const QPointF &point );
 
+    // TODO
+    void setVisible( bool isVisible );
+
   private:
     // TODO
     enum CurrentDisplay
@@ -74,6 +77,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapTool
 
     void canvasMoveEvent( QgsMapMouseEvent *e ) override;
     void canvasPressEvent( QgsMapMouseEvent *e ) override;
+    void deactivate() override;
 
   private:
     // TODO returns start/end info and set in correct order (in points order)

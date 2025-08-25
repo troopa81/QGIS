@@ -1938,7 +1938,10 @@ QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *
   connect( mEditBlankAreasBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankAreas );
 }
 
-QgsMarkerLineSymbolLayerWidget::~QgsMarkerLineSymbolLayerWidget() = default;
+QgsMarkerLineSymbolLayerWidget::~QgsMarkerLineSymbolLayerWidget()
+{
+  delete mMapToolEditBlankAreas;
+}
 
 void QgsMarkerLineSymbolLayerWidget::setSymbolLayer( QgsSymbolLayer *layer )
 {
@@ -2141,17 +2144,17 @@ void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankAreas( bool toggled )
 {
   if ( mMapToolEditBlankAreas )
   {
-    context().mapCanvas()->unsetMapTool( mMapToolEditBlankAreas.get() );
-    mMapToolEditBlankAreas.reset();
+    context().mapCanvas()->unsetMapTool( mMapToolEditBlankAreas );
+    delete mMapToolEditBlankAreas;
   }
 
   if ( toggled )
   {
     // TODO if context changes, we have to delete/reset the maptool because mapCanvas may have changed
-    mMapToolEditBlankAreas = std::make_unique<QgsMapToolEditBlankAreas>( context().mapCanvas(), vectorLayer(), mLayer, blankAreasFieldIndex() );
+    mMapToolEditBlankAreas = new QgsMapToolEditBlankAreas( context().mapCanvas(), vectorLayer(), mLayer, blankAreasFieldIndex() );
 
     // TODO on destructor remove maptool if set (to check, it looks ok)
-    context().mapCanvas()->setMapTool( mMapToolEditBlankAreas.get() );
+    context().mapCanvas()->setMapTool( mMapToolEditBlankAreas );
   }
 }
 

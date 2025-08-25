@@ -491,7 +491,8 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
   protected:
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
-    std::unique_ptr<QgsMapToolEditBlankAreas> mMapToolEditBlankAreas;
+    // map canvas is owner of maptool
+    QPointer<QgsMapToolEditBlankAreas> mMapToolEditBlankAreas;
 
   private slots:
     void setRotate();
