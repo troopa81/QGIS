@@ -429,26 +429,20 @@ std::pair<double, double> QgsMapToolEditBlankAreas::getStartEndDistance() const
   getStartEnd( startIndex, endIndex, startPt, endPt );
 
   double startDistance = 0;
-  double endDistance = 0;
-  double d = 0;
   for ( int i = 1; i < startIndex; i++ )
   {
-    d = distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
-    startDistance += d;
-    endDistance += d;
+    startDistance += distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
   }
 
-  d = distanceFct( mPoints.at( startIndex - 1 ), startPt );
-  startDistance += d;
-  endDistance += d;
+  startDistance += distanceFct( mPoints.at( startIndex - 1 ), startPt );
 
+  double endDistance = startDistance;
   for ( int i = startIndex + 1; i < endIndex; i++ )
   {
-    d = distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
-    endDistance += d;
+    endDistance += distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
   }
 
-  endDistance += startIndex == endIndex ? distanceFct( startPt, endPt ) : distanceFct( mPoints.at( endIndex - 1 ), endPt );
+  endDistance += startIndex == endIndex ? distanceFct( startPt, endPt ) : distanceFct( mPoints.at( endIndex - 1 ), endPt ) + distanceFct( mPoints.at( endIndex - 1 ), startPt );
 
   QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
 
