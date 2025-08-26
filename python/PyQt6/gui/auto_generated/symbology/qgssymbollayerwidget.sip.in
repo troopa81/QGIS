@@ -10,6 +10,9 @@
 
 
 
+template<T>
+class QgsMapToolEditBlankAreas;
+
 class QgsSymbolLayerWidget : QWidget, protected QgsExpressionContextGenerator
 {
 %Docstring(signature="appended")

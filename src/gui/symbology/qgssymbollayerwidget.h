@@ -29,7 +29,9 @@
 class QgsVectorLayer;
 class QgsMarkerSymbol;
 class QgsLineSymbol;
-class QgsMapToolEditBlankAreas;
+
+template<class T>
+class GUI_EXPORT QgsMapToolEditBlankAreas;
 
 /**
  * \ingroup gui
@@ -492,8 +494,7 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
   protected:
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
-    // map canvas is owner of maptool
-    QObjectUniquePtr<QgsMapToolEditBlankAreas> mMapToolEditBlankAreas;
+    QObjectUniquePtr<QgsMapToolEditBlankAreas<QgsMarkerLineSymbolLayer>> mMapToolEditBlankAreas;
 
   private slots:
     void setRotate();

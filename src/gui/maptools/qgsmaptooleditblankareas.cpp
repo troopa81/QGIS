@@ -28,55 +28,6 @@
 #include "qgssettingsentryimpl.h"
 #include "qgsguiutils.h"
 
-// TODO rename marker with templated
-// This not a rubberband, rename!!
-template<class T>
-class QgsMarkerLineSymbolLayerRubberBand : public T
-{
-  public:
-    // TODO
-    QgsMarkerLineSymbolLayerRubberBand( const T *original )
-      : T( original->rotateSymbols(), original->interval() )
-    {
-      original->copyTemplateSymbolProperties( this );
-    }
-
-    void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &, double ) override
-    {
-      mPoints = points;
-    }
-
-    const QPolygonF &getRenderedPoints() const { return mPoints; };
-
-  private:
-    QPolygonF mPoints;
-};
-
-typedef std::tuple<QgsSymbolLayer *, QgsSymbol *, int> FoundSymbolLayer;
-
-// TODO doc & shall we put in QgsVectorLayerUtils ? or QgsSymbolLayerUtils
-FoundSymbolLayer findSymbolLayer( QgsSymbol *symbol, const QString slId )
-{
-  if ( !symbol )
-    return { nullptr, nullptr, -1 };
-
-  for ( int i = 0; i < symbol->symbolLayers().count(); i++ )
-  {
-    QgsSymbolLayer *sl = symbol->symbolLayers().at( i );
-    if ( sl->id() == slId )
-    {
-      return { sl, symbol, i };
-    }
-
-    FoundSymbolLayer children = findSymbolLayer( sl->subSymbol(), slId );
-    if ( std::get<QgsSymbolLayer *>( children ) )
-      return children;
-  }
-
-  return { nullptr, nullptr, -1 };
-};
-
-
 QgsMapToolBlankAreaRubberBand::QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas )
   : mMapCanvas( canvas )
   , mBlankAreasRubberBand( new QgsRubberBand( canvas ) )
@@ -214,60 +165,71 @@ void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
 
 // }
 
-QgsMapToolEditBlankAreas::QgsMapToolEditBlankAreas( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankAreaFieldIndex )
+QgsMapToolEditBlankAreasBase::QgsMapToolEditBlankAreasBase( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankAreaFieldIndex )
   : QgsMapTool( canvas )
   , mRubberBand( std::make_unique<QgsMapToolBlankAreaRubberBand>( canvas ) )
   , mLayer( layer )
-  , mSymbolLayer( symbolLayer )
+  , mSymbolLayerId( symbolLayer->id() )
   , mBlankAreasFieldIndex( blankAreaFieldIndex )
 {
   // TODO what happen with other renderer
   // TODO deal with errors
   const QgsSingleSymbolRenderer *renderer = dynamic_cast<const QgsSingleSymbolRenderer *>( mLayer->renderer() );
   mSymbol.reset( renderer->symbol()->clone() );
-
-  // search and replace symbol layer in clone
-  FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayer->id() );
-  QgsMarkerLineSymbolLayerRubberBand<QgsMarkerLineSymbolLayer> *newSymbolLayer = nullptr;
-  if ( !std::get<QgsSymbolLayer *>( found ) )
-  {
-    mSymbol.reset();
-  }
-  else
-  {
-    // TODO deal w errors
-    // TODO make it template and instanciate here either a marker or hash
-    const QgsMarkerLineSymbolLayer *currentSl = dynamic_cast<QgsMarkerLineSymbolLayer *>( std::get<QgsSymbolLayer *>( found ) );
-    newSymbolLayer = new QgsMarkerLineSymbolLayerRubberBand( currentSl );
-    std::get<QgsSymbol *>( found )->changeSymbolLayer( std::get<int>( found ), newSymbolLayer );
-  }
-
-  // TODO to be move when we would know what feature is edited
-
-  mCurrentFeatureId = 1;
-  QgsFeature feature;
-  feature = mLayer->getFeature( mCurrentFeatureId );
-  mCurrentBlankAreas = feature.attribute( mBlankAreasFieldIndex ).toString();
-
-  QgsRenderContext context = QgsRenderContext::fromMapSettings( canvas->mapSettings() );
-  QgsCoordinateTransform tranform( canvas->mapSettings().layerTransform( mLayer ) );
-  QgsNullPaintDevice nullPaintDevice;
-  QPainter painter( &nullPaintDevice );
-  context.setPainter( &painter );
-  context.setCoordinateTransform( tranform );
-  mSymbol->startRender( context );
-  mSymbol->renderFeature( feature, context );
-  mSymbol->stopRender( context );
-
-  if ( newSymbolLayer )
-  {
-    mPoints = newSymbolLayer->getRenderedPoints();
-  }
 }
 
-QgsMapToolEditBlankAreas::~QgsMapToolEditBlankAreas()
+QgsMapToolEditBlankAreasBase::~QgsMapToolEditBlankAreasBase()
 {
 }
+
+void QgsMapToolEditBlankAreasBase::activate()
+{
+  if ( !mSymbolLayer )
+  {
+    // search and replace symbol layer in clone
+    FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayerId );
+    if ( !std::get<QgsSymbolLayer *>( found ) )
+    {
+      mSymbol.reset();
+    }
+    else
+    {
+      // TODO deal w errors
+      // TODO use real type and not string from qgstemplatedlinesymbollayer
+      // TODO make mSymbolLayer a ref to avoid ownership question ?
+      const QgsTemplatedLineSymbolLayerBase *currentSl = dynamic_cast<QgsTemplatedLineSymbolLayerBase *>( std::get<QgsSymbolLayer *>( found ) );
+      initFakeSymbolLayer( currentSl );
+      std::get<QgsSymbol *>( found )->changeSymbolLayer( std::get<int>( found ), mSymbolLayer );
+    }
+
+    // TODO to be move when we would know what feature is edited
+    mCurrentFeatureId = 1;
+    loadFeaturePoints();
+  }
+}
+
+
+// TODO doc & shall we put in QgsVectorLayerUtils ? or QgsSymbolLayerUtils
+QgsMapToolEditBlankAreasBase::FoundSymbolLayer QgsMapToolEditBlankAreasBase::findSymbolLayer( QgsSymbol *symbol, const QString slId )
+{
+  if ( !symbol )
+    return { nullptr, nullptr, -1 };
+
+  for ( int i = 0; i < symbol->symbolLayers().count(); i++ )
+  {
+    QgsSymbolLayer *sl = symbol->symbolLayers().at( i );
+    if ( sl->id() == slId )
+    {
+      return { sl, symbol, i };
+    }
+
+    FoundSymbolLayer children = findSymbolLayer( sl->subSymbol(), slId );
+    if ( std::get<QgsSymbolLayer *>( children ) )
+      return children;
+  }
+
+  return { nullptr, nullptr, -1 };
+};
 
 
 double distanceFct( const QPointF &prevPt, const QPointF &pt )
@@ -280,9 +242,12 @@ double distanceFct( const QPointF &prevPt, const QPointF &pt )
   return std::sqrt( std::pow( Bx - Ax, 2 ) + std::pow( By - Ay, 2 ) );
 }
 
-void QgsMapToolEditBlankAreas::canvasMoveEvent( QgsMapMouseEvent *e )
+void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
 {
   QPointF pos = e->pos();
+
+  if ( canvas()->extent() != mExtent )
+    loadFeaturePoints();
 
   if ( !mSymbol || mPoints.isEmpty() )
     return;
@@ -351,7 +316,7 @@ void QgsMapToolEditBlankAreas::canvasMoveEvent( QgsMapMouseEvent *e )
   }
 }
 
-void QgsMapToolEditBlankAreas::canvasPressEvent( QgsMapMouseEvent * )
+void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent * )
 {
   // finish creating a blank area
   if ( mFirstIndex > -1 )
@@ -368,7 +333,7 @@ void QgsMapToolEditBlankAreas::canvasPressEvent( QgsMapMouseEvent * )
   }
 }
 
-void QgsMapToolEditBlankAreas::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
+void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
 {
   startIndex = mFirstIndex;
   endIndex = mCurrentIndex;
@@ -395,7 +360,7 @@ void QgsMapToolEditBlankAreas::getStartEnd( int &startIndex, int &endIndex, QPoi
   }
 }
 
-std::pair<double, double> QgsMapToolEditBlankAreas::getStartEndDistance() const
+std::pair<double, double> QgsMapToolEditBlankAreasBase::getStartEndDistance() const
 {
   int startIndex = -1, endIndex = -1;
   QPointF startPt, endPt;
@@ -426,8 +391,7 @@ std::pair<double, double> QgsMapToolEditBlankAreas::getStartEndDistance() const
   return std::pair<double, double>( startDistance, endDistance );
 }
 
-
-void QgsMapToolEditBlankAreas::addNewBlankArea( double startDistance, double endDistance )
+void QgsMapToolEditBlankAreasBase::addNewBlankArea( double startDistance, double endDistance )
 {
   if ( mBlankAreasFieldIndex < 0 || mBlankAreasFieldIndex >= mLayer->fields().count() )
     return;
@@ -463,4 +427,27 @@ void QgsMapToolEditBlankAreas::addNewBlankArea( double startDistance, double end
   {
     mLayer->destroyEditCommand();
   }
+}
+
+void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
+{
+  mExtent = canvas()->extent();
+
+  // TODO check before doing all this ?
+  // if ( !mSymbolLayer )
+  //   return;
+
+  QgsFeature feature;
+  feature = mLayer->getFeature( mCurrentFeatureId );
+  mCurrentBlankAreas = feature.attribute( mBlankAreasFieldIndex ).toString();
+
+  QgsRenderContext context = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
+  QgsCoordinateTransform tranform( canvas()->mapSettings().layerTransform( mLayer ) );
+  QgsNullPaintDevice nullPaintDevice;
+  QPainter painter( &nullPaintDevice );
+  context.setPainter( &painter );
+  context.setCoordinateTransform( tranform );
+  mSymbol->startRender( context );
+  mSymbol->renderFeature( feature, context );
+  mSymbol->stopRender( context );
 }
