@@ -40,7 +40,7 @@ class QgsMapToolBlankAreaRubberBand
     QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas );
 
     // TODO coords are in screen ref (is it better to convert them before ? )
-    void setCurrentBlankArea( const QList<QPointF> &points );
+    void setCurrentBlankArea( const QList<QPointF> &points, int iBlankArea );
 
     // TODO
     void setCurrentPosition( const QPointF &point );
@@ -99,6 +99,23 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     // TODO comment and maybe rename -> "fake" stuff isn't really super ?!
     virtual void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
 
+    class BlankArea
+    {
+      public:
+        BlankArea( int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const QPolygonF &points );
+
+        void setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt, const QPolygonF &points );
+
+      private:
+        int mStartIndex = -1;
+        int mEndIndex = -1;
+        QPointF mStartPt;
+        QPointF mEndPt;
+        QObjectUniquePtr<QgsRubberBand> mRubberBand;
+        QgsMapCanvas *mCanvas = nullptr;
+    };
+
+    std::list<std::unique_ptr<BlankArea>> mBlankAreas;
     std::unique_ptr<QgsMapToolBlankAreaRubberBand> mRubberBand;
     QgsVectorLayer *mLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;

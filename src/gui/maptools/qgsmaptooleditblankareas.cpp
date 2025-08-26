@@ -107,32 +107,31 @@ QgsMapToolBlankAreaRubberBand::QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canv
 //   }
 // }
 
-void QgsMapToolBlankAreaRubberBand::setCurrentBlankArea( const QList<QPointF> &points )
+void QgsMapToolBlankAreaRubberBand::setCurrentBlankArea( const QList<QPointF> &points, int iBlankArea )
 {
   const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
-  mBlankAreasRubberBand->reset();
-  mStartEndRubberBand->reset( Qgis::GeometryType::Point );
+  // mStartEndRubberBand->reset( Qgis::GeometryType::Point );
 
   const QgsPointXY firstPoint = m2p.toMapCoordinates( points.at( 0 ).x(), points.at( 0 ).y() );
-  mBlankAreasRubberBand->addPoint( firstPoint, false );
-  mStartEndRubberBand->addPoint( firstPoint, false );
+  mBlankAreasRubberBand->addPoint( firstPoint, false, iBlankArea );
+  // mStartEndRubberBand->addPoint( firstPoint, false );
 
   for ( int i = 1; i < points.size() - 1; i++ )
   {
     const QgsPointXY point = m2p.toMapCoordinates( points.at( i ).x(), points.at( i ).y() );
-    mBlankAreasRubberBand->addPoint( point, false );
+    mBlankAreasRubberBand->addPoint( point, false, iBlankArea );
   }
 
   const QgsPointXY lastPoint = m2p.toMapCoordinates( points.at( points.size() - 1 ).x(), points.at( points.size() - 1 ).y() );
-  mBlankAreasRubberBand->addPoint( lastPoint );
-  mStartEndRubberBand->addPoint( lastPoint );
+  mBlankAreasRubberBand->addPoint( lastPoint, true, iBlankArea );
+  // mStartEndRubberBand->addPoint( lastPoint );
 }
 
 void QgsMapToolBlankAreaRubberBand::setCurrentPosition( const QPointF &point )
 {
-  mStartEndRubberBand->reset( Qgis::GeometryType::Point );
-  const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
-  mStartEndRubberBand->addPoint( m2p.toMapCoordinates( point.x(), point.y() ) );
+  // mStartEndRubberBand->reset( Qgis::GeometryType::Point );
+  // const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
+  // mStartEndRubberBand->addPoint( m2p.toMapCoordinates( point.x(), point.y() ) );
 }
 
 // void QgsMapToolBlankAreaRubberBand::collectBlankAreas()
@@ -205,6 +204,16 @@ void QgsMapToolEditBlankAreasBase::activate()
     // TODO to be move when we would know what feature is edited
     mCurrentFeatureId = 1;
     loadFeaturePoints();
+
+
+    // load current blank areas distance from feature
+    //
+
+    // transform distance from and to start/end Index/Pt
+
+    // then transform start/end Index/Pt to rubberband
+
+    // store a list of struct rubberband, start/end index/pt
   }
 }
 
@@ -308,7 +317,7 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
     }
     pointsToDraw << endPt;
 
-    mRubberBand->setCurrentBlankArea( pointsToDraw );
+    // mRubberBand->setCurrentBlankArea( pointsToDraw, 0 );
   }
   else
   {
@@ -438,18 +447,84 @@ void QgsMapToolEditBlankAreasBase::addNewBlankArea( double startDistance, double
   }
 }
 
+// TODO put in a private header file
+class MyLine
+{
+  public:
+    MyLine( QPointF p1, QPointF p2 )
+      : mVertical( false )
+      , mIncreasing( false )
+      , mT( 0.0 )
+      , mLength( 0.0 )
+    {
+      if ( p1 == p2 )
+        return; // invalid
+
+      // tangent and direction
+      if ( qgsDoubleNear( p1.x(), p2.x() ) )
+      {
+        // vertical line - tangent undefined
+        mVertical = true;
+        mIncreasing = ( p2.y() > p1.y() );
+      }
+      else
+      {
+        mVertical = false;
+        mT = ( p2.y() - p1.y() ) / ( p2.x() - p1.x() );
+        mIncreasing = ( p2.x() > p1.x() );
+      }
+
+      // length
+      double x = ( p2.x() - p1.x() );
+      double y = ( p2.y() - p1.y() );
+      mLength = std::sqrt( x * x + y * y );
+    }
+
+    // return angle in radians
+    double angle()
+    {
+      double a = ( mVertical ? M_PI_2 : std::atan( mT ) );
+
+      if ( !mIncreasing )
+        a += M_PI;
+      return a;
+    }
+
+    // return difference for x,y when going along the line with specified interval
+    QPointF diffForInterval( double interval )
+    {
+      if ( mVertical )
+        return ( mIncreasing ? QPointF( 0, interval ) : QPointF( 0, -interval ) );
+
+      double alpha = std::atan( mT );
+      double dx = std::cos( alpha ) * interval;
+      double dy = std::sin( alpha ) * interval;
+      return ( mIncreasing ? QPointF( dx, dy ) : QPointF( -dx, -dy ) );
+    }
+
+    double length() const { return mLength; }
+
+  protected:
+    bool mVertical;
+    bool mIncreasing;
+    double mT;
+    double mLength;
+};
+
+
 void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
 {
-  mExtent = canvas()->extent();
+  if ( !mSymbolLayer )
+    return;
 
-  // TODO check before doing all this ?
-  // if ( !mSymbolLayer )
-  //   return;
+  mExtent = canvas()->extent();
 
   QgsFeature feature;
   feature = mLayer->getFeature( mCurrentFeatureId );
   mCurrentBlankAreas = feature.attribute( mBlankAreasFieldIndex ).toString();
 
+
+  // render feature to update mPoints
   QgsRenderContext context = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
   QgsCoordinateTransform tranform( canvas()->mapSettings().layerTransform( mLayer ) );
   QgsNullPaintDevice nullPaintDevice;
@@ -459,4 +534,85 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
   mSymbol->startRender( context );
   mSymbol->renderFeature( feature, context );
   mSymbol->stopRender( context );
+
+  if ( mPoints.isEmpty() )
+    return;
+
+  // TODO this code exists already on qgslinesymbollayer
+  // TODO shall we use a property type list
+  QList<QPair<double, double>> blankAreas;
+  const QStringList strBlankAreaList = mCurrentBlankAreas.split( ",", Qt::SkipEmptyParts );
+  for ( int i = 0; i + 1 < strBlankAreaList.count(); i += 2 )
+  {
+    blankAreas.append( QPair<double, double>( context.convertFromMapUnits( strBlankAreaList.at( i ).toDouble(), Qgis::RenderUnit::Pixels ), context.convertFromMapUnits( strBlankAreaList.at( i + 1 ).toDouble(), Qgis::RenderUnit::Pixels ) ) );
+  }
+
+  double currentLength = 0;
+  int iPoint = 0;
+  for ( QPair<double, double> ba : blankAreas )
+  {
+    while ( iPoint < mPoints.count() && currentLength < ba.first )
+    {
+      iPoint++;
+      // TODO replace distanceFct with MyLine().lentgh() and put MyLine in a private header file
+      currentLength += distanceFct( mPoints[iPoint], mPoints[iPoint - 1] );
+    }
+
+    if ( iPoint == mPoints.count() )
+      break;
+
+
+    int startIndex = iPoint;
+    // TODO maybe replace difforInterval with a better name
+    MyLine l( mPoints[iPoint], mPoints[iPoint - 1] );
+    QPointF startPt = mPoints[iPoint] + l.diffForInterval( currentLength - ba.first );
+
+    while ( iPoint < mPoints.count() && currentLength < ba.second )
+    {
+      iPoint++;
+      currentLength += distanceFct( mPoints[iPoint], mPoints[iPoint - 1] );
+    }
+
+    if ( iPoint == mPoints.count() )
+      break;
+
+    int endIndex = iPoint;
+    MyLine l2( mPoints[iPoint], mPoints[iPoint - 1] );
+    QPointF endPt = mPoints[iPoint] + l2.diffForInterval( currentLength - ba.second );
+
+    mBlankAreas.push_back( std::make_unique<BlankArea>( startIndex, endIndex, startPt, endPt, canvas(), mPoints ) );
+  }
+}
+
+QgsMapToolEditBlankAreasBase::BlankArea::BlankArea( int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const QPolygonF &points )
+  : mRubberBand( new QgsRubberBand( canvas ) )
+  , mCanvas( canvas )
+{
+  mRubberBand->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+  mRubberBand->setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
+  mRubberBand->setVisible( true );
+
+  setPoints( startIndex, endIndex, startPt, endPt, points );
+}
+
+void QgsMapToolEditBlankAreasBase::BlankArea::setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt, const QPolygonF &points )
+{
+  mStartIndex = startIndex;
+  mEndIndex = endIndex;
+  mStartPt = startPt;
+  mEndPt = endPt;
+
+  const QgsMapToPixel &m2p = *( mCanvas->getCoordinateTransform() );
+
+  const QgsPointXY firstPoint = m2p.toMapCoordinates( startPt.x(), startPt.y() );
+  mRubberBand->addPoint( firstPoint, false );
+
+  for ( int i = startIndex; i < endIndex; i++ )
+  {
+    const QgsPointXY point = m2p.toMapCoordinates( points.at( i ).x(), points.at( i ).y() );
+    mRubberBand->addPoint( point, false );
+  }
+
+  const QgsPointXY lastPoint = m2p.toMapCoordinates( endPt.x(), endPt.y() );
+  mRubberBand->addPoint( lastPoint, true );
 }
