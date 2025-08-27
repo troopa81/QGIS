@@ -155,108 +155,96 @@ QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, co
 
 void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
 {
-  // TODO add function and call function instead of just returning
-  switch ( mState )
-  {
-    case State::SELECT_FEATURE:
-      return;
-    case State::START_CREATE_BLANK_AREA:
-      break;
-  }
+  if ( !mSymbol || mPoints.isEmpty() )
+    return;
 
-  QPointF pos = e->pos();
+  const QPointF &pos = e->pos();
 
   if ( canvas()->extent() != mExtent )
     loadFeaturePoints();
 
-  if ( !mSymbol || mPoints.isEmpty() )
-    return;
-
-
-  // TODO do a function getClosestBlankArea() returns distance & index
-  // TODO maybe a spatial index would be better ?
-  // search for closest blankArea
-  double distance = -1;
-  int iBlankArea = -1;
-  for ( uint i = 0; i < mBlankAreas.size(); i++ )
+  // TODO add function and call function instead of just returning
+  switch ( mState )
   {
-    const std::unique_ptr<BlankArea> &blankArea = mBlankAreas.at( i );
-    for ( int iPoint = 1; iPoint < blankArea->pointsCount(); iPoint++ )
-    {
-      double d = 0;
-      bool ok = false;
-      QPointF P = projectedPoint( blankArea->pointAt( iPoint - 1 ), blankArea->pointAt( iPoint ), pos, d, ok );
-      if ( !ok )
-        continue;
+    case State::SELECT_FEATURE:
+    case State::EDIT_BLANK_AREA:
+      return;
 
-      if ( distance == -1 || d < distance )
+    case State::START_CREATE_BLANK_AREA:
+    {
+      double distance = -1;
+      int iBlankArea = getClosestBlankAreaIndex( pos, distance );
+
+      if ( mCurrentBlankArea > -1 )
       {
-        distance = d;
-        iBlankArea = i;
+        // TODO constant or function for set selected or not
+        mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+        mBlankAreas.at( mCurrentBlankArea )->update();
       }
-    }
-  }
 
-  if ( mCurrentBlankArea > -1 )
-  {
-    // TODO constant or function for set selected or not
-    mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
-    mBlankAreas.at( mCurrentBlankArea )->update();
-  }
-
-  // TODO constant or use tolerance general parameter
-  if ( iBlankArea > -1 && distance < 20 )
-  {
-    mCurrentBlankArea = iBlankArea;
-    mBlankAreas.at( iBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
-    mBlankAreas.at( iBlankArea )->update();
-  }
-
-  double minDistance = -1;
-  for ( int i = 1; i < mPoints.count(); i++ )
-  {
-    double distance = 0;
-    bool ok = false;
-    QPointF P = projectedPoint( mPoints[i - 1], mPoints[i], pos, distance, ok );
-    if ( !ok )
-      continue;
-
-    if ( minDistance == -1 || distance < minDistance )
-    {
-      minDistance = distance;
-      mCurrentPt = P;
-      mCurrentIndex = i;
-    }
-  }
-
-  if ( mCurrentIndex == -1 )
-    return;
-
-  if ( mFirstIndex > -1 )
-  {
-    QList<QPointF> pointsToDraw;
-
-    int startIndex = -1, endIndex = -1;
-    QPointF startPt, endPt;
-    getStartEnd( startIndex, endIndex, startPt, endPt );
-
-    pointsToDraw << startPt;
-    if ( startIndex != endIndex )
-    {
-      for ( int i = startIndex; i < endIndex; i++ )
+      // TODO constant or use tolerance general parameter
+      if ( iBlankArea > -1 && distance < 20 )
       {
-        pointsToDraw << mPoints.at( i );
+        mCurrentBlankArea = iBlankArea;
+        mBlankAreas.at( iBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+        mBlankAreas.at( iBlankArea )->update();
       }
-    }
-    pointsToDraw << endPt;
 
-    // mRubberBand->setCurrentBlankArea( pointsToDraw, 0 );
+      break;
+    }
   }
-  else
-  {
-    // mRubberBand->setCurrentPosition( mCurrentPt );
-  }
+
+  // double minDistance = -1;
+  // for ( int i = 1; i < mPoints.count(); i++ )
+  // {
+  //   double distance = 0;
+  //   bool ok = false;
+  //   QPointF P = projectedPoint( mPoints[i - 1], mPoints[i], pos, distance, ok );
+  //   if ( !ok )
+  //     continue;
+
+  //   if ( minDistance == -1 || distance < minDistance )
+  //   {
+  //     minDistance = distance;
+  //     mCurrentPt = P;
+  //     mCurrentIndex = i;
+  //   }
+  // }
+
+  // if ( mCurrentIndex == -1 )
+  //   return;
+
+  // if ( mFirstIndex > -1 )
+  // {
+  //   QList<QPointF> pointsToDraw;
+
+  //   int startIndex = -1, endIndex = -1;
+  //   QPointF startPt, endPt;
+  //   getStartEnd( startIndex, endIndex, startPt, endPt );
+
+  //   pointsToDraw << startPt;
+  //   if ( startIndex != endIndex )
+  //   {
+  //     for ( int i = startIndex; i < endIndex; i++ )
+  //     {
+  //       pointsToDraw << mPoints.at( i );
+  //     }
+  //   }
+  //   pointsToDraw << endPt;
+
+  //   // mRubberBand->setCurrentBlankArea( pointsToDraw, 0 );
+  // }
+  // else
+  // {
+  //   // mRubberBand->setCurrentPosition( mCurrentPt );
+  // }
 }
+
+// on move test if currentBlanAkrea startPt et close sont proche, si oui change cursor
+
+// dragEnterEvent faire pareil, changer state, puis dans move update start et call updatestartend
+
+// dropEvent -> changer state
 
 void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
 {
@@ -318,12 +306,26 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
       return;
 
     case State::EDIT_BLANK_AREA:
+      // TODO conflic with QgisApp::mapCanvas_keyPressed even if I switch to !accepted
+      // ( it's not possible anymore to delete a feature )
+      if ( e->matches( QKeySequence::Delete ) && mCurrentBlankArea > -1 )
+      {
+        mBlankAreas.erase( mBlankAreas.begin() + mCurrentBlankArea );
+        mState = State::START_CREATE_BLANK_AREA;
+        mCurrentBlankArea = -1;
+        updateStartEndRubberBand();
+        e->accept();
+      }
+      [[fallthrough]];
+
     case State::START_CREATE_BLANK_AREA:
       if ( e->key() == Qt::Key_Escape )
       {
         mCurrentFeatureId = FID_NULL;
         loadFeaturePoints();
         mState = State::SELECT_FEATURE;
+        updateStartEndRubberBand();
+        e->accept();
       }
   }
 }
@@ -394,6 +396,34 @@ std::pair<double, double> QgsMapToolEditBlankAreasBase::getStartEndDistance() co
   endDistance = renderContext.convertToMapUnits( endDistance, Qgis::RenderUnit::Pixels );
 
   return std::pair<double, double>( startDistance, endDistance );
+}
+
+int QgsMapToolEditBlankAreasBase::getClosestBlankAreaIndex( const QPointF &point, double &distance ) const
+{
+  // TODO maybe a spatial index would be better ?
+  // search for closest blankArea
+  distance = -1;
+  int iBlankArea = -1;
+  for ( int i = 0; i < static_cast<int>( mBlankAreas.size() ); i++ )
+  {
+    const std::unique_ptr<BlankArea> &blankArea = mBlankAreas.at( i );
+    for ( int iPoint = 1; iPoint < blankArea->pointsCount(); iPoint++ )
+    {
+      double d = 0;
+      bool ok = false;
+      projectedPoint( blankArea->pointAt( iPoint - 1 ), blankArea->pointAt( iPoint ), point, d, ok );
+      if ( !ok )
+        continue;
+
+      if ( distance == -1 || d < distance )
+      {
+        distance = d;
+        iBlankArea = i;
+      }
+    }
+  }
+
+  return iBlankArea;
 }
 
 void QgsMapToolEditBlankAreasBase::updateStartEndRubberBand()

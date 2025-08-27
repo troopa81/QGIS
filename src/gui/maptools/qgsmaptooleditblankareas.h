@@ -70,6 +70,8 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     // TODO comment and maybe rename -> "fake" stuff isn't really super ?!
     virtual void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
 
+    int getClosestBlankAreaIndex( const QPointF &point, double &distance ) const;
+
     void updateStartEndRubberBand();
 
     class BlankArea : public QgsRubberBand
