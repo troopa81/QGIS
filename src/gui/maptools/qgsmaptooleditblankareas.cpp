@@ -281,8 +281,8 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
         // finish creating a blank area
         if ( mFirstIndex > -1 )
         {
-          const std::pair<double, double> startEndDistance = getStartEndDistance();
-          addNewBlankArea( startEndDistance.first, startEndDistance.second );
+          // const std::pair<double, double> startEndDistance = getStartEndDistance();
+          // addNewBlankArea( startEndDistance.first, startEndDistance.second );
           mFirstIndex = -1;
         }
         // currently creating a blank area
@@ -314,6 +314,7 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
         mState = State::START_CREATE_BLANK_AREA;
         mCurrentBlankArea = -1;
         updateStartEndRubberBand();
+        updateAttribute();
         e->accept();
       }
       [[fallthrough]];
@@ -358,38 +359,34 @@ void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, 
   }
 }
 
-std::pair<double, double> QgsMapToolEditBlankAreasBase::getStartEndDistance() const
+std::pair<double, double> QgsMapToolEditBlankAreasBase::BlankArea::getStartEndDistance() const
 {
-  int startIndex = -1, endIndex = -1;
-  QPointF startPt, endPt;
-  getStartEnd( startIndex, endIndex, startPt, endPt );
-
   double startDistance = 0;
-  for ( int i = 1; i < startIndex; i++ )
+  for ( int i = 1; i < mStartIndex; i++ )
   {
     startDistance += distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
   }
 
-  startDistance += distanceFct( mPoints.at( startIndex - 1 ), startPt );
+  startDistance += distanceFct( mPoints.at( mStartIndex - 1 ), mStartPt );
 
   double endDistance = startDistance;
 
-  if ( startIndex == endIndex )
+  if ( mStartIndex == mEndIndex )
   {
-    endDistance += distanceFct( startPt, endPt );
+    endDistance += distanceFct( mStartPt, mEndPt );
   }
   else
   {
-    for ( int i = startIndex + 1; i < endIndex; i++ )
+    for ( int i = mStartIndex + 1; i < mEndIndex; i++ )
     {
       endDistance += distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
     }
 
-    endDistance += distanceFct( mPoints.at( endIndex - 1 ), endPt )
-                   + distanceFct( mPoints.at( startIndex ), startPt );
+    endDistance += distanceFct( mPoints.at( mEndIndex - 1 ), mEndPt )
+                   + distanceFct( mPoints.at( mStartIndex ), mStartPt );
   }
 
-  QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
+  QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( mMapCanvas->mapSettings() );
 
   // TODO use combobox unit
   startDistance = renderContext.convertToMapUnits( startDistance, Qgis::RenderUnit::Pixels );
@@ -446,32 +443,18 @@ void QgsMapToolEditBlankAreasBase::updateStartEndRubberBand()
 }
 
 
-void QgsMapToolEditBlankAreasBase::addNewBlankArea( double startDistance, double endDistance )
+void QgsMapToolEditBlankAreasBase::updateAttribute()
 {
-  if ( mBlankAreasFieldIndex < 0 || mBlankAreasFieldIndex >= mLayer->fields().count() )
-    return;
-
-  QList<double> blankAreas;
-  // TODO this code exists already on qgslinesymbollayer
-  // TODO shall we use a property type list
-  for ( QString strBlankArea : mCurrentBlankAreas.split( ",", Qt::SkipEmptyParts ) )
-  {
-    // TODO deal with error
-    blankAreas << strBlankArea.toDouble();
-  }
-
-  blankAreas << startDistance << endDistance;
-  std::sort( blankAreas.begin(), blankAreas.end() );
-
   QStringList strBlankAreaList;
-  for ( double blankArea : blankAreas )
+  for ( std::unique_ptr<BlankArea> &blankArea : mBlankAreas )
   {
-    strBlankAreaList << QString::number( blankArea );
+    std::pair<double, double> startEndDistance = blankArea->getStartEndDistance();
+    strBlankAreaList << QString::number( startEndDistance.first ) << QString::number( startEndDistance.second );
   }
 
   const QString strNewBlankAreas = strBlankAreaList.join( "," );
 
-  mLayer->beginEditCommand( tr( "Add blank area" ) );
+  mLayer->beginEditCommand( tr( "Set blank area list" ) );
   if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasFieldIndex, strNewBlankAreas ) )
   {
     mCurrentBlankAreas = strNewBlankAreas;

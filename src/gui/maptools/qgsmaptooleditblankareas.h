@@ -63,7 +63,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     // TODO compute and return current blank area start and end distance
     std::pair<double, double> getStartEndDistance() const;
     // TODO
-    void addNewBlankArea( double startDistance, double endDistance );
+    void updateAttribute();
     // TODO
     void loadFeaturePoints();
 
@@ -83,6 +83,8 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
 
         const QPointF &getStartPoint() const;
         const QPointF &getEndPoint() const;
+
+        std::pair<double, double> getStartEndDistance() const;
 
         int pointsCount() const;
         const QPointF &pointAt( int index ) const;
