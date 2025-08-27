@@ -22,44 +22,12 @@
 #include "qobjectuniqueptr.h"
 #include "qgslinesymbollayer.h"
 #include "qgssymbol.h"
+#include "qgsrubberband.h"
 
 class QgsMapToolBlankAreaRubberBand;
 class QgsVectorLayer;
 class QgsSymbol;
-class QgsRubberBand;
 class QgsSymbolLayer;
-
-template<class T>
-class QgsMarkerLineSymbolLayerRubberBand;
-
-// TODO Rename ? It's not actually a rubberband, its more a container of rubber band , no? (et virer "MapTool")
-// TODO do we have to expose it in header
-class QgsMapToolBlankAreaRubberBand
-{
-  public:
-    QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas );
-
-    // TODO coords are in screen ref (is it better to convert them before ? )
-    void setCurrentBlankArea( const QList<QPointF> &points, int iBlankArea );
-
-    // TODO
-    void setCurrentPosition( const QPointF &point );
-
-  private:
-    // TODO
-    enum CurrentDisplay
-    {
-      None,
-      BlankArea,
-      Position
-    };
-
-    QPointF mCurrentPosition;
-
-    QgsMapCanvas *mMapCanvas = nullptr;
-    QObjectUniquePtr<QgsRubberBand> mBlankAreasRubberBand;
-    QObjectUniquePtr<QgsRubberBand> mStartEndRubberBand;
-};
 
 /**
  * \ingroup gui
@@ -84,6 +52,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
 
     void activate() override;
 
+    // TODO every thing really need to be protected, can we not private stuff here ?
   protected:
     typedef std::tuple<QgsSymbolLayer *, QgsSymbol *, int> FoundSymbolLayer;
 
@@ -101,35 +70,42 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     // TODO comment and maybe rename -> "fake" stuff isn't really super ?!
     virtual void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
 
-    class BlankArea
+    void updateStartEndRubberBand();
+
+    class BlankArea : public QgsRubberBand
     {
       public:
         BlankArea( int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const QPolygonF &points );
 
-        void setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt, const QPolygonF &points );
+        void setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt );
+
+        const QPointF &getStartPoint() const;
+        const QPointF &getEndPoint() const;
+
+        int pointsCount() const;
+        const QPointF &pointAt( int index ) const;
 
       private:
         int mStartIndex = -1;
         int mEndIndex = -1;
         QPointF mStartPt;
         QPointF mEndPt;
-        QObjectUniquePtr<QgsRubberBand> mRubberBand;
-        QgsMapCanvas *mCanvas = nullptr;
+        const QPolygonF &mPoints; //! all feature rendered points
     };
 
     enum State
     {
       SELECT_FEATURE,
-      START_CREATE_BLANK_AREA
+      START_CREATE_BLANK_AREA,
+      EDIT_BLANK_AREA
     };
 
-    std::list<std::unique_ptr<BlankArea>> mBlankAreas;
-    std::unique_ptr<QgsMapToolBlankAreaRubberBand> mRubberBand;
+    std::vector<std::unique_ptr<BlankArea>> mBlankAreas;
     QgsVectorLayer *mLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
     QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
     const QString mSymbolLayerId;
-    QPolygonF mPoints; // TODO don't this need, don't we ?
+    QPolygonF mPoints;
     int mBlankAreasFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
     QString mCurrentBlankAreas; // TODO remove this when we will use current rubber band blank areas to serialize
@@ -139,6 +115,10 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     int mFirstIndex = -1;
     QgsRectangle mExtent;
     State mState = State::SELECT_FEATURE;
+    int mCurrentBlankArea = -1;
+
+    QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
+    QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
 };
 
 template<class T>
