@@ -14,6 +14,7 @@
  ***************************************************************************/
 
 #include "qgscoordinatetransform.h"
+#include "qgsfeatureid.h"
 #include "qgsmaptooleditblankareas.h"
 
 #include "qgsmapcanvas.h"
@@ -206,7 +207,6 @@ void QgsMapToolEditBlankAreasBase::activate()
     //
 
     // transform distance from and to start/end Index/Pt
-
     // then transform start/end Index/Pt to rubberband
 
     // store a list of struct rubberband, start/end index/pt
@@ -370,6 +370,24 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       }
   }
 }
+
+void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
+{
+  switch ( mState )
+  {
+    case State::SELECT_FEATURE:
+      return;
+
+    case State::START_CREATE_BLANK_AREA:
+      if ( e->key() == Qt::Key_Escape )
+      {
+        mCurrentFeatureId = FID_NULL;
+        loadFeaturePoints();
+        mState = State::SELECT_FEATURE;
+      }
+  }
+}
+
 
 void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
 {
@@ -543,10 +561,13 @@ class MyLine
 
 void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
 {
-  if ( !mSymbolLayer )
-    return;
-
+  mPoints.clear();
+  mCurrentBlankAreas = QString();
   mExtent = canvas()->extent();
+  mBlankAreas.clear();
+
+  if ( FID_IS_NULL( mCurrentFeatureId ) || !mSymbolLayer )
+    return;
 
   QgsFeature feature;
   feature = mLayer->getFeature( mCurrentFeatureId );

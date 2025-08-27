@@ -80,6 +80,8 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
 
     void canvasMoveEvent( QgsMapMouseEvent *e ) override;
     void canvasPressEvent( QgsMapMouseEvent *e ) override;
+    void keyPressEvent( QKeyEvent *e ) override;
+
     void activate() override;
 
   protected:
