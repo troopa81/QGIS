@@ -115,6 +115,12 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
         QgsMapCanvas *mCanvas = nullptr;
     };
 
+    enum State
+    {
+      SELECT_FEATURE,
+      START_CREATE_BLANK_AREA
+    };
+
     std::list<std::unique_ptr<BlankArea>> mBlankAreas;
     std::unique_ptr<QgsMapToolBlankAreaRubberBand> mRubberBand;
     QgsVectorLayer *mLayer = nullptr;
@@ -130,6 +136,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     int mCurrentIndex = -1;
     int mFirstIndex = -1;
     QgsRectangle mExtent;
+    State mState = State::SELECT_FEATURE;
 };
 
 template<class T>

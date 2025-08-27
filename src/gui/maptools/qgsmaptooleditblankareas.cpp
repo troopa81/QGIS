@@ -27,6 +27,7 @@
 #include "qgssettingsregistrycore.h"
 #include "qgssettingsentryimpl.h"
 #include "qgsguiutils.h"
+#include "qgssnappingutils.h"
 
 QgsMapToolBlankAreaRubberBand::QgsMapToolBlankAreaRubberBand( QgsMapCanvas *canvas )
   : mMapCanvas( canvas )
@@ -201,11 +202,6 @@ void QgsMapToolEditBlankAreasBase::activate()
       std::get<QgsSymbol *>( found )->changeSymbolLayer( std::get<int>( found ), mSymbolLayer );
     }
 
-    // TODO to be move when we would know what feature is edited
-    mCurrentFeatureId = 1;
-    loadFeaturePoints();
-
-
     // load current blank areas distance from feature
     //
 
@@ -215,6 +211,8 @@ void QgsMapToolEditBlankAreasBase::activate()
 
     // store a list of struct rubberband, start/end index/pt
   }
+
+  QgsMapTool::activate();
 }
 
 
@@ -253,6 +251,15 @@ double distanceFct( const QPointF &prevPt, const QPointF &pt )
 
 void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
 {
+  // TODO add function and call function instead of just returning
+  switch ( mState )
+  {
+    case State::SELECT_FEATURE:
+      return;
+    case State::START_CREATE_BLANK_AREA:
+      break;
+  }
+
   QPointF pos = e->pos();
 
   if ( canvas()->extent() != mExtent )
@@ -325,20 +332,42 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
   }
 }
 
-void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent * )
+void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
 {
-  // finish creating a blank area
-  if ( mFirstIndex > -1 )
+  // TODO separate in functions
+  switch ( mState )
   {
-    const std::pair<double, double> startEndDistance = getStartEndDistance();
-    addNewBlankArea( startEndDistance.first, startEndDistance.second );
-    mFirstIndex = -1;
-  }
-  // currently creating a blank area
-  else
-  {
-    mFirstIndex = mCurrentIndex;
-    mFirstPt = mCurrentPt;
+    case State::SELECT_FEATURE:
+    {
+      //find the closest feature to the pressed position
+      const QgsPointLocator::Match m = mCanvas->snappingUtils()->snapToCurrentLayer( e->pos(), QgsPointLocator::Area );
+      if ( !m.isValid() )
+      {
+        // TODO deal with message
+        // emit messageEmitted( tr( "No point feature was detected at the clicked position. Please click closer to the feature or enhance the search tolerance under Settings->Options->Digitizing->Search radius for vertex edits" ), Qgis::MessageLevel::Critical );
+        return;
+      }
+
+      mCurrentFeatureId = 1;
+      loadFeaturePoints();
+
+      mState = State::START_CREATE_BLANK_AREA;
+      break;
+    }
+    case State::START_CREATE_BLANK_AREA:
+      // finish creating a blank area
+      if ( mFirstIndex > -1 )
+      {
+        const std::pair<double, double> startEndDistance = getStartEndDistance();
+        addNewBlankArea( startEndDistance.first, startEndDistance.second );
+        mFirstIndex = -1;
+      }
+      // currently creating a blank area
+      else
+      {
+        mFirstIndex = mCurrentIndex;
+        mFirstPt = mCurrentPt;
+      }
   }
 }
 
