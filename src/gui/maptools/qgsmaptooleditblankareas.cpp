@@ -167,27 +167,31 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
   switch ( mState )
   {
     case State::SELECT_FEATURE:
-    case State::EDIT_BLANK_AREA:
       return;
 
+    case State::EDIT_BLANK_AREA:
     case State::START_CREATE_BLANK_AREA:
     {
       double distance = -1;
       int iBlankArea = getClosestBlankAreaIndex( pos, distance );
 
-      if ( mCurrentBlankArea > -1 )
+      if ( mHoveredBlankArea > -1 && mHoveredBlankArea != mCurrentBlankArea )
       {
         // TODO constant or function for set selected or not
-        mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
-        mBlankAreas.at( mCurrentBlankArea )->update();
+        mBlankAreas.at( mHoveredBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+        mBlankAreas.at( mHoveredBlankArea )->update();
       }
 
       // TODO constant or use tolerance general parameter
       if ( iBlankArea > -1 && distance < 20 )
       {
-        mCurrentBlankArea = iBlankArea;
-        mBlankAreas.at( iBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
-        mBlankAreas.at( iBlankArea )->update();
+        mHoveredBlankArea = iBlankArea;
+        mBlankAreas.at( mHoveredBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+        mBlankAreas.at( mHoveredBlankArea )->update();
+      }
+      else
+      {
+        mHoveredBlankArea = -1;
       }
 
       break;
@@ -271,10 +275,14 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
     case State::START_CREATE_BLANK_AREA:
     case State::EDIT_BLANK_AREA:
 
-      if ( mCurrentBlankArea > -1 )
+      // new blank area selected
+      if ( mHoveredBlankArea > -1 && mHoveredBlankArea != mCurrentBlankArea )
       {
-        mState = State::EDIT_BLANK_AREA;
+        if ( mCurrentBlankArea > -1 )
+          mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+        mCurrentBlankArea = mHoveredBlankArea;
         updateStartEndRubberBand();
+        mState = State::EDIT_BLANK_AREA;
       }
       else
       {
@@ -294,6 +302,7 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       }
       break;
 
+    case State::EDIT_BLANK_AREA_END:
       break;
   }
 }
@@ -330,7 +339,6 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
       }
   }
 }
-
 
 void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
 {

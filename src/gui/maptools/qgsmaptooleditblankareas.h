@@ -101,7 +101,8 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     {
       SELECT_FEATURE,
       START_CREATE_BLANK_AREA,
-      EDIT_BLANK_AREA
+      EDIT_BLANK_AREA, // TODO rename BLAN_AREA_SELECTED ?
+      EDIT_BLANK_AREA_END
     };
 
     std::vector<std::unique_ptr<BlankArea>> mBlankAreas;
@@ -120,6 +121,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     QgsRectangle mExtent;
     State mState = State::SELECT_FEATURE;
     int mCurrentBlankArea = -1;
+    int mHoveredBlankArea = -1;
 
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
     QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
