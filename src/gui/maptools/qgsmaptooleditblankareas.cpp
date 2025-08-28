@@ -273,18 +273,27 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       break;
     }
     case State::START_CREATE_BLANK_AREA:
-    case State::EDIT_BLANK_AREA:
 
       // new blank area selected
-      if ( mHoveredBlankArea > -1 && mHoveredBlankArea != mCurrentBlankArea )
+      if ( mHoveredBlankArea > -1 )
       {
-        if ( mCurrentBlankArea > -1 )
-          mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
         mCurrentBlankArea = mHoveredBlankArea;
         updateStartEndRubberBand();
         mState = State::EDIT_BLANK_AREA;
       }
-      else
+
+      break;
+
+    case State::EDIT_BLANK_AREA:
+
+      // selected blank area has changed
+      if ( mHoveredBlankArea > -1 && mHoveredBlankArea != mCurrentBlankArea )
+      {
+        mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+        mCurrentBlankArea = mHoveredBlankArea;
+        updateStartEndRubberBand();
+      }
+      else if ( mCurrentBlankArea != -1 )
       {
         // finish creating a blank area
         if ( mFirstIndex > -1 )
@@ -300,6 +309,7 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
           mFirstPt = mCurrentPt;
         }
       }
+
       break;
 
     case State::EDIT_BLANK_AREA_END:
