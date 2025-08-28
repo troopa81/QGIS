@@ -71,15 +71,20 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     virtual void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
 
     int getClosestBlankAreaIndex( const QPointF &point, double &distance ) const;
+    QPointF getClosestPoint( const QPointF &point, double &distance, int &pointIndex ) const;
 
     void updateStartEndRubberBand();
+    void updateHoveredBlankArea( const QPoint &pos );
+    void setCurrentBlankArea( int currentBlankAreaIndex );
 
     class BlankArea : public QgsRubberBand
     {
       public:
         BlankArea( int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const QPolygonF &points );
+        BlankArea( QgsMapCanvas *canvas, const QPolygonF &points );
 
         void setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt );
+        void copyFrom( const BlankArea &blankArea );
 
         const QPointF &getStartPoint() const;
         const QPointF &getEndPoint() const;
@@ -122,8 +127,9 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     int mFirstIndex = -1;
     QgsRectangle mExtent;
     State mState = State::SELECT_FEATURE;
-    int mCurrentBlankArea = -1;
+    int mCurrentBlankAreaIndex = -1;
     int mHoveredBlankArea = -1;
+    BlankArea mEditedBlankArea;
 
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
     QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
