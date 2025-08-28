@@ -50,6 +50,8 @@ QgsMapToolEditBlankAreasBase::QgsMapToolEditBlankAreasBase( QgsMapCanvas *canvas
   initRubberBand( mStartRubberBand );
   initRubberBand( mEndRubberBand );
 
+  mEditedBlankArea.setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+
   // TODO what happen with other renderer
   // TODO deal with errors
   const QgsSingleSymbolRenderer *renderer = dynamic_cast<const QgsSingleSymbolRenderer *>( mLayer->renderer() );
@@ -282,9 +284,9 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       if ( mHoveredBlankArea > -1 )
       {
         setCurrentBlankArea( mHoveredBlankArea );
-        updateStartEndRubberBand();
         mState = State::EDIT_BLANK_AREA;
       }
+      // init first point of new blank area
       else
       {
         mEditedBlankArea.setPoints( mFirstIndex, mCurrentIndex, mFirstPt, mCurrentPt );
@@ -302,7 +304,6 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       {
         currentBlankArea->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
         setCurrentBlankArea( mHoveredBlankArea );
-        updateStartEndRubberBand();
       }
       else
       {
@@ -324,8 +325,6 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
           }
 
           // copy the current blank area to the current edited one
-          currentBlankArea->setVisible( false );
-          mEditedBlankArea.setPoints( currentBlankArea->getStartIndex(), currentBlankArea->getEndIndex(), currentBlankArea->getStartPoint(), currentBlankArea->getEndPoint() );
           mState = State::EDIT_BLANK_AREA_END;
         }
 
@@ -374,14 +373,20 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
         mBlankAreas.erase( mBlankAreas.begin() + mCurrentBlankAreaIndex );
         mState = State::START_CREATE_BLANK_AREA;
         setCurrentBlankArea( -1 );
-        updateStartEndRubberBand();
         updateAttribute();
         e->accept();
       }
-      [[fallthrough]];
+      else if ( e->matches( QKeySequence::Cancel ) )
+      {
+        mState = State::START_CREATE_BLANK_AREA;
+        setCurrentBlankArea( -1 );
+        e->accept();
+      }
+
+      break;
 
     case State::START_CREATE_BLANK_AREA:
-      if ( e->key() == Qt::Key_Escape )
+      if ( e->matches( QKeySequence::Cancel ) )
       {
         mCurrentFeatureId = FID_NULL;
         loadFeaturePoints();
@@ -392,12 +397,11 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
       break;
 
     case State::EDIT_BLANK_AREA_END:
-      if ( e->key() == Qt::Key_Escape )
+      if ( e->matches( QKeySequence::Cancel ) )
       {
         mState = State::EDIT_BLANK_AREA;
         // force original blank area
         setCurrentBlankArea( mCurrentBlankAreaIndex );
-        updateStartEndRubberBand();
         e->accept();
       }
   }
@@ -580,11 +584,26 @@ void QgsMapToolEditBlankAreasBase::updateHoveredBlankArea( const QPoint &pos )
 
 void QgsMapToolEditBlankAreasBase::setCurrentBlankArea( int currentBlankAreaIndex )
 {
+  // copy current blank area so we can edit it later (and hide the original one)
+
+  if ( mCurrentBlankAreaIndex > -1 )
+  {
+    mBlankAreas.at( mCurrentBlankAreaIndex )->setVisible( true );
+    mBlankAreas.at( mCurrentBlankAreaIndex )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+  }
+
   mCurrentBlankAreaIndex = currentBlankAreaIndex;
   if ( mCurrentBlankAreaIndex > -1 )
   {
+    mBlankAreas.at( mCurrentBlankAreaIndex )->setVisible( false );
     mEditedBlankArea.copyFrom( *( mBlankAreas.at( mCurrentBlankAreaIndex ).get() ) );
   }
+  else
+  {
+    mEditedBlankArea.setVisible( false );
+  }
+
+  updateStartEndRubberBand();
 }
 
 void QgsMapToolEditBlankAreasBase::updateAttribute()
