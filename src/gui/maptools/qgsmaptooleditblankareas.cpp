@@ -30,6 +30,8 @@
 #include "qgsguiutils.h"
 #include "qgssnappingutils.h"
 
+constexpr int TOLERANCE = 20;
+
 QgsMapToolEditBlankAreasBase::QgsMapToolEditBlankAreasBase( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankAreaFieldIndex )
   : QgsMapTool( canvas )
   , mLayer( layer )
@@ -115,10 +117,17 @@ double distanceFct( const QPointF &prevPt, const QPointF &pt )
   return std::sqrt( std::pow( Bx - Ax, 2 ) + std::pow( By - Ay, 2 ) );
 }
 
-// TODO doc (distance = distance to line)
-QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, const QPointF &point, double &distance, bool &ok )
+enum Status
 {
-  ok = true;
+  OK,
+  LINE_EMPTY,
+  NOT_ON_LINE
+};
+
+// TODO doc (distance = distance to line)
+QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, const QPointF &point, double &distance, Status &status )
+{
+  status = Status::OK;
 
   double Ax = lineStartPt.x();
   double Ay = lineStartPt.y();
@@ -130,19 +139,16 @@ QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, co
   double length = std::sqrt( std::pow( Bx - Ax, 2 ) + std::pow( By - Ay, 2 ) );
   if ( length == 0 )
   {
-    ok = false;
+    status = Status::LINE_EMPTY;
     return QPointF();
   }
 
   double r = ( ( Cx - Ax ) * ( Bx - Ax ) + ( Cy - Ay ) * ( By - Ay ) ) / std::pow( length, 2 );
 
-  // TODO point is outside the segment, see if it's a problem when we create, we don't have to return false
-  // when we search for closest blank area
-  // if ( r < 0 or r > 1 )
-  // {
-  //   ok = false;
-  //   return QPointF();
-  // }
+  if ( r < 0 or r > 1 )
+  {
+    status = Status::NOT_ON_LINE;
+  }
 
   // projected point
   double Px = Ax + r * ( Bx - Ax );
@@ -183,7 +189,7 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
       }
 
       // TODO constant or use tolerance general parameter
-      if ( iBlankArea > -1 && distance < 20 )
+      if ( iBlankArea > -1 && distance < TOLERANCE )
       {
         mHoveredBlankArea = iBlankArea;
         mBlankAreas.at( mHoveredBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
@@ -196,52 +202,69 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
 
       break;
     }
+
+    case State::EDIT_BLANK_AREA_END:
+    {
+      double minDistance = -1;
+      for ( int i = 1; i < mPoints.count(); i++ )
+      {
+        double distance = 0;
+        Status status = Status::OK;
+        QPointF P = projectedPoint( mPoints[i - 1], mPoints[i], pos, distance, status );
+        switch ( status )
+        {
+          case Status::LINE_EMPTY:
+          case Status::NOT_ON_LINE:
+            continue;
+
+          case Status::OK:
+            break;
+        }
+
+        if ( minDistance == -1 || distance < minDistance )
+        {
+          minDistance = distance;
+          mCurrentPt = P;
+          mCurrentIndex = i;
+        }
+      }
+
+      if ( mCurrentIndex > -1 )
+      {
+        const std::unique_ptr<BlankArea> &currentBlankArea = mBlankAreas.at( mCurrentBlankArea );
+        int startIndex = -1, endIndex = -1;
+        QPointF startPoint, endPoint;
+        getStartEnd( startIndex, endIndex, startPoint, endPoint );
+        currentBlankArea->setPoints( startIndex, endIndex, startPoint, endPoint );
+        updateStartEndRubberBand();
+      }
+    }
+    break;
+      //   if ( mFirstIndex > -1 )
+      //   {
+      //     QList<QPointF> pointsToDraw;
+
+      //     int startIndex = -1, endIndex = -1;
+      //     QPointF startPt, endPt;
+      //     getStartEnd( startIndex, endIndex, startPt, endPt );
+
+      //     pointsToDraw << startPt;
+      //     if ( startIndex != endIndex )
+      //     {
+      //       for ( int i = startIndex; i < endIndex; i++ )
+      //       {
+      //         pointsToDraw << mPoints.at( i );
+      //       }
+      //     }
+      //     pointsToDraw << endPt;
+
+      //   // mRubberBand->setCurrentBlankArea( pointsToDraw, 0 );
+      // }
+      // else
+      // {
+      //   // mRubberBand->setCurrentPosition( mCurrentPt );
+      // }
   }
-
-  // double minDistance = -1;
-  // for ( int i = 1; i < mPoints.count(); i++ )
-  // {
-  //   double distance = 0;
-  //   bool ok = false;
-  //   QPointF P = projectedPoint( mPoints[i - 1], mPoints[i], pos, distance, ok );
-  //   if ( !ok )
-  //     continue;
-
-  //   if ( minDistance == -1 || distance < minDistance )
-  //   {
-  //     minDistance = distance;
-  //     mCurrentPt = P;
-  //     mCurrentIndex = i;
-  //   }
-  // }
-
-  // if ( mCurrentIndex == -1 )
-  //   return;
-
-  // if ( mFirstIndex > -1 )
-  // {
-  //   QList<QPointF> pointsToDraw;
-
-  //   int startIndex = -1, endIndex = -1;
-  //   QPointF startPt, endPt;
-  //   getStartEnd( startIndex, endIndex, startPt, endPt );
-
-  //   pointsToDraw << startPt;
-  //   if ( startIndex != endIndex )
-  //   {
-  //     for ( int i = startIndex; i < endIndex; i++ )
-  //     {
-  //       pointsToDraw << mPoints.at( i );
-  //     }
-  //   }
-  //   pointsToDraw << endPt;
-
-  //   // mRubberBand->setCurrentBlankArea( pointsToDraw, 0 );
-  // }
-  // else
-  // {
-  //   // mRubberBand->setCurrentPosition( mCurrentPt );
-  // }
 }
 
 // on move test if currentBlanAkrea startPt et close sont proche, si oui change cursor
@@ -285,34 +308,62 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       break;
 
     case State::EDIT_BLANK_AREA:
+    {
+      const std::unique_ptr<BlankArea> &currentBlankArea = mBlankAreas.at( mCurrentBlankArea );
 
       // selected blank area has changed
       if ( mHoveredBlankArea > -1 && mHoveredBlankArea != mCurrentBlankArea )
       {
-        mBlankAreas.at( mCurrentBlankArea )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+        currentBlankArea->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
         mCurrentBlankArea = mHoveredBlankArea;
         updateStartEndRubberBand();
       }
-      else if ( mCurrentBlankArea != -1 )
+      else
       {
-        // finish creating a blank area
-        if ( mFirstIndex > -1 )
-        {
-          // const std::pair<double, double> startEndDistance = getStartEndDistance();
-          // addNewBlankArea( startEndDistance.first, startEndDistance.second );
-          mFirstIndex = -1;
-        }
-        // currently creating a blank area
-        else
-        {
-          mFirstIndex = mCurrentIndex;
-          mFirstPt = mCurrentPt;
-        }
-      }
+        const double distanceFromStart = ( currentBlankArea->getStartPoint() - e->pos() ).manhattanLength();
+        const double distanceFromEnd = ( currentBlankArea->getEndPoint() - e->pos() ).manhattanLength();
 
-      break;
+        // user clicked on start or end point to move it
+        if ( std::min( distanceFromStart, distanceFromEnd ) < TOLERANCE )
+        {
+          mFirstIndex = currentBlankArea->getStartIndex();
+          mCurrentIndex = currentBlankArea->getEndIndex();
+          mFirstPt = currentBlankArea->getStartPoint();
+          mCurrentPt = currentBlankArea->getEndPoint();
+
+          if ( distanceFromStart < distanceFromEnd )
+          {
+            std::swap( mFirstIndex, mCurrentIndex );
+            std::swap( mFirstPt, mCurrentPt );
+          }
+
+          mState = State::EDIT_BLANK_AREA_END;
+        }
+
+        // // finish creating a blank area
+        // if ( mFirstIndex > -1 )
+        // {
+        //   // const std::pair<double, double> startEndDistance = getStartEndDistance();
+        //   // addNewBlankArea( startEndDistance.first, startEndDistance.second );
+        //   mFirstIndex = -1;
+        // }
+        // // currently creating a blank area
+        // else
+        // {
+        //   mFirstIndex = mCurrentIndex;
+        //   mFirstPt = mCurrentPt;
+        // }
+      }
+    }
+
+    break;
 
     case State::EDIT_BLANK_AREA_END:
+
+      mFirstIndex = -1;
+      mCurrentIndex = -1;
+      mState = State::EDIT_BLANK_AREA;
+      updateAttribute();
       break;
   }
 }
@@ -425,10 +476,20 @@ int QgsMapToolEditBlankAreasBase::getClosestBlankAreaIndex( const QPointF &point
     for ( int iPoint = 1; iPoint < blankArea->pointsCount(); iPoint++ )
     {
       double d = 0;
-      bool ok = false;
-      projectedPoint( blankArea->pointAt( iPoint - 1 ), blankArea->pointAt( iPoint ), point, d, ok );
-      if ( !ok )
-        continue;
+      Status status = Status::OK;
+      projectedPoint( blankArea->pointAt( iPoint - 1 ), blankArea->pointAt( iPoint ), point, d, status );
+      switch ( status )
+      {
+        case Status::LINE_EMPTY:
+          continue;
+
+        case Status::NOT_ON_LINE:
+          d = std::min( ( blankArea->getStartPoint() - point ).manhattanLength(), ( blankArea->getEndPoint() - point ).manhattanLength() );
+          break;
+
+        case Status::OK:
+          break;
+      }
 
       if ( distance == -1 || d < distance )
       {
@@ -644,6 +705,7 @@ void QgsMapToolEditBlankAreasBase::BlankArea::setPoints( int startIndex, int end
 
   const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
 
+  reset();
   for ( int iPoint = 0; iPoint < pointsCount(); iPoint++ )
   {
     const QPointF &point = pointAt( iPoint );
@@ -660,6 +722,16 @@ const QPointF &QgsMapToolEditBlankAreasBase::BlankArea::getStartPoint() const
 const QPointF &QgsMapToolEditBlankAreasBase::BlankArea::getEndPoint() const
 {
   return mEndPt;
+}
+
+int QgsMapToolEditBlankAreasBase::BlankArea::getStartIndex() const
+{
+  return mStartIndex;
+}
+
+int QgsMapToolEditBlankAreasBase::BlankArea::getEndIndex() const
+{
+  return mEndIndex;
 }
 
 int QgsMapToolEditBlankAreasBase::BlankArea::pointsCount() const

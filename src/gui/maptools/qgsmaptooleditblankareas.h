@@ -83,6 +83,8 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
 
         const QPointF &getStartPoint() const;
         const QPointF &getEndPoint() const;
+        int getStartIndex() const;
+        int getEndIndex() const;
 
         std::pair<double, double> getStartEndDistance() const;
 
