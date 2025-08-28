@@ -346,9 +346,10 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
       // ( it's not possible anymore to delete a feature )
       if ( e->matches( QKeySequence::Delete ) && mCurrentBlankAreaIndex > -1 )
       {
-        mBlankAreas.erase( mBlankAreas.begin() + mCurrentBlankAreaIndex );
         mState = State::FEATURE_SELECTED;
+        int toRemoveIndex = mCurrentBlankAreaIndex;
         setCurrentBlankArea( -1 );
+        mBlankAreas.erase( mBlankAreas.begin() + toRemoveIndex );
         updateAttribute();
         e->accept();
       }
