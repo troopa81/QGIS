@@ -179,11 +179,11 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
     case State::SELECT_FEATURE:
       return;
 
-    case State::EDIT_BLANK_AREA:
+    case State::BLANK_AREA_SELECTED:
       updateHoveredBlankArea( pos );
       break;
 
-    case State::START_CREATE_BLANK_AREA:
+    case State::FEATURE_SELECTED:
     {
       updateHoveredBlankArea( pos );
 
@@ -194,15 +194,19 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
         const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
         mStartRubberBand->reset( Qgis::GeometryType::Point );
         double distance;
-        int pointIndex;
-        QPointF closestPoint = getClosestPoint( pos, distance, pointIndex );
-        mStartRubberBand->addPoint( m2p.toMapCoordinates( closestPoint.x(), closestPoint.y() ) );
+        mFirstPt = getClosestPoint( pos, distance, mFirstIndex );
+
+        // for now end point is the same as start one
+        mCurrentPt = mFirstPt;
+        mCurrentIndex = mFirstIndex;
+        mStartRubberBand->addPoint( m2p.toMapCoordinates( mFirstPt.x(), mFirstPt.y() ) );
       }
 
       break;
     }
 
-    case State::EDIT_BLANK_AREA_END:
+    case State::BLANK_AREA_MODIFICATION_STARTED:
+    case State::BLANK_AREA_CREATION_STARTED:
     {
       double distance = -1;
       int pointIndex = -1;
@@ -223,38 +227,8 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
       }
     }
     break;
-      //   if ( mFirstIndex > -1 )
-      //   {
-      //     QList<QPointF> pointsToDraw;
-
-      //     int startIndex = -1, endIndex = -1;
-      //     QPointF startPt, endPt;
-      //     getStartEnd( startIndex, endIndex, startPt, endPt );
-
-      //     pointsToDraw << startPt;
-      //     if ( startIndex != endIndex )
-      //     {
-      //       for ( int i = startIndex; i < endIndex; i++ )
-      //       {
-      //         pointsToDraw << mPoints.at( i );
-      //       }
-      //     }
-      //     pointsToDraw << endPt;
-
-      //   // mRubberBand->setCurrentBlankArea( pointsToDraw, 0 );
-      // }
-      // else
-      // {
-      //   // mRubberBand->setCurrentPosition( mCurrentPt );
-      // }
   }
 }
-
-// on move test if currentBlanAkrea startPt et close sont proche, si oui change cursor
-
-// dragEnterEvent faire pareil, changer state, puis dans move update start et call updatestartend
-
-// dropEvent -> changer state
 
 void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
 {
@@ -275,27 +249,31 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       mCurrentFeatureId = 1;
       loadFeaturePoints();
 
-      mState = State::START_CREATE_BLANK_AREA;
+      mState = State::FEATURE_SELECTED;
       break;
     }
-    case State::START_CREATE_BLANK_AREA:
+    case State::FEATURE_SELECTED:
 
       // new blank area selected
       if ( mHoveredBlankArea > -1 )
       {
+        mState = State::BLANK_AREA_SELECTED;
         setCurrentBlankArea( mHoveredBlankArea );
-        mState = State::EDIT_BLANK_AREA;
       }
       // init first point of new blank area
       else
       {
-        mEditedBlankArea.setPoints( mFirstIndex, mCurrentIndex, mFirstPt, mCurrentPt );
-        mState = State::EDIT_BLANK_AREA_END;
+        int startIndex = -1, endIndex = -1;
+        QPointF startPoint, endPoint;
+        getStartEnd( startIndex, endIndex, startPoint, endPoint );
+        mEditedBlankArea.setPoints( startIndex, endIndex, startPoint, endPoint );
+        mState = State::BLANK_AREA_CREATION_STARTED;
+        updateStartEndRubberBand();
       }
 
       break;
 
-    case State::EDIT_BLANK_AREA:
+    case State::BLANK_AREA_SELECTED:
     {
       const std::unique_ptr<BlankArea> &currentBlankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
 
@@ -324,35 +302,33 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
             std::swap( mFirstPt, mCurrentPt );
           }
 
-          // copy the current blank area to the current edited one
-          mState = State::EDIT_BLANK_AREA_END;
+          mState = State::BLANK_AREA_MODIFICATION_STARTED;
         }
-
-        // // finish creating a blank area
-        // if ( mFirstIndex > -1 )
-        // {
-        //   // const std::pair<double, double> startEndDistance = getStartEndDistance();
-        //   // addNewBlankArea( startEndDistance.first, startEndDistance.second );
-        //   mFirstIndex = -1;
-        // }
-        // // currently creating a blank area
-        // else
-        // {
-        //   mFirstIndex = mCurrentIndex;
-        //   mFirstPt = mCurrentPt;
-        // }
       }
     }
 
     break;
 
-    case State::EDIT_BLANK_AREA_END:
+    case State::BLANK_AREA_MODIFICATION_STARTED:
+    case State::BLANK_AREA_CREATION_STARTED:
 
-      std::unique_ptr<BlankArea> &blankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
-      blankArea->setPoints( mEditedBlankArea.getStartIndex(), mEditedBlankArea.getEndIndex(), mEditedBlankArea.getStartPoint(), mEditedBlankArea.getEndPoint() );
+      // this is a new one
+      if ( mCurrentBlankAreaIndex == -1 )
+      {
+        mBlankAreas.push_back( std::make_unique<BlankArea>( canvas(), mPoints ) );
+        mBlankAreas.back()->copyFrom( mEditedBlankArea );
+        mState = State::FEATURE_SELECTED;
+      }
+      // modify an existing one
+      else
+      {
+        std::unique_ptr<BlankArea> &blankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
+        blankArea->copyFrom( mEditedBlankArea );
+        mState = State::BLANK_AREA_SELECTED;
+      }
+
       mFirstIndex = -1;
       mCurrentIndex = -1;
-      mState = State::EDIT_BLANK_AREA;
       updateAttribute();
       break;
   }
@@ -365,27 +341,27 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
     case State::SELECT_FEATURE:
       return;
 
-    case State::EDIT_BLANK_AREA:
+    case State::BLANK_AREA_SELECTED:
       // TODO conflic with QgisApp::mapCanvas_keyPressed even if I switch to !accepted
       // ( it's not possible anymore to delete a feature )
       if ( e->matches( QKeySequence::Delete ) && mCurrentBlankAreaIndex > -1 )
       {
         mBlankAreas.erase( mBlankAreas.begin() + mCurrentBlankAreaIndex );
-        mState = State::START_CREATE_BLANK_AREA;
+        mState = State::FEATURE_SELECTED;
         setCurrentBlankArea( -1 );
         updateAttribute();
         e->accept();
       }
       else if ( e->matches( QKeySequence::Cancel ) )
       {
-        mState = State::START_CREATE_BLANK_AREA;
+        mState = State::FEATURE_SELECTED;
         setCurrentBlankArea( -1 );
         e->accept();
       }
 
       break;
 
-    case State::START_CREATE_BLANK_AREA:
+    case State::FEATURE_SELECTED:
       if ( e->matches( QKeySequence::Cancel ) )
       {
         mCurrentFeatureId = FID_NULL;
@@ -396,14 +372,23 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
       }
       break;
 
-    case State::EDIT_BLANK_AREA_END:
+    case State::BLANK_AREA_CREATION_STARTED:
       if ( e->matches( QKeySequence::Cancel ) )
       {
-        mState = State::EDIT_BLANK_AREA;
+        mState = State::FEATURE_SELECTED;
+        e->accept();
+      }
+      break;
+
+    case State::BLANK_AREA_MODIFICATION_STARTED:
+      if ( e->matches( QKeySequence::Cancel ) )
+      {
+        mState = State::BLANK_AREA_SELECTED;
         // force original blank area
         setCurrentBlankArea( mCurrentBlankAreaIndex );
         e->accept();
       }
+      break;
   }
 }
 
@@ -544,16 +529,32 @@ void QgsMapToolEditBlankAreasBase::updateStartEndRubberBand()
   mStartRubberBand->reset( Qgis::GeometryType::Point );
   mEndRubberBand->reset( Qgis::GeometryType::Point );
 
-  if ( mCurrentBlankAreaIndex == -1 )
-    return;
+  bool displayEndPoint = true;
+  switch ( mState )
+  {
+    case State::SELECT_FEATURE:
+    case State::BLANK_AREA_CREATION_STARTED:
+      return;
+
+    case State::FEATURE_SELECTED:
+      displayEndPoint = false;
+      [[fallthrough]];
+
+    case State::BLANK_AREA_SELECTED:
+    case State::BLANK_AREA_MODIFICATION_STARTED:
+      break;
+  }
 
   const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
 
   const QPointF &startPoint = mEditedBlankArea.getStartPoint();
   mStartRubberBand->addPoint( m2p.toMapCoordinates( startPoint.x(), startPoint.y() ) );
 
-  const QPointF &endPoint = mEditedBlankArea.getEndPoint();
-  mEndRubberBand->addPoint( m2p.toMapCoordinates( endPoint.x(), endPoint.y() ) );
+  if ( displayEndPoint )
+  {
+    const QPointF &endPoint = mEditedBlankArea.getEndPoint();
+    mEndRubberBand->addPoint( m2p.toMapCoordinates( endPoint.x(), endPoint.y() ) );
+  }
 }
 
 void QgsMapToolEditBlankAreasBase::updateHoveredBlankArea( const QPoint &pos )
@@ -620,7 +621,6 @@ void QgsMapToolEditBlankAreasBase::updateAttribute()
   mLayer->beginEditCommand( tr( "Set blank area list" ) );
   if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasFieldIndex, strNewBlankAreas ) )
   {
-    mCurrentBlankAreas = strNewBlankAreas;
     mLayer->endEditCommand();
     mLayer->triggerRepaint();
   }
@@ -698,7 +698,6 @@ class MyLine
 void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
 {
   mPoints.clear();
-  mCurrentBlankAreas = QString();
   mExtent = canvas()->extent();
   mBlankAreas.clear();
 
@@ -707,7 +706,7 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
 
   QgsFeature feature;
   feature = mLayer->getFeature( mCurrentFeatureId );
-  mCurrentBlankAreas = feature.attribute( mBlankAreasFieldIndex ).toString();
+  QString currentBlankAreas = feature.attribute( mBlankAreasFieldIndex ).toString();
 
 
   // render feature to update mPoints
@@ -727,7 +726,7 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
   // TODO this code exists already on qgslinesymbollayer
   // TODO shall we use a property type list
   QList<QPair<double, double>> blankAreas;
-  const QStringList strBlankAreaList = mCurrentBlankAreas.split( ",", Qt::SkipEmptyParts );
+  const QStringList strBlankAreaList = currentBlankAreas.split( ",", Qt::SkipEmptyParts );
   for ( int i = 0; i + 1 < strBlankAreaList.count(); i += 2 )
   {
     blankAreas.append( QPair<double, double>( context.convertFromMapUnits( strBlankAreaList.at( i ).toDouble(), Qgis::RenderUnit::Pixels ), context.convertFromMapUnits( strBlankAreaList.at( i + 1 ).toDouble(), Qgis::RenderUnit::Pixels ) ) );

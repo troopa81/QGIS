@@ -107,9 +107,10 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     enum State
     {
       SELECT_FEATURE,
-      START_CREATE_BLANK_AREA,
-      EDIT_BLANK_AREA, // TODO rename BLAN_AREA_SELECTED ?
-      EDIT_BLANK_AREA_END
+      FEATURE_SELECTED,
+      BLANK_AREA_SELECTED,
+      BLANK_AREA_MODIFICATION_STARTED,
+      BLANK_AREA_CREATION_STARTED
     };
 
     std::vector<std::unique_ptr<BlankArea>> mBlankAreas;
@@ -120,7 +121,6 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     QPolygonF mPoints;
     int mBlankAreasFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
-    QString mCurrentBlankAreas; // TODO remove this when we will use current rubber band blank areas to serialize
     QPointF mCurrentPt;
     QPointF mFirstPt;
     int mCurrentIndex = -1;
