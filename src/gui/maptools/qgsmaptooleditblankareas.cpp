@@ -17,6 +17,8 @@
 #include "qgsfeatureid.h"
 #include "qgsmaptooleditblankareas.h"
 
+#include "qgsmultipolygon.h"
+#include "qgspolygon.h"
 #include "qgsmapcanvas.h"
 #include "qgsvectorlayer.h"
 #include "qgslinesymbollayer.h"
@@ -611,13 +613,16 @@ void QgsMapToolEditBlankAreasBase::setCurrentBlankArea( int currentBlankAreaInde
 void QgsMapToolEditBlankAreasBase::updateAttribute()
 {
   QStringList strBlankAreaList;
+  QgsPolylineXY line;
   for ( std::unique_ptr<BlankArea> &blankArea : mBlankAreas )
   {
     std::pair<double, double> startEndDistance = blankArea->getStartEndDistance();
-    strBlankAreaList << QString::number( startEndDistance.first ) << QString::number( startEndDistance.second );
+    line << QgsPointXY( startEndDistance.first, startEndDistance.second );
   }
 
-  const QString strNewBlankAreas = strBlankAreaList.join( "," );
+  QgsPolygonXY polygon = QgsPolygonXY() << line;
+  QgsMultiPolygonXY multiPolygon = QgsMultiPolygonXY() << polygon;
+  const QString strNewBlankAreas = QgsGeometry::fromMultiPolygonXY( multiPolygon ).asWkt().replace( "MultiPolygon", "" );
 
   mLayer->beginEditCommand( tr( "Set blank area list" ) );
   if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasFieldIndex, strNewBlankAreas ) )
