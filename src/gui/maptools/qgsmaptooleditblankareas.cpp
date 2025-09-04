@@ -130,6 +130,8 @@ enum Status
 };
 
 // TODO doc (distance = distance to line)
+// TODO maybe use project from qgsgeometryutils_base ? et distance2d au lieu de distanceFct aussi
+// et aussi pointsAreCollinear
 QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, const QPointF &point, double &distance, Status &status )
 {
   status = Status::OK;
