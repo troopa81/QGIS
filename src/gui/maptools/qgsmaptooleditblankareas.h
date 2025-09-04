@@ -154,7 +154,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapToolEditBlankAreasBase
     }
 
   private:
-    // TODO not a wonderfull name
+    // TODO not a wonderful name
     class QgsRenderedPointsSymbolLayer : public T
     {
       public:
@@ -166,7 +166,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapToolEditBlankAreasBase
           original->copyTemplateSymbolProperties( this );
         }
 
-        void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &, double ) override
+        void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &, double, const QList<QPair<double, double>> & ) override
         {
           mPoints = points;
         }
