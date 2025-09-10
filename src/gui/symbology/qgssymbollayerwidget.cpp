@@ -2130,6 +2130,15 @@ void QgsMarkerLineSymbolLayerWidget::averageAngleUnitChanged()
   emit changed();
 }
 
+void QgsMarkerLineSymbolLayerWidget::blankAreasUnitChanged()
+{
+  if ( mLayer )
+  {
+    mLayer->setBlankAreasUnit( mBlankAreasUnitWidget->unit() );
+  }
+  emit changed();
+}
+
 void QgsMarkerLineSymbolLayerWidget::setAverageAngle( double val )
 {
   if ( mLayer )
