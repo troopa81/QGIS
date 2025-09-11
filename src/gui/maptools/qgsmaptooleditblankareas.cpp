@@ -250,7 +250,7 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
         return;
       }
 
-      mCurrentFeatureId = 1;
+      mCurrentFeatureId = m.featureId();
       loadFeaturePoints();
 
       mState = State::FEATURE_SELECTED;
@@ -424,7 +424,7 @@ void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, 
   }
 }
 
-std::pair<double, double> QgsMapToolEditBlankAreasBase::BlankArea::getStartEndDistance() const
+std::pair<double, double> QgsMapToolEditBlankAreasBase::BlankArea::getStartEndDistance( Qgis::RenderUnit unit ) const
 {
   double startDistance = 0;
   for ( int i = 1; i < mStartIndex; i++ )
@@ -453,9 +453,8 @@ std::pair<double, double> QgsMapToolEditBlankAreasBase::BlankArea::getStartEndDi
 
   QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( mMapCanvas->mapSettings() );
 
-  // TODO use combobox unit
-  startDistance = renderContext.convertToMapUnits( startDistance, Qgis::RenderUnit::Pixels );
-  endDistance = renderContext.convertToMapUnits( endDistance, Qgis::RenderUnit::Pixels );
+  startDistance = renderContext.convertFromPainterUnits( startDistance, unit );
+  endDistance = renderContext.convertFromPainterUnits( endDistance, unit );
 
   return std::pair<double, double>( startDistance, endDistance );
 }
@@ -614,17 +613,18 @@ void QgsMapToolEditBlankAreasBase::setCurrentBlankArea( int currentBlankAreaInde
 
 void QgsMapToolEditBlankAreasBase::updateAttribute()
 {
-  QStringList strBlankAreaList;
-  QgsPolylineXY line;
+  if ( !mSymbolLayer )
+    return;
+
+  // TODO deal with part & ring, and blankarea in not appropriate order
+  QString strNewBlankAreas = "(((";
   for ( std::unique_ptr<BlankArea> &blankArea : mBlankAreas )
   {
-    std::pair<double, double> startEndDistance = blankArea->getStartEndDistance();
-    line << QgsPointXY( startEndDistance.first, startEndDistance.second );
+    std::pair<double, double> startEndDistance = blankArea->getStartEndDistance( mSymbolLayer->blankAreasUnit() );
+    strNewBlankAreas += QString::number( startEndDistance.first ) + " " + QString::number( startEndDistance.second ) + ",";
   }
-
-  QgsPolygonXY polygon = QgsPolygonXY() << line;
-  QgsMultiPolygonXY multiPolygon = QgsMultiPolygonXY() << polygon;
-  const QString strNewBlankAreas = QgsGeometry::fromMultiPolygonXY( multiPolygon ).asWkt().replace( "MultiPolygon", "" );
+  strNewBlankAreas.chop( 1 );
+  strNewBlankAreas += ")))";
 
   mLayer->beginEditCommand( tr( "Set blank area list" ) );
   if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasFieldIndex, strNewBlankAreas ) )
@@ -719,11 +719,11 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
 
   // render feature to update mPoints
   QgsRenderContext context = QgsRenderContext::fromMapSettings( canvas()->mapSettings() );
-  QgsCoordinateTransform tranform( canvas()->mapSettings().layerTransform( mLayer ) );
+  QgsCoordinateTransform transform( canvas()->mapSettings().layerTransform( mLayer ) );
   QgsNullPaintDevice nullPaintDevice;
   QPainter painter( &nullPaintDevice );
   context.setPainter( &painter );
-  context.setCoordinateTransform( tranform );
+  context.setCoordinateTransform( transform );
   mSymbol->startRender( context );
   mSymbol->renderFeature( feature, context );
   mSymbol->stopRender( context );
@@ -731,14 +731,7 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
   if ( mPoints.isEmpty() )
     return;
 
-  // TODO this code exists already on qgslinesymbollayer
-  // TODO shall we use a property type list
-  QList<QPair<double, double>> blankAreas;
-  const QStringList strBlankAreaList = currentBlankAreas.split( ",", Qt::SkipEmptyParts );
-  for ( int i = 0; i + 1 < strBlankAreaList.count(); i += 2 )
-  {
-    blankAreas.append( QPair<double, double>( context.convertFromMapUnits( strBlankAreaList.at( i ).toDouble(), Qgis::RenderUnit::Pixels ), context.convertFromMapUnits( strBlankAreaList.at( i + 1 ).toDouble(), Qgis::RenderUnit::Pixels ) ) );
-  }
+  QList<QPair<double, double>> blankAreas = QgsTemplatedLineSymbolLayerBase::parseBlankArea( currentBlankAreas, context, mSymbolLayer->blankAreasUnit(), 1, 0 );
 
   double currentLength = 0;
   int iPoint = 0;
