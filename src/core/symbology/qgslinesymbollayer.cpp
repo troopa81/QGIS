@@ -16,6 +16,7 @@
 #include "line_p.h"
 #include "qgsgeometryutils.h"
 #include "qgslinesymbollayer.h"
+#include "qgscircularstring.h"
 #include "qgscurvepolygon.h"
 #include "qgsdxfexport.h"
 #include "qgssymbollayerutils.h"
@@ -1689,6 +1690,7 @@ class BlankSegmentsWalker
         for ( int i = static_cast<int>( mDistances.count() ); i < pointIndex + 1; i++ )
         {
           const QPointF diff = mPoints.at( i ) - mPoints.at( i - 1 );
+          // TODO use geometryutilsbase distance2D and everywhere needed
           const double distance = std::sqrt( std::pow( diff.x(), 2 ) + std::pow( diff.y(), 2 ) );
           const double totalDistance = distance + mDistances.last();
           mDistances << totalDistance;
@@ -2062,9 +2064,10 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineVertex( const QPolygonF &poi
 
         if ( rotateSymbols() )
         {
-          double angle = context.renderContext().geometry()->vertexAngle( vId );
+          double angle = geom->vertexAngle( vId );
           setSymbolLineAngle( angle * 180 / M_PI );
         }
+
         renderSymbol( mapPoint, context.feature(), rc, -1, useSelectedColor );
       }
     }
