@@ -39,7 +39,7 @@ QgsMapToolEditBlankAreasBase::QgsMapToolEditBlankAreasBase( QgsMapCanvas *canvas
   , mLayer( layer )
   , mSymbolLayerId( symbolLayer->id() )
   , mBlankAreasFieldIndex( blankAreaFieldIndex )
-  , mEditedBlankArea( canvas, mPoints )
+  , mEditedBlankArea( new BlankArea( canvas, mPoints ) )
   , mStartRubberBand( new QgsRubberBand( canvas, Qgis::GeometryType::Point ) )
   , mEndRubberBand( new QgsRubberBand( canvas, Qgis::GeometryType::Point ) )
 {
@@ -52,7 +52,7 @@ QgsMapToolEditBlankAreasBase::QgsMapToolEditBlankAreasBase( QgsMapCanvas *canvas
   initRubberBand( mStartRubberBand );
   initRubberBand( mEndRubberBand );
 
-  mEditedBlankArea.setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+  mEditedBlankArea->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
 
   // TODO what happen with other renderer
   // TODO deal with errors
@@ -60,9 +60,7 @@ QgsMapToolEditBlankAreasBase::QgsMapToolEditBlankAreasBase( QgsMapCanvas *canvas
   mSymbol.reset( renderer->symbol()->clone() );
 }
 
-QgsMapToolEditBlankAreasBase::~QgsMapToolEditBlankAreasBase()
-{
-}
+QgsMapToolEditBlankAreasBase::~QgsMapToolEditBlankAreasBase() = default;
 
 void QgsMapToolEditBlankAreasBase::activate()
 {
@@ -226,7 +224,7 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
         int startIndex = -1, endIndex = -1;
         QPointF startPoint, endPoint;
         getStartEnd( startIndex, endIndex, startPoint, endPoint );
-        mEditedBlankArea.setPoints( startIndex, endIndex, startPoint, endPoint );
+        mEditedBlankArea->setPoints( startIndex, endIndex, startPoint, endPoint );
         updateStartEndRubberBand();
       }
     }
@@ -270,7 +268,7 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
         int startIndex = -1, endIndex = -1;
         QPointF startPoint, endPoint;
         getStartEnd( startIndex, endIndex, startPoint, endPoint );
-        mEditedBlankArea.setPoints( startIndex, endIndex, startPoint, endPoint );
+        mEditedBlankArea->setPoints( startIndex, endIndex, startPoint, endPoint );
         mState = State::BLANK_AREA_CREATION_STARTED;
         updateStartEndRubberBand();
       }
@@ -279,7 +277,7 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
 
     case State::BLANK_AREA_SELECTED:
     {
-      const std::unique_ptr<BlankArea> &currentBlankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
+      const QObjectUniquePtr<BlankArea> &currentBlankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
 
       // selected blank area has changed
       if ( mHoveredBlankArea > -1 && mHoveredBlankArea != mCurrentBlankAreaIndex )
@@ -319,15 +317,15 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
       // this is a new one
       if ( mCurrentBlankAreaIndex == -1 )
       {
-        mBlankAreas.push_back( std::make_unique<BlankArea>( canvas(), mPoints ) );
-        mBlankAreas.back()->copyFrom( mEditedBlankArea );
+        mBlankAreas.emplace_back( new BlankArea( canvas(), mPoints ) );
+        mBlankAreas.back()->copyFrom( *mEditedBlankArea );
         mState = State::FEATURE_SELECTED;
       }
       // modify an existing one
       else
       {
-        std::unique_ptr<BlankArea> &blankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
-        blankArea->copyFrom( mEditedBlankArea );
+        QObjectUniquePtr<BlankArea> &blankArea = mBlankAreas.at( mCurrentBlankAreaIndex );
+        blankArea->copyFrom( *mEditedBlankArea );
         mState = State::BLANK_AREA_SELECTED;
       }
 
@@ -467,7 +465,7 @@ int QgsMapToolEditBlankAreasBase::getClosestBlankAreaIndex( const QPointF &point
   int iBlankArea = -1;
   for ( int i = 0; i < static_cast<int>( mBlankAreas.size() ); i++ )
   {
-    const std::unique_ptr<BlankArea> &blankArea = mBlankAreas.at( i );
+    const QObjectUniquePtr<BlankArea> &blankArea = mBlankAreas.at( i );
     for ( int iPoint = 1; iPoint < blankArea->pointsCount(); iPoint++ )
     {
       double d = 0;
@@ -551,12 +549,12 @@ void QgsMapToolEditBlankAreasBase::updateStartEndRubberBand()
 
   const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
 
-  const QPointF &startPoint = mEditedBlankArea.getStartPoint();
+  const QPointF &startPoint = mEditedBlankArea->getStartPoint();
   mStartRubberBand->addPoint( m2p.toMapCoordinates( startPoint.x(), startPoint.y() ) );
 
   if ( displayEndPoint )
   {
-    const QPointF &endPoint = mEditedBlankArea.getEndPoint();
+    const QPointF &endPoint = mEditedBlankArea->getEndPoint();
     mEndRubberBand->addPoint( m2p.toMapCoordinates( endPoint.x(), endPoint.y() ) );
   }
 }
@@ -601,11 +599,11 @@ void QgsMapToolEditBlankAreasBase::setCurrentBlankArea( int currentBlankAreaInde
   if ( mCurrentBlankAreaIndex > -1 )
   {
     mBlankAreas.at( mCurrentBlankAreaIndex )->setVisible( false );
-    mEditedBlankArea.copyFrom( *( mBlankAreas.at( mCurrentBlankAreaIndex ).get() ) );
+    mEditedBlankArea->copyFrom( *( mBlankAreas.at( mCurrentBlankAreaIndex ).get() ) );
   }
   else
   {
-    mEditedBlankArea.setVisible( false );
+    mEditedBlankArea->setVisible( false );
   }
 
   updateStartEndRubberBand();
@@ -618,7 +616,7 @@ void QgsMapToolEditBlankAreasBase::updateAttribute()
 
   // TODO deal with part & ring, and blankarea in not appropriate order
   QString strNewBlankAreas = "(((";
-  for ( std::unique_ptr<BlankArea> &blankArea : mBlankAreas )
+  for ( const QObjectUniquePtr<BlankArea> &blankArea : mBlankAreas )
   {
     std::pair<double, double> startEndDistance = blankArea->getStartEndDistance( mSymbolLayer->blankAreasUnit() );
     strNewBlankAreas += QString::number( startEndDistance.first ) + " " + QString::number( startEndDistance.second ) + ",";
@@ -766,7 +764,7 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
     MyLine l2( mPoints[iPoint], mPoints[iPoint - 1] );
     QPointF endPt = mPoints[iPoint] + l2.diffForInterval( currentLength - ba.second );
 
-    mBlankAreas.push_back( std::make_unique<BlankArea>( startIndex, endIndex, startPt, endPt, canvas(), mPoints ) );
+    mBlankAreas.emplace_back( new BlankArea( startIndex, endIndex, startPt, endPt, canvas(), mPoints ) );
   }
 }
 

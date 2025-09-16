@@ -113,7 +113,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
       BLANK_AREA_CREATION_STARTED
     };
 
-    std::vector<std::unique_ptr<BlankArea>> mBlankAreas;
+    std::vector<QObjectUniquePtr<BlankArea>> mBlankAreas;
     QgsVectorLayer *mLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
     QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
@@ -129,7 +129,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     State mState = State::SELECT_FEATURE;
     int mCurrentBlankAreaIndex = -1;
     int mHoveredBlankArea = -1;
-    BlankArea mEditedBlankArea;
+    QObjectUniquePtr<BlankArea> mEditedBlankArea;
 
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
     QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
