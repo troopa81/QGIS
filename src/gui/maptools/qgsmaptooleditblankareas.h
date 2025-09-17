@@ -125,15 +125,6 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
     const QString mSymbolLayerId;
 
-    // mPoints doit devenir une liste de liste de QPolygon (première pour les part, 2eme pour les rings)
-    // On doit avoir un currentPartIndex et currentRingIndex qui sont initialisé à -1 tous les deux
-    // Quand on cherche le point le plus proche au départ, on prends tous les points. Quand y en a un
-    // sélectionné ou que l'on commence à tracer, il faut les initialiser
-    // faire une méthode getPoints() qui renvoie une const ref sur le current part num/ring
-
-    // on remplit ce tableeau dans le fake symbol layer en récupérant le part num et le ring index depuis le context
-    // et la variable mRingIndex
-
     FeaturePoints mPoints;
     int mBlankAreasFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
@@ -151,6 +142,9 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     QObjectUniquePtr<BlankArea> mEditedBlankArea;
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
     QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
+
+
+    friend class TestQgsMapToolEditBlankAreas;
 };
 
 template<class T>
@@ -170,6 +164,7 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapToolEditBlankAreasBase
       const T *sl = dynamic_cast<const T *>( originalSl );
       mSymbolLayer = sl ? new QgsRenderedPointsSymbolLayer( sl, mPoints ) : nullptr;
     }
+
 
   private:
     // TODO not a wonderful name
