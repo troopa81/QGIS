@@ -1045,6 +1045,7 @@ settings serialized in the ``properties`` map.
 %End
 
 
+
 };
 
 class QgsMarkerLineSymbolLayer : QgsTemplatedLineSymbolLayerBase

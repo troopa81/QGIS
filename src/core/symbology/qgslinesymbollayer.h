@@ -892,6 +892,9 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     // TODO really need to be virtual ? could we not inherit from renderPolyline
     virtual void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double averageAngleOver, const BlankSegments &blankSegments ) SIP_SKIP;
 
+    // TODO we need ot when we extend to fake rendering, can we not not do better ?
+    int mRingIndex = 0; // current ring index while rendering
+
   private:
 
     void renderPolylineVertex( const QPolygonF &points, QgsSymbolRenderContext &context, Qgis::MarkerLinePlacement placement, const BlankSegments &blankSegments );
@@ -940,7 +943,6 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     QPointF mFinalVertex;
     bool mCurrentFeatureIsSelected = false;
     double mFeatureSymbolOpacity = 1;
-    int mRingIndex = 0; // current ring index while rendering
 
     friend class TestQgsMarkerLineSymbol;
 

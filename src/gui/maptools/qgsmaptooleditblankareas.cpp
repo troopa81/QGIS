@@ -196,7 +196,7 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
         const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
         mStartRubberBand->reset( Qgis::GeometryType::Point );
         double distance;
-        mFirstPt = getClosestPoint( pos, distance, mFirstIndex );
+        mFirstPt = getClosestPoint( pos, distance, mPartIndex, mRingIndex, mFirstIndex );
 
         // for now end point is the same as start one
         mCurrentPt = mFirstPt;
@@ -211,11 +211,15 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
     case State::BLANK_AREA_CREATION_STARTED:
     {
       double distance = -1;
+      int partIndex = -1;
       int pointIndex = -1;
-      QPointF P = getClosestPoint( pos, distance, pointIndex );
+      int ringIndex = -1;
+      QPointF P = getClosestPoint( pos, distance, partIndex, ringIndex, pointIndex );
       if ( distance > -1 && pointIndex > -1 )
       {
         mCurrentPt = P;
+        mPartIndex = partIndex;
+        mRingIndex = ringIndex;
         mCurrentIndex = pointIndex;
       }
 
@@ -224,7 +228,7 @@ void QgsMapToolEditBlankAreasBase::canvasMoveEvent( QgsMapMouseEvent *e )
         int startIndex = -1, endIndex = -1;
         QPointF startPoint, endPoint;
         getStartEnd( startIndex, endIndex, startPoint, endPoint );
-        mEditedBlankArea->setPoints( startIndex, endIndex, startPoint, endPoint );
+        mEditedBlankArea->setPoints( mPartIndex, mRingIndex, startIndex, endIndex, startPoint, endPoint );
         updateStartEndRubberBand();
       }
     }
@@ -268,7 +272,7 @@ void QgsMapToolEditBlankAreasBase::canvasPressEvent( QgsMapMouseEvent *e )
         int startIndex = -1, endIndex = -1;
         QPointF startPoint, endPoint;
         getStartEnd( startIndex, endIndex, startPoint, endPoint );
-        mEditedBlankArea->setPoints( startIndex, endIndex, startPoint, endPoint );
+        mEditedBlankArea->setPoints( mPartIndex, mRingIndex, startIndex, endIndex, startPoint, endPoint );
         mState = State::BLANK_AREA_CREATION_STARTED;
         updateStartEndRubberBand();
       }
@@ -395,6 +399,27 @@ void QgsMapToolEditBlankAreasBase::keyPressEvent( QKeyEvent *e )
   }
 }
 
+
+const QPointF &pointAt( const QList<QList<QPolygonF>> &points, int partIndex, int ringIndex, int pointIndex )
+{
+  if ( partIndex < 0 || ringIndex < 0 || pointIndex < 0 || partIndex >= points.count() )
+    // TODO rewrite message
+    throw std::invalid_argument( "Invalid part index" );
+
+  const QList<QPolygonF> &rings = points.at( partIndex );
+  if ( ringIndex >= rings.count() )
+    // TODO rewrite message
+    throw std::invalid_argument( "Invalid part index" );
+
+  const QPolygonF &pts = rings.at( ringIndex );
+  if ( pointIndex >= pts.count() )
+    // TODO rewrite message
+    throw std::invalid_argument( "Invalid part index" );
+
+  return pts.at( pointIndex );
+}
+
+
 void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
 {
   startIndex = mFirstIndex;
@@ -404,9 +429,17 @@ void QgsMapToolEditBlankAreasBase::getStartEnd( int &startIndex, int &endIndex, 
     startPt = mCurrentPt;
     endPt = mFirstPt;
 
-    if ( distanceFct( startPt, mPoints.at( mFirstIndex ) ) < distanceFct( endPt, mPoints.at( mFirstIndex ) ) )
+    try
     {
-      std::swap( startPt, endPt );
+      if ( const QPointF &firstIndexPoint = ::pointAt( mPoints, mPartIndex, mRingIndex, mFirstIndex );
+           distanceFct( startPt, firstIndexPoint ) < distanceFct( endPt, firstIndexPoint ) )
+      {
+        std::swap( startPt, endPt );
+      }
+    }
+    catch ( std::invalid_argument e )
+    {
+      QgsDebugError( e.what() );
     }
   }
   else
@@ -427,26 +460,15 @@ std::pair<double, double> QgsMapToolEditBlankAreasBase::BlankArea::getStartEndDi
   double startDistance = 0;
   for ( int i = 1; i < mStartIndex; i++ )
   {
-    startDistance += distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
+    startDistance += distanceFct( ::pointAt( mPoints, mPartIndex, mRingIndex, i - 1 ), ::pointAt( mPoints, mPartIndex, mRingIndex, i ) );
   }
 
-  startDistance += distanceFct( mPoints.at( mStartIndex - 1 ), mStartPt );
+  startDistance += distanceFct( ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex - 1 ), mStartPt );
 
   double endDistance = startDistance;
-
-  if ( mStartIndex == mEndIndex )
+  for ( int i = 1; i < pointsCount(); i++ )
   {
-    endDistance += distanceFct( mStartPt, mEndPt );
-  }
-  else
-  {
-    for ( int i = mStartIndex + 1; i < mEndIndex; i++ )
-    {
-      endDistance += distanceFct( mPoints.at( i - 1 ), mPoints.at( i ) );
-    }
-
-    endDistance += distanceFct( mPoints.at( mEndIndex - 1 ), mEndPt )
-                   + distanceFct( mPoints.at( mStartIndex ), mStartPt );
+    endDistance += distanceFct( pointAt( i ), pointAt( i - 1 ) );
   }
 
   QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( mMapCanvas->mapSettings() );
@@ -495,33 +517,44 @@ int QgsMapToolEditBlankAreasBase::getClosestBlankAreaIndex( const QPointF &point
   return iBlankArea;
 }
 
-QPointF QgsMapToolEditBlankAreasBase::getClosestPoint( const QPointF &point, double &distance, int &pointIndex ) const
+QPointF QgsMapToolEditBlankAreasBase::getClosestPoint( const QPointF &point, double &distance, int &partIndex, int &ringIndex, int &pointIndex ) const
 {
   distance = -1;
   QPointF currentPoint;
-  for ( int i = 1; i < mPoints.count(); i++ )
+
+  // iterate through all points from parts and ring to get the closest one
+  for ( int iPart = 0; iPart < mPoints.count(); iPart++ )
   {
-    double d = 0;
-    Status status = Status::OK;
-    QPointF P = projectedPoint( mPoints[i - 1], mPoints[i], point, d, status );
-    switch ( status )
+    const QList<QPolygonF> &rings = mPoints.at( iPart );
+    for ( int iRing = 0; iRing < rings.count(); iRing++ )
     {
-      case Status::LINE_EMPTY:
-      case Status::NOT_ON_LINE:
-        continue;
+      const QPolygonF &points = rings.at( iRing );
+      for ( int i = 1; i < points.count(); i++ )
+      {
+        double d = 0;
+        Status status = Status::OK;
+        QPointF P = projectedPoint( points.at( i - 1 ), points.at( i ), point, d, status );
+        switch ( status )
+        {
+          case Status::LINE_EMPTY:
+          case Status::NOT_ON_LINE:
+            continue;
 
-      case Status::OK:
-        break;
-    }
+          case Status::OK:
+            break;
+        }
 
-    if ( distance == -1 || d < distance )
-    {
-      distance = d;
-      currentPoint = P;
-      pointIndex = i;
+        if ( distance == -1 || d < distance )
+        {
+          distance = d;
+          currentPoint = P;
+          partIndex = iPart;
+          ringIndex = iRing;
+          pointIndex = i;
+        }
+      }
     }
   }
-
   return currentPoint;
 }
 
@@ -614,15 +647,51 @@ void QgsMapToolEditBlankAreasBase::updateAttribute()
   if ( !mSymbolLayer )
     return;
 
-  // TODO deal with part & ring, and blankarea in not appropriate order
-  QString strNewBlankAreas = "(((";
+  QList<QList<QList<std::pair<double, double>>>> blankAreas;
   for ( const QObjectUniquePtr<BlankArea> &blankArea : mBlankAreas )
   {
-    std::pair<double, double> startEndDistance = blankArea->getStartEndDistance( mSymbolLayer->blankAreasUnit() );
-    strNewBlankAreas += QString::number( startEndDistance.first ) + " " + QString::number( startEndDistance.second ) + ",";
+    try
+    {
+      std::pair<double, double> startEndDistance = blankArea->getStartEndDistance( mSymbolLayer->blankAreasUnit() );
+
+      const int partIndex = blankArea->getPartIndex();
+      if ( partIndex >= blankAreas.count() )
+        blankAreas.resize( partIndex + 1 );
+
+      QList<QList<std::pair<double, double>>> &rings = blankAreas[partIndex];
+      const int ringIndex = blankArea->getRingIndex();
+      if ( ringIndex >= rings.count() )
+        rings.resize( ringIndex + 1 );
+
+      // TODO fix order?
+      QList<std::pair<double, double>> &distances = rings[ringIndex];
+      distances << startEndDistance;
+    }
+    catch ( std::invalid_argument e )
+    {
+      QgsDebugError( e.what() );
+    }
   }
-  strNewBlankAreas.chop( 1 );
-  strNewBlankAreas += ")))";
+
+  QStringList strParts;
+  for ( const QList<QList<std::pair<double, double>>> &part : blankAreas )
+  {
+    QStringList strRings;
+    for ( const QList<std::pair<double, double>> &ring : part )
+    {
+      QStringList strDistances;
+      for ( const std::pair<double, double> &distance : ring )
+      {
+        strDistances << ( QString::number( distance.first ) + " " + QString::number( distance.second ) );
+      }
+
+      strRings << "(" + strDistances.join( "," ) + ")";
+    }
+
+    strParts << "(" + strRings.join( "," ) + ")";
+  }
+
+  QString strNewBlankAreas = "(" + strParts.join( "," ) + ")";
 
   mLayer->beginEditCommand( tr( "Set blank area list" ) );
   if ( mLayer->changeAttributeValue( mCurrentFeatureId, mBlankAreasFieldIndex, strNewBlankAreas ) )
@@ -729,46 +798,57 @@ void QgsMapToolEditBlankAreasBase::loadFeaturePoints()
   if ( mPoints.isEmpty() )
     return;
 
-  QList<QPair<double, double>> blankAreas = QgsTemplatedLineSymbolLayerBase::parseBlankArea( currentBlankAreas, context, mSymbolLayer->blankAreasUnit(), 1, 0 );
 
-  double currentLength = 0;
-  int iPoint = 0;
-  for ( QPair<double, double> ba : blankAreas )
+  // iterate through all points from parts and ring to get the closest one
+  for ( int iPart = 0; iPart < mPoints.count(); iPart++ )
   {
-    while ( iPoint < mPoints.count() - 1 && currentLength < ba.first )
+    const QList<QPolygonF> &rings = mPoints.at( iPart );
+    for ( int iRing = 0; iRing < rings.count(); iRing++ )
     {
-      iPoint++;
-      // TODO replace distanceFct with MyLine().lentgh() and put MyLine in a private header file
-      currentLength += distanceFct( mPoints[iPoint], mPoints[iPoint - 1] );
+      // TODO it forces reread polygon for every part/ring, could we not do better
+      QList<QPair<double, double>> blankAreas = QgsTemplatedLineSymbolLayerBase::parseBlankArea( currentBlankAreas, context, mSymbolLayer->blankAreasUnit(), iPart + 1, iRing );
+
+      double currentLength = 0;
+      int iPoint = 0;
+      const QPolygonF &points = rings.at( iRing );
+      for ( QPair<double, double> ba : blankAreas )
+      {
+        while ( iPoint < points.count() - 1 && currentLength < ba.first )
+        {
+          iPoint++;
+          // TODO replace distanceFct with MyLine().lentgh() and put MyLine in a private header file
+          currentLength += distanceFct( points.at( iPoint ), points.at( iPoint - 1 ) );
+        }
+
+        if ( iPoint == points.count() )
+          break;
+
+
+        int startIndex = iPoint;
+        // TODO maybe replace difforInterval with a better name
+        MyLine l( points.at( iPoint ), points.at( iPoint - 1 ) );
+        QPointF startPt = points.at( iPoint ) + l.diffForInterval( currentLength - ba.first );
+
+        while ( iPoint < points.count() - 1 && currentLength < ba.second )
+        {
+          iPoint++;
+          currentLength += distanceFct( points.at( iPoint ), points.at( iPoint - 1 ) );
+        }
+
+        if ( iPoint == points.count() )
+          break;
+
+        int endIndex = iPoint;
+        MyLine l2( points.at( iPoint ), points.at( iPoint - 1 ) );
+        QPointF endPt = points.at( iPoint ) + l2.diffForInterval( currentLength - ba.second );
+
+        mBlankAreas.emplace_back( new BlankArea( iPart, iRing, startIndex, endIndex, startPt, endPt, canvas(), mPoints ) );
+      }
     }
-
-    if ( iPoint == mPoints.count() )
-      break;
-
-
-    int startIndex = iPoint;
-    // TODO maybe replace difforInterval with a better name
-    MyLine l( mPoints[iPoint], mPoints[iPoint - 1] );
-    QPointF startPt = mPoints[iPoint] + l.diffForInterval( currentLength - ba.first );
-
-    while ( iPoint < mPoints.count() - 1 && currentLength < ba.second )
-    {
-      iPoint++;
-      currentLength += distanceFct( mPoints[iPoint], mPoints[iPoint - 1] );
-    }
-
-    if ( iPoint == mPoints.count() )
-      break;
-
-    int endIndex = iPoint;
-    MyLine l2( mPoints[iPoint], mPoints[iPoint - 1] );
-    QPointF endPt = mPoints[iPoint] + l2.diffForInterval( currentLength - ba.second );
-
-    mBlankAreas.emplace_back( new BlankArea( startIndex, endIndex, startPt, endPt, canvas(), mPoints ) );
   }
 }
 
-QgsMapToolEditBlankAreasBase::BlankArea::BlankArea( QgsMapCanvas *canvas, const QPolygonF &points )
+QgsMapToolEditBlankAreasBase::BlankArea::BlankArea( QgsMapCanvas *canvas, const FeaturePoints &points )
   : QgsRubberBand( canvas )
   , mPoints( points )
 {
@@ -776,14 +856,16 @@ QgsMapToolEditBlankAreasBase::BlankArea::BlankArea( QgsMapCanvas *canvas, const 
   setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
 }
 
-QgsMapToolEditBlankAreasBase::BlankArea::BlankArea( int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const QPolygonF &points )
+QgsMapToolEditBlankAreasBase::BlankArea::BlankArea( int partIndex, int ringIndex, int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const FeaturePoints &points )
   : BlankArea( canvas, points )
 {
-  setPoints( startIndex, endIndex, startPt, endPt );
+  setPoints( partIndex, ringIndex, startIndex, endIndex, startPt, endPt );
 }
 
-void QgsMapToolEditBlankAreasBase::BlankArea::setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt )
+void QgsMapToolEditBlankAreasBase::BlankArea::setPoints( int partIndex, int ringIndex, int startIndex, int endIndex, QPointF startPt, QPointF endPt )
 {
+  mPartIndex = partIndex;
+  mRingIndex = ringIndex;
   mStartIndex = startIndex;
   mEndIndex = endIndex;
   mStartPt = startPt;
@@ -794,15 +876,22 @@ void QgsMapToolEditBlankAreasBase::BlankArea::setPoints( int startIndex, int end
   reset();
   for ( int iPoint = 0; iPoint < pointsCount(); iPoint++ )
   {
-    const QPointF &point = pointAt( iPoint );
-    const QgsPointXY mapPoint = m2p.toMapCoordinates( point.x(), point.y() );
-    addPoint( mapPoint, iPoint == pointsCount() - 1 ); // update only last one
+    try
+    {
+      const QPointF &point = pointAt( iPoint );
+      const QgsPointXY mapPoint = m2p.toMapCoordinates( point.x(), point.y() );
+      addPoint( mapPoint, iPoint == pointsCount() - 1 ); // update only last one
+    }
+    catch ( std::invalid_argument e )
+    {
+      QgsDebugError( e.what() );
+    }
   }
 }
 
 void QgsMapToolEditBlankAreasBase::BlankArea::copyFrom( const BlankArea &blankArea )
 {
-  setPoints( blankArea.getStartIndex(), blankArea.getEndIndex(), blankArea.getStartPoint(), blankArea.getEndPoint() );
+  setPoints( blankArea.mPartIndex, blankArea.mRingIndex, blankArea.getStartIndex(), blankArea.getEndIndex(), blankArea.getStartPoint(), blankArea.getEndPoint() );
 }
 
 const QPointF &QgsMapToolEditBlankAreasBase::BlankArea::getStartPoint() const
@@ -825,6 +914,16 @@ int QgsMapToolEditBlankAreasBase::BlankArea::getEndIndex() const
   return mEndIndex;
 }
 
+int QgsMapToolEditBlankAreasBase::BlankArea::getPartIndex() const
+{
+  return mPartIndex;
+}
+
+int QgsMapToolEditBlankAreasBase::BlankArea::getRingIndex() const
+{
+  return mRingIndex;
+}
+
 int QgsMapToolEditBlankAreasBase::BlankArea::pointsCount() const
 {
   return ( mEndIndex - mStartIndex ) + 2;
@@ -833,5 +932,5 @@ int QgsMapToolEditBlankAreasBase::BlankArea::pointsCount() const
 const QPointF &QgsMapToolEditBlankAreasBase::BlankArea::pointAt( int index ) const
 {
   // TODO test whether index is valid (and do what if not? see QList?)
-  return index == 0 ? mStartPt : ( index == pointsCount() - 1 ? mEndPt : mPoints.at( mStartIndex + index - 1 ) );
+  return index == 0 ? mStartPt : ( index == pointsCount() - 1 ? mEndPt : ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex + index - 1 ) );
 }

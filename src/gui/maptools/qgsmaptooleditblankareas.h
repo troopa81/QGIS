@@ -71,25 +71,29 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     virtual void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
 
     int getClosestBlankAreaIndex( const QPointF &point, double &distance ) const;
-    QPointF getClosestPoint( const QPointF &point, double &distance, int &pointIndex ) const;
+    QPointF getClosestPoint( const QPointF &point, double &distance, int &partIndex, int &ringIndex, int &pointIndex ) const;
 
     void updateStartEndRubberBand();
     void updateHoveredBlankArea( const QPoint &pos );
     void setCurrentBlankArea( int currentBlankAreaIndex );
 
+    typedef QList<QList<QPolygonF>> FeaturePoints;
+
     class BlankArea : public QgsRubberBand
     {
       public:
-        BlankArea( int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const QPolygonF &points );
-        BlankArea( QgsMapCanvas *canvas, const QPolygonF &points );
+        BlankArea( int partIndex, int ringIndex, int startIndex, int endIndex, QPointF startPt, QPointF endPt, QgsMapCanvas *canvas, const FeaturePoints &points );
+        BlankArea( QgsMapCanvas *canvas, const FeaturePoints &points );
 
-        void setPoints( int startIndex, int endIndex, QPointF startPt, QPointF endPt );
+        void setPoints( int partIndex, int ringIndex, int startIndex, int endIndex, QPointF startPt, QPointF endPt );
         void copyFrom( const BlankArea &blankArea );
 
         const QPointF &getStartPoint() const;
         const QPointF &getEndPoint() const;
         int getStartIndex() const;
         int getEndIndex() const;
+        int getPartIndex() const;
+        int getRingIndex() const;
 
         std::pair<double, double> getStartEndDistance( Qgis::RenderUnit unit ) const;
 
@@ -97,11 +101,13 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
         const QPointF &pointAt( int index ) const;
 
       private:
+        int mPartIndex = -1;
+        int mRingIndex = -1;
         int mStartIndex = -1;
         int mEndIndex = -1;
         QPointF mStartPt;
         QPointF mEndPt;
-        const QPolygonF &mPoints; //! all feature rendered points
+        const FeaturePoints &mPoints; //! all feature rendered points
     };
 
     enum State
@@ -118,7 +124,17 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     std::unique_ptr<QgsSymbol> mSymbol;
     QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
     const QString mSymbolLayerId;
-    QPolygonF mPoints;
+
+    // mPoints doit devenir une liste de liste de QPolygon (première pour les part, 2eme pour les rings)
+    // On doit avoir un currentPartIndex et currentRingIndex qui sont initialisé à -1 tous les deux
+    // Quand on cherche le point le plus proche au départ, on prends tous les points. Quand y en a un
+    // sélectionné ou que l'on commence à tracer, il faut les initialiser
+    // faire une méthode getPoints() qui renvoie une const ref sur le current part num/ring
+
+    // on remplit ce tableeau dans le fake symbol layer en récupérant le part num et le ring index depuis le context
+    // et la variable mRingIndex
+
+    FeaturePoints mPoints;
     int mBlankAreasFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
     QPointF mCurrentPt;
@@ -129,8 +145,10 @@ class GUI_EXPORT QgsMapToolEditBlankAreasBase : public QgsMapTool
     State mState = State::SELECT_FEATURE;
     int mCurrentBlankAreaIndex = -1;
     int mHoveredBlankArea = -1;
-    QObjectUniquePtr<BlankArea> mEditedBlankArea;
+    int mPartIndex = -1;
+    int mRingIndex = -1;
 
+    QObjectUniquePtr<BlankArea> mEditedBlankArea;
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
     QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
 };
@@ -159,20 +177,28 @@ class GUI_EXPORT QgsMapToolEditBlankAreas : public QgsMapToolEditBlankAreasBase
     {
       public:
         // TODO
-        QgsRenderedPointsSymbolLayer( const T *original, QPolygonF &points )
+        QgsRenderedPointsSymbolLayer( const T *original, FeaturePoints &points )
           : T( original->rotateSymbols(), original->interval() )
           , mPoints( points )
         {
           original->copyTemplateSymbolProperties( this );
         }
 
-        void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &, double, const QList<QPair<double, double>> & ) override
+        void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double, const QList<QPair<double, double>> & ) override
         {
-          mPoints = points;
+          const int iPart = context.geometryPartNum() - 1;
+          if ( iPart >= mPoints.count() )
+            mPoints.resize( iPart + 1 );
+
+          QVector<QPolygonF> &rings = mPoints[iPart];
+          if ( QgsRenderedPointsSymbolLayer::mRingIndex >= rings.count() )
+            rings.resize( QgsRenderedPointsSymbolLayer::mRingIndex + 1 );
+
+          rings[QgsRenderedPointsSymbolLayer::mRingIndex] = points;
         }
 
       private:
-        QPolygonF &mPoints;
+        FeaturePoints &mPoints;
     };
 };
 
