@@ -31,7 +31,7 @@ class QgsMarkerSymbol;
 class QgsLineSymbol;
 
 template<class T>
-class GUI_EXPORT QgsMapToolEditBlankAreas;
+class GUI_EXPORT QgsMapToolEditBlankSegments;
 
 /**
  * \ingroup gui
@@ -494,7 +494,7 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
   protected:
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
-    QObjectUniquePtr<QgsMapToolEditBlankAreas<QgsMarkerLineSymbolLayer>> mMapToolEditBlankAreas;
+    QObjectUniquePtr<QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>> mMapToolEditBlankSegments;
 
   private slots:
     void setRotate();
@@ -504,16 +504,16 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
     void mOffsetUnitWidget_changed();
     void mOffsetAlongLineUnitWidget_changed();
     void averageAngleUnitChanged();
-    void blankAreasUnitChanged();
+    void blankSegmentsUnitChanged();
     void setAverageAngle( double val );
-    void toggleMapToolEditBlankAreas( bool toggled );
+    void toggleMapToolEditBlankSegments( bool toggled );
 
     // TODO
-    void updateBlankAreaWidget();
+    void updateBlankSegmentsWidget();
 
   private:
     // TODO returns -1 if no dd property field has been set
-    int blankAreasFieldIndex() const;
+    int blankSegmentsFieldIndex() const;
 };
 
 

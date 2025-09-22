@@ -11,7 +11,7 @@
 
 
 template<T>
-class QgsMapToolEditBlankAreas;
+class QgsMapToolEditBlankSegments;
 
 class QgsSymbolLayerWidget : QWidget, protected QgsExpressionContextGenerator
 {

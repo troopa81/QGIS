@@ -399,7 +399,7 @@
    <item row="3" column="0" colspan="3">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
-      <string>Blank areas</string>
+      <string>Blank segments</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_7">
       <item>
@@ -418,7 +418,7 @@
          </spacer>
         </item>
         <item>
-         <widget class="QToolButton" name="mEditBlankAreasBtn">
+         <widget class="QToolButton" name="mEditBlankSegmentsBtn">
           <property name="text">
            <string/>
           </property>
@@ -432,7 +432,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QgsUnitSelectionWidget" name="mBlankAreasUnitWidget" native="true">
+         <widget class="QgsUnitSelectionWidget" name="mBlankSegmentsUnitWidget" native="true">
           <property name="minimumSize">
            <size>
             <width>20</width>
@@ -445,7 +445,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QgsPropertyOverrideButton" name="mBlankAreasDDButton">
+         <widget class="QgsPropertyOverrideButton" name="mBlankSegmentsDDButton">
           <property name="text">
            <string>…</string>
           </property>

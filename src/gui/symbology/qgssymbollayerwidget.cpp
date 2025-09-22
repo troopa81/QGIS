@@ -46,7 +46,7 @@
 #include "qgsiconutils.h"
 #include "qgslinearreferencingsymbollayer.h"
 #include "qgsnumericformatselectorwidget.h"
-#include "qgsmaptooleditblankareas.h"
+#include "qgsmaptooleditblanksegments.h"
 
 #include <QAbstractButton>
 #include <QButtonGroup>
@@ -1891,13 +1891,13 @@ QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *
   connect( mOffsetUnitWidget, &QgsUnitSelectionWidget::changed, this, &QgsMarkerLineSymbolLayerWidget::mOffsetUnitWidget_changed );
   connect( mOffsetAlongLineUnitWidget, &QgsUnitSelectionWidget::changed, this, &QgsMarkerLineSymbolLayerWidget::mOffsetAlongLineUnitWidget_changed );
   connect( mAverageAngleUnit, &QgsUnitSelectionWidget::changed, this, &QgsMarkerLineSymbolLayerWidget::averageAngleUnitChanged );
-  connect( mBlankAreasUnitWidget, &QgsUnitSelectionWidget::changed, this, &QgsMarkerLineSymbolLayerWidget::blankAreasUnitChanged );
+  connect( mBlankSegmentsUnitWidget, &QgsUnitSelectionWidget::changed, this, &QgsMarkerLineSymbolLayerWidget::blankSegmentsUnitChanged );
   mIntervalUnitWidget->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches );
   mOffsetUnitWidget->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches );
   mOffsetAlongLineUnitWidget->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches << Qgis::RenderUnit::Percentage );
   mAverageAngleUnit->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches );
   mIntervalUnitWidget->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches );
-  mBlankAreasUnitWidget->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches );
+  mBlankSegmentsUnitWidget->setUnits( QgsUnitTypes::RenderUnitList() << Qgis::RenderUnit::Millimeters << Qgis::RenderUnit::MetersInMapUnits << Qgis::RenderUnit::MapUnits << Qgis::RenderUnit::Pixels << Qgis::RenderUnit::Points << Qgis::RenderUnit::Inches );
 
   mRingFilterComboBox->addItem( QgsApplication::getThemeIcon( QStringLiteral( "mIconAllRings.svg" ) ), tr( "All Rings" ), QgsLineSymbolLayer::AllRings );
   mRingFilterComboBox->addItem( QgsApplication::getThemeIcon( QStringLiteral( "mIconExteriorRing.svg" ) ), tr( "Exterior Ring Only" ), QgsLineSymbolLayer::ExteriorRingOnly );
@@ -1935,7 +1935,7 @@ QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *
   } );
 
 
-  connect( mEditBlankAreasBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankAreas );
+  connect( mEditBlankSegmentsBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankSegments );
 }
 
 QgsMarkerLineSymbolLayerWidget::~QgsMarkerLineSymbolLayerWidget()
@@ -1990,7 +1990,7 @@ void QgsMarkerLineSymbolLayerWidget::setSymbolLayer( QgsSymbolLayer *layer )
   whileBlocking( mAverageAngleUnit )->setUnit( mLayer->averageAngleUnit() );
   whileBlocking( mAverageAngleUnit )->setMapUnitScale( mLayer->averageAngleMapUnitScale() );
   whileBlocking( mSpinAverageAngleLength )->setValue( mLayer->averageAngleLength() );
-  whileBlocking( mBlankAreasUnitWidget )->setUnit( mLayer->blankAreasUnit() );
+  whileBlocking( mBlankSegmentsUnitWidget )->setUnit( mLayer->blankSegmentsUnit() );
 
   whileBlocking( mRingFilterComboBox )->setCurrentIndex( mRingFilterComboBox->findData( mLayer->ringFilter() ) );
 
@@ -2001,12 +2001,12 @@ void QgsMarkerLineSymbolLayerWidget::setSymbolLayer( QgsSymbolLayer *layer )
   registerDataDefinedButton( mPlacementDDBtn, QgsSymbolLayer::Property::Placement );
   registerDataDefinedButton( mOffsetAlongLineDDBtn, QgsSymbolLayer::Property::OffsetAlongLine );
   registerDataDefinedButton( mAverageAngleDDBtn, QgsSymbolLayer::Property::AverageAngleLength );
-  registerDataDefinedButton( mBlankAreasDDButton, QgsSymbolLayer::Property::BlankAreas );
+  registerDataDefinedButton( mBlankSegmentsDDButton, QgsSymbolLayer::Property::BlankSegments );
 
-  connect( mBlankAreasDDButton, &QgsPropertyOverrideButton::changed, this, &QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget );
-  connect( mBlankAreasDDButton, &QgsPropertyOverrideButton::createAuxiliaryField, this, &QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget );
+  connect( mBlankSegmentsDDButton, &QgsPropertyOverrideButton::changed, this, &QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget );
+  connect( mBlankSegmentsDDButton, &QgsPropertyOverrideButton::createAuxiliaryField, this, &QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget );
 
-  updateBlankAreaWidget();
+  updateBlankSegmentsWidget();
 }
 
 QgsSymbolLayer *QgsMarkerLineSymbolLayerWidget::symbolLayer()
@@ -2130,11 +2130,11 @@ void QgsMarkerLineSymbolLayerWidget::averageAngleUnitChanged()
   emit changed();
 }
 
-void QgsMarkerLineSymbolLayerWidget::blankAreasUnitChanged()
+void QgsMarkerLineSymbolLayerWidget::blankSegmentsUnitChanged()
 {
   if ( mLayer )
   {
-    mLayer->setBlankAreasUnit( mBlankAreasUnitWidget->unit() );
+    mLayer->setBlankSegmentsUnit( mBlankSegmentsUnitWidget->unit() );
   }
   emit changed();
 }
@@ -2148,42 +2148,42 @@ void QgsMarkerLineSymbolLayerWidget::setAverageAngle( double val )
   }
 }
 
-void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankAreas( bool toggled )
+void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankSegments( bool toggled )
 {
-  if ( mMapToolEditBlankAreas )
+  if ( mMapToolEditBlankSegments )
   {
-    context().mapCanvas()->unsetMapTool( mMapToolEditBlankAreas );
-    mMapToolEditBlankAreas.reset();
+    context().mapCanvas()->unsetMapTool( mMapToolEditBlankSegments );
+    mMapToolEditBlankSegments.reset();
   }
 
   if ( toggled )
   {
     // TODO if context changes, we have to delete/reset the maptool because mapCanvas may have changed
-    mMapToolEditBlankAreas.reset( new QgsMapToolEditBlankAreas<QgsMarkerLineSymbolLayer>( context().mapCanvas(), vectorLayer(), mLayer, blankAreasFieldIndex() ) );
+    mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( context().mapCanvas(), vectorLayer(), mLayer, blankSegmentsFieldIndex() ) );
 
     // TODO on destructor remove maptool if set (to check, it looks ok)
-    context().mapCanvas()->setMapTool( mMapToolEditBlankAreas );
+    context().mapCanvas()->setMapTool( mMapToolEditBlankSegments );
   }
 }
 
-void QgsMarkerLineSymbolLayerWidget::updateBlankAreaWidget()
+void QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget()
 {
-  mEditBlankAreasBtn->setEnabled( blankAreasFieldIndex() > -1 );
+  mEditBlankSegmentsBtn->setEnabled( blankSegmentsFieldIndex() > -1 );
   QString tooltip = tr( "Tool to create blank areas where marker lines won't be displayed" );
-  if ( !mEditBlankAreasBtn->isEnabled() )
+  if ( !mEditBlankSegmentsBtn->isEnabled() )
   {
     tooltip += QStringLiteral( "<br/><br/>" ) + tr( "This tool is disabled because no valid field property has been set" );
   }
 
-  mEditBlankAreasBtn->setToolTip( tooltip );
+  mEditBlankSegmentsBtn->setToolTip( tooltip );
 }
 
-int QgsMarkerLineSymbolLayerWidget::blankAreasFieldIndex() const
+int QgsMarkerLineSymbolLayerWidget::blankSegmentsFieldIndex() const
 {
-  const QgsProperty blankAreasProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankAreas );
-  return blankAreasProperty && blankAreasProperty.isActive()
-             && blankAreasProperty.propertyType() == Qgis::PropertyType::Field
-           ? vectorLayer()->fields().indexFromName( blankAreasProperty.field() )
+  const QgsProperty blankSegmentsProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankSegments );
+  return blankSegmentsProperty && blankSegmentsProperty.isActive()
+             && blankSegmentsProperty.propertyType() == Qgis::PropertyType::Field
+           ? vectorLayer()->fields().indexFromName( blankSegmentsProperty.field() )
            : -1;
 }
 

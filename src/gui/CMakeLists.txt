@@ -354,7 +354,7 @@ set(QGIS_GUI_SRCS
   maptools/qgsmaptoolcapturerubberband.cpp
   maptools/qgsmaptooldigitizefeature.cpp
   maptools/qgsmaptooledit.cpp
-  maptools/qgsmaptooleditblankareas.cpp
+  maptools/qgsmaptooleditblanksegments.cpp
   maptools/qgsmaptoolemitpoint.cpp
   maptools/qgsmaptoolextent.cpp
   maptools/qgsmaptoolidentify.cpp
@@ -1359,7 +1359,7 @@ set(QGIS_GUI_HDRS
   maptools/qgsmaptoolcapturerubberband.h
   maptools/qgsmaptooldigitizefeature.h
   maptools/qgsmaptooledit.h
-  maptools/qgsmaptooleditblankareas.h
+  maptools/qgsmaptooleditblanksegments.h
   maptools/qgsmaptoolemitpoint.h
   maptools/qgsmaptoolextent.h
   maptools/qgsmaptoolidentify.h
