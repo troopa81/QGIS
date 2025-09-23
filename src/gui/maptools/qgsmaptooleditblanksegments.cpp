@@ -813,7 +813,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
     const QList<QPolygonF> &rings = mPoints.at( iPart );
     for ( int iRing = 0; iRing < rings.count(); iRing++ )
     {
-      if ( iPart < allBlankSegments.count() && iRing < allBlankSegments.at( iPart ).count() )
+      if ( iPart >= allBlankSegments.count() || iRing >= allBlankSegments.at( iPart ).count() )
         continue;
 
       const QgsTemplatedLineSymbolLayerBase::BlankSegments &blankSegments = allBlankSegments.at( iPart ).at( iRing );

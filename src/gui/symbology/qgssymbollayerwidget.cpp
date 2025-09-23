@@ -2169,7 +2169,7 @@ void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankSegments( bool toggle
 void QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget()
 {
   mEditBlankSegmentsBtn->setEnabled( blankSegmentsFieldIndex() > -1 );
-  QString tooltip = tr( "Tool to create blank areas where marker lines won't be displayed" );
+  QString tooltip = tr( "Tool to create blank segments where marker lines won't be displayed" );
   if ( !mEditBlankSegmentsBtn->isEnabled() )
   {
     tooltip += QStringLiteral( "<br/><br/>" ) + tr( "This tool is disabled because no valid field property has been set" );
