@@ -647,7 +647,7 @@ void QgsMapToolEditBlankSegmentsBase::updateAttribute()
   if ( !mSymbolLayer )
     return;
 
-  QList<QList<QList<std::pair<double, double>>>> blankSegments;
+  QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> blankSegments;
   for ( const QObjectUniquePtr<BlankSegment> &blankSegment : mBlankSegments )
   {
     try
@@ -674,11 +674,12 @@ void QgsMapToolEditBlankSegmentsBase::updateAttribute()
   }
 
   QStringList strParts;
-  for ( const QList<QList<std::pair<double, double>>> &part : blankSegments )
+  for ( QList<QgsTemplatedLineSymbolLayerBase::BlankSegments> &part : blankSegments )
   {
     QStringList strRings;
-    for ( const QList<std::pair<double, double>> &ring : part )
+    for ( QgsTemplatedLineSymbolLayerBase::BlankSegments &ring : part )
     {
+      std::sort( ring.begin(), ring.end() );
       QStringList strDistances;
       for ( const std::pair<double, double> &distance : ring )
       {
