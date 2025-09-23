@@ -13,6 +13,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qgslinesymbollayer.h"
 #include "qgssymbollayer.h"
 #include "qgstest.h"
 #include "qgsmapcanvas.h"
@@ -40,6 +41,8 @@ class TestQgsMapToolEditBlankSegments : public QgsTest
     void testCreateBlankSegment();
 
   private:
+    void compareBlankSegments( const QString &strBlankSegments, const QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> &expected );
+
     QObjectUniquePtr<QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>> mMapToolEditBlankSegments;
     std::unique_ptr<QgsMapCanvas> mCanvas;
     std::unique_ptr<QgsVectorLayer> mLayer;
@@ -107,6 +110,36 @@ void TestQgsMapToolEditBlankSegments::cleanup()
 {
 }
 
+void TestQgsMapToolEditBlankSegments::compareBlankSegments( const QString &strBlankSegments, const QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> &expectedBlankSegments )
+{
+  QString error;
+  QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> blankSegments = QgsTemplatedLineSymbolLayerBase::parseBlankSegments( strBlankSegments, QgsRenderContext(), Qgis::RenderUnit::Pixels, error );
+  QVERIFY( error.isEmpty() );
+
+  QVERIFY2( expectedBlankSegments.count() == blankSegments.count(), QStringLiteral( "Part number differs (Actual: %1 != Expected: %2). Returned blank segments: %3" ).arg( blankSegments.count() ).arg( expectedBlankSegments.count() ).arg( strBlankSegments ).toLatin1().constData() );
+
+  for ( int iPart = 0; iPart < expectedBlankSegments.count(); iPart++ )
+  {
+    const QList<QgsTemplatedLineSymbolLayerBase::BlankSegments> &expectedRings = expectedBlankSegments.at( iPart );
+    const QList<QgsTemplatedLineSymbolLayerBase::BlankSegments> &rings = blankSegments.at( iPart );
+    QVERIFY2( expectedRings.count() == rings.count(), QStringLiteral( "Rings number differs (Actual: %1 != Expected: %2) for part %3. Returned blank segments: %4" ).arg( rings.count() ).arg( expectedRings.count() ).arg( iPart ).arg( strBlankSegments ).toLatin1().constData() );
+
+    for ( int iRing = 0; iRing < rings.count(); iRing++ )
+    {
+      const QgsTemplatedLineSymbolLayerBase::BlankSegments &expectedSegments = expectedRings.at( iRing );
+      const QgsTemplatedLineSymbolLayerBase::BlankSegments &segments = rings.at( iRing );
+      QVERIFY2( expectedSegments.count() == segments.count(), QStringLiteral( "Segments number differs (Actual: %1 != Expected: %2) for part %3 and ring %4. Returned blank segments: %5" ).arg( segments.count() ).arg( expectedSegments.count() ).arg( iPart ).arg( iRing ).arg( strBlankSegments ).toLatin1().constData() );
+      for ( int iSegment = 0; iSegment < segments.count(); iSegment++ )
+      {
+        QVERIFY2( qgsDoubleNear( segments.at( iSegment ).first, expectedSegments.at( iSegment ).first, 0.1 ), QString( "Value differs (Actual: %1 != Expected: %2) for part %3, ring %4, segment %5, start distance. Returned blank segments: %6" ).arg( segments.at( iSegment ).first ).arg( expectedSegments.at( iSegment ).first ).arg( iPart ).arg( iRing ).arg( iSegment ).arg( strBlankSegments ).toLatin1().constData() );
+
+        QVERIFY2( qgsDoubleNear( segments.at( iSegment ).second, expectedSegments.at( iSegment ).second, 0.1 ), QString( "Value differs (Actual: %1 != Expected: %2) for part %3, ring %4, segment %5, end distance. Returned blank segments: %6" ).arg( segments.at( iSegment ).second ).arg( expectedSegments.at( iSegment ).second ).arg( iPart ).arg( iRing ).arg( iSegment ).arg( strBlankSegments ).toLatin1().constData() );
+      }
+    }
+  }
+}
+
+
 void TestQgsMapToolEditBlankSegments::testSelectFeature()
 {
   TestQgsMapToolUtils utils( mMapToolEditBlankSegments.get() );
@@ -148,7 +181,8 @@ void TestQgsMapToolEditBlankSegments::testCreateBlankSegment()
 
   QgsFeature feat = mLayer->getFeature( 1 );
   QVERIFY( feat.isValid() );
-  QCOMPARE( feat.attribute( 1 ).toString(), QStringLiteral( "tutu" ) );
+
+  compareBlankSegments( feat.attribute( 1 ).toString(), { { { { 4, 7 } } } } );
 
   mLayer->rollBack();
 }
