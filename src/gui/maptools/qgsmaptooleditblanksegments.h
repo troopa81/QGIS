@@ -16,6 +16,8 @@
 #ifndef QGSMAPTOOLEDITBLANKSEGMENTS_H
 #define QGSMAPTOOLEDITBLANKSEGMENTS_H
 
+#define SIP_NO_FILE
+
 #include "qgsmaptool.h"
 #include "qgsmapcanvasitem.h"
 #include "qgsfeatureid.h"
@@ -52,23 +54,20 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
 
     void activate() override;
 
-    // TODO every thing really need to be protected, can we not private stuff here ?
   protected:
-    typedef std::tuple<QgsSymbolLayer *, QgsSymbol *, int> FoundSymbolLayer;
+    typedef QList<QList<QPolygonF>> FeaturePoints;
+    FeaturePoints mPoints;
 
-    static FoundSymbolLayer findSymbolLayer( QgsSymbol *symbol, const QString slId );
-
-    // TODO returns start/end info and set in correct order (in points order)
+  private:
+    // Returns current start/end info
     void getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const;
-    // TODO compute and return current blank segment start and end distance
-    std::pair<double, double> getStartEndDistance() const;
-    // TODO
+    // compute and return current blank segment start and end distance
+    QPair<double, double> getStartEndDistance() const;
     void updateAttribute();
-    // TODO
     void loadFeaturePoints();
 
     // TODO comment and maybe rename -> "fake" stuff isn't really super ?!
-    virtual void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
+    virtual QgsTemplatedLineSymbolLayerBase *createFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *original ) = 0;
 
     int getClosestBlankSegmentIndex( const QPointF &point, double &distance ) const;
     QPointF getClosestPoint( const QPointF &point, double &distance, int &partIndex, int &ringIndex, int &pointIndex ) const;
@@ -76,8 +75,6 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
     void updateStartEndRubberBand();
     void updateHoveredBlankSegment( const QPoint &pos );
     void setCurrentBlankSegment( int currentBlankSegmentIndex );
-
-    typedef QList<QList<QPolygonF>> FeaturePoints;
 
     class BlankSegment : public QgsRubberBand
     {
@@ -95,7 +92,7 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
         int getPartIndex() const;
         int getRingIndex() const;
 
-        std::pair<double, double> getStartEndDistance( Qgis::RenderUnit unit ) const;
+        QPair<double, double> getStartEndDistance( Qgis::RenderUnit unit ) const;
 
         int pointsCount() const;
         const QPointF &pointAt( int index ) const;
@@ -122,10 +119,9 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
     std::vector<QObjectUniquePtr<BlankSegment>> mBlankSegments;
     QgsVectorLayer *mLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
-    QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
     const QString mSymbolLayerId;
+    QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
 
-    FeaturePoints mPoints;
     int mBlankSegmentsFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
     QPointF mCurrentPt;
@@ -150,21 +146,17 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
 template<class T>
 class GUI_EXPORT QgsMapToolEditBlankSegments : public QgsMapToolEditBlankSegmentsBase
 {
-    // TODO missing ? sip ?
-    // Q_OBJECT
-
   public:
     QgsMapToolEditBlankSegments<T>( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex )
       : QgsMapToolEditBlankSegmentsBase( canvas, layer, symbolLayer, blankSegmentFieldIndex )
     {
     }
 
-    void initFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *originalSl ) override
+    QgsTemplatedLineSymbolLayerBase *createFakeSymbolLayer( const QgsTemplatedLineSymbolLayerBase *originalSl ) override
     {
       const T *sl = dynamic_cast<const T *>( originalSl );
-      mSymbolLayer = sl ? new QgsRenderedPointsSymbolLayer( sl, mPoints ) : nullptr;
+      return sl ? new QgsRenderedPointsSymbolLayer( sl, mPoints ) : nullptr;
     }
-
 
   private:
     // TODO not a wonderful name

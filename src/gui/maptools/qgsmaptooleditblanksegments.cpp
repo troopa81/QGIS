@@ -62,33 +62,8 @@ QgsMapToolEditBlankSegmentsBase::QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *
 
 QgsMapToolEditBlankSegmentsBase::~QgsMapToolEditBlankSegmentsBase() = default;
 
-void QgsMapToolEditBlankSegmentsBase::activate()
-{
-  if ( !mSymbolLayer )
-  {
-    // search and replace symbol layer in clone
-    FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayerId );
-    if ( !std::get<QgsSymbolLayer *>( found ) )
-    {
-      mSymbol.reset();
-    }
-    else
-    {
-      // TODO deal w errors
-      // TODO use real type and not string from qgstemplatedlinesymbollayer
-      // TODO make mSymbolLayer a ref to avoid ownership question ?
-      const QgsTemplatedLineSymbolLayerBase *currentSl = dynamic_cast<QgsTemplatedLineSymbolLayerBase *>( std::get<QgsSymbolLayer *>( found ) );
-      initFakeSymbolLayer( currentSl );
-      std::get<QgsSymbol *>( found )->changeSymbolLayer( std::get<int>( found ), mSymbolLayer );
-    }
-  }
-
-  QgsMapTool::activate();
-}
-
-
-// TODO doc & shall we put in QgsVectorLayerUtils ? or QgsSymbolLayerUtils
-QgsMapToolEditBlankSegmentsBase::FoundSymbolLayer QgsMapToolEditBlankSegmentsBase::findSymbolLayer( QgsSymbol *symbol, const QString slId )
+typedef std::tuple<QgsSymbolLayer *, QgsSymbol *, int> FoundSymbolLayer;
+FoundSymbolLayer findSymbolLayer( QgsSymbol *symbol, const QString slId )
 {
   if ( !symbol )
     return { nullptr, nullptr, -1 };
@@ -109,6 +84,31 @@ QgsMapToolEditBlankSegmentsBase::FoundSymbolLayer QgsMapToolEditBlankSegmentsBas
   return { nullptr, nullptr, -1 };
 };
 
+void QgsMapToolEditBlankSegmentsBase::activate()
+{
+  if ( !mSymbolLayer )
+  {
+    // search and replace symbol layer
+    FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayerId );
+    const QgsTemplatedLineSymbolLayerBase *currentSl = dynamic_cast<QgsTemplatedLineSymbolLayerBase *>( std::get<QgsSymbolLayer *>( found ) );
+    if ( !currentSl )
+    {
+      QgsDebugError( "Fail to retrieve templated line symbol layer" );
+      mSymbol.reset();
+    }
+    else if ( mSymbolLayer = createFakeSymbolLayer( currentSl ); mSymbolLayer )
+    {
+      // set our on symbol layer to later retrieve rendered points
+      std::get<QgsSymbol *>( found )->changeSymbolLayer( std::get<int>( found ), mSymbolLayer );
+    }
+    else
+    {
+      QgsDebugError( "Fail to create fake templated line symbol layer" );
+    }
+  }
+
+  QgsMapTool::activate();
+}
 
 double distanceFct( const QPointF &prevPt, const QPointF &pt )
 {
@@ -175,7 +175,6 @@ void QgsMapToolEditBlankSegmentsBase::canvasMoveEvent( QgsMapMouseEvent *e )
   if ( canvas()->extent() != mExtent )
     loadFeaturePoints();
 
-  // TODO add function and call function instead of just returning
   switch ( mState )
   {
     case State::SELECT_FEATURE:
@@ -238,7 +237,6 @@ void QgsMapToolEditBlankSegmentsBase::canvasMoveEvent( QgsMapMouseEvent *e )
 
 void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
 {
-  // TODO separate in functions
   switch ( mState )
   {
     case State::SELECT_FEATURE:
@@ -454,7 +452,7 @@ void QgsMapToolEditBlankSegmentsBase::getStartEnd( int &startIndex, int &endInde
   }
 }
 
-std::pair<double, double> QgsMapToolEditBlankSegmentsBase::BlankSegment::getStartEndDistance( Qgis::RenderUnit unit ) const
+QPair<double, double> QgsMapToolEditBlankSegmentsBase::BlankSegment::getStartEndDistance( Qgis::RenderUnit unit ) const
 {
   double startDistance = 0;
   for ( int i = 1; i < mStartIndex; i++ )
@@ -475,12 +473,11 @@ std::pair<double, double> QgsMapToolEditBlankSegmentsBase::BlankSegment::getStar
   startDistance = renderContext.convertFromPainterUnits( startDistance, unit );
   endDistance = renderContext.convertFromPainterUnits( endDistance, unit );
 
-  return std::pair<double, double>( startDistance, endDistance );
+  return QPair<double, double>( startDistance, endDistance );
 }
 
 int QgsMapToolEditBlankSegmentsBase::getClosestBlankSegmentIndex( const QPointF &point, double &distance ) const
 {
-  // TODO maybe a spatial index would be better ?
   // search for closest blankSegment
   distance = -1;
   int iBlankSegment = -1;
@@ -651,20 +648,19 @@ void QgsMapToolEditBlankSegmentsBase::updateAttribute()
   {
     try
     {
-      std::pair<double, double> startEndDistance = blankSegment->getStartEndDistance( mSymbolLayer->blankSegmentsUnit() );
+      QPair<double, double> startEndDistance = blankSegment->getStartEndDistance( mSymbolLayer->blankSegmentsUnit() );
 
       const int partIndex = blankSegment->getPartIndex();
       if ( partIndex >= blankSegments.count() )
         blankSegments.resize( partIndex + 1 );
 
-      QList<QList<std::pair<double, double>>> &rings = blankSegments[partIndex];
+      QList<QgsTemplatedLineSymbolLayerBase::BlankSegments> &rings = blankSegments[partIndex];
       const int ringIndex = blankSegment->getRingIndex();
       if ( ringIndex >= rings.count() )
         rings.resize( ringIndex + 1 );
 
-      // TODO fix order?
-      QList<std::pair<double, double>> &distances = rings[ringIndex];
-      distances << startEndDistance;
+      QgsTemplatedLineSymbolLayerBase::BlankSegments &segments = rings[ringIndex];
+      segments << startEndDistance;
     }
     catch ( std::invalid_argument e )
     {
@@ -680,7 +676,7 @@ void QgsMapToolEditBlankSegmentsBase::updateAttribute()
     {
       std::sort( ring.begin(), ring.end() );
       QStringList strDistances;
-      for ( const std::pair<double, double> &distance : ring )
+      for ( const QPair<double, double> &distance : ring )
       {
         strDistances << ( QString::number( distance.first ) + " " + QString::number( distance.second ) );
       }
