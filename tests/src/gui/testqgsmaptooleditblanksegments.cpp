@@ -42,10 +42,12 @@ class TestQgsMapToolEditBlankSegments : public QgsTest
 
   private:
     void compareBlankSegments( const QString &strBlankSegments, const QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> &expected );
+    int nbRubberBandVisible() const;
 
     QObjectUniquePtr<QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>> mMapToolEditBlankSegments;
     std::unique_ptr<QgsMapCanvas> mCanvas;
     std::unique_ptr<QgsVectorLayer> mLayer;
+    QgsMarkerLineSymbolLayer *mSymbolLayer = new QgsMarkerLineSymbolLayer();
 };
 
 void TestQgsMapToolEditBlankSegments::initTestCase()
@@ -89,13 +91,10 @@ void TestQgsMapToolEditBlankSegments::initTestCase()
   QVERIFY( renderer );
   QVERIFY( renderer->symbol() );
 
-  QgsMarkerLineSymbolLayer *symbolLayer = new QgsMarkerLineSymbolLayer();
-  symbolLayer->setPlacements( Qgis::MarkerLinePlacement::Interval );
+  mSymbolLayer = new QgsMarkerLineSymbolLayer();
+  mSymbolLayer->setPlacements( Qgis::MarkerLinePlacement::Interval );
 
-  renderer->symbol()->changeSymbolLayer( 0, symbolLayer );
-
-  mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( mCanvas.get(), mLayer.get(), symbolLayer, 1 ) );
-  mCanvas->setMapTool( mMapToolEditBlankSegments );
+  renderer->symbol()->changeSymbolLayer( 0, mSymbolLayer );
 }
 
 void TestQgsMapToolEditBlankSegments::cleanupTestCase()
@@ -104,10 +103,29 @@ void TestQgsMapToolEditBlankSegments::cleanupTestCase()
 
 void TestQgsMapToolEditBlankSegments::init()
 {
+  mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( mCanvas.get(), mLayer.get(), mSymbolLayer, 1 ) );
+  mCanvas->setMapTool( mMapToolEditBlankSegments );
 }
 
 void TestQgsMapToolEditBlankSegments::cleanup()
 {
+  mCanvas->unsetMapTool( mMapToolEditBlankSegments );
+  mMapToolEditBlankSegments.reset();
+}
+
+int TestQgsMapToolEditBlankSegments::nbRubberBandVisible() const
+{
+  int result = 0;
+  for ( QGraphicsItem *item : mCanvas->items() )
+  {
+    if ( QgsRubberBand *rubberBand = dynamic_cast<QgsRubberBand *>( item );
+         rubberBand && rubberBand->isVisible() )
+    {
+      result++;
+    }
+  }
+
+  return result;
 }
 
 void TestQgsMapToolEditBlankSegments::compareBlankSegments( const QString &strBlankSegments, const QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> &expectedBlankSegments )
@@ -150,17 +168,25 @@ void TestQgsMapToolEditBlankSegments::testSelectFeature()
   utils.mouseClick( 1, 1, Qt::LeftButton );
   QCOMPARE( mMapToolEditBlankSegments->mCurrentFeatureId, 1 );
 
+  // TODO shall it work without move ?
+  utils.mouseMove( 1, 1 );
+  QCOMPARE( nbRubberBandVisible(), 1 );
+
   // escape
   utils.keyClick( Qt::Key_Escape );
   QVERIFY( FID_IS_NULL( mMapToolEditBlankSegments->mCurrentFeatureId ) );
+  QCOMPARE( nbRubberBandVisible(), 0 );
 
   // select second feature
   utils.mouseClick( 21, 1, Qt::LeftButton );
   QCOMPARE( mMapToolEditBlankSegments->mCurrentFeatureId, 2 );
+  utils.mouseMove( 21, 1 );
+  QCOMPARE( nbRubberBandVisible(), 1 );
 
   // escape
   utils.keyClick( Qt::Key_Escape );
   QVERIFY( FID_IS_NULL( mMapToolEditBlankSegments->mCurrentFeatureId ) );
+  QCOMPARE( nbRubberBandVisible(), 0 );
 }
 
 void TestQgsMapToolEditBlankSegments::testCreateBlankSegment()
@@ -173,6 +199,13 @@ void TestQgsMapToolEditBlankSegments::testCreateBlankSegment()
   utils.mouseClick( 1, 1, Qt::LeftButton );
   QCOMPARE( mMapToolEditBlankSegments->mCurrentFeatureId, 1 );
 
+
+  // TODO Shall it work without move before ?
+  utils.mouseMove( 11, 2 );
+  utils.mouseClick( 11, 2, Qt::LeftButton );
+  utils.mouseMove( 9, 9 );
+  utils.mouseClick( 9, 9, Qt::LeftButton );
+
   // TODO Shall it work without move before ?
   utils.mouseMove( 4, 1 );
   utils.mouseClick( 4, 1, Qt::LeftButton );
@@ -182,7 +215,12 @@ void TestQgsMapToolEditBlankSegments::testCreateBlankSegment()
   QgsFeature feat = mLayer->getFeature( 1 );
   QVERIFY( feat.isValid() );
 
-  compareBlankSegments( feat.attribute( 1 ).toString(), { { { { 4, 7 } } } } );
+  compareBlankSegments( feat.attribute( 1 ).toString(), { { { { 4, 7 }, { 12, 32.8 } } } } );
+
+  // escape
+  utils.keyClick( Qt::Key_Escape );
+  QVERIFY( FID_IS_NULL( mMapToolEditBlankSegments->mCurrentFeatureId ) );
+  QCOMPARE( nbRubberBandVisible(), 0 );
 
   mLayer->rollBack();
 }

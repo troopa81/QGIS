@@ -372,9 +372,8 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
       if ( e->matches( QKeySequence::Cancel ) )
       {
         mCurrentFeatureId = FID_NULL;
-        loadFeaturePoints();
         mState = State::SELECT_FEATURE;
-        updateStartEndRubberBand();
+        loadFeaturePoints();
         e->accept();
       }
       break;
@@ -776,6 +775,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
   mPoints.clear();
   mExtent = canvas()->extent();
   mBlankSegments.clear();
+  setCurrentBlankSegment( -1 );
 
   if ( FID_IS_NULL( mCurrentFeatureId ) || !mSymbolLayer )
     return;
