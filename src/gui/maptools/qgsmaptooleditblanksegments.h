@@ -59,8 +59,6 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
     FeaturePoints mPoints;
 
   private:
-    // Returns current start/end info
-    void getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const;
     // compute and return current blank segment start and end distance
     QPair<double, double> getStartEndDistance() const;
     void updateAttribute();
@@ -98,12 +96,15 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
         const QPointF &pointAt( int index ) const;
 
       private:
+        void updatePoints();
+
         int mPartIndex = -1;
         int mRingIndex = -1;
         int mStartIndex = -1;
         int mEndIndex = -1;
         QPointF mStartPt;
         QPointF mEndPt;
+        bool mNeedSwap = false;
         const FeaturePoints &mPoints; //! all feature rendered points
     };
 
@@ -124,16 +125,10 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
 
     int mBlankSegmentsFieldIndex = -1;
     QgsFeatureId mCurrentFeatureId = FID_NULL;
-    QPointF mCurrentPt;
-    QPointF mFirstPt;
-    int mCurrentIndex = -1;
-    int mFirstIndex = -1;
     QgsRectangle mExtent;
     State mState = State::SELECT_FEATURE;
     int mCurrentBlankSegmentIndex = -1;
     int mHoveredBlankSegment = -1;
-    int mPartIndex = -1;
-    int mRingIndex = -1;
 
     QObjectUniquePtr<BlankSegment> mEditedBlankSegment;
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;

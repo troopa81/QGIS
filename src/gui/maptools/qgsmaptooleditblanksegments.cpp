@@ -183,12 +183,11 @@ void QgsMapToolEditBlankSegmentsBase::canvasMoveEvent( QgsMapMouseEvent *e )
         const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
         mStartRubberBand->reset( Qgis::GeometryType::Point );
         double distance;
-        mFirstPt = getClosestPoint( pos, distance, mPartIndex, mRingIndex, mFirstIndex );
+        int partIndex = -1, ringIndex = -1, pointIndex = -1;
+        const QPointF closestPoint = getClosestPoint( pos, distance, partIndex, ringIndex, pointIndex );
 
         // for now end point is the same as start one
-        mCurrentPt = mFirstPt;
-        mCurrentIndex = mFirstIndex;
-        mStartRubberBand->addPoint( m2p.toMapCoordinates( mFirstPt.x(), mFirstPt.y() ) );
+        mStartRubberBand->addPoint( m2p.toMapCoordinates( closestPoint.x(), closestPoint.y() ) );
       }
 
       break;
@@ -204,18 +203,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasMoveEvent( QgsMapMouseEvent *e )
       QPointF P = getClosestPoint( pos, distance, partIndex, ringIndex, pointIndex );
       if ( distance > -1 && pointIndex > -1 )
       {
-        mCurrentPt = P;
-        mPartIndex = partIndex;
-        mRingIndex = ringIndex;
-        mCurrentIndex = pointIndex;
-      }
-
-      if ( mCurrentIndex > -1 )
-      {
-        int startIndex = -1, endIndex = -1;
-        QPointF startPoint, endPoint;
-        getStartEnd( startIndex, endIndex, startPoint, endPoint );
-        mEditedBlankSegment->setPoints( mPartIndex, mRingIndex, startIndex, endIndex, startPoint, endPoint );
+        mEditedBlankSegment->setPoints( partIndex, ringIndex, mEditedBlankSegment->getStartIndex(), pointIndex, mEditedBlankSegment->getStartPoint(), P );
         updateStartEndRubberBand();
       }
     }
@@ -255,12 +243,17 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       // init first point of new blank segment
       else
       {
-        int startIndex = -1, endIndex = -1;
-        QPointF startPoint, endPoint;
-        getStartEnd( startIndex, endIndex, startPoint, endPoint );
-        mEditedBlankSegment->setPoints( mPartIndex, mRingIndex, startIndex, endIndex, startPoint, endPoint );
         mState = State::BLANK_SEGMENT_CREATION_STARTED;
-        updateStartEndRubberBand();
+        double distance = -1;
+        int partIndex = -1;
+        int pointIndex = -1;
+        int ringIndex = -1;
+        QPointF P = getClosestPoint( e->pos(), distance, partIndex, ringIndex, pointIndex );
+        if ( distance > -1 && pointIndex > -1 )
+        {
+          mEditedBlankSegment->setPoints( partIndex, ringIndex, pointIndex, pointIndex, P, P );
+          updateStartEndRubberBand();
+        }
       }
 
       break;
@@ -283,15 +276,10 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
         // user clicked on start or end point to move it
         if ( std::min( distanceFromStart, distanceFromEnd ) < TOLERANCE )
         {
-          mFirstIndex = currentBlankSegment->getStartIndex();
-          mCurrentIndex = currentBlankSegment->getEndIndex();
-          mFirstPt = currentBlankSegment->getStartPoint();
-          mCurrentPt = currentBlankSegment->getEndPoint();
-
           if ( distanceFromStart < distanceFromEnd )
           {
-            std::swap( mFirstIndex, mCurrentIndex );
-            std::swap( mFirstPt, mCurrentPt );
+            // start point become current point (end point TODO shall we rewrite endPoint to currentPoint ? ) to edit
+            mEditedBlankSegment->setPoints( currentBlankSegment->getPartIndex(), currentBlankSegment->getRingIndex(), currentBlankSegment->getEndIndex(), currentBlankSegment->getStartIndex(), currentBlankSegment->getEndPoint(), currentBlankSegment->getStartPoint() );
           }
 
           mState = State::BLANK_SEGMENT_MODIFICATION_STARTED;
@@ -319,8 +307,8 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
         mState = State::BLANK_SEGMENT_SELECTED;
       }
 
-      mFirstIndex = -1;
-      mCurrentIndex = -1;
+      // mFirstIndex = -1;
+      // mCurrentIndex = -1;
       updateAttribute();
       break;
   }
@@ -404,51 +392,17 @@ const QPointF &pointAt( const QList<QList<QPolygonF>> &points, int partIndex, in
   return pts.at( pointIndex );
 }
 
-
-void QgsMapToolEditBlankSegmentsBase::getStartEnd( int &startIndex, int &endIndex, QPointF &startPt, QPointF &endPt ) const
-{
-  startIndex = mFirstIndex;
-  endIndex = mCurrentIndex;
-  if ( mFirstIndex == mCurrentIndex )
-  {
-    startPt = mCurrentPt;
-    endPt = mFirstPt;
-
-    try
-    {
-      if ( const QPointF &firstIndexPoint = ::pointAt( mPoints, mPartIndex, mRingIndex, mFirstIndex );
-           QgsGeometryUtilsBase::distance2D( startPt, firstIndexPoint ) < QgsGeometryUtilsBase::distance2D( endPt, firstIndexPoint ) )
-      {
-        std::swap( startPt, endPt );
-      }
-    }
-    catch ( std::invalid_argument e )
-    {
-      QgsDebugError( e.what() );
-    }
-  }
-  else
-  {
-    startPt = mFirstPt;
-    endPt = mCurrentPt;
-
-    if ( startIndex > endIndex )
-    {
-      std::swap( startIndex, endIndex );
-      std::swap( startPt, endPt );
-    }
-  }
-}
-
 QPair<double, double> QgsMapToolEditBlankSegmentsBase::BlankSegment::getStartEndDistance( Qgis::RenderUnit unit ) const
 {
   double startDistance = 0;
-  for ( int i = 1; i < mStartIndex; i++ )
+  const int startIndex = mNeedSwap ? mEndIndex : mStartIndex;
+  const QPointF startPt = mNeedSwap ? mEndPt : mStartPt;
+  for ( int i = 1; i < startIndex; i++ )
   {
     startDistance += QgsGeometryUtilsBase::distance2D( ::pointAt( mPoints, mPartIndex, mRingIndex, i - 1 ), ::pointAt( mPoints, mPartIndex, mRingIndex, i ) );
   }
 
-  startDistance += QgsGeometryUtilsBase::distance2D( ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex - 1 ), mStartPt );
+  startDistance += QgsGeometryUtilsBase::distance2D( ::pointAt( mPoints, mPartIndex, mRingIndex, startIndex - 1 ), startPt );
 
   double endDistance = startDistance;
   for ( int i = 1; i < pointsCount(); i++ )
@@ -865,6 +819,32 @@ void QgsMapToolEditBlankSegmentsBase::BlankSegment::setPoints( int partIndex, in
   mStartPt = startPt;
   mEndPt = endPt;
 
+  mNeedSwap = false;
+  if ( mStartIndex == mEndIndex )
+  {
+    try
+    {
+      if ( const QPointF &startIndexPoint = ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex );
+           QgsGeometryUtilsBase::distance2D( startPt, startIndexPoint ) < QgsGeometryUtilsBase::distance2D( endPt, startIndexPoint ) )
+      {
+        mNeedSwap = true;
+      }
+    }
+    catch ( std::invalid_argument e )
+    {
+      QgsDebugError( e.what() );
+    }
+  }
+  else if ( mStartIndex > mEndIndex )
+  {
+    mNeedSwap = true;
+  }
+
+  updatePoints();
+}
+
+void QgsMapToolEditBlankSegmentsBase::BlankSegment::updatePoints()
+{
   const QgsMapToPixel &m2p = *( mMapCanvas->getCoordinateTransform() );
 
   reset();
@@ -882,6 +862,7 @@ void QgsMapToolEditBlankSegmentsBase::BlankSegment::setPoints( int partIndex, in
     }
   }
 }
+
 
 void QgsMapToolEditBlankSegmentsBase::BlankSegment::copyFrom( const BlankSegment &blankSegment )
 {
@@ -920,11 +901,17 @@ int QgsMapToolEditBlankSegmentsBase::BlankSegment::getRingIndex() const
 
 int QgsMapToolEditBlankSegmentsBase::BlankSegment::pointsCount() const
 {
-  return ( mEndIndex - mStartIndex ) + 2;
+  return std::abs( mEndIndex - mStartIndex ) + 2;
 }
 
 const QPointF &QgsMapToolEditBlankSegmentsBase::BlankSegment::pointAt( int index ) const
 {
   // TODO test whether index is valid (and do what if not? see QList?)
-  return index == 0 ? mStartPt : ( index == pointsCount() - 1 ? mEndPt : ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex + index - 1 ) );
+  return index == 0 ?
+                    // first point
+           ( mNeedSwap ? mEndPt : mStartPt )
+                    // last point
+                    : ( index == pointsCount() - 1 ? ( mNeedSwap ? mStartPt : mEndPt )
+                                                   // point in between
+                                                   : ::pointAt( mPoints, mPartIndex, mRingIndex, ( mNeedSwap ? mEndIndex : mStartIndex ) + index - 1 ) );
 }
