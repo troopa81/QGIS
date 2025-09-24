@@ -177,8 +177,8 @@ void QgsMapToolEditBlankSegmentsBase::canvasMoveEvent( QgsMapMouseEvent *e )
       updateHoveredBlankSegment( pos );
 
       // display current start point to create a new blank segment
-      mStartRubberBand->setVisible( mHoveredBlankSegment == -1 );
-      if ( mHoveredBlankSegment == -1 )
+      mStartRubberBand->setVisible( mHoveredBlankSegmentIndex == -1 );
+      if ( mHoveredBlankSegmentIndex == -1 )
       {
         const QgsMapToPixel &m2p = *( canvas()->getCoordinateTransform() );
         mStartRubberBand->reset( Qgis::GeometryType::Point );
@@ -235,10 +235,10 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
     case State::FEATURE_SELECTED:
 
       // new blank segment selected
-      if ( mHoveredBlankSegment > -1 )
+      if ( mHoveredBlankSegmentIndex > -1 )
       {
         mState = State::BLANK_SEGMENT_SELECTED;
-        setCurrentBlankSegment( mHoveredBlankSegment );
+        setCurrentBlankSegment( mHoveredBlankSegmentIndex );
       }
       // init first point of new blank segment
       else
@@ -263,10 +263,10 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       const QObjectUniquePtr<BlankSegment> &currentBlankSegment = mBlankSegments.at( mCurrentBlankSegmentIndex );
 
       // selected blank segment has changed
-      if ( mHoveredBlankSegment > -1 && mHoveredBlankSegment != mCurrentBlankSegmentIndex )
+      if ( mHoveredBlankSegmentIndex > -1 && mHoveredBlankSegmentIndex != mCurrentBlankSegmentIndex )
       {
         currentBlankSegment->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
-        setCurrentBlankSegment( mHoveredBlankSegment );
+        setCurrentBlankSegment( mHoveredBlankSegmentIndex );
       }
       else
       {
@@ -278,7 +278,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
         {
           if ( distanceFromStart < distanceFromEnd )
           {
-            // start point become current point (end point TODO shall we rewrite endPoint to currentPoint ? ) to edit
+            // start point become end point because we always edit end point
             mEditedBlankSegment->setPoints( currentBlankSegment->getPartIndex(), currentBlankSegment->getRingIndex(), currentBlankSegment->getEndIndex(), currentBlankSegment->getStartIndex(), currentBlankSegment->getEndPoint(), currentBlankSegment->getStartPoint() );
           }
 
@@ -535,24 +535,24 @@ void QgsMapToolEditBlankSegmentsBase::updateHoveredBlankSegment( const QPoint &p
   double distance = -1;
   int iBlankSegment = getClosestBlankSegmentIndex( pos, distance );
 
-  if ( mHoveredBlankSegment > -1 && mHoveredBlankSegment != mCurrentBlankSegmentIndex )
+  if ( mHoveredBlankSegmentIndex > -1 && mHoveredBlankSegmentIndex != mCurrentBlankSegmentIndex )
   {
     // TODO constant or function for set selected or not
-    mBlankSegments.at( mHoveredBlankSegment )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
-    mBlankSegments.at( mHoveredBlankSegment )->update();
+    mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+    mBlankSegments.at( mHoveredBlankSegmentIndex )->update();
   }
 
   // blank segment is hovered
   if ( iBlankSegment > -1 && distance < TOLERANCE )
   {
-    mHoveredBlankSegment = iBlankSegment;
-    mBlankSegments.at( mHoveredBlankSegment )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
-    mBlankSegments.at( mHoveredBlankSegment )->update();
+    mHoveredBlankSegmentIndex = iBlankSegment;
+    mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+    mBlankSegments.at( mHoveredBlankSegmentIndex )->update();
   }
   // no blank segment hovered, display the first point to create a new blank segment
   else
   {
-    mHoveredBlankSegment = -1;
+    mHoveredBlankSegmentIndex = -1;
   }
 }
 

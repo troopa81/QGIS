@@ -128,8 +128,10 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
     QgsRectangle mExtent;
     State mState = State::SELECT_FEATURE;
     int mCurrentBlankSegmentIndex = -1;
-    int mHoveredBlankSegment = -1;
+    int mHoveredBlankSegmentIndex = -1;
 
+    // currently edited blank segment, start point is the fixed point and end point is the currently
+    // modified one
     QObjectUniquePtr<BlankSegment> mEditedBlankSegment;
     QObjectUniquePtr<QgsRubberBand> mStartRubberBand;
     QObjectUniquePtr<QgsRubberBand> mEndRubberBand;
