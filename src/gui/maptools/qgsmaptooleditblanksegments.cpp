@@ -110,16 +110,6 @@ void QgsMapToolEditBlankSegmentsBase::activate()
   QgsMapTool::activate();
 }
 
-double distanceFct( const QPointF &prevPt, const QPointF &pt )
-{
-  double Ax = prevPt.x();
-  double Ay = prevPt.y();
-  double Bx = pt.x();
-  double By = pt.y();
-
-  return std::sqrt( std::pow( Bx - Ax, 2 ) + std::pow( By - Ay, 2 ) );
-}
-
 enum Status
 {
   OK,
@@ -128,7 +118,7 @@ enum Status
 };
 
 // TODO doc (distance = distance to line)
-// TODO maybe use project from qgsgeometryutils_base ? et distance2d au lieu de distanceFct aussi
+// TODO maybe use project from qgsgeometryutils_base
 // et aussi pointsAreCollinear
 QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, const QPointF &point, double &distance, Status &status )
 {
@@ -429,7 +419,7 @@ void QgsMapToolEditBlankSegmentsBase::getStartEnd( int &startIndex, int &endInde
     try
     {
       if ( const QPointF &firstIndexPoint = ::pointAt( mPoints, mPartIndex, mRingIndex, mFirstIndex );
-           distanceFct( startPt, firstIndexPoint ) < distanceFct( endPt, firstIndexPoint ) )
+           QgsGeometryUtilsBase::distance2D( startPt, firstIndexPoint ) < QgsGeometryUtilsBase::distance2D( endPt, firstIndexPoint ) )
       {
         std::swap( startPt, endPt );
       }
@@ -457,15 +447,15 @@ QPair<double, double> QgsMapToolEditBlankSegmentsBase::BlankSegment::getStartEnd
   double startDistance = 0;
   for ( int i = 1; i < mStartIndex; i++ )
   {
-    startDistance += distanceFct( ::pointAt( mPoints, mPartIndex, mRingIndex, i - 1 ), ::pointAt( mPoints, mPartIndex, mRingIndex, i ) );
+    startDistance += QgsGeometryUtilsBase::distance2D( ::pointAt( mPoints, mPartIndex, mRingIndex, i - 1 ), ::pointAt( mPoints, mPartIndex, mRingIndex, i ) );
   }
 
-  startDistance += distanceFct( ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex - 1 ), mStartPt );
+  startDistance += QgsGeometryUtilsBase::distance2D( ::pointAt( mPoints, mPartIndex, mRingIndex, mStartIndex - 1 ), mStartPt );
 
   double endDistance = startDistance;
   for ( int i = 1; i < pointsCount(); i++ )
   {
-    endDistance += distanceFct( pointAt( i ), pointAt( i - 1 ) );
+    endDistance += QgsGeometryUtilsBase::distance2D( pointAt( i ), pointAt( i - 1 ) );
   }
 
   QgsRenderContext renderContext = QgsRenderContext::fromMapSettings( mMapCanvas->mapSettings() );
@@ -823,8 +813,8 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
         while ( iPoint < points.count() - 1 && currentLength < ba.first )
         {
           iPoint++;
-          // TODO replace distanceFct with MyLine().lentgh() and put MyLine in a private header file
-          currentLength += distanceFct( points.at( iPoint ), points.at( iPoint - 1 ) );
+          // TODO replace QgsGeometryUtilsBase::distance2D with MyLine().lentgh() and put MyLine in a private header file
+          currentLength += QgsGeometryUtilsBase::distance2D( points.at( iPoint ), points.at( iPoint - 1 ) );
         }
 
         if ( iPoint == points.count() )
@@ -839,7 +829,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
         while ( iPoint < points.count() - 1 && currentLength < ba.second )
         {
           iPoint++;
-          currentLength += distanceFct( points.at( iPoint ), points.at( iPoint - 1 ) );
+          currentLength += QgsGeometryUtilsBase::distance2D( points.at( iPoint ), points.at( iPoint - 1 ) );
         }
 
         if ( iPoint == points.count() )
