@@ -112,45 +112,43 @@ void QgsMapToolEditBlankSegmentsBase::activate()
 
 enum Status
 {
-  OK,
-  LINE_EMPTY,
-  NOT_ON_LINE
+  OK,            // ok, point is on the segment
+  LINE_EMPTY,    // line is empty, cannot project point
+  NOT_ON_SEGMENT // point is on the line, but not on the segment
 };
 
-// TODO doc (distance = distance to line)
-// TODO maybe use project from qgsgeometryutils_base
-// et aussi pointsAreCollinear
+// Returns point projected on segment defined by lineStartPt and lineEndPt
+// distance is updated with the distance between the point and the returned projected point
 QPointF projectedPoint( const QPointF &lineStartPt, const QPointF &lineEndPt, const QPointF &point, double &distance, Status &status )
 {
   status = Status::OK;
   distance = -1;
 
-  double Ax = lineStartPt.x();
-  double Ay = lineStartPt.y();
-  double Bx = lineEndPt.x();
-  double By = lineEndPt.y();
-  double Cx = point.x();
-  double Cy = point.y();
+  const double Ax = lineStartPt.x();
+  const double Ay = lineStartPt.y();
+  const double Bx = lineEndPt.x();
+  const double By = lineEndPt.y();
+  const double Cx = point.x();
+  const double Cy = point.y();
 
-  double length = std::sqrt( std::pow( Bx - Ax, 2 ) + std::pow( By - Ay, 2 ) );
+  const double length = QgsGeometryUtilsBase::distance2D( Ax, Ay, Bx, By );
   if ( length == 0 )
   {
     status = Status::LINE_EMPTY;
     return QPointF();
   }
 
-  double r = ( ( Cx - Ax ) * ( Bx - Ax ) + ( Cy - Ay ) * ( By - Ay ) ) / std::pow( length, 2 );
-
+  const double r = ( ( Cx - Ax ) * ( Bx - Ax ) + ( Cy - Ay ) * ( By - Ay ) ) / std::pow( length, 2 );
   if ( r < 0 or r > 1 )
   {
-    status = Status::NOT_ON_LINE;
+    status = Status::NOT_ON_SEGMENT;
   }
 
   // projected point
-  double Px = Ax + r * ( Bx - Ax );
-  double Py = Ay + r * ( By - Ay );
+  const double Px = Ax + r * ( Bx - Ax );
+  const double Py = Ay + r * ( By - Ay );
 
-  distance = std::sqrt( std::pow( Px - Cx, 2 ) + std::pow( Py - Cy, 2 ) );
+  distance = QgsGeometryUtilsBase::distance2D( Cx, Cy, Px, Py );
 
   return QPointF( Px, Py );
 }
@@ -484,7 +482,7 @@ int QgsMapToolEditBlankSegmentsBase::getClosestBlankSegmentIndex( const QPointF 
         case Status::LINE_EMPTY:
           continue;
 
-        case Status::NOT_ON_LINE:
+        case Status::NOT_ON_SEGMENT:
           d = std::min( ( blankSegment->getStartPoint() - point ).manhattanLength(), ( blankSegment->getEndPoint() - point ).manhattanLength() );
           break;
 
@@ -523,7 +521,7 @@ QPointF QgsMapToolEditBlankSegmentsBase::getClosestPoint( const QPointF &point, 
         switch ( status )
         {
           case Status::LINE_EMPTY:
-          case Status::NOT_ON_LINE:
+          case Status::NOT_ON_SEGMENT:
             continue;
 
           case Status::OK:
@@ -813,7 +811,6 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
         while ( iPoint < points.count() - 1 && currentLength < ba.first )
         {
           iPoint++;
-          // TODO replace QgsGeometryUtilsBase::distance2D with MyLine().lentgh() and put MyLine in a private header file
           currentLength += QgsGeometryUtilsBase::distance2D( points.at( iPoint ), points.at( iPoint - 1 ) );
         }
 
