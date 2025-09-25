@@ -171,6 +171,9 @@ class GUI_EXPORT QgsMapToolEditBlankSegments : public QgsMapToolEditBlankSegment
         void renderPolylineInterval( const QPolygonF &points, QgsSymbolRenderContext &context, double, const QList<QPair<double, double>> & ) override
         {
           const int iPart = context.geometryPartNum() - 1;
+          if ( iPart < 0 || QgsRenderedPointsSymbolLayer::mRingIndex < 0 )
+            return;
+
           if ( iPart >= mPoints.count() )
             mPoints.resize( iPart + 1 );
 

@@ -30,8 +30,85 @@
 #include "qgssettingsentryimpl.h"
 #include "qgsguiutils.h"
 #include "qgssnappingutils.h"
+#include "qgsstyleentityvisitor.h"
 
 constexpr int TOLERANCE = 20;
+
+
+/////////
+
+///@cond PRIVATE
+
+namespace
+{
+
+  class SymbolLayerVisitor : public QgsStyleEntityVisitorInterface
+  {
+    public:
+      //! constructor
+      SymbolLayerVisitor( const QString &symbolLayerId )
+        : mSymbolLayerId( symbolLayerId ) {}
+
+      bool visitEnter( const QgsStyleEntityVisitorInterface::Node &node ) override
+      {
+        if ( node.type != QgsStyleEntityVisitorInterface::NodeType::SymbolRule )
+          return false;
+
+        return true;
+      }
+
+      bool visitSymbol( const QgsSymbol *symbol, const QString &leafIdentifier )
+      {
+        if ( symbol && !mSymbol )
+          mSymbol = symbol;
+
+        for ( int idx = 0; idx < symbol->symbolLayerCount(); idx++ )
+        {
+          const QgsSymbolLayer *sl = symbol->symbolLayer( idx );
+          if ( sl->id() == mSymbolLayerId )
+          {
+            mSymbolLayer = dynamic_cast<const QgsTemplatedLineSymbolLayerBase *>( sl );
+            mSymbolLayerIndex = idx;
+            return false;
+          }
+
+          // recurse over sub symbols
+          if ( const QgsSymbol *subSymbol = const_cast<QgsSymbolLayer *>( sl )->subSymbol();
+               subSymbol && !visitSymbol( subSymbol, leafIdentifier ) )
+          {
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      bool visit( const QgsStyleEntityVisitorInterface::StyleLeaf &leaf ) override
+      {
+        if ( leaf.entity && leaf.entity->type() == QgsStyle::SymbolEntity )
+        {
+          auto symbolEntity = static_cast<const QgsStyleSymbolEntity *>( leaf.entity );
+          if ( symbolEntity->symbol() )
+            visitSymbol( symbolEntity->symbol(), leaf.identifier );
+        }
+        return true;
+      }
+
+      const QgsSymbol *symbol() const { return mSymbol; }
+      const QgsTemplatedLineSymbolLayerBase *symbolLayer() const { return mSymbolLayer; }
+      int symbolLayerIndex() const { return mSymbolLayerIndex; }
+
+      bool found() const { return mSymbol && mSymbolLayer; }
+
+    private:
+      const QgsSymbol *mSymbol = nullptr;
+      const QgsTemplatedLineSymbolLayerBase *mSymbolLayer = nullptr;
+      int mSymbolLayerIndex = -1;
+      const QString &mSymbolLayerId;
+  };
+
+} //namespace
+///@endcond
 
 QgsMapToolEditBlankSegmentsBase::QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex )
   : QgsMapTool( canvas )
@@ -52,57 +129,37 @@ QgsMapToolEditBlankSegmentsBase::QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *
   initRubberBand( mEndRubberBand );
 
   mEditedBlankSegment->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
-
-  // TODO what happen with other renderer
-  // TODO deal with errors
-  const QgsSingleSymbolRenderer *renderer = dynamic_cast<const QgsSingleSymbolRenderer *>( mLayer->renderer() );
-  mSymbol.reset( renderer->symbol()->clone() );
 }
 
 QgsMapToolEditBlankSegmentsBase::~QgsMapToolEditBlankSegmentsBase() = default;
 
-typedef std::tuple<QgsSymbolLayer *, QgsSymbol *, int> FoundSymbolLayer;
-FoundSymbolLayer findSymbolLayer( QgsSymbol *symbol, const QString slId )
-{
-  if ( !symbol )
-    return { nullptr, nullptr, -1 };
-
-  for ( int i = 0; i < symbol->symbolLayers().count(); i++ )
-  {
-    QgsSymbolLayer *sl = symbol->symbolLayers().at( i );
-    if ( sl->id() == slId )
-    {
-      return { sl, symbol, i };
-    }
-
-    FoundSymbolLayer children = findSymbolLayer( sl->subSymbol(), slId );
-    if ( std::get<QgsSymbolLayer *>( children ) )
-      return children;
-  }
-
-  return { nullptr, nullptr, -1 };
-};
-
 void QgsMapToolEditBlankSegmentsBase::activate()
 {
-  if ( !mSymbolLayer )
+  if ( !mLayer || !mLayer->renderer() )
+    return;
+
+  if ( !mSymbol || !mSymbolLayer )
   {
-    // search and replace symbol layer
-    FoundSymbolLayer found = findSymbolLayer( mSymbol.get(), mSymbolLayerId );
-    const QgsTemplatedLineSymbolLayerBase *currentSl = dynamic_cast<QgsTemplatedLineSymbolLayerBase *>( std::get<QgsSymbolLayer *>( found ) );
-    if ( !currentSl )
+    // search and symbol and symbol layer
+    SymbolLayerVisitor visitor( mSymbolLayerId );
+    mLayer->renderer()->accept( &visitor );
+    if ( visitor.symbol() && visitor.symbolLayer() && visitor.symbolLayerIndex() > -1 )
     {
-      QgsDebugError( "Fail to retrieve templated line symbol layer" );
-      mSymbol.reset();
-    }
-    else if ( mSymbolLayer = createFakeSymbolLayer( currentSl ); mSymbolLayer )
-    {
-      // set our on symbol layer to later retrieve rendered points
-      std::get<QgsSymbol *>( found )->changeSymbolLayer( std::get<int>( found ), mSymbolLayer );
+      mSymbol.reset( visitor.symbol()->clone() );
+      if ( mSymbolLayer = createFakeSymbolLayer( visitor.symbolLayer() ); mSymbolLayer )
+      {
+        // set our on symbol layer to later retrieve rendered points
+        mSymbol->changeSymbolLayer( visitor.symbolLayerIndex(), mSymbolLayer );
+      }
+      else
+      {
+        mSymbol.reset();
+        QgsDebugError( "Fail to create fake templated line symbol layer" );
+      }
     }
     else
     {
-      QgsDebugError( "Fail to create fake templated line symbol layer" );
+      QgsDebugError( "Fail to retrieve symbol and templated line symbol layer" );
     }
   }
 

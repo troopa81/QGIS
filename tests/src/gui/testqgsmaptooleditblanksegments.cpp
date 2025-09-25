@@ -52,14 +52,6 @@ class TestQgsMapToolEditBlankSegments : public QgsTest
 
 void TestQgsMapToolEditBlankSegments::initTestCase()
 {
-  // QgsApplication::init();
-  // QgsApplication::initQgis();
-
-  // // Set up the QSettings environment
-  // QCoreApplication::setOrganizationName( QStringLiteral( "QGIS" ) );
-  // QCoreApplication::setOrganizationDomain( QStringLiteral( "qgis.org" ) );
-  // QCoreApplication::setApplicationName( QStringLiteral( "QGIS-TEST" ) );
-
   mCanvas = std::make_unique<QgsMapCanvas>();
   mCanvas->setDestinationCrs( QgsCoordinateReferenceSystem( QStringLiteral( "EPSG:3946" ) ) );
   mCanvas->setFrameStyle( QFrame::NoFrame );
