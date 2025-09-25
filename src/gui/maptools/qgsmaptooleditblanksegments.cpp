@@ -277,8 +277,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       const QgsPointLocator::Match m = mCanvas->snappingUtils()->snapToCurrentLayer( e->pos(), QgsPointLocator::Area );
       if ( !m.isValid() )
       {
-        // TODO deal with message
-        // emit messageEmitted( tr( "No point feature was detected at the clicked position. Please click closer to the feature or enhance the search tolerance under Settings->Options->Digitizing->Search radius for vertex edits" ), Qgis::MessageLevel::Critical );
+        emit messageEmitted( tr( "No feature was detected at the clicked position. Please click closer to the feature or enhance the search tolerance under Settings->Options->Digitizing->Search radius for vertex edits" ), Qgis::MessageLevel::Critical );
         return;
       }
 
@@ -730,8 +729,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
   QList<QList<QgsTemplatedLineSymbolLayerBase::BlankSegments>> allBlankSegments = QgsTemplatedLineSymbolLayerBase::parseBlankSegments( currentBlankSegments, context, mSymbolLayer->blankSegmentsUnit(), error );
   if ( !error.isEmpty() )
   {
-    // TODO report error to user
-    QgsDebugError( QStringLiteral( "Error while parsing feature blank segments: %1" ).arg( error ) );
+    emit messageEmitted( tr( "Error while parsing feature blank segments: %1" ).arg( error ), Qgis::MessageLevel::Critical );
     return;
   }
 
@@ -760,9 +758,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
         if ( iPoint == points.count() )
           break;
 
-
         int startIndex = iPoint;
-        // TODO maybe replace difforInterval with a better name
         Line l( points.at( iPoint ), points.at( iPoint - 1 ) );
         QPointF startPt = points.at( iPoint ) + l.diffForInterval( currentLength - ba.first );
 
