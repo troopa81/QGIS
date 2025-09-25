@@ -2013,6 +2013,7 @@ set(QGIS_CORE_HDRS
   stac/qgsstacparser.h
   stac/qgsstacprovider.h
 
+  symbology/line_p.h
   symbology/qgs25drenderer.h
   symbology/qgsarrowsymbollayer.h
   symbology/qgscategorizedsymbolrenderer.h

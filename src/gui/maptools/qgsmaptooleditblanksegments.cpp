@@ -17,8 +17,7 @@
 #include "qgsfeatureid.h"
 #include "qgsmaptooleditblanksegments.h"
 
-#include "qgsmultipolygon.h"
-#include "qgspolygon.h"
+#include "line_p.h"
 #include "qgsmapcanvas.h"
 #include "qgsvectorlayer.h"
 #include "qgslinesymbollayer.h"
@@ -307,8 +306,6 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
         mState = State::BLANK_SEGMENT_SELECTED;
       }
 
-      // mFirstIndex = -1;
-      // mCurrentIndex = -1;
       updateAttribute();
       break;
   }
@@ -643,71 +640,6 @@ void QgsMapToolEditBlankSegmentsBase::updateAttribute()
   }
 }
 
-// TODO put in a private header file
-class MyLine
-{
-  public:
-    MyLine( QPointF p1, QPointF p2 )
-      : mVertical( false )
-      , mIncreasing( false )
-      , mT( 0.0 )
-      , mLength( 0.0 )
-    {
-      if ( p1 == p2 )
-        return; // invalid
-
-      // tangent and direction
-      if ( qgsDoubleNear( p1.x(), p2.x() ) )
-      {
-        // vertical line - tangent undefined
-        mVertical = true;
-        mIncreasing = ( p2.y() > p1.y() );
-      }
-      else
-      {
-        mVertical = false;
-        mT = ( p2.y() - p1.y() ) / ( p2.x() - p1.x() );
-        mIncreasing = ( p2.x() > p1.x() );
-      }
-
-      // length
-      double x = ( p2.x() - p1.x() );
-      double y = ( p2.y() - p1.y() );
-      mLength = std::sqrt( x * x + y * y );
-    }
-
-    // return angle in radians
-    double angle()
-    {
-      double a = ( mVertical ? M_PI_2 : std::atan( mT ) );
-
-      if ( !mIncreasing )
-        a += M_PI;
-      return a;
-    }
-
-    // return difference for x,y when going along the line with specified interval
-    QPointF diffForInterval( double interval )
-    {
-      if ( mVertical )
-        return ( mIncreasing ? QPointF( 0, interval ) : QPointF( 0, -interval ) );
-
-      double alpha = std::atan( mT );
-      double dx = std::cos( alpha ) * interval;
-      double dy = std::sin( alpha ) * interval;
-      return ( mIncreasing ? QPointF( dx, dy ) : QPointF( -dx, -dy ) );
-    }
-
-    double length() const { return mLength; }
-
-  protected:
-    bool mVertical;
-    bool mIncreasing;
-    double mT;
-    double mLength;
-};
-
-
 void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
 {
   mPoints.clear();
@@ -774,7 +706,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
 
         int startIndex = iPoint;
         // TODO maybe replace difforInterval with a better name
-        MyLine l( points.at( iPoint ), points.at( iPoint - 1 ) );
+        Line l( points.at( iPoint ), points.at( iPoint - 1 ) );
         QPointF startPt = points.at( iPoint ) + l.diffForInterval( currentLength - ba.first );
 
         while ( iPoint < points.count() - 1 && currentLength < ba.second )
@@ -787,7 +719,7 @@ void QgsMapToolEditBlankSegmentsBase::loadFeaturePoints()
           break;
 
         int endIndex = iPoint;
-        MyLine l2( points.at( iPoint ), points.at( iPoint - 1 ) );
+        Line l2( points.at( iPoint ), points.at( iPoint - 1 ) );
         QPointF endPt = points.at( iPoint ) + l2.diffForInterval( currentLength - ba.second );
 
         mBlankSegments.emplace_back( new BlankSegment( iPart, iRing, startIndex, endIndex, startPt, endPt, canvas(), mPoints ) );
