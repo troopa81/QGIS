@@ -315,6 +315,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
 
     case State::BLANK_SEGMENT_SELECTED:
     {
+      Q_ASSERT( mCurrentBlankSegmentIndex > -1 && mCurrentBlankSegmentIndex < static_cast<int>( mBlankSegments.size() ) );
       const QObjectUniquePtr<BlankSegment> &currentBlankSegment = mBlankSegments.at( mCurrentBlankSegmentIndex );
 
       // selected blank segment has changed
@@ -348,7 +349,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
     case State::BLANK_SEGMENT_CREATION_STARTED:
 
       // this is a new one
-      if ( mCurrentBlankSegmentIndex == -1 )
+      if ( mCurrentBlankSegmentIndex < 0 )
       {
         mBlankSegments.emplace_back( new BlankSegment( canvas(), mPoints ) );
         mBlankSegments.back()->copyFrom( *mEditedBlankSegment );
@@ -429,19 +430,16 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
 
 const QPointF &pointAt( const QList<QList<QPolygonF>> &points, int partIndex, int ringIndex, int pointIndex )
 {
-  if ( partIndex < 0 || ringIndex < 0 || pointIndex < 0 || partIndex >= points.count() )
-    // TODO rewrite message
-    throw std::invalid_argument( "Invalid part index" );
+  if ( partIndex < 0 || partIndex >= points.count() )
+    throw std::invalid_argument( "Blank segments internal error : Invalid part index" );
 
   const QList<QPolygonF> &rings = points.at( partIndex );
-  if ( ringIndex >= rings.count() )
-    // TODO rewrite message
-    throw std::invalid_argument( "Invalid part index" );
+  if ( ringIndex < 0 || ringIndex >= rings.count() )
+    throw std::invalid_argument( "blank segments internal error : Invalid ring index" );
 
   const QPolygonF &pts = rings.at( ringIndex );
-  if ( pointIndex >= pts.count() )
-    // TODO rewrite message
-    throw std::invalid_argument( "Invalid part index" );
+  if ( pointIndex < 0 || pointIndex >= pts.count() )
+    throw std::invalid_argument( "blank segments internal error : Invalid point index" );
 
   return pts.at( pointIndex );
 }
@@ -484,7 +482,17 @@ int QgsMapToolEditBlankSegmentsBase::getClosestBlankSegmentIndex( const QPointF 
     {
       double d = 0;
       Status status = Status::OK;
-      projectedPoint( blankSegment->pointAt( iPoint - 1 ), blankSegment->pointAt( iPoint ), point, d, status );
+
+      try
+      {
+        projectedPoint( blankSegment->pointAt( iPoint - 1 ), blankSegment->pointAt( iPoint ), point, d, status );
+      }
+      catch ( std::invalid_argument e )
+      {
+        QgsDebugError( e.what() );
+        continue;
+      }
+
       switch ( status )
       {
         case Status::LINE_EMPTY:
@@ -589,7 +597,9 @@ void QgsMapToolEditBlankSegmentsBase::updateHoveredBlankSegment( const QPoint &p
   double distance = -1;
   int iBlankSegment = getClosestBlankSegmentIndex( pos, distance );
 
-  if ( mHoveredBlankSegmentIndex > -1 && mHoveredBlankSegmentIndex != mCurrentBlankSegmentIndex )
+  if ( mHoveredBlankSegmentIndex > -1
+       && mHoveredBlankSegmentIndex < static_cast<int>( mBlankSegments.size() )
+       && mHoveredBlankSegmentIndex != mCurrentBlankSegmentIndex )
   {
     // TODO constant or function for set selected or not
     mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
@@ -600,8 +610,11 @@ void QgsMapToolEditBlankSegmentsBase::updateHoveredBlankSegment( const QPoint &p
   if ( iBlankSegment > -1 && distance < TOLERANCE )
   {
     mHoveredBlankSegmentIndex = iBlankSegment;
-    mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
-    mBlankSegments.at( mHoveredBlankSegmentIndex )->update();
+    if ( mHoveredBlankSegmentIndex < static_cast<int>( mBlankSegments.size() ) )
+    {
+      mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+      mBlankSegments.at( mHoveredBlankSegmentIndex )->update();
+    }
   }
   // no blank segment hovered, display the first point to create a new blank segment
   else
@@ -614,14 +627,15 @@ void QgsMapToolEditBlankSegmentsBase::setCurrentBlankSegment( int currentBlankSe
 {
   // copy current blank segment so we can edit it later (and hide the original one)
 
-  if ( mCurrentBlankSegmentIndex > -1 )
+  if ( mCurrentBlankSegmentIndex > -1
+       && mCurrentBlankSegmentIndex < static_cast<int>( mBlankSegments.size() ) )
   {
     mBlankSegments.at( mCurrentBlankSegmentIndex )->setVisible( true );
     mBlankSegments.at( mCurrentBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
   }
 
   mCurrentBlankSegmentIndex = currentBlankSegmentIndex;
-  if ( mCurrentBlankSegmentIndex > -1 )
+  if ( mCurrentBlankSegmentIndex > -1 && mCurrentBlankSegmentIndex < static_cast<int>( mBlankSegments.size() ) )
   {
     mBlankSegments.at( mCurrentBlankSegmentIndex )->setVisible( false );
     mEditedBlankSegment->copyFrom( *( mBlankSegments.at( mCurrentBlankSegmentIndex ).get() ) );
@@ -661,6 +675,7 @@ void QgsMapToolEditBlankSegmentsBase::updateAttribute()
     catch ( std::invalid_argument e )
     {
       QgsDebugError( e.what() );
+      return;
     }
   }
 
@@ -892,7 +907,6 @@ int QgsMapToolEditBlankSegmentsBase::BlankSegment::pointsCount() const
 
 const QPointF &QgsMapToolEditBlankSegmentsBase::BlankSegment::pointAt( int index ) const
 {
-  // TODO test whether index is valid (and do what if not? see QList?)
   return index == 0 ?
                     // first point
            ( mNeedSwap ? mEndPt : mStartPt )
