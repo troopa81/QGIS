@@ -82,6 +82,7 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
 
         void setPoints( int partIndex, int ringIndex, int startIndex, int endIndex, QPointF startPt, QPointF endPt );
         void copyFrom( const BlankSegment &blankSegment );
+        void setHighlighted( bool highlighted );
 
         const QPointF &getStartPoint() const;
         const QPointF &getEndPoint() const;

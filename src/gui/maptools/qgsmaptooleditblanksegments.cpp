@@ -128,7 +128,7 @@ QgsMapToolEditBlankSegmentsBase::QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *
   initRubberBand( mStartRubberBand );
   initRubberBand( mEndRubberBand );
 
-  mEditedBlankSegment->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
+  mEditedBlankSegment->setHighlighted( true );
 }
 
 QgsMapToolEditBlankSegmentsBase::~QgsMapToolEditBlankSegmentsBase() = default;
@@ -321,7 +321,6 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       // selected blank segment has changed
       if ( mHoveredBlankSegmentIndex > -1 && mHoveredBlankSegmentIndex != mCurrentBlankSegmentIndex )
       {
-        currentBlankSegment->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
         setCurrentBlankSegment( mHoveredBlankSegmentIndex );
       }
       else
@@ -601,9 +600,7 @@ void QgsMapToolEditBlankSegmentsBase::updateHoveredBlankSegment( const QPoint &p
        && mHoveredBlankSegmentIndex < static_cast<int>( mBlankSegments.size() )
        && mHoveredBlankSegmentIndex != mCurrentBlankSegmentIndex )
   {
-    // TODO constant or function for set selected or not
-    mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
-    mBlankSegments.at( mHoveredBlankSegmentIndex )->update();
+    mBlankSegments.at( mHoveredBlankSegmentIndex )->setHighlighted( false );
   }
 
   // blank segment is hovered
@@ -612,8 +609,7 @@ void QgsMapToolEditBlankSegmentsBase::updateHoveredBlankSegment( const QPoint &p
     mHoveredBlankSegmentIndex = iBlankSegment;
     if ( mHoveredBlankSegmentIndex < static_cast<int>( mBlankSegments.size() ) )
     {
-      mBlankSegments.at( mHoveredBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 4 ) );
-      mBlankSegments.at( mHoveredBlankSegmentIndex )->update();
+      mBlankSegments.at( mHoveredBlankSegmentIndex )->setHighlighted( true );
     }
   }
   // no blank segment hovered, display the first point to create a new blank segment
@@ -631,7 +627,7 @@ void QgsMapToolEditBlankSegmentsBase::setCurrentBlankSegment( int currentBlankSe
        && mCurrentBlankSegmentIndex < static_cast<int>( mBlankSegments.size() ) )
   {
     mBlankSegments.at( mCurrentBlankSegmentIndex )->setVisible( true );
-    mBlankSegments.at( mCurrentBlankSegmentIndex )->setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+    mBlankSegments.at( mCurrentBlankSegmentIndex )->setHighlighted( false );
   }
 
   mCurrentBlankSegmentIndex = currentBlankSegmentIndex;
@@ -801,7 +797,7 @@ QgsMapToolEditBlankSegmentsBase::BlankSegment::BlankSegment( QgsMapCanvas *canva
   : QgsRubberBand( canvas )
   , mPoints( points )
 {
-  setWidth( QgsGuiUtils::scaleIconSize( 2 ) );
+  setHighlighted( false );
   setColor( QgsSettingsRegistryCore::settingsDigitizingLineColor->value() );
 }
 
@@ -869,6 +865,13 @@ void QgsMapToolEditBlankSegmentsBase::BlankSegment::copyFrom( const BlankSegment
 {
   setPoints( blankSegment.mPartIndex, blankSegment.mRingIndex, blankSegment.getStartIndex(), blankSegment.getEndIndex(), blankSegment.getStartPoint(), blankSegment.getEndPoint() );
 }
+
+void QgsMapToolEditBlankSegmentsBase::BlankSegment::setHighlighted( bool highlighted )
+{
+  setWidth( QgsGuiUtils::scaleIconSize( highlighted ? 4 : 2 ) );
+  update();
+}
+
 
 const QPointF &QgsMapToolEditBlankSegmentsBase::BlankSegment::getStartPoint() const
 {
