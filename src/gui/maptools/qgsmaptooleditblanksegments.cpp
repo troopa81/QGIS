@@ -369,14 +369,15 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
 
 void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
 {
+  // !!! We need to ignore event instead of accept them if we want to consume them
+  // see QgsMapCanvas::keyPressEvent
+
   switch ( mState )
   {
     case State::SELECT_FEATURE:
       return;
 
     case State::BLANK_SEGMENT_SELECTED:
-      // TODO conflic with QgisApp::mapCanvas_keyPressed even if I switch to !accepted
-      // ( it's not possible anymore to delete a feature )
       if ( e->matches( QKeySequence::Delete ) && mCurrentBlankSegmentIndex > -1 )
       {
         mState = State::FEATURE_SELECTED;
@@ -384,13 +385,13 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
         setCurrentBlankSegment( -1 );
         mBlankSegments.erase( mBlankSegments.begin() + toRemoveIndex );
         updateAttribute();
-        e->accept();
+        e->ignore();
       }
       else if ( e->matches( QKeySequence::Cancel ) )
       {
         mState = State::FEATURE_SELECTED;
         setCurrentBlankSegment( -1 );
-        e->accept();
+        e->ignore();
       }
 
       break;
@@ -401,7 +402,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
         mCurrentFeatureId = FID_NULL;
         mState = State::SELECT_FEATURE;
         loadFeaturePoints();
-        e->accept();
+        e->ignore();
       }
       break;
 
@@ -409,7 +410,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
       if ( e->matches( QKeySequence::Cancel ) )
       {
         mState = State::FEATURE_SELECTED;
-        e->accept();
+        e->ignore();
       }
       break;
 
@@ -419,7 +420,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
         mState = State::BLANK_SEGMENT_SELECTED;
         // force original blank segment
         setCurrentBlankSegment( mCurrentBlankSegmentIndex );
-        e->accept();
+        e->ignore();
       }
       break;
   }
