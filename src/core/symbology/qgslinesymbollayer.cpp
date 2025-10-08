@@ -1439,6 +1439,34 @@ void QgsTemplatedLineSymbolLayerBase::renderPolygonStroke( const QPolygonF &poin
         break;
     }
   }
+
+  QList<std::tuple<double, double, double>> extraItems;
+  if ( mDataDefinedProperties.isActive( QgsSymbolLayer::Property::ExtraItems ) )
+  {
+    const QString strExtraItems = mDataDefinedProperties.valueAsString( QgsSymbolLayer::Property::ExtraItems, context.renderContext().expressionContext() );
+    QString error;
+    extraItems = parseExtraItems( strExtraItems, error );
+
+    if ( !error.isEmpty() )
+    {
+      QgsDebugError( QStringLiteral( "Badly formatted extra items '%1', skip it: %2" ).arg( strExtraItems ).arg( error ) );
+    }
+    else
+    {
+      const QgsMapToPixel &mtp = context.renderContext().mapToPixel();
+      for ( const std::tuple<double, double, double> &extraItem : extraItems )
+      {
+        QPointF mapPoint( std::get<0>( extraItem ), std::get<1>( extraItem ) );
+        mtp.transformInPlace( mapPoint.rx(), mapPoint.ry() );
+
+        // double angle = geom->vertexAngle( vId );
+        setSymbolLineAngle( std::get<2>( extraItem ) * 180 / M_PI );
+
+        renderSymbol( mapPoint, context.feature(), context.renderContext(), -1, shouldRenderUsingSelectionColor( context ) );
+      }
+    }
+  }
+
 }
 
 Qgis::RenderUnit QgsTemplatedLineSymbolLayerBase::outputUnit() const
@@ -2505,6 +2533,170 @@ void QgsTemplatedLineSymbolLayerBase::renderPolylineCentral( const QPolygonF &po
     const bool useSelectedColor = shouldRenderUsingSelectionColor( context );
     renderSymbol( pt, context.feature(), context.renderContext(), -1, useSelectedColor );
   }
+}
+
+// TODO refactor to put some code in common
+QList<std::tuple<double, double, double>> QgsTemplatedLineSymbolLayerBase::parseExtraItems( const QString &strExtraItems, QString &error )
+{
+  QString currentNumber;
+  QList<std::tuple<double, double, double>> extraItems;
+
+  constexpr QStringView internalError = u"Internal error while processing extra items";
+
+  auto appendLevel = [&extraItems, &internalError]( int level )-> QString
+  {
+    if ( level == 0 )
+    {
+      // TODO UGLY, we should do different
+      extraItems.append( std::tuple<double, double, double>( std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() ) );
+    }
+    else
+      return QString( internalError ); // should not happen
+
+    return QString();
+  };
+
+
+  auto addNumber = [&extraItems, &internalError, &currentNumber]( const QChar & c ) -> QString
+
+  {
+    if ( extraItems.isEmpty() )
+    {
+      return QString( internalError ); // should not happen
+    }
+    else if ( ( c == ')' || c == ',' ) && std::get<0>( extraItems.back() ) == std::numeric_limits<double>::max() )
+    {
+      return QStringLiteral( "Missing number" );
+    }
+    // TODO incomplete error management, we don't check y  here
+    else if ( std::get<2>( extraItems.back() ) != std::numeric_limits<double>::max() )
+    {
+      return QStringLiteral( "Too many number" );
+    }
+    else
+    {
+      bool ok;
+      const double number = currentNumber.toDouble( &ok );
+      if ( !ok )
+      {
+        return QStringLiteral( "bad formatted number '%1'" ).arg( currentNumber );
+      }
+      else
+      {
+        // TODO deal with error management
+        std::tuple<double, double, double> &extraItem = extraItems.back();
+        if ( std::get<0>( extraItem ) == std::numeric_limits<double>::max() )
+        {
+          std::get<0>( extraItem ) = number;
+        }
+        else if ( std::get<1>( extraItem ) == std::numeric_limits<double>::max() )
+        {
+          std::get<1>( extraItem ) = number;
+        }
+        else if ( std::get<2>( extraItem ) == std::numeric_limits<double>::max() )
+        {
+          std::get<2>( extraItem ) = number;
+        }
+        else
+        {
+          return QStringLiteral( "Too many number" );
+        }
+
+        currentNumber.clear();
+      }
+    }
+
+    return QString();
+  };
+
+  int level = -1;
+  int iChar = 0;
+  for ( const QChar &c : strExtraItems )
+  {
+    if ( !currentNumber.isEmpty() && ( c.isSpace() || c == ')' || c == "," ) )
+    {
+      if ( level < 0 )
+      {
+        error = QStringLiteral( "Missing '('" );
+      }
+      else
+      {
+        error = addNumber( c );
+      }
+    }
+
+    if ( !error.isEmpty() )
+    {
+      break;
+    }
+
+    if ( c == '(' )
+    {
+      if ( level >= 0 )
+      {
+        error = QStringLiteral( "Extraneous '('" );
+      }
+      else
+      {
+        error = appendLevel( ++level );
+      }
+    }
+    else if ( c == ')' )
+    {
+      if ( level < 0 )
+      {
+        error = QStringLiteral( "Extraneous ')'" );
+      }
+      else
+      {
+        if ( level == 0 && extraItems.back() == std::tuple<double, double, double>( std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() ) )
+        {
+          extraItems.pop_back();
+        }
+        level--;
+      }
+    }
+    else if ( c == ',' )
+    {
+      if ( level == 0 && extraItems.count() == 0 )
+      {
+        error = QStringLiteral( "No elements, Not expecting ','" );
+      }
+      else
+      {
+        error = appendLevel( level );
+      }
+    }
+    else if ( c.isNumber() || c == '.' )
+    {
+      currentNumber.append( c );
+    }
+    else if ( !c.isSpace() )
+    {
+      error = QStringLiteral( "Invalid character '%1'" ).arg( c );
+    }
+
+    if ( !error.isEmpty() )
+    {
+      break;
+    }
+
+    iChar++;
+  }
+
+
+  if ( error.isEmpty() && level != -1 )
+  {
+    error = "Missing ')'";
+  }
+
+  if ( !error.isEmpty() )
+  {
+    extraItems.clear();
+    error += QStringLiteral( " (column: %1)" ).arg( iChar );
+  }
+
+  return extraItems;
 }
 
 QgsSymbol *QgsMarkerLineSymbolLayer::subSymbol()

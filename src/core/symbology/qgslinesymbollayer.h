@@ -833,6 +833,9 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
     void startFeatureRender( const QgsFeature &feature, QgsRenderContext &context ) override;
     void stopFeatureRender( const QgsFeature &feature, QgsRenderContext &context ) override;
 
+    // TODO
+    static QList<std::tuple<double, double, double>> parseExtraItems( const QString &strExtraItems, QString &error ) SIP_SKIP;
+
     /**
      * Copies all common properties of this layer to another templated symbol layer \a destLayer.
      */

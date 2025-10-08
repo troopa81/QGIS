@@ -455,6 +455,7 @@ class GUI_EXPORT QgsShapeburstFillSymbolLayerWidget : public QgsSymbolLayerWidge
 
 class QgsTemplatedLineSymbolLayerBase;
 class QgsMapToolEditBlankSegmentsBase;
+class QgsAddExtraItemMapTool;
 
 /**
  * \ingroup gui
@@ -518,16 +519,21 @@ class GUI_EXPORT QgsTemplatedLineSymbolLayerWidget : public QgsSymbolLayerWidget
     void blankSegmentsUnitChanged();
     void setAverageAngle( double val );
     void toggleMapToolEditBlankSegments( bool toggled );
+    void toggleMapToolAddExtraItem( bool toggled );
 
     void updateBlankSegmentsWidget();
+    void updateExtraItemsWidget();
 
   private:
     // Returns blank segments field index, -1 if no dd property field has been set
     int blankSegmentsFieldIndex() const;
+    // TODO returns -1 if no dd property field has been set
+    int extraItemsFieldIndex() const;
 
     QgsTemplatedLineSymbolLayerBase *mLayer = nullptr;
     TemplatedSymbolType mSymbolType = TemplatedSymbolType::Hash;
     QObjectUniquePtr<QgsMapToolEditBlankSegmentsBase> mMapToolEditBlankSegments;
+    QObjectUniquePtr<QgsAddExtraItemMapTool> mMapToolAddExtraItem;
 };
 
 /**

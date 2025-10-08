@@ -504,6 +504,61 @@
         </item>
        </layout>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="lblExtraItems">
+          <property name="text">
+           <string>Extra items</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mAddExtraItemBtn">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionAdd.svg</normaloff>:/images/themes/default/mActionAdd.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="mSelectExtraItemBtn">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../images/images.qrc">
+            <normaloff>:/images/themes/default/mActionSelect.svg</normaloff>:/images/themes/default/mActionSelect.svg</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QgsPropertyOverrideButton" name="mExtraItemsDDBtn"/>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
