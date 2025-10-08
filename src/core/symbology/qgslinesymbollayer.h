@@ -844,6 +844,9 @@ class CORE_EXPORT QgsTemplatedLineSymbolLayerBase : public QgsLineSymbolLayer
      */
     static QList<QList<BlankSegments>> parseBlankSegments( const QString &strBlankSegments, const QgsRenderContext &renderContext, Qgis::RenderUnit unit, QString &error ) SIP_SKIP;
 
+    // TODO
+    static QList<std::tuple<double, double, double>> parseExtraItems( const QString &strExtraItems, QString &error ) SIP_SKIP;
+
     /**
      * Copies all common properties of this layer to another templated symbol layer.
      */

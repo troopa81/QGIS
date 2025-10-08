@@ -401,6 +401,7 @@ Creates a new QgsMarkerLineSymbolLayerWidget.
   protected:
 
 
+
 };
 
 

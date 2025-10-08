@@ -47,6 +47,9 @@
 #include "qgslinearreferencingsymbollayer.h"
 #include "qgsnumericformatselectorwidget.h"
 #include "qgsmaptooleditblanksegments.h"
+#include "qgsmaptoolcapture.h"
+#include "qgsmapmouseevent.h"
+#include "qgssnappingutils.h"
 
 #include <QAbstractButton>
 #include <QButtonGroup>
@@ -1881,6 +1884,115 @@ void QgsShapeburstFillSymbolLayerWidget::mIgnoreRingsCheckBox_stateChanged( int 
 
 ///////////
 
+class QgsAddExtraItemMapTool : public QgsMapTool
+{
+  public:
+    QgsAddExtraItemMapTool( QgsMapCanvas *canvas, QgsVectorLayer *layer, int extraItemsFieldIndex )
+      : QgsMapTool( canvas )
+      , mLayer( layer )
+      , mExtraItemsFieldIndex( extraItemsFieldIndex )
+    {
+      mToolName = tr( "Extra item add tool" );
+    }
+
+    enum State
+    {
+      SELECT_FEATURE,
+      FEATURE_SELECTED
+    };
+
+    void canvasPressEvent( QgsMapMouseEvent *e ) override
+    {
+      if ( !mLayer || e->button() != Qt::LeftButton )
+        return;
+
+      switch ( mState )
+      {
+        case State::SELECT_FEATURE:
+        {
+          // find the closest feature to the pressed position
+          const QgsPointLocator::Match m = mCanvas->snappingUtils()->snapToCurrentLayer( e->pos(), QgsPointLocator::Area );
+          if ( !m.isValid() )
+          {
+            emit messageEmitted( tr( "No feature was detected at the clicked position. Please click closer to the feature or enhance the search tolerance under Settings->Options->Digitizing->Search radius for vertex edits" ), Qgis::MessageLevel::Critical );
+            return;
+          }
+
+          mFeatureId = m.featureId();
+          loadFeatureExtraItems();
+
+          mState = State::FEATURE_SELECTED;
+          break;
+        }
+
+        case State::FEATURE_SELECTED:
+        {
+          const QgsPointXY layerPoint = toLayerCoordinates( mLayer, e->mapPoint() );
+          mExtraItems << std::tuple<double, double, double>( layerPoint.x(), layerPoint.y(), 0 );
+          updateAttribute();
+          break;
+        }
+      }
+      // TODO shall we accept event ? call parent class ?
+    }
+
+    void loadFeatureExtraItems()
+    {
+      if ( FID_IS_NULL( mFeatureId ) || !mLayer )
+        return;
+
+      QgsFeature feature = mLayer->getFeature( mFeatureId );
+      if ( !feature.isValid() )
+        return;
+
+      QString currentExtraItems = feature.attribute( mExtraItemsFieldIndex ).toString();
+
+      QString error;
+      mExtraItems = QgsTemplatedLineSymbolLayerBase::parseExtraItems( currentExtraItems, error );
+      if ( !error.isEmpty() )
+      {
+        emit messageEmitted( tr( "Error while parsing feature extra items: %1" ).arg( error ), Qgis::MessageLevel::Critical );
+        return;
+      }
+    }
+
+    void updateAttribute()
+    {
+      // TODO commonize code with blank segments
+      QStringList strExtraItems;
+      for ( std::tuple<double, double, double> extraItem : mExtraItems )
+      {
+        strExtraItems << QString::number( std::get<0>( extraItem ) ) + " "
+                           + QString::number( std::get<1>( extraItem ) ) + " "
+                           + QString::number( std::get<2>( extraItem ) );
+      }
+
+      QString strNewExtraItems = "(" + strExtraItems.join( "," ) + ")";
+
+      mLayer->beginEditCommand( tr( "Set extra item list" ) );
+      if ( mLayer->changeAttributeValue( mFeatureId, mExtraItemsFieldIndex, strNewExtraItems ) )
+      {
+        mLayer->endEditCommand();
+        mLayer->triggerRepaint();
+      }
+      else
+      {
+        mLayer->destroyEditCommand();
+      }
+    }
+
+
+  private:
+    QgsVectorLayer *mLayer = nullptr;
+    int mExtraItemsFieldIndex = -1;
+    QgsFeatureId mFeatureId = FID_NULL;
+    State mState = SELECT_FEATURE;
+    QList<std::tuple<double, double, double>> mExtraItems;
+};
+
+///////////
+
+
 QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *vl, QWidget *parent )
   : QgsSymbolLayerWidget( parent, vl )
 {
@@ -1936,6 +2048,7 @@ QgsMarkerLineSymbolLayerWidget::QgsMarkerLineSymbolLayerWidget( QgsVectorLayer *
 
 
   connect( mEditBlankSegmentsBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankSegments );
+  connect( mAddExtraItemBtn, &QToolButton::toggled, this, &QgsMarkerLineSymbolLayerWidget::toggleMapToolAddExtraItem );
 }
 
 QgsMarkerLineSymbolLayerWidget::~QgsMarkerLineSymbolLayerWidget()
@@ -2002,11 +2115,16 @@ void QgsMarkerLineSymbolLayerWidget::setSymbolLayer( QgsSymbolLayer *layer )
   registerDataDefinedButton( mOffsetAlongLineDDBtn, QgsSymbolLayer::Property::OffsetAlongLine );
   registerDataDefinedButton( mAverageAngleDDBtn, QgsSymbolLayer::Property::AverageAngleLength );
   registerDataDefinedButton( mBlankSegmentsDDButton, QgsSymbolLayer::Property::BlankSegments );
+  registerDataDefinedButton( mExtraItemsDDBtn, QgsSymbolLayer::Property::ExtraItems );
 
   connect( mBlankSegmentsDDButton, &QgsPropertyOverrideButton::changed, this, &QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget );
   connect( mBlankSegmentsDDButton, &QgsPropertyOverrideButton::createAuxiliaryField, this, &QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget );
 
+  connect( mExtraItemsDDBtn, &QgsPropertyOverrideButton::changed, this, &QgsMarkerLineSymbolLayerWidget::updateExtraItemsWidget );
+  connect( mExtraItemsDDBtn, &QgsPropertyOverrideButton::createAuxiliaryField, this, &QgsMarkerLineSymbolLayerWidget::updateExtraItemsWidget );
+
   updateBlankSegmentsWidget();
+  updateExtraItemsWidget();
 }
 
 QgsSymbolLayer *QgsMarkerLineSymbolLayerWidget::symbolLayer()
@@ -2166,6 +2284,26 @@ void QgsMarkerLineSymbolLayerWidget::toggleMapToolEditBlankSegments( bool toggle
   }
 }
 
+void QgsMarkerLineSymbolLayerWidget::toggleMapToolAddExtraItem( bool toggled )
+{
+  // TODO not sure this is the best way to deal with this. See also above
+  if ( mMapToolAddExtraItem )
+  {
+    context().mapCanvas()->unsetMapTool( mMapToolAddExtraItem );
+    mMapToolAddExtraItem.reset();
+  }
+
+
+  if ( toggled )
+  {
+    // TODO if context changes, we have to delete/reset the maptool because mapCanvas may have changed
+    mMapToolAddExtraItem.reset( new QgsAddExtraItemMapTool( context().mapCanvas(), vectorLayer(), extraItemsFieldIndex() ) );
+
+    // TODO on destructor remove maptool if set (to check, it looks ok)
+    context().mapCanvas()->setMapTool( mMapToolAddExtraItem );
+  }
+}
+
 void QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget()
 {
   mEditBlankSegmentsBtn->setEnabled( blankSegmentsFieldIndex() > -1 );
@@ -2180,12 +2318,34 @@ void QgsMarkerLineSymbolLayerWidget::updateBlankSegmentsWidget()
 
 int QgsMarkerLineSymbolLayerWidget::blankSegmentsFieldIndex() const
 {
-  const QgsProperty blankSegmentsProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankSegments );
+  const QgsProperty &blankSegmentsProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::BlankSegments );
   return blankSegmentsProperty && blankSegmentsProperty.isActive()
              && blankSegmentsProperty.propertyType() == Qgis::PropertyType::Field
            ? vectorLayer()->fields().indexFromName( blankSegmentsProperty.field() )
            : -1;
 }
+
+void QgsMarkerLineSymbolLayerWidget::updateExtraItemsWidget()
+{
+  mAddExtraItemBtn->setEnabled( extraItemsFieldIndex() > -1 );
+  QString tooltip = tr( "Tool to add extra marker being displayed with the marker line" );
+  if ( !mAddExtraItemBtn->isEnabled() )
+  {
+    tooltip += QStringLiteral( "<br/><br/>" ) + tr( "This tool is disabled because no valid field property has been set" );
+  }
+
+  mAddExtraItemBtn->setToolTip( tooltip );
+}
+
+int QgsMarkerLineSymbolLayerWidget::extraItemsFieldIndex() const
+{
+  const QgsProperty &extraItemsProperty = mLayer->dataDefinedProperties().property( QgsSymbolLayer::Property::ExtraItems );
+  return extraItemsProperty && extraItemsProperty.isActive()
+             && extraItemsProperty.propertyType() == Qgis::PropertyType::Field
+           ? vectorLayer()->fields().indexFromName( extraItemsProperty.field() )
+           : -1;
+}
+
 
 ///////////
 

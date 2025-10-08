@@ -455,6 +455,7 @@ class GUI_EXPORT QgsShapeburstFillSymbolLayerWidget : public QgsSymbolLayerWidge
 #include "ui_widget_markerline.h"
 
 class QgsMarkerLineSymbolLayer;
+class QgsAddExtraItemMapTool;
 
 /**
  * \ingroup gui
@@ -494,7 +495,9 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
   protected:
     QgsMarkerLineSymbolLayer *mLayer = nullptr;
 
+
     QObjectUniquePtr<QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>> mMapToolEditBlankSegments;
+    QObjectUniquePtr<QgsAddExtraItemMapTool> mMapToolAddExtraItem;
 
   private slots:
     void setRotate();
@@ -507,13 +510,16 @@ class GUI_EXPORT QgsMarkerLineSymbolLayerWidget : public QgsSymbolLayerWidget, p
     void blankSegmentsUnitChanged();
     void setAverageAngle( double val );
     void toggleMapToolEditBlankSegments( bool toggled );
+    void toggleMapToolAddExtraItem( bool toggled );
 
-    // TODO
     void updateBlankSegmentsWidget();
+    void updateExtraItemsWidget();
 
   private:
     // TODO returns -1 if no dd property field has been set
     int blankSegmentsFieldIndex() const;
+    // TODO returns -1 if no dd property field has been set
+    int extraItemsFieldIndex() const;
 };
 
 

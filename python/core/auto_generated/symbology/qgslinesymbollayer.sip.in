@@ -993,6 +993,7 @@ Returns the unit for for blank segments start and end distances
 
 
 
+
     void copyTemplateSymbolProperties( QgsTemplatedLineSymbolLayerBase *destLayer ) const;
 %Docstring
 Copies all common properties of this layer to another templated symbol
