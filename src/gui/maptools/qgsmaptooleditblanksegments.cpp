@@ -31,6 +31,7 @@
 #include "qgsguiutils.h"
 #include "qgssnappingutils.h"
 #include "qgsstyleentityvisitor.h"
+#include "qgsstatusbar.h"
 
 constexpr int TOLERANCE = 20;
 
@@ -110,8 +111,9 @@ namespace
 } //namespace
 ///@endcond
 
-QgsMapToolEditBlankSegmentsBase::QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex )
+QgsMapToolEditBlankSegmentsBase::QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *canvas, QgsStatusBar *statusBar, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex )
   : QgsMapTool( canvas )
+  , mStatusBar( statusBar )
   , mLayer( layer )
   , mSymbolLayerId( symbolLayer->id() )
   , mBlankSegmentsFieldIndex( blankSegmentFieldIndex )
@@ -285,7 +287,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       loadFeaturePoints();
       updateHoveredBlankSegment( e->pos() );
 
-      mState = State::FEATURE_SELECTED;
+      setState( State::FEATURE_SELECTED );
       break;
     }
     case State::FEATURE_SELECTED:
@@ -293,13 +295,13 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       // new blank segment selected
       if ( mHoveredBlankSegmentIndex > -1 )
       {
-        mState = State::BLANK_SEGMENT_SELECTED;
+        setState( State::BLANK_SEGMENT_SELECTED );
         setCurrentBlankSegment( mHoveredBlankSegmentIndex );
       }
       // init first point of new blank segment
       else
       {
-        mState = State::BLANK_SEGMENT_CREATION_STARTED;
+        setState( State::BLANK_SEGMENT_CREATION_STARTED );
         double distance = -1;
         int partIndex = -1;
         int pointIndex = -1;
@@ -338,7 +340,7 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
             mEditedBlankSegment->setPoints( currentBlankSegment->getPartIndex(), currentBlankSegment->getRingIndex(), currentBlankSegment->getEndIndex(), currentBlankSegment->getStartIndex(), currentBlankSegment->getEndPoint(), currentBlankSegment->getStartPoint() );
           }
 
-          mState = State::BLANK_SEGMENT_MODIFICATION_STARTED;
+          setState( State::BLANK_SEGMENT_MODIFICATION_STARTED );
         }
       }
     }
@@ -353,14 +355,14 @@ void QgsMapToolEditBlankSegmentsBase::canvasPressEvent( QgsMapMouseEvent *e )
       {
         mBlankSegments.emplace_back( new BlankSegment( canvas(), mPoints ) );
         mBlankSegments.back()->copyFrom( *mEditedBlankSegment );
-        mState = State::FEATURE_SELECTED;
+        setState( State::FEATURE_SELECTED );
       }
       // modify an existing one
       else
       {
         QObjectUniquePtr<BlankSegment> &blankSegment = mBlankSegments.at( mCurrentBlankSegmentIndex );
         blankSegment->copyFrom( *mEditedBlankSegment );
-        mState = State::BLANK_SEGMENT_SELECTED;
+        setState( State::BLANK_SEGMENT_SELECTED );
       }
 
       updateAttribute();
@@ -381,7 +383,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
     case State::BLANK_SEGMENT_SELECTED:
       if ( e->matches( QKeySequence::Delete ) && mCurrentBlankSegmentIndex > -1 )
       {
-        mState = State::FEATURE_SELECTED;
+        setState( State::FEATURE_SELECTED );
         int toRemoveIndex = mCurrentBlankSegmentIndex;
         setCurrentBlankSegment( -1 );
         mBlankSegments.erase( mBlankSegments.begin() + toRemoveIndex );
@@ -390,7 +392,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
       }
       else if ( e->matches( QKeySequence::Cancel ) )
       {
-        mState = State::FEATURE_SELECTED;
+        setState( State::FEATURE_SELECTED );
         setCurrentBlankSegment( -1 );
         e->ignore();
       }
@@ -401,7 +403,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
       if ( e->matches( QKeySequence::Cancel ) )
       {
         mCurrentFeatureId = FID_NULL;
-        mState = State::SELECT_FEATURE;
+        setState( State::SELECT_FEATURE );
         loadFeaturePoints();
         e->ignore();
       }
@@ -410,7 +412,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
     case State::BLANK_SEGMENT_CREATION_STARTED:
       if ( e->matches( QKeySequence::Cancel ) )
       {
-        mState = State::FEATURE_SELECTED;
+        setState( State::FEATURE_SELECTED );
         setCurrentBlankSegment( -1 );
         e->ignore();
       }
@@ -419,7 +421,7 @@ void QgsMapToolEditBlankSegmentsBase::keyPressEvent( QKeyEvent *e )
     case State::BLANK_SEGMENT_MODIFICATION_STARTED:
       if ( e->matches( QKeySequence::Cancel ) )
       {
-        mState = State::BLANK_SEGMENT_SELECTED;
+        setState( State::BLANK_SEGMENT_SELECTED );
         // force original blank segment
         setCurrentBlankSegment( mCurrentBlankSegmentIndex );
         e->ignore();
@@ -644,6 +646,45 @@ void QgsMapToolEditBlankSegmentsBase::setCurrentBlankSegment( int currentBlankSe
   }
 
   updateStartEndRubberBand();
+}
+
+void QgsMapToolEditBlankSegmentsBase::setState( State state )
+{
+  mState = state;
+
+  if ( !mStatusBar )
+    return;
+
+
+  const QString cancelKeySeq = QKeySequence( QKeySequence::Cancel ).toString( QKeySequence::SequenceFormat::NativeText );
+  const QString deleteKeySeq = QKeySequence( QKeySequence::Delete ).toString( QKeySequence::SequenceFormat::NativeText );
+  switch ( mState )
+  {
+    case State::SELECT_FEATURE:
+      mStatusBar->showMessage( tr( "<b>Left Click</b> to select a feature" ) );
+      break;
+
+    case State::FEATURE_SELECTED:
+      mStatusBar->showMessage( tr( "<b>Left Click</b> to create a new blank segment, or select one to modify. <b>%1</b> to unselect the feature" )
+                                 .arg( cancelKeySeq ) );
+      break;
+
+    case State::BLANK_SEGMENT_SELECTED:
+      mStatusBar->showMessage( tr( "<b>Left Click</b> to move blank segment start or end point. <b>%1</b> to unselect the blank segment. <b>%2</b> to delete the blank segment" )
+                                 .arg( cancelKeySeq )
+                                 .arg( deleteKeySeq ) );
+      break;
+
+    case State::BLANK_SEGMENT_MODIFICATION_STARTED:
+      mStatusBar->showMessage( tr( "<b>Left Click</b> to end blank segment modification. <b>%1</b> to cancel the modification." )
+                                 .arg( cancelKeySeq ) );
+      break;
+
+    case State::BLANK_SEGMENT_CREATION_STARTED:
+      mStatusBar->showMessage( tr( "<b>Left Click</b> to end the blank segment creation. <b>%1</b> to cancel the creation" )
+                                 .arg( cancelKeySeq ) );
+      break;
+  }
 }
 
 void QgsMapToolEditBlankSegmentsBase::updateAttribute()

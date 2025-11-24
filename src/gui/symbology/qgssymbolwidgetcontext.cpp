@@ -22,6 +22,7 @@
 QgsSymbolWidgetContext::QgsSymbolWidgetContext( const QgsSymbolWidgetContext &other )
   : mMapCanvas( other.mMapCanvas )
   , mMessageBar( other.mMessageBar )
+  , mStatusBar( other.mStatusBar )
   , mAdditionalScopes( other.mAdditionalScopes )
   , mSymbolType( other.mSymbolType )
 {
@@ -38,6 +39,7 @@ QgsSymbolWidgetContext &QgsSymbolWidgetContext::operator=( const QgsSymbolWidget
 
   mMapCanvas = other.mMapCanvas;
   mMessageBar = other.mMessageBar;
+  mStatusBar = other.mStatusBar;
   mAdditionalScopes = other.mAdditionalScopes;
   mSymbolType = other.mSymbolType;
   if ( other.mExpressionContext )
@@ -69,6 +71,16 @@ void QgsSymbolWidgetContext::setMessageBar( QgsMessageBar *bar )
 QgsMessageBar *QgsSymbolWidgetContext::messageBar() const
 {
   return mMessageBar;
+}
+
+void QgsSymbolWidgetContext::setStatusBar( QgsStatusBar *bar )
+{
+  mStatusBar = bar;
+}
+
+QgsStatusBar *QgsSymbolWidgetContext::statusBar() const
+{
+  return mStatusBar;
 }
 
 void QgsSymbolWidgetContext::setExpressionContext( QgsExpressionContext *context )

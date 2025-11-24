@@ -60,6 +60,25 @@ Returns the message bar associated with the widget.
 .. versionadded:: 3.6
 %End
 
+    void setStatusBar( QgsStatusBar *bar );
+%Docstring
+Sets the status ``bar`` associated with the widget. This allows the
+widget to push status messages to the appropriate status bar.
+
+.. seealso:: :py:func:`statusBar`
+
+.. versionadded:: 4.0
+%End
+
+    QgsStatusBar *statusBar() const;
+%Docstring
+Returns the status bar associated with the widget.
+
+.. seealso:: :py:func:`setStatusBar`
+
+.. versionadded:: 4.0
+%End
+
     void setExpressionContext( QgsExpressionContext *context );
 %Docstring
 Sets the optional expression context used for the widget. This

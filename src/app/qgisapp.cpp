@@ -1348,7 +1348,7 @@ QgisApp::QgisApp( QSplashScreen *splash, AppOptions options, const QString &root
   registerMapLayerPropertiesFactory( new QgsAnnotationLayer3DRendererWidgetFactory( this ) );
 #endif
 
-  mMapStyleWidget = new QgsLayerStylingWidget( mMapCanvas, mInfoBar, mMapLayerPanelFactories );
+  mMapStyleWidget = new QgsLayerStylingWidget( mMapCanvas, mInfoBar, mStatusBar, mMapLayerPanelFactories );
   mMapStylingDock->setWidget( mMapStyleWidget );
   connect( mMapStyleWidget, &QgsLayerStylingWidget::styleChanged, this, &QgisApp::updateLabelToolButtons );
   connect( mMapStyleWidget, &QgsLayerStylingWidget::layerStyleChanged, this, [this]( const QString &styleName ) {

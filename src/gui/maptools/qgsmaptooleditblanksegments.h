@@ -30,6 +30,7 @@ class QgsMapToolBlankSegmentRubberBand;
 class QgsVectorLayer;
 class QgsSymbol;
 class QgsSymbolLayer;
+class QgsStatusBar;
 
 /**
  * \ingroup gui
@@ -46,11 +47,12 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
     /**
      * Constructor
      * \param canvas map canvas where the edit take place
+     * \param statusBar status bar to report edition hints
      * \param layer layer to be edited
      * \param symbolLayer symbol layer affected by the blank segments
      * \param blankSegmentFieldIndex index of the field containing the digitized blank segments
      */
-    QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex );
+    QgsMapToolEditBlankSegmentsBase( QgsMapCanvas *canvas, QgsStatusBar *statusBar, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex );
 
     /**
      * Destructor
@@ -68,6 +70,15 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
     FeaturePoints mPoints;
 
   private:
+    enum State
+    {
+      SELECT_FEATURE,
+      FEATURE_SELECTED,
+      BLANK_SEGMENT_SELECTED,
+      BLANK_SEGMENT_MODIFICATION_STARTED,
+      BLANK_SEGMENT_CREATION_STARTED
+    };
+
     // compute and return current blank segment start and end distance
     QPair<double, double> getStartEndDistance() const;
     void updateAttribute();
@@ -77,10 +88,10 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
 
     int getClosestBlankSegmentIndex( const QPointF &point, double &distance ) const;
     QPointF getClosestPoint( const QPointF &point, double &distance, int &partIndex, int &ringIndex, int &pointIndex ) const;
-
     void updateStartEndRubberBand();
     void updateHoveredBlankSegment( const QPoint &pos );
     void setCurrentBlankSegment( int currentBlankSegmentIndex );
+    void setState( State state );
 
     class BlankSegment : public QgsRubberBand
     {
@@ -117,16 +128,9 @@ class GUI_EXPORT QgsMapToolEditBlankSegmentsBase : public QgsMapTool
         const FeaturePoints &mPoints; //! all feature rendered points
     };
 
-    enum State
-    {
-      SELECT_FEATURE,
-      FEATURE_SELECTED,
-      BLANK_SEGMENT_SELECTED,
-      BLANK_SEGMENT_MODIFICATION_STARTED,
-      BLANK_SEGMENT_CREATION_STARTED
-    };
-
     std::vector<QObjectUniquePtr<BlankSegment>> mBlankSegments;
+    // TODO maybe should be in QgsMapTool
+    QgsStatusBar *mStatusBar = nullptr;
     QgsVectorLayer *mLayer = nullptr;
     std::unique_ptr<QgsSymbol> mSymbol;
     const QString mSymbolLayerId;
@@ -159,8 +163,8 @@ template<class T>
 class GUI_EXPORT QgsMapToolEditBlankSegments : public QgsMapToolEditBlankSegmentsBase
 {
   public:
-    QgsMapToolEditBlankSegments<T>( QgsMapCanvas *canvas, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex )
-      : QgsMapToolEditBlankSegmentsBase( canvas, layer, symbolLayer, blankSegmentFieldIndex )
+    QgsMapToolEditBlankSegments<T>( QgsMapCanvas *canvas, QgsStatusBar *statusBar, QgsVectorLayer *layer, QgsLineSymbolLayer *symbolLayer, int blankSegmentFieldIndex )
+      : QgsMapToolEditBlankSegmentsBase( canvas, statusBar, layer, symbolLayer, blankSegmentFieldIndex )
     {
     }
 

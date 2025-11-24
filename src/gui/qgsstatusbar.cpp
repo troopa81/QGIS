@@ -18,7 +18,7 @@
 #include "qgsstatusbar.h"
 #include "moc_qgsstatusbar.cpp"
 #include <QLayout>
-#include <QLineEdit>
+#include <QLabel>
 #include <QPalette>
 #include <QTimer>
 #include <QEvent>
@@ -31,9 +31,8 @@ QgsStatusBar::QgsStatusBar( QWidget *parent )
   mLayout->setContentsMargins( 2, 0, 2, 0 );
   mLayout->setSpacing( 6 );
 
-  mLineEdit = new QLineEdit( QString() );
+  mLineEdit = new QLabel( QString() );
   mLineEdit->setDisabled( true );
-  mLineEdit->setFrame( false );
   mLineEdit->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Minimum );
   QPalette pal = mLineEdit->palette();
   pal.setColor( QPalette::Disabled, QPalette::Text, palette().color( QPalette::WindowText ) );
@@ -71,7 +70,7 @@ QString QgsStatusBar::currentMessage() const
 void QgsStatusBar::showMessage( const QString &text, int timeout )
 {
   mLineEdit->setText( text );
-  mLineEdit->setCursorPosition( 0 );
+  // mLineEdit->setCursorPosition( 0 );
   if ( timeout > 0 )
   {
     if ( !mTempMessageTimer )

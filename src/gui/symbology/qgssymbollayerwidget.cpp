@@ -2394,11 +2394,11 @@ void QgsTemplatedLineSymbolLayerWidget::toggleMapToolEditBlankSegments( bool tog
     switch ( mSymbolType )
     {
       case TemplatedSymbolType::Hash:
-        mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsHashedLineSymbolLayer>( context().mapCanvas(), vectorLayer(), mLayer, blankSegmentsFieldIndex() ) );
+        mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsHashedLineSymbolLayer>( context().mapCanvas(), context().statusBar(), vectorLayer(), mLayer, blankSegmentsFieldIndex() ) );
         break;
 
       case TemplatedSymbolType::Marker:
-        mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( context().mapCanvas(), vectorLayer(), mLayer, blankSegmentsFieldIndex() ) );
+        mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( context().mapCanvas(), context().statusBar(), vectorLayer(), mLayer, blankSegmentsFieldIndex() ) );
         break;
     }
 

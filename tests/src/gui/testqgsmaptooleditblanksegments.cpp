@@ -95,7 +95,7 @@ void TestQgsMapToolEditBlankSegments::cleanupTestCase()
 
 void TestQgsMapToolEditBlankSegments::init()
 {
-  mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( mCanvas.get(), mLayer.get(), mSymbolLayer, 1 ) );
+  mMapToolEditBlankSegments.reset( new QgsMapToolEditBlankSegments<QgsMarkerLineSymbolLayer>( mCanvas.get(), nullptr, mLayer.get(), mSymbolLayer, 1 ) );
   mCanvas->setMapTool( mMapToolEditBlankSegments );
 }
 

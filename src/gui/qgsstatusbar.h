@@ -23,7 +23,7 @@
 #include <QWidget>
 
 class QHBoxLayout;
-class QLineEdit;
+class QLabel;
 class QStatusBar;
 
 /**
@@ -114,7 +114,7 @@ class GUI_EXPORT QgsStatusBar : public QWidget
 
   private:
     QHBoxLayout *mLayout = nullptr;
-    QLineEdit *mLineEdit = nullptr;
+    QLabel *mLineEdit = nullptr;
     QTimer *mTempMessageTimer = nullptr;
     QStatusBar *mParentStatusBar = nullptr;
     QMetaObject::Connection mShowMessageConnection;

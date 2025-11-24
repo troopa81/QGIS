@@ -54,6 +54,7 @@ class QgsVectorTileBasicRendererWidget;
 class QgsVectorTileBasicLabelingWidget;
 class QgsAnnotationLayer;
 class QgsLayerTreeGroup;
+class QgsStatusBar;
 
 class APP_EXPORT QgsLayerStyleManagerWidgetFactory : public QgsMapLayerConfigWidgetFactory
 {
@@ -105,7 +106,7 @@ class APP_EXPORT QgsLayerStylingWidget : public QWidget, private Ui::QgsLayerSty
       VectorDiagram,         //!< Vector diagram, since QGIS 3.40
     };
 
-    QgsLayerStylingWidget( QgsMapCanvas *canvas, QgsMessageBar *messageBar, const QList<const QgsMapLayerConfigWidgetFactory *> &pages, QWidget *parent = nullptr );
+    QgsLayerStylingWidget( QgsMapCanvas *canvas, QgsMessageBar *messageBar, QgsStatusBar *statusBar, const QList<const QgsMapLayerConfigWidgetFactory *> &pages, QWidget *parent = nullptr );
     ~QgsLayerStylingWidget() override;
     QgsMapLayer *layer() { return mCurrentLayer; }
 
@@ -167,6 +168,7 @@ class APP_EXPORT QgsLayerStylingWidget : public QWidget, private Ui::QgsLayerSty
     QDomNode mLastStyleXml;
     QgsMapCanvas *mMapCanvas = nullptr;
     QgsMessageBar *mMessageBar = nullptr;
+    QgsStatusBar *mStatusBar = nullptr;
     bool mBlockAutoApply;
     QgsUndoWidget *mUndoWidget = nullptr;
     QgsMapLayer *mCurrentLayer = nullptr;

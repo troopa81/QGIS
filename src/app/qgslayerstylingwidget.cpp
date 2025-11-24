@@ -65,12 +65,13 @@
 #endif
 
 
-QgsLayerStylingWidget::QgsLayerStylingWidget( QgsMapCanvas *canvas, QgsMessageBar *messageBar, const QList<const QgsMapLayerConfigWidgetFactory *> &pages, QWidget *parent )
+QgsLayerStylingWidget::QgsLayerStylingWidget( QgsMapCanvas *canvas, QgsMessageBar *messageBar, QgsStatusBar *statusBar, const QList<const QgsMapLayerConfigWidgetFactory *> &pages, QWidget *parent )
   : QWidget( parent )
   , mNotSupportedPage( 0 )
   , mLayerPage( 1 )
   , mMapCanvas( canvas )
   , mMessageBar( messageBar )
+  , mStatusBar( statusBar )
   , mBlockAutoApply( false )
   , mPageFactories( pages )
 {
@@ -530,6 +531,7 @@ void QgsLayerStylingWidget::updateCurrentWidgetLayer()
             QgsSymbolWidgetContext context;
             context.setMapCanvas( mMapCanvas );
             context.setMessageBar( mMessageBar );
+            context.setStatusBar( mStatusBar );
             styleWidget->setContext( context );
             styleWidget->setDockMode( true );
             connect( styleWidget, &QgsRendererPropertiesDialog::widgetChanged, this, &QgsLayerStylingWidget::autoApply );
@@ -644,6 +646,7 @@ void QgsLayerStylingWidget::updateCurrentWidgetLayer()
             QgsSymbolWidgetContext context;
             context.setMapCanvas( mMapCanvas );
             context.setMessageBar( mMessageBar );
+            context.setStatusBar( mStatusBar );
             transwidget->setContext( context );
 
             connect( transwidget, &QgsPanelWidget::widgetChanged, this, &QgsLayerStylingWidget::autoApply );

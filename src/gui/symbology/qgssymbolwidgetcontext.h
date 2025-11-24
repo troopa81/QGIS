@@ -23,6 +23,7 @@
 class QgsMapLayer;
 class QgsMapCanvas;
 class QgsMessageBar;
+class QgsStatusBar;
 
 /**
  * \ingroup gui
@@ -66,6 +67,21 @@ class GUI_EXPORT QgsSymbolWidgetContext // clazy:exclude=rule-of-three
      * \since QGIS 3.6
      */
     QgsMessageBar *messageBar() const;
+
+    /**
+     * Sets the status \a bar associated with the widget. This allows the widget to push status messages
+     * to the appropriate status bar.
+     * \see statusBar()
+     * \since QGIS 4.0
+     */
+    void setStatusBar( QgsStatusBar *bar );
+
+    /**
+     * Returns the status bar associated with the widget.
+     * \see setStatusBar()
+     * \since QGIS 4.0
+     */
+    QgsStatusBar *statusBar() const;
 
     /**
      * Sets the optional expression context used for the widget. This expression context is used for
@@ -125,6 +141,7 @@ class GUI_EXPORT QgsSymbolWidgetContext // clazy:exclude=rule-of-three
   private:
     QgsMapCanvas *mMapCanvas = nullptr;
     QgsMessageBar *mMessageBar = nullptr;
+    QgsStatusBar *mStatusBar = nullptr;
     std::unique_ptr<QgsExpressionContext> mExpressionContext;
     QList<QgsExpressionContextScope> mAdditionalScopes;
     Qgis::SymbolType mSymbolType = Qgis::SymbolType::Hybrid;
