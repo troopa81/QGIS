@@ -174,7 +174,7 @@ class CORE_EXPORT QgsAnnotationLayer : public QgsMapLayer
 
     Qgis::MapLayerProperties properties() const override;
     QgsAnnotationLayer *clone() const override SIP_FACTORY;
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) override SIP_FACTORY;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) override;
     QgsRectangle extent() const override;
     void setTransformContext( const QgsCoordinateTransformContext &context ) override;
     bool readXml( const QDomNode &layerNode, QgsReadWriteContext &context ) override;

@@ -551,7 +551,7 @@ Returns if this layer is read only.
 Synchronises with changes in the datasource
 %End
 
-    virtual QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) = 0 /Factory/;
+    virtual std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) = 0;
 %Docstring
 Returns new instance of :py:class:`QgsMapLayerRenderer` that will be
 used for rendering of given context

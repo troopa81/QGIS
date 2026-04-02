@@ -181,7 +181,7 @@ class CORE_EXPORT QgsMeshLayer : public QgsMapLayer, public QgsAbstractProfileSo
     const QgsMeshDataProvider *dataProvider() const override SIP_SKIP;
     QgsMeshLayer *clone() const override SIP_FACTORY;
     QgsRectangle extent() const override;
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) override SIP_FACTORY;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) override;
     QgsAbstractProfileSource *profileSource() override { return this; }
     QString profileSourceId() const override { return id(); }
     QString profileSourceName() const override { return name(); }

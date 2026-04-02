@@ -79,7 +79,7 @@ Constructor for QgsTiledSceneLayer.
     QString loadDefaultStyle( bool &resultFlag /Out/ ) final;
     virtual QString htmlMetadata() const;
 
-    virtual QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) /Factory/;
+    virtual std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext );
 
     virtual QString loadDefaultMetadata( bool &resultFlag /Out/ );
 

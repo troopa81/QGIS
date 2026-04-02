@@ -558,7 +558,7 @@ class CORE_EXPORT QgsMapLayer : public QObject
     /**
      * Returns new instance of QgsMapLayerRenderer that will be used for rendering of given context
      */
-    virtual QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) = 0 SIP_FACTORY;
+    virtual std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) = 0;
 
     //! Returns the extent of the layer.
     Q_INVOKABLE virtual QgsRectangle extent() const;
