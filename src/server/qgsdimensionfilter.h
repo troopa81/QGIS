@@ -46,7 +46,7 @@ class SERVER_EXPORT QgsDimensionFilter : public QgsFeatureFilterProvider
     using QgsFeatureFilterProvider::filterFeatures;
     void filterFeatures( const QgsVectorLayer *layer, QgsFeatureRequest &filterFeatures ) const override;
     QStringList layerAttributes( const QgsVectorLayer *layer, const QStringList &attributes ) const override;
-    QgsDimensionFilter *clone() const override;
+    std::unique_ptr<QgsFeatureFilterProvider> clone() const override;
 
   private:
     QHash<const QgsVectorLayer *, QStringList> mDimensionFilter;

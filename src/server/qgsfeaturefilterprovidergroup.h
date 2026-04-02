@@ -40,7 +40,7 @@ class SERVER_EXPORT QgsFeatureFilterProviderGroup : public QgsFeatureFilterProvi
     using QgsFeatureFilterProvider::filterFeatures;
     void filterFeatures( const QgsVectorLayer *layer, QgsFeatureRequest &filterFeatures ) const override;
     QStringList layerAttributes( const QgsVectorLayer *layer, const QStringList &attributes ) const override;
-    QgsFeatureFilterProviderGroup *clone() const override SIP_FACTORY;
+    std::unique_ptr<QgsFeatureFilterProvider> clone() const override;
 
     /**
      * Add another filter provider to the group

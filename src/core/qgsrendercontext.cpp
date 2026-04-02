@@ -191,7 +191,7 @@ QgsRenderContext &QgsRenderContext::operator=( const QgsRenderContext &rh )
   mVectorSimplifyMethod = rh.mVectorSimplifyMethod;
   mExpressionContext = rh.mExpressionContext;
   mGeometry = rh.mGeometry;
-  mFeatureFilterProvider.reset( rh.mFeatureFilterProvider ? rh.mFeatureFilterProvider->clone() : nullptr );
+  mFeatureFilterProvider = rh.mFeatureFilterProvider ? rh.mFeatureFilterProvider->clone() : nullptr;
   mSegmentationTolerance = rh.mSegmentationTolerance;
   //****** IMPORTANT! editing this? make sure you update the move assignment operator too! *****
   mSegmentationToleranceType = rh.mSegmentationToleranceType;
@@ -530,14 +530,7 @@ void QgsRenderContext::setUseRenderingOptimization( bool enabled )
 
 void QgsRenderContext::setFeatureFilterProvider( const QgsFeatureFilterProvider *ffp )
 {
-  if ( ffp )
-  {
-    mFeatureFilterProvider.reset( ffp->clone() );
-  }
-  else
-  {
-    mFeatureFilterProvider.reset( nullptr );
-  }
+  mFeatureFilterProvider = ffp ? ffp->clone() : nullptr;
 }
 
 const QgsFeatureFilterProvider *QgsRenderContext::featureFilterProvider() const

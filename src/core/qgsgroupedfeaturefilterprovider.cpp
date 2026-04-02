@@ -80,9 +80,9 @@ QStringList QgsGroupedFeatureFilterProvider::layerAttributes( const QgsVectorLay
   return allowedAttributes;
 }
 
-QgsGroupedFeatureFilterProvider *QgsGroupedFeatureFilterProvider::clone() const
+std::unique_ptr<QgsFeatureFilterProvider> QgsGroupedFeatureFilterProvider::clone() const
 {
-  QgsGroupedFeatureFilterProvider *filter = new QgsGroupedFeatureFilterProvider();
+  auto filter = std::make_unique<QgsGroupedFeatureFilterProvider>();
   filter->mProviders = mProviders;
   return filter;
 }

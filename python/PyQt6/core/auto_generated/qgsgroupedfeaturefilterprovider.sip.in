@@ -36,7 +36,7 @@ Constructor
 
     virtual QStringList layerAttributes( const QgsVectorLayer *layer, const QStringList &attributes ) const;
 
-    virtual QgsGroupedFeatureFilterProvider *clone() const /Factory/;
+    virtual std::unique_ptr<QgsFeatureFilterProvider> clone() const /Factory/;
 
 
     QgsGroupedFeatureFilterProvider &addProvider( const QgsFeatureFilterProvider *provider );
