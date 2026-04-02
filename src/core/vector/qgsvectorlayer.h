@@ -1667,7 +1667,7 @@ class CORE_EXPORT QgsVectorLayer : public QgsMapLayer,
     /**
      * Returns new instance of QgsMapLayerRenderer that will be used for rendering of given context
      */
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) final SIP_FACTORY;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) final;
 
     QgsRectangle extent() const final;
     QgsRectangle sourceExtent() const final;

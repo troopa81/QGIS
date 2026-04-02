@@ -340,7 +340,7 @@ class CORE_EXPORT QgsRasterLayer : public QgsMapLayer, public QgsAbstractProfile
     const QgsRasterDataProvider *dataProvider() const SIP_PYNAME( constDataProvider ) override;
 
     void reload() override;
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) override SIP_FACTORY;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) override;
 
     //! \brief This is an overloaded version of the draw() function that is called by both draw() and thumbnailAsPixmap
     void draw( QPainter *theQPainter, QgsRasterViewPort *myRasterViewPort, const QgsMapToPixel *qgsMapToPixel = nullptr );

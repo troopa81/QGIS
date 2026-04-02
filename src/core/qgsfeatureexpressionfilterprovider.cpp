@@ -41,9 +41,9 @@ QStringList QgsFeatureExpressionFilterProvider::layerAttributes( const QgsVector
   return attributes;
 }
 
-QgsFeatureExpressionFilterProvider *QgsFeatureExpressionFilterProvider::clone() const
+std::unique_ptr<QgsFeatureFilterProvider> QgsFeatureExpressionFilterProvider::clone() const
 {
-  QgsFeatureExpressionFilterProvider *filter = new QgsFeatureExpressionFilterProvider();
+  auto filter = std::make_unique<QgsFeatureExpressionFilterProvider>();
   filter->mFilters = mFilters;
   return filter;
 }

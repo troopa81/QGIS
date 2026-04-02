@@ -37,7 +37,7 @@ QStringList QgsDimensionFilter::layerAttributes( const QgsVectorLayer *layer, co
   return attributes;
 }
 
-QgsDimensionFilter *QgsDimensionFilter::clone() const
+std::unique_ptr<QgsFeatureFilterProvider> QgsDimensionFilter::clone() const
 {
-  return new QgsDimensionFilter( mDimensionFilter );
+  return std::make_unique<QgsDimensionFilter>( mDimensionFilter );
 }

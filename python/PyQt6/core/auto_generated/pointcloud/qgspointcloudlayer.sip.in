@@ -76,7 +76,7 @@ Constructor - creates a point cloud layer
 
     virtual QgsRectangle extent() const;
 
-    virtual QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) /Factory/;
+    virtual std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext );
 
     virtual QgsAbstractProfileSource *profileSource();
     virtual QString profileSourceId() const;

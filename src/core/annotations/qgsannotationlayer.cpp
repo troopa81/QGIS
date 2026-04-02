@@ -330,11 +330,11 @@ QgsAnnotationLayer *QgsAnnotationLayer::clone() const
   return layer.release();
 }
 
-QgsMapLayerRenderer *QgsAnnotationLayer::createMapRenderer( QgsRenderContext &rendererContext )
+std::unique_ptr<QgsMapLayerRenderer> QgsAnnotationLayer::createMapRenderer( QgsRenderContext &rendererContext )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
-  return new QgsAnnotationLayerRenderer( this, rendererContext );
+  return std::make_unique<QgsAnnotationLayerRenderer>( this, rendererContext );
 }
 
 QgsRectangle QgsAnnotationLayer::extent() const

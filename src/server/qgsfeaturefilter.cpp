@@ -36,9 +36,9 @@ QStringList QgsFeatureFilter::layerAttributes( const QgsVectorLayer *, const QSt
   return attributes;
 }
 
-QgsFeatureFilterProvider *QgsFeatureFilter::clone() const
+std::unique_ptr<QgsFeatureFilterProvider> QgsFeatureFilter::clone() const
 {
-  auto result = new QgsFeatureFilter();
+  auto result = std::make_unique<QgsFeatureFilter>();
   result->mFilters = mFilters;
   return result;
 }

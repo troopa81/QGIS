@@ -90,9 +90,9 @@ void QgsAccessControl::filterFeatures( const QgsVectorLayer *layer, QgsFeatureRe
 }
 
 //! Clone the object
-QgsAccessControl *QgsAccessControl::clone() const
+std::unique_ptr<QgsFeatureFilterProvider> QgsAccessControl::clone() const
 {
-  return new QgsAccessControl( *this );
+  return std::make_unique<QgsAccessControl>( *this );
 }
 
 //! Returns an additional subset string (typically SQL) filter

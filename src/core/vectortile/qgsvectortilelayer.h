@@ -132,7 +132,7 @@ class CORE_EXPORT QgsVectorTileLayer : public QgsMapLayer
       QgsVectorTileLayer *clone() const override SIP_FACTORY;
     QgsDataProvider *dataProvider() override;
     const QgsDataProvider *dataProvider() const override SIP_SKIP;
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) override SIP_FACTORY;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) override;
     bool readXml( const QDomNode &layerNode, QgsReadWriteContext &context ) override;
     bool writeXml( QDomNode &layerNode, QDomDocument &doc, const QgsReadWriteContext &context ) const override;
     bool readSymbology( const QDomNode &node, QString &errorMessage, QgsReadWriteContext &context, StyleCategories categories = AllStyleCategories ) override;
