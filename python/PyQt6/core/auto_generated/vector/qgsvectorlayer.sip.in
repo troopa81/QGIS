@@ -1748,7 +1748,7 @@ otherwise.
 Synchronises with changes in the datasource
 %End
 
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) final /Factory/;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) final;
 %Docstring
 Returns new instance of :py:class:`QgsMapLayerRenderer` that will be
 used for rendering of given context

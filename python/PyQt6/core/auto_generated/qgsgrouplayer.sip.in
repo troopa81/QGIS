@@ -55,7 +55,7 @@ The ``options`` argument specifies load-time layer options.
 
       virtual QgsGroupLayer *clone() const /Factory/;
 
-    virtual QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) /Factory/;
+    virtual std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext );
 
     virtual QgsRectangle extent() const;
 

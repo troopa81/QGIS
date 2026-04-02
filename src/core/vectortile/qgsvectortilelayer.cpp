@@ -149,11 +149,11 @@ const QgsDataProvider *QgsVectorTileLayer::dataProvider() const
   return mDataProvider.get();
 }
 
-QgsMapLayerRenderer *QgsVectorTileLayer::createMapRenderer( QgsRenderContext &rendererContext )
+std::unique_ptr<QgsMapLayerRenderer> QgsVectorTileLayer::createMapRenderer( QgsRenderContext &rendererContext )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
-  return new QgsVectorTileLayerRenderer( this, rendererContext );
+  return std::make_unique<QgsVectorTileLayerRenderer>( this, rendererContext );
 }
 
 bool QgsVectorTileLayer::readXml( const QDomNode &layerNode, QgsReadWriteContext &context )
