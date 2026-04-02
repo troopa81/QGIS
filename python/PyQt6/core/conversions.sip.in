@@ -1283,7 +1283,7 @@ template <TYPE>
 
 %If (!MOVABLE_MAPPED_TYPE)
 template <TYPE>
-%MappedType std::unique_ptr<TYPE> /NoRelease,AllowNone,TypeHint="Optional[TYPE]",TypeHintValue="TYPE"/
+%MappedType std::unique_ptr<TYPE> /NoAssignmentOperator,NoCopyCtor,TypeHint="Optional[TYPE]",TypeHintValue="TYPE"/
 {
 %TypeHeaderCode
 #include <memory>
@@ -1295,8 +1295,46 @@ template <TYPE>
 %End
 
 %ConvertToTypeCode
-  // only one way for now...
+  const sipTypeDef *sip_type = sipFindType("TYPE");
+
+  std::cout << "--- TESTA" << std::endl;
+
+  if (sipIsErr == NULL)
+    return sipCanConvertToType(sipPy, sip_type, 0);
+
+  std::cout << "--- TESTB" << std::endl;
+
+  if (sipPy == Py_None)
+    return 1;
+
+  std::cout << "--- TESTC" << std::endl;
+
+  int state;
+  TYPE *type_ = reinterpret_cast<TYPE *>(sipConvertToType(sipPy, sip_type, sipTransferObj, 0, &state, sipIsErr));
+
+  std::cout << "--- TESTD" << std::endl;
+
+   if (*sipIsErr)
+    {
+  std::cout << "--- TESTD1" << std::endl;
+  sipReleaseType(type_, sip_type, state);
+  std::cout << "--- TESTD2" << std::endl;
   return 0;
+    }
+
+  std::cout << "--- TESTE" << std::endl;
+
+  if (*sipIsErr)
+    return 0;
+
+  std::cout << "--- TESTF" << std::endl;
+  sipTransferTo(sipPy, NULL);   // detach from Python GC
+  std::cout << "--- TESTG" << std::endl;
+  *sipCppPtr = new std::unique_ptr<TYPE>(type_);
+
+  std::cout << "--- TESTH" << std::endl;
+
+  return sipGetState(sipTransferObj);
 %End
 };
 %End

@@ -116,14 +116,14 @@ QgsRectangle QgsPointCloudLayer::extent() const
   return mDataProvider->extent();
 }
 
-QgsMapLayerRenderer *QgsPointCloudLayer::createMapRenderer( QgsRenderContext &rendererContext )
+std::unique_ptr<QgsMapLayerRenderer> QgsPointCloudLayer::createMapRenderer( QgsRenderContext &rendererContext )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
   if ( mRenderer->type() != "extent"_L1 )
     loadIndexesForRenderContext( rendererContext );
 
-  return new QgsPointCloudLayerRenderer( this, rendererContext );
+  return std::make_unique<QgsPointCloudLayerRenderer>( this, rendererContext );
 }
 
 QgsAbstractProfileGenerator *QgsPointCloudLayer::createProfileGenerator( const QgsProfileRequest &request )

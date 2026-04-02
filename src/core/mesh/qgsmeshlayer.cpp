@@ -1660,7 +1660,7 @@ void QgsMeshLayer::assignDefaultStyleToDatasetGroup( int groupIndex )
   }
 }
 
-QgsMapLayerRenderer *QgsMeshLayer::createMapRenderer( QgsRenderContext &rendererContext )
+std::unique_ptr<QgsMapLayerRenderer> QgsMeshLayer::createMapRenderer( QgsRenderContext &rendererContext )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
@@ -1674,7 +1674,7 @@ QgsMapLayerRenderer *QgsMeshLayer::createMapRenderer( QgsRenderContext &renderer
   if ( !mRendererCache )
     mRendererCache = std::make_unique<QgsMeshLayerRendererCache>();
 
-  return new QgsMeshLayerRenderer( this, rendererContext );
+  return std::make_unique<QgsMeshLayerRenderer>( this, rendererContext );
 }
 
 QgsMeshDatasetIndex QgsMeshLayer::activeScalarDatasetIndex( QgsRenderContext &rendererContext )

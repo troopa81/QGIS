@@ -205,7 +205,7 @@ class DummyPluginLayer : public QgsPluginLayer
 
     DummyPluginLayer *clone() const override { return new DummyPluginLayer( "dummylayer", "test" ); };
 
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) override
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) override
     {
       Q_UNUSED( rendererContext );
       return nullptr;

@@ -134,11 +134,11 @@ Qgis::MapLayerProperties QgsTiledSceneLayer::properties() const
   return res;
 }
 
-QgsMapLayerRenderer *QgsTiledSceneLayer::createMapRenderer( QgsRenderContext &context )
+std::unique_ptr<QgsMapLayerRenderer> QgsTiledSceneLayer::createMapRenderer( QgsRenderContext &context )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
-  return new QgsTiledSceneLayerRenderer( this, context );
+  return std::make_unique<QgsTiledSceneLayerRenderer>( this, context );
 }
 
 QgsTiledSceneRenderer *QgsTiledSceneLayer::renderer()

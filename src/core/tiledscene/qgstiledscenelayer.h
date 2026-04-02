@@ -112,7 +112,7 @@ class CORE_EXPORT QgsTiledSceneLayer : public QgsMapLayer
     QString decodedSource( const QString &source, const QString &dataProvider, const QgsReadWriteContext &context ) const override;
     QString loadDefaultStyle( bool &resultFlag SIP_OUT ) final;
     QString htmlMetadata() const override;
-    QgsMapLayerRenderer *createMapRenderer( QgsRenderContext &rendererContext ) override SIP_FACTORY;
+    std::unique_ptr<QgsMapLayerRenderer> createMapRenderer( QgsRenderContext &rendererContext ) override;
     QString loadDefaultMetadata( bool &resultFlag SIP_OUT ) override;
     QgsMapLayerElevationProperties *elevationProperties() override;
     Qgis::MapLayerProperties properties() const override;
