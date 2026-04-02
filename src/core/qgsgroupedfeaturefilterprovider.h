@@ -40,7 +40,7 @@ class CORE_EXPORT QgsGroupedFeatureFilterProvider : public QgsFeatureFilterProvi
     Q_DECL_DEPRECATED void filterFeatures( const QgsVectorLayer *layer, QgsFeatureRequest &filterFeatures ) const override SIP_DEPRECATED;
     void filterFeatures( const QString &layerId, QgsFeatureRequest &filterFeatures ) const override;
     QStringList layerAttributes( const QgsVectorLayer *layer, const QStringList &attributes ) const override;
-    QgsGroupedFeatureFilterProvider *clone() const override SIP_FACTORY;
+    std::unique_ptr<QgsFeatureFilterProvider> clone() const override;
 
     /**
      * Add another filter provider to the group

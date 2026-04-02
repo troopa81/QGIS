@@ -433,12 +433,12 @@ void QgsVectorLayer::reload()
   }
 }
 
-QgsMapLayerRenderer *QgsVectorLayer::createMapRenderer( QgsRenderContext &rendererContext )
+std::unique_ptr<QgsMapLayerRenderer> QgsVectorLayer::createMapRenderer( QgsRenderContext &rendererContext )
 {
   // non fatal for now -- the "rasterize" processing algorithm is not thread safe and calls this
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS_NON_FATAL
 
-  return new QgsVectorLayerRenderer( this, rendererContext );
+  return std::make_unique<QgsVectorLayerRenderer>( this, rendererContext );
 }
 
 

@@ -360,11 +360,11 @@ void QgsRasterLayer::reload()
   }
 }
 
-QgsMapLayerRenderer *QgsRasterLayer::createMapRenderer( QgsRenderContext &rendererContext )
+std::unique_ptr<QgsMapLayerRenderer> QgsRasterLayer::createMapRenderer( QgsRenderContext &rendererContext )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
-  return new QgsRasterLayerRenderer( this, rendererContext );
+  return std::make_unique<QgsRasterLayerRenderer>( this, rendererContext );
 }
 
 

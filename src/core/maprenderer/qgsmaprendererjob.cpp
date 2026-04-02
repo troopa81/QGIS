@@ -694,7 +694,7 @@ std::vector<LayerRenderJob> QgsMapRendererJob::prepareJobs( QPainter *painter, Q
 
     QElapsedTimer layerTime;
     layerTime.start();
-    job.renderer.reset( ml->createMapRenderer( *( job.context() ) ) );
+    job.renderer = ml->createMapRenderer( *( job.context() ) );
     if ( job.renderer )
     {
       job.renderer->setLayerRenderingTimeHint( job.estimatedRenderingTime );
@@ -1109,7 +1109,7 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
           // force recreation of layer renderer so it initialize correctly the renderer
           // especially the RasterLayerRender that need logicalDpiX from painting device
           job.context()->setFeedback( nullptr );
-          job.renderer.reset( job.layer->createMapRenderer( *( job.context() ) ) );
+          job.renderer = job.layer->createMapRenderer( *( job.context() ) );
           if ( job.renderer )
           {
             job.context()->setFeedback( job.renderer->feedback() );
@@ -1249,7 +1249,7 @@ std::vector< LayerRenderJob > QgsMapRendererJob::prepareSecondPassJobs( std::vec
     // FIXME: another possibility here, to avoid allocating a new map renderer and reuse the one from
     // the first pass job, would be to be able to call QgsMapLayerRenderer::render() with a QgsRenderContext.
     job2.context()->setFeedback( nullptr );
-    job2.renderer.reset( ml->createMapRenderer( *job2.context() ) );
+    job2.renderer = ml->createMapRenderer( *job2.context() );
     if ( job2.renderer )
     {
       job2.context()->setFeedback( job2.renderer->feedback() );

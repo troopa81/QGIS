@@ -66,11 +66,11 @@ QgsGroupLayer *QgsGroupLayer::clone() const
   return layer.release();
 }
 
-QgsMapLayerRenderer *QgsGroupLayer::createMapRenderer( QgsRenderContext &context )
+std::unique_ptr<QgsMapLayerRenderer> QgsGroupLayer::createMapRenderer( QgsRenderContext &context )
 {
   QGIS_PROTECT_QOBJECT_THREAD_ACCESS
 
-  return new QgsGroupLayerRenderer( this, context );
+  return std::make_unique<QgsGroupLayerRenderer>( this, context );
 }
 
 QgsRectangle QgsGroupLayer::extent() const
