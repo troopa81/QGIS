@@ -22,7 +22,7 @@ A dummy implementation class method which does not compute any breaks.
   public:
     QgsClassificationCustom();
 
-    virtual std::unique_ptr< QgsClassificationMethod > clone() const;
+    virtual std::unique_ptr< QgsClassificationMethod > clone() const /Factory/;
 
     virtual QString name() const;
 

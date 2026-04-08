@@ -155,7 +155,7 @@ if serialization of symbols is not supported for this converter.
                                   serialization of symbols.
 %End
 
-    virtual std::unique_ptr< QgsSymbol > createSymbol( const QVariant &variant, QgsSymbolConverterContext &context ) const = 0;
+    virtual std::unique_ptr< QgsSymbol > createSymbol( const QVariant &variant, QgsSymbolConverterContext &context ) const = 0  /Factory/;
 %Docstring
 Creates a new :py:class:`QgsSymbol` from a QVariant representation.
 

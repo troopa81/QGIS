@@ -26,7 +26,7 @@ A classification method which creates classes based on quantiles.
 
     virtual QString id() const;
 
-    virtual std::unique_ptr< QgsClassificationMethod > clone() const;
+    virtual std::unique_ptr< QgsClassificationMethod > clone() const /Factory/;
 
     virtual QIcon icon() const;
 

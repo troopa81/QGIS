@@ -22,7 +22,7 @@ Implementation of a fixed interval classification.
 %End
   public:
     QgsClassificationFixedInterval();
-    virtual std::unique_ptr< QgsClassificationMethod > clone() const;
+    virtual std::unique_ptr< QgsClassificationMethod > clone() const /Factory/;
 
     virtual QString name() const;
 

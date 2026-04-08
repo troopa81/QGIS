@@ -44,7 +44,7 @@ Resolves the profiles folder for the given path. Path will have
 :return: The root path to store user profiles.
 %End
 
-    std::unique_ptr< QgsUserProfile > getProfile( const QString &defaultProfile = "default", bool createNew = true, bool initSettings = true );
+    std::unique_ptr< QgsUserProfile > getProfile( const QString &defaultProfile = "default", bool createNew = true, bool initSettings = true ) /Factory/;
 %Docstring
 Returns the profile from the given root profile location. If no name is
 given it returns a profile called "default". By default will create the
@@ -172,7 +172,7 @@ Sets the user profile selection policy.
 .. versionadded:: 3.32
 %End
 
-    std::unique_ptr< QgsUserProfile > profileForName( const QString &name ) const;
+    std::unique_ptr< QgsUserProfile > profileForName( const QString &name ) const /Factory/;
 %Docstring
 Returns the profile found for a given name.
 

@@ -45,7 +45,7 @@ The builder is left in its current state.
 .. seealso:: :py:func:`takeGraph`
 %End
 
-    std::unique_ptr< QgsGraph > takeGraph();
+    std::unique_ptr< QgsGraph > takeGraph() /Factory/;
 %Docstring
 Takes the generated graph from the builder, resetting the builder back
 to its initial state ready for additional graph construction.

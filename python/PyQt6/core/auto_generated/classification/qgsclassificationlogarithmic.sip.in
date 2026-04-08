@@ -29,7 +29,7 @@ Implementation of a logarithmic scale method for classification.
     };
 
     QgsClassificationLogarithmic();
-    virtual std::unique_ptr< QgsClassificationMethod > clone() const;
+    virtual std::unique_ptr< QgsClassificationMethod > clone() const /Factory/;
 
     virtual QString name() const;
 

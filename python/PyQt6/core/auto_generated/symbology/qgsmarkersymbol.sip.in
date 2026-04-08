@@ -19,7 +19,7 @@ A marker symbol type, for rendering Point and MultiPoint geometries.
 #include "qgsmarkersymbol.h"
 %End
   public:
-    static std::unique_ptr< QgsMarkerSymbol > createSimple( const QVariantMap &properties );
+    static std::unique_ptr< QgsMarkerSymbol > createSimple( const QVariantMap &properties ) /Factory/;
 %Docstring
 Create a marker symbol with one symbol layer: SimpleMarker with
 specified properties. This is a convenience method for easier creation

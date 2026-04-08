@@ -83,7 +83,7 @@ Converts an ESRI REST geometry ``type`` to a WKB type.
 
     static std::unique_ptr< QgsAbstractGeometry > convertGeometry(
       const QVariantMap &geometry, const QString &esriGeometryType, bool hasM, bool hasZ, bool allowCurves = true, QgsCoordinateReferenceSystem *crs /Out/ = 0
-    );
+    ) /Factory/;
 %Docstring
 Converts an ESRI REST ``geometry`` JSON definition to a
 :py:class:`QgsAbstractGeometry`.
@@ -107,14 +107,14 @@ Converts a spatial reference JSON definition to a
 :py:class:`QgsCoordinateReferenceSystem` value.
 %End
 
-    static std::unique_ptr< QgsSymbol > convertSymbol( const QVariantMap &definition );
+    static std::unique_ptr< QgsSymbol > convertSymbol( const QVariantMap &definition ) /Factory/;
 %Docstring
 Converts a symbol JSON ``definition`` to a :py:class:`QgsSymbol`.
 
 Caller takes ownership of the returned symbol.
 %End
 
-    static std::unique_ptr< QgsFeatureRenderer > convertRenderer( const QVariantMap &rendererData );
+    static std::unique_ptr< QgsFeatureRenderer > convertRenderer( const QVariantMap &rendererData ) /Factory/;
 %Docstring
 Converts renderer JSON ``data`` to an equivalent
 :py:class:`QgsFeatureRenderer`.
@@ -122,7 +122,7 @@ Converts renderer JSON ``data`` to an equivalent
 Caller takes ownership of the returned renderer.
 %End
 
-    static std::unique_ptr< QgsAbstractVectorLayerLabeling > convertLabeling( const QVariantList &data );
+    static std::unique_ptr< QgsAbstractVectorLayerLabeling > convertLabeling( const QVariantList &data ) /Factory/;
 %Docstring
 Converts labeling JSON ``data`` to an equivalent QGIS vector labeling.
 

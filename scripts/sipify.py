@@ -1701,6 +1701,12 @@ def fix_annotations(line):
 
     line = re.sub(r"SIP_FORCE", "", line)
     line = re.sub(r"SIP_DOC_TEMPLATE", "", line)
+
+    # print(f"--- toto={line} return_type={CONTEXT.return_type}")
+    if "std.unique_ptr" in CONTEXT.return_type:
+        # print(f"--- coucou={line}")
+        line = re.sub(r";", " /Factory/;", line)
+
     line = re.sub(r"\s+;$", ";", line)
 
     return line
@@ -3387,6 +3393,8 @@ def process_method_decl():
 
         if CONTEXT.current_method_is_override:
             CONTEXT.overridden_methods[class_name][CONTEXT.current_method_name] = True
+
+    # print(f"--- return_type={CONTEXT.return_type} CONTEXT.current_line={CONTEXT.current_line}")
 
 
 def try_skip_deleted_function():

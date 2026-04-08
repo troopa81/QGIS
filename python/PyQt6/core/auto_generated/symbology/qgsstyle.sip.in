@@ -909,7 +909,7 @@ Returns count of 3D material settings in the style.
 .. versionadded:: 4.2
 %End
 
-    std::unique_ptr< QgsAbstractMaterialSettings > materialSettings( const QString &name ) const;
+    std::unique_ptr< QgsAbstractMaterialSettings > materialSettings( const QString &name ) const /Factory/;
 %Docstring
 Returns a new copy of the 3D material settings with the specified
 ``name``.

@@ -198,7 +198,7 @@ symbol when rendering the legend node.
 .. versionadded:: 3.14
 %End
 
-    static std::unique_ptr< QgsSymbol > legendNodeCustomSymbol( QgsLayerTreeLayer *nodeLayer, int originalIndex );
+    static std::unique_ptr< QgsSymbol > legendNodeCustomSymbol( QgsLayerTreeLayer *nodeLayer, int originalIndex ) /Factory/;
 %Docstring
 Returns the custom legend symbol for the legend node belonging to
 ``nodeLayer`` at the specified ``originalIndex``.

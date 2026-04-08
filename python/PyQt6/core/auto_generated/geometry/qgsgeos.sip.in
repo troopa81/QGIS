@@ -77,7 +77,7 @@ QGIS 4.2).
       const QgsAbstractGeometry *geom, QString *errorMsg = 0, const QgsGeometryParameters &parameters = QgsGeometryParameters(), QgsFeedback *feedback = 0
     ) const;
 
-    std::unique_ptr< QgsAbstractGeometry > clip( const QgsRectangle &rectangle, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > clip( const QgsRectangle &rectangle, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Performs a fast, non-robust intersection between the geometry and a
 ``rectangle``. The returned geometry may be invalid.
@@ -92,7 +92,7 @@ Performs a fast, non-robust intersection between the geometry and a
 
     std::unique_ptr< QgsAbstractGeometry > subdivide(
       int maxNodes, QString *errorMsg /Out/ = 0, const QgsGeometryParameters &parameters = QgsGeometryParameters(), QgsFeedback *feedback = 0
-    ) const;
+    ) const /Factory/;
 %Docstring
 Subdivides the geometry. The returned geometry will be a collection
 containing subdivided parts from the original geometry, where no part
@@ -357,7 +357,7 @@ This method requires a QGIS build based on GEOS 3.7 or later.
 
     std::unique_ptr< QgsAbstractGeometry > singleSidedBuffer(
       double distance, int segments, Qgis::BufferSide side, Qgis::JoinStyle joinStyle, double miterLimit, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0
-    ) const;
+    ) const /Factory/;
 %Docstring
 Returns a single sided buffer for a geometry. The buffer is only applied
 to one side of the geometry.
@@ -377,7 +377,7 @@ to one side of the geometry.
          - errorMsg: descriptive error string if the operation fails
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > maximumInscribedCircle( double tolerance, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > maximumInscribedCircle( double tolerance, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const  /Factory/;
 %Docstring
 Returns the maximum inscribed circle.
 
@@ -457,7 +457,7 @@ This method requires a QGIS build based on GEOS 3.9 or later.
 .. versionadded:: 3.20
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > minimumWidth( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > minimumWidth( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const  /Factory/;
 %Docstring
 Returns a linestring geometry which represents the minimum diameter of
 the geometry.
@@ -513,7 +513,7 @@ This method requires a QGIS build based on GEOS 3.6 or later.
 .. versionadded:: 3.20
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > minimumClearanceLine( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > minimumClearanceLine( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const  /Factory/;
 %Docstring
 Returns a LineString whose endpoints define the minimum clearance of a
 geometry.
@@ -536,7 +536,7 @@ This method requires a QGIS build based on GEOS 3.6 or later.
 .. versionadded:: 3.20
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > node( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > node( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Returns a (Multi)LineString representing the fully noded version of a
 collection of linestrings.
@@ -557,7 +557,7 @@ The input geometry type should be a (Multi)LineString.
 .. versionadded:: 3.20
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > sharedPaths( const QgsAbstractGeometry *other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > sharedPaths( const QgsAbstractGeometry *other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Find paths shared between the two given lineal geometries (this and
 ``other``).
@@ -580,7 +580,7 @@ Returns a GeometryCollection having two elements:
 %End
 
 
-    std::unique_ptr< QgsAbstractGeometry > mergeLines( QString *errorMsg /Out/ = 0, const QgsGeometryParameters &parameters = QgsGeometryParameters(), QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > mergeLines( QString *errorMsg /Out/ = 0, const QgsGeometryParameters &parameters = QgsGeometryParameters(), QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Merges any connected lines in a LineString/MultiLineString geometry and
 converts them to single line strings.
@@ -596,7 +596,7 @@ converts them to single line strings.
            control the mergeLines results (since QGIS 3.44)
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > closestPoint( const QgsGeometry &other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > closestPoint( const QgsGeometry &other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Returns the closest point on the geometry to the other geometry.
 
@@ -610,7 +610,7 @@ Returns the closest point on the geometry to the other geometry.
 .. seealso:: :py:func:`shortestLine`
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > shortestLine( const QgsGeometry &other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > shortestLine( const QgsGeometry &other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Returns the shortest line joining this geometry to the other geometry.
 
@@ -624,7 +624,7 @@ Returns the shortest line joining this geometry to the other geometry.
 .. seealso:: :py:func:`closestPoint`
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > shortestLine( const QgsAbstractGeometry *other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > shortestLine( const QgsAbstractGeometry *other, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Returns the shortest line joining this geometry to the other geometry.
 
@@ -689,7 +689,7 @@ This method is more efficient than creating a temporary
 
     std::unique_ptr< QgsAbstractGeometry > voronoiDiagram(
       const QgsAbstractGeometry *extent = 0, double tolerance = 0.0, bool edgesOnly = false, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0
-    ) const;
+    ) const /Factory/;
 %Docstring
 Creates a Voronoi diagram for the nodes contained within the geometry.
 
@@ -714,7 +714,7 @@ empty geometry will be returned if the diagram could not be calculated.
          - errorMsg: descriptive error string if the operation fails
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > delaunayTriangulation( double tolerance = 0.0, bool edgesOnly = false, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > delaunayTriangulation( double tolerance = 0.0, bool edgesOnly = false, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Returns the Delaunay triangulation for the vertices of the geometry. The
 ``tolerance`` parameter specifies an optional snapping tolerance which
@@ -734,7 +734,7 @@ diagram could not be calculated.
 .. seealso:: :py:func:`constrainedDelaunayTriangulation`
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > constrainedDelaunayTriangulation( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > constrainedDelaunayTriangulation( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const  /Factory/;
 %Docstring
 Returns a constrained Delaunay triangulation for the vertices of the
 geometry.
@@ -758,7 +758,7 @@ This method requires a QGIS build based on GEOS 3.11 or later.
 .. versionadded:: 3.36
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > concaveHull( double targetPercent, bool allowHoles = false, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > concaveHull( double targetPercent, bool allowHoles = false, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const  /Factory/;
 %Docstring
 Returns a possibly concave geometry that encloses the input geometry.
 
@@ -798,7 +798,7 @@ This method requires a QGIS build based on GEOS 3.11 or later.
 %End
 
 
-    std::unique_ptr< QgsAbstractGeometry > simplifyCoverageVW( double tolerance, bool preserveBoundary, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > simplifyCoverageVW( double tolerance, bool preserveBoundary, QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const  /Factory/;
 %Docstring
 Operates on a coverage (represented as a list of polygonal geometry with
 exactly matching edge geometry) to apply a Visvalingam–Whyatt
@@ -834,7 +834,7 @@ This method requires a QGIS build based on GEOS 3.12 or later.
 .. versionadded:: 3.36
 %End
 
-    std::unique_ptr< QgsAbstractGeometry > unionCoverage( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const;
+    std::unique_ptr< QgsAbstractGeometry > unionCoverage( QString *errorMsg /Out/ = 0, QgsFeedback *feedback = 0 ) const /Factory/;
 %Docstring
 Optimized union algorithm for polygonal inputs that are correctly noded
 and do not overlap. It may generate an error (returns ``None``) for

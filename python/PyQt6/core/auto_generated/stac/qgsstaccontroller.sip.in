@@ -32,26 +32,26 @@ Default constructor
 
     ~QgsStacController();
 
-    std::unique_ptr< QgsStacCatalog > openLocalCatalog( const QString &fileName ) const;
+    std::unique_ptr< QgsStacCatalog > openLocalCatalog( const QString &fileName ) const /Factory/;
 %Docstring
 Returns a STAC Catalog by parsing a local file The caller takes
 ownership of the returned catalog
 %End
 
-    std::unique_ptr< QgsStacCollection > openLocalCollection( const QString &fileName ) const;
+    std::unique_ptr< QgsStacCollection > openLocalCollection( const QString &fileName ) const /Factory/;
 %Docstring
 Returns a STAC Collection by parsing a local file The caller takes
 ownership of the returned collection
 %End
 
-    std::unique_ptr< QgsStacItem > openLocalItem( const QString &fileName ) const;
+    std::unique_ptr< QgsStacItem > openLocalItem( const QString &fileName ) const /Factory/;
 %Docstring
 Returns a STAC Item by parsing a local file The caller takes ownership
 of the returned item
 %End
 
 
-    std::unique_ptr< QgsStacItemCollection > fetchItemCollection( const QUrl &url, QString *error = 0 );
+    std::unique_ptr< QgsStacItemCollection > fetchItemCollection( const QUrl &url, QString *error = 0 ) /Factory/;
 %Docstring
 Fetches a feature collection from ``url`` using a blocking network
 request. An optional ``error`` parameter will be populated with any
@@ -59,7 +59,7 @@ network error information. The caller takes ownership of the returned
 feature collection
 %End
 
-    std::unique_ptr< QgsStacCollectionList > fetchCollections( const QUrl &url, QString *error = 0 );
+    std::unique_ptr< QgsStacCollectionList > fetchCollections( const QUrl &url, QString *error = 0 ) /Factory/;
 %Docstring
 Fetches collections from ``url`` using a blocking network request. An
 optional ``error`` parameter will be populated with any network error
@@ -105,7 +105,7 @@ Cancels all pending async requests
 %End
 
 
-    std::unique_ptr< QgsStacItemCollection > takeItemCollection( int requestId );
+    std::unique_ptr< QgsStacItemCollection > takeItemCollection( int requestId ) /Factory/;
 %Docstring
 Returns the feature collection fetched with the specified ``requestId``
 It should be used after the finishedItemCollectionRequest signal is
@@ -119,7 +119,7 @@ feature collection
 .. seealso:: :py:func:`finishedItemCollectionRequest`
 %End
 
-    std::unique_ptr< QgsStacCollectionList > takeCollections( int requestId );
+    std::unique_ptr< QgsStacCollectionList > takeCollections( int requestId ) /Factory/;
 %Docstring
 Returns the collections collection fetched with the specified
 ``requestId`` It should be used after the finishedCollectionsRequest

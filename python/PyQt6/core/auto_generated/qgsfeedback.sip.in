@@ -99,7 +99,7 @@ Sets the current processed objects count for the feedback object. The
 %End
 
     static std::unique_ptr<QgsFeedback> createScaledFeedback(
-      QgsFeedback *parentFeedback, double startPercentage, double endPercentage );
+      QgsFeedback *parentFeedback, double startPercentage, double endPercentage ) /Factory/;
 %Docstring
 Returns a feedback object whose [0, 100] progression range will be
 mapped to ``parentFeedback`` [``startPercentage``, ``endPercentage``].

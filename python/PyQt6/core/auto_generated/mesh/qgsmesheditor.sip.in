@@ -61,7 +61,7 @@ Constructor with a specified layer ``meshLayer``
     ~QgsMeshEditor();
 
 
-    std::unique_ptr< QgsMeshDatasetGroup > createZValueDatasetGroup();
+    std::unique_ptr< QgsMeshDatasetGroup > createZValueDatasetGroup() /Factory/;
 %Docstring
 Creates and returns a scalar dataset group with value on vertex that is
 can be used to access the Z value of the edited mesh. The caller takes
