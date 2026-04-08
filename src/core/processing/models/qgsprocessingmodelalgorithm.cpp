@@ -428,7 +428,9 @@ QVariantMap QgsProcessingModelAlgorithm::processAlgorithm( const QVariantMap &pa
         feedback->pushDebugInfo( QObject::tr( "Prepare algorithm: %1" ).arg( childId ) );
 
       QgsExpressionContext expContext = baseContext;
-      expContext << QgsExpressionContextUtils::processingAlgorithmScope( child.algorithm(), parameters, context ) << createExpressionContextScopeForChildAlgorithm( childId, context, parameters, childResults );
+      expContext
+        << QgsExpressionContextUtils::processingAlgorithmScope( child.algorithm(), parameters, context )
+        << createExpressionContextScopeForChildAlgorithm( childId, context, parameters, childResults ).release();
       context.setExpressionContext( expContext );
 
       QString error;
@@ -1326,7 +1328,7 @@ QMap<QString, QgsProcessingModelAlgorithm::VariableDefinition> QgsProcessingMode
   return variables;
 }
 
-QgsExpressionContextScope *QgsProcessingModelAlgorithm::createExpressionContextScopeForChildAlgorithm(
+std::unique_ptr<QgsExpressionContextScope> QgsProcessingModelAlgorithm::createExpressionContextScopeForChildAlgorithm(
   const QString &childId, QgsProcessingContext &context, const QVariantMap &modelParameters, const QVariantMap &results
 ) const
 {
@@ -1337,7 +1339,7 @@ QgsExpressionContextScope *QgsProcessingModelAlgorithm::createExpressionContextS
   {
     scope->addVariable( QgsExpressionContextScope::StaticVariable( varIt.key(), varIt->value, true, false, varIt->description ) );
   }
-  return scope.release();
+  return scope;
 }
 
 QgsProcessingModelChildParameterSources QgsProcessingModelAlgorithm::availableSourcesForChild( const QString &childId, const QgsProcessingParameterDefinition *param ) const
