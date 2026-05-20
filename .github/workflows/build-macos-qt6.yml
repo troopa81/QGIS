@@ -239,7 +239,7 @@ jobs:
             *.dmg
 
       - name: Upload release assets
-        uses: AButler/upload-release-assets@45be2facf3acc71812c1c17b4cefef5f6e8cac8a  # v3.0.1
+        uses: AButler/upload-release-assets@34491005a5d7ec239a784e460807ce844fde7962  # v4.0.0
         if: ${{ github.event_name == 'release' }}
         with:
           files: '*.dmg'
