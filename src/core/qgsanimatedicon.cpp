@@ -18,6 +18,12 @@
 
 #include "moc_qgsanimatedicon.cpp"
 
+enum BAD_ENUM
+{
+  BAD_VALUE,
+  BAD_OTHER_VALUE
+};
+
 QgsAnimatedIcon::QgsAnimatedIcon( const QString &iconPath, QObject *parent )
   : QObject( parent )
   , mMovie( new QMovie( this ) )
