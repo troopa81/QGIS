@@ -24,6 +24,12 @@ enum BAD_ENUM
   BAD_OTHER_VALUE
 };
 
+enum GoodEnum
+{
+  GoodValue = 1,
+  GoodOtherValue = 2
+};
+
 QgsAnimatedIcon::QgsAnimatedIcon( const QString &iconPath, QObject *parent )
   : QObject( parent )
   , mMovie( new QMovie( this ) )
@@ -34,6 +40,9 @@ QgsAnimatedIcon::QgsAnimatedIcon( const QString &iconPath, QObject *parent )
   }
   mMovie->setCacheMode( QMovie::CacheAll );
   connect( mMovie, &QMovie::frameChanged, this, &QgsAnimatedIcon::onFrameChanged );
+
+  GoodEnum enumVal = static_cast<GoodEnum>( static_cast<int>( GoodValue ) | static_cast<int>( GoodOtherValue ) );
+  qDebug() << enumVal;
 }
 
 QString QgsAnimatedIcon::iconPath() const
