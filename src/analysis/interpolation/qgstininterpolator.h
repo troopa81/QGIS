@@ -54,6 +54,9 @@ class ANALYSIS_EXPORT QgsTinInterpolator : public QgsInterpolator
     );
     ~QgsTinInterpolator() override;
 
+    QgsTinInterpolator( const QgsTinInterpolator &other ) = delete;
+    QgsTinInterpolator &operator=( const QgsTinInterpolator &other ) = delete;
+
     int interpolatePoint( double x, double y, double &result SIP_OUT, QgsFeedback *feedback ) override;
 
     /**
@@ -75,8 +78,12 @@ class ANALYSIS_EXPORT QgsTinInterpolator : public QgsInterpolator
     void setTriangulationSink( QgsFeatureSink *sink );
 
   private:
-    QgsTriangulation *mTriangulation = nullptr;
-    TriangleInterpolator *mTriangleInterpolator = nullptr;
+#ifdef SIP_RUN
+    QgsTinInterpolator( const QgsTinInterpolator &rh );
+#endif
+
+    std::unique_ptr<QgsTriangulation> mTriangulation;
+    std::unique_ptr<TriangleInterpolator> mTriangleInterpolator;
     bool mIsInitialized = false;
     QgsFeedback *mFeedback = nullptr;
 

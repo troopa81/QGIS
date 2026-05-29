@@ -40,10 +40,7 @@ QgsTinInterpolator::QgsTinInterpolator( const QList<LayerData> &inputData, QgsTi
 {}
 
 QgsTinInterpolator::~QgsTinInterpolator()
-{
-  delete mTriangulation;
-  delete mTriangleInterpolator;
-}
+{}
 
 int QgsTinInterpolator::interpolatePoint( double x, double y, double &result, QgsFeedback * )
 {
@@ -81,13 +78,13 @@ void QgsTinInterpolator::initialize()
   QgsDualEdgeTriangulation *dualEdgeTriangulation = new QgsDualEdgeTriangulation( 100000 );
   if ( mInterpolation == QgsTinInterpolator::TinInterpolation::CloughTocher )
   {
-    NormVecDecorator *dec = new NormVecDecorator();
+    auto dec = std::make_unique<NormVecDecorator>();
     dec->addTriangulation( dualEdgeTriangulation );
-    mTriangulation = dec;
+    mTriangulation = std::move( dec );
   }
   else
   {
-    mTriangulation = dualEdgeTriangulation;
+    mTriangulation.reset( dualEdgeTriangulation );
   }
 
   //get number of features if we use a progress bar
@@ -144,19 +141,19 @@ void QgsTinInterpolator::initialize()
 
   if ( mInterpolation == QgsTinInterpolator::TinInterpolation::CloughTocher )
   {
-    NormVecDecorator *dec = dynamic_cast<NormVecDecorator *>( mTriangulation );
+    NormVecDecorator *dec = dynamic_cast<NormVecDecorator *>( mTriangulation.get() );
     if ( dec )
     {
       auto ctInterpolator = std::make_unique<CloughTocherInterpolator>();
       dec->estimateFirstDerivatives( mFeedback );
       ctInterpolator->setTriangulation( dec );
-      mTriangleInterpolator = ctInterpolator.release();
-      dec->setTriangleInterpolator( mTriangleInterpolator );
+      mTriangleInterpolator = std::move( ctInterpolator );
+      dec->setTriangleInterpolator( mTriangleInterpolator.get() );
     }
   }
   else //linear
   {
-    mTriangleInterpolator = new LinTriangleInterpolator( dualEdgeTriangulation );
+    mTriangleInterpolator = std::make_unique<LinTriangleInterpolator>( dualEdgeTriangulation );
   }
   mIsInitialized = true;
 

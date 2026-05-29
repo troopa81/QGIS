@@ -38,6 +38,7 @@ callers must ensure that it exists for the lifetime of this object.
 %End
     ~QgsTinInterpolator();
 
+
     virtual int interpolatePoint( double x, double y, double &result /Out/, QgsFeedback *feedback );
 
 
@@ -61,6 +62,8 @@ matching those returned by
 .. seealso:: :py:func:`triangulationFields`
 %End
 
+  private:
+    QgsTinInterpolator( const QgsTinInterpolator &rh );
 };
 
 /************************************************************************
