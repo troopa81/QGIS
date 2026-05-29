@@ -81,7 +81,7 @@ class ANALYSIS_EXPORT QgsRasterMatrix
      * Returns data array (but not ownership)
      * \note not available in Python bindings
      */
-    double *data() SIP_SKIP { return mData; }
+    double *data() SIP_SKIP { return mData.get(); }
 
     /**
      * Returns data and ownership. Sets data and nrows, ncols of this matrix to 0
@@ -149,7 +149,7 @@ class ANALYSIS_EXPORT QgsRasterMatrix
   private:
     int mColumns = 0;
     int mRows = 0;
-    double *mData = nullptr;
+    std::unique_ptr<double[]> mData;
     double mNodataValue = -1;
 
     //! +,-,*,/,^,<,>,<=,>=,=,!=, and, or
