@@ -76,18 +76,16 @@ const QgsSettingsEntryEnumFlag<QgsMapToolIdentify::IdentifyMode> *QgsMapToolIden
 
 QgsMapToolIdentify::QgsMapToolIdentify( QgsMapCanvas *canvas )
   : QgsMapTool( canvas )
-  , mIdentifyMenu( new QgsIdentifyMenu( mCanvas ) )
+  , mIdentifyMenu( make_qobject_unique<QgsIdentifyMenu>( mCanvas ) )
 {
-  connect( mIdentifyMenu, &QgsIdentifyMenu::messageEmitted, this, &QgsMapTool::messageEmitted );
-  connect( mIdentifyMenu, &QgsIdentifyMenu::messageDiscarded, this, &QgsMapTool::messageDiscarded );
+  connect( mIdentifyMenu.get(), &QgsIdentifyMenu::messageEmitted, this, &QgsMapTool::messageEmitted );
+  connect( mIdentifyMenu.get(), &QgsIdentifyMenu::messageDiscarded, this, &QgsMapTool::messageDiscarded );
 
   setCursor( QgsApplication::getThemeCursor( QgsApplication::Cursor::Identify ) );
 }
 
 QgsMapToolIdentify::~QgsMapToolIdentify()
-{
-  delete mIdentifyMenu;
-}
+{}
 
 void QgsMapToolIdentify::canvasMoveEvent( QgsMapMouseEvent *e )
 {
@@ -1527,6 +1525,11 @@ void QgsMapToolIdentify::formatChanged( QgsRasterLayer *layer )
   {
     emit changedRasterResults( results );
   }
+}
+
+QgsIdentifyMenu *QgsMapToolIdentify::identifyMenu()
+{
+  return mIdentifyMenu.get();
 }
 
 void QgsMapToolIdentify::fromPointCloudIdentificationToIdentifyResults( QgsPointCloudLayer *layer, const QVector<QVariantMap> &identified, QList<QgsMapToolIdentify::IdentifyResult> &results )

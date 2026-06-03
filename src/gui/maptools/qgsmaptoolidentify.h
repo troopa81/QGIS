@@ -22,6 +22,7 @@
 #include "qgsidentifycontext.h"
 #include "qgsmaptool.h"
 #include "qgspointxy.h"
+#include "qobjectuniqueptr.h"
 
 #include <QObject>
 #include <QPointer>
@@ -172,7 +173,7 @@ class GUI_EXPORT QgsMapToolIdentify : public QgsMapTool
      * Returns a pointer to the identify menu which will be used in layer selection mode
      * this menu can also be customized
      */
-    QgsIdentifyMenu *identifyMenu() { return mIdentifyMenu; }
+    QgsIdentifyMenu *identifyMenu();
 
     /**
      * Converts point cloud identification results from variant maps to QgsMapToolIdentify::IdentifyResult and apply some formatting
@@ -231,7 +232,7 @@ class GUI_EXPORT QgsMapToolIdentify : public QgsMapTool
       int x, int y, IdentifyMode mode, const QList<QgsMapLayer *> &layerList, LayerType layerType = AllLayers, const QgsIdentifyContext &identifyContext = QgsIdentifyContext()
     );
 
-    QgsIdentifyMenu *mIdentifyMenu = nullptr;
+    QObjectUniquePtr<QgsIdentifyMenu> mIdentifyMenu;
 
     //! Call the right method depending on layer type
     bool identifyLayer(
