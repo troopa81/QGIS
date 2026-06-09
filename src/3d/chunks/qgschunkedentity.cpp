@@ -222,6 +222,8 @@ void QgsChunkedEntity::handleSceneUpdate( const SceneContext &sceneContext )
   if ( pendingJobsCount() != oldJobsCount )
     emit pendingJobsCountChanged();
 
+// test
+#ifdef QGISDEBUG
   QgsDebugMsgLevel(
     u"update: active %1 enabled %2 disabled %3 | culled %4 | loading %5 loaded %6 | unloaded %7 elapsed %8ms"_s.arg( mActiveNodes.count() )
       .arg( enabled )
@@ -233,6 +235,7 @@ void QgsChunkedEntity::handleSceneUpdate( const SceneContext &sceneContext )
       .arg( t.elapsed() ),
     2
   );
+#endif
 }
 
 
