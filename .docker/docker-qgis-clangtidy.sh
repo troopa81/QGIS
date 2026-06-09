@@ -29,6 +29,12 @@ echo "::group::Install clang tidy"
 apt install -y clang-tidy
 echo "::endgroup::"
 
+# We need intermediate targets object *.o files to properly ran clang-tidy (for instance, clang-tidy
+# need to know all required include paths for each cpp file). Those targets don't exists with
+# unity build.
+echo "${bold}Disable unity build...${endbold}"
+cmake . -B ${CTEST_BUILD_DIR} -DENABLE_UNITY_BUILDS=OFF
+
 # Make the clang-tidy report warnings as errors
 # TODO We are currently using clang 20. When switching to clang 21, we could
 # directly add this option to clang-tidy-diff call

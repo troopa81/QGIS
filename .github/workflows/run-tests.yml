@@ -218,7 +218,7 @@ jobs:
       - name: Push artifact
         id: push_artifact
         if: ${{ matrix.run-tests }}
-        run: tar --exclude='*.o' -cvzf build.tgz build src .docker .clang-tidy external pr.diff
+        run: tar --exclude='*.o' -cvzf build.tgz .* *
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ matrix.run-tests }}
@@ -334,11 +334,6 @@ jobs:
           large-packages: false
           docker-images: false
           swap-storage: true
-
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
 
       - name: Set vars
         env:
