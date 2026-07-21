@@ -645,7 +645,7 @@ void QgsWmsRenderContext::searchLayersToRenderStyle()
       for ( QgsMapLayer *layer : mLayerGroups[nickname] )
       {
         const QString nickname = layerNickname( *layer );
-        if ( !style.isEmpty() )
+        if ( !style.isEmpty() && style != "default" )
         {
           mStyles[nickname] = style;
         }
