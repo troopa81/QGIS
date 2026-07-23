@@ -212,7 +212,7 @@ static void tune_areas( EFFECTIVE_AREAS *ea, int avoid_collaps, int set_area, do
   // Add all keys (index in initial_arealist) into minheap array
   for ( i = 0; i < npoints; i++ )
   {
-    tree.key_array[i] = ea->initial_arealist + i;
+    tree.key_array[i] = ea->initial_arealist.data() + i;
     //LWDEBUGF( 2, "add nr %d, with area %lf, and %lf", i, ea->initial_arealist[i].area, tree.key_array[i]->area );
   }
   tree.usedSize = npoints;
@@ -232,7 +232,7 @@ static void tune_areas( EFFECTIVE_AREAS *ea, int avoid_collaps, int set_area, do
   while ( go_on )
   {
     // Get a reference to the point with the currently smallest effective area
-    current = minheap_pop( &tree, ea->initial_arealist ) - ea->initial_arealist;
+    current = minheap_pop( &tree, ea->initial_arealist.data() ) - ea->initial_arealist.data();
 
     // We have found the smallest area. That is the resulting effective area for the "current" point
     if ( i < npoints - avoid_collaps )
@@ -270,7 +270,7 @@ static void tune_areas( EFFECTIVE_AREAS *ea, int avoid_collaps, int set_area, do
         area = triarea2d( P1, P2, P3 );
 
       ea->initial_arealist[before_current].area = FP_MAX( area, ea->res_arealist[current] );
-      minheap_update( &tree, ea->initial_arealist, ea->initial_arealist[before_current].treeindex );
+      minheap_update( &tree, ea->initial_arealist.data(), ea->initial_arealist[before_current].treeindex );
     }
     if ( after_current < npoints - 1 ) // Check if point after current point is the last in the point array.
     {
@@ -284,7 +284,7 @@ static void tune_areas( EFFECTIVE_AREAS *ea, int avoid_collaps, int set_area, do
         area = triarea2d( P1, P2, P3 );
 
       ea->initial_arealist[after_current].area = FP_MAX( area, ea->res_arealist[current] );
-      minheap_update( &tree, ea->initial_arealist, ea->initial_arealist[after_current].treeindex );
+      minheap_update( &tree, ea->initial_arealist.data(), ea->initial_arealist[after_current].treeindex );
     }
 
     // rearrange the nodes so the eliminated point will be ignored on the next run

@@ -425,8 +425,6 @@ QgsGmlStreamingParser::~QgsGmlStreamingParser()
   {
     delete featPair.first;
   }
-
-  delete mCurrentFeature;
 }
 
 bool QgsGmlStreamingParser::processData( const QByteArray &data, bool atEnd )
@@ -653,7 +651,7 @@ void QgsGmlStreamingParser::startElement( const XML_Char *el, const XML_Char **a
   else if ( parseMode == None && !mTypeNamePtr && LOCALNAME_EQUALS( "Tuple" ) )
   {
     Q_ASSERT( !mCurrentFeature );
-    mCurrentFeature = new QgsFeature( mFeatureCount );
+    mCurrentFeature = std::make_unique<QgsFeature>( mFeatureCount );
     mCurrentFeature->setFields( mFields );                        // allow name-based attribute lookups
     const QgsAttributes attributes( mThematicAttributes.size() ); //add empty attributes
     mCurrentFeature->setAttributes( attributes );
@@ -706,7 +704,7 @@ void QgsGmlStreamingParser::startElement( const XML_Char *el, const XML_Char **a
   else if ( parseMode == None && localNameLen == static_cast<int>( mTypeNameUTF8Len ) && mTypeNamePtr && memcmp( pszLocalName, mTypeNamePtr, mTypeNameUTF8Len ) == 0 )
   {
     Q_ASSERT( !mCurrentFeature );
-    mCurrentFeature = new QgsFeature( mFeatureCount );
+    mCurrentFeature = std::make_unique<QgsFeature>( mFeatureCount );
     mCurrentFeature->setFields( mFields );                        // allow name-based attribute lookups
     const QgsAttributes attributes( mThematicAttributes.size() ); //add empty attributes
     mCurrentFeature->setAttributes( attributes );
@@ -1208,9 +1206,7 @@ void QgsGmlStreamingParser::endElement( const XML_Char *el )
     }
     mMapFieldNameToJSONContent.clear();
 
-    mFeatureList.push_back( QgsGmlFeaturePtrGmlIdPair( mCurrentFeature, mCurrentFeatureId ) );
-
-    mCurrentFeature = nullptr;
+    mFeatureList.push_back( QgsGmlFeaturePtrGmlIdPair( mCurrentFeature.release(), mCurrentFeatureId ) );
     ++mFeatureCount;
     mParseModeStack.pop();
   }

@@ -23,6 +23,7 @@ QgsPluginLayer::QgsPluginLayer( const QString &layerType, const QString &layerNa
   , mPluginLayerType( layerType )
 {
   mDataProvider = new QgsPluginLayerDataProvider( layerType, QgsDataProvider::ProviderOptions(), Qgis::DataProviderReadFlags() );
+  mDataProvider->setParent( this );
 }
 
 QgsPluginLayer::~QgsPluginLayer()
@@ -30,7 +31,6 @@ QgsPluginLayer::~QgsPluginLayer()
   // TODO: shall we move the responsibility of emitting the signal to plugin
   // layer implementations before they start doing their part of cleanup...?
   emit willBeDeleted();
-  delete mDataProvider;
 }
 
 QString QgsPluginLayer::pluginLayerType() const

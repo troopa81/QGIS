@@ -152,7 +152,7 @@ class CORE_EXPORT QgsCurveTransform
 
     QList< QgsPointXY > mControlPoints;
 
-    double *mSecondDerivativeArray = nullptr;
+    std::vector<double> mSecondDerivativeArray;
 };
 
 

@@ -167,7 +167,7 @@ class QgsFeatureIteratorDataStream : public IDataStream
       readNextEntry();
     }
 
-    ~QgsFeatureIteratorDataStream() override { delete mNextData; }
+    ~QgsFeatureIteratorDataStream() override {}
 
     //! returns a pointer to the next entry in the stream or 0 at the end of the stream.
     IData *getNext() override
@@ -175,14 +175,13 @@ class QgsFeatureIteratorDataStream : public IDataStream
       if ( mFeedback && mFeedback->isCanceled() )
         return nullptr;
 
-      RTree::Data *ret = mNextData;
-      mNextData = nullptr;
+      RTree::Data *ret = mNextData.release();
       readNextEntry();
       return ret;
     }
 
     //! returns true if there are more items in the stream.
-    bool hasNext() override { return nullptr != mNextData; }
+    bool hasNext() override { return nullptr != mNextData.get(); }
 
     //! returns the total number of entries available in the stream.
     uint32_t size() override
@@ -209,13 +208,13 @@ class QgsFeatureIteratorDataStream : public IDataStream
           const bool res = ( *mCallback )( f );
           if ( !res )
           {
-            mNextData = nullptr;
+            mNextData.reset();
             return;
           }
         }
         if ( QgsSpatialIndex::featureInfo( f, r, id ) )
         {
-          mNextData = new RTree::Data( 0, nullptr, r, id );
+          mNextData = std::make_unique<RTree::Data>( 0, nullptr, r, id );
           if ( mFlags & QgsSpatialIndex::FlagStoreFeatureGeometries )
             geometries.insert( f.id(), f.geometry() );
           return;
@@ -225,7 +224,7 @@ class QgsFeatureIteratorDataStream : public IDataStream
 
   private:
     QgsFeatureIterator mFi;
-    RTree::Data *mNextData = nullptr;
+    std::unique_ptr<RTree::Data> mNextData;
     QgsFeedback *mFeedback = nullptr;
     QgsSpatialIndex::Flags mFlags = QgsSpatialIndex::Flags();
     const std::function< bool( const QgsFeature & ) > *mCallback = nullptr;

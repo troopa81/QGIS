@@ -75,18 +75,18 @@ struct EFFECTIVE_AREAS
       : is3d( curve.is3D() )
     {
       curve.points( inpts );
-      initial_arealist = new areanode[inpts.size()];
+      initial_arealist.resize( inpts.size() );
       res_arealist.resize( inpts.size() );
     }
 
-    ~EFFECTIVE_AREAS() { delete[] initial_arealist; }
+    ~EFFECTIVE_AREAS() {}
 
     EFFECTIVE_AREAS( const EFFECTIVE_AREAS &other ) = delete;
     EFFECTIVE_AREAS &operator=( const EFFECTIVE_AREAS &other ) = delete;
 
     bool is3d;
     QgsPointSequence inpts;
-    areanode *initial_arealist = nullptr;
+    std::vector<areanode> initial_arealist;
     std::vector<double> res_arealist;
 };
 

@@ -393,7 +393,7 @@ class QgsTaskRunnableWrapper : public QRunnable
 QgsTaskManager::QgsTaskManager( QObject *parent )
   : QObject( parent )
   , mThreadPool( new QThreadPool( this ) )
-  , mTaskMutex( new QRecursiveMutex() )
+  , mTaskMutex( std::make_unique<QRecursiveMutex>() )
 {}
 
 QgsTaskManager::~QgsTaskManager()
@@ -412,7 +412,7 @@ QgsTaskManager::~QgsTaskManager()
     cleanupAndDeleteTask( it.value().task );
   }
 
-  delete mTaskMutex;
+
   mThreadPool->waitForDone();
 }
 
@@ -529,7 +529,7 @@ long QgsTaskManager::addTaskPrivate( QgsTask *task, QgsTaskList dependencies, bo
 
 QgsTask *QgsTaskManager::task( long id ) const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   QgsTask *t = nullptr;
   if ( mTasks.contains( id ) )
     t = mTasks.value( id ).task;
@@ -538,13 +538,13 @@ QgsTask *QgsTaskManager::task( long id ) const
 
 QList<QgsTask *> QgsTaskManager::tasks() const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   return QList<QgsTask *>( mParentTasks.begin(), mParentTasks.end() );
 }
 
 int QgsTaskManager::count() const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   return mParentTasks.count();
 }
 
@@ -553,7 +553,7 @@ long QgsTaskManager::taskId( QgsTask *task ) const
   if ( !task )
     return -1;
 
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   const auto iter = mMapTaskPtrToId.constFind( task );
   if ( iter != mMapTaskPtrToId.constEnd() )
     return *iter;
@@ -657,13 +657,13 @@ bool QgsTaskManager::hasCircularDependencies( long taskId ) const
 
 QList<QgsMapLayer *> QgsTaskManager::dependentLayers( long taskId ) const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   return _qgis_listQPointerToRaw( mLayerDependencies.value( taskId, QgsWeakMapLayerPointerList() ) );
 }
 
 QList<QgsTask *> QgsTaskManager::tasksDependentOnLayer( QgsMapLayer *layer ) const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   QList< QgsTask * > tasks;
   QMap< long, QgsWeakMapLayerPointerList >::const_iterator layerIt = mLayerDependencies.constBegin();
   for ( ; layerIt != mLayerDependencies.constEnd(); ++layerIt )
@@ -680,7 +680,7 @@ QList<QgsTask *> QgsTaskManager::tasksDependentOnLayer( QgsMapLayer *layer ) con
 
 QList<QgsTask *> QgsTaskManager::activeTasks() const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   QSet< QgsTask * > activeTasks = mActiveTasks;
   activeTasks.intersect( mParentTasks );
   return QList<QgsTask *>( activeTasks.constBegin(), activeTasks.constEnd() );
@@ -688,7 +688,7 @@ QList<QgsTask *> QgsTaskManager::activeTasks() const
 
 int QgsTaskManager::countActiveTasks( bool includeHidden ) const
 {
-  QMutexLocker ml( mTaskMutex );
+  QMutexLocker ml( mTaskMutex.get() );
   QSet< QgsTask * > tasks = mActiveTasks;
 
   if ( !includeHidden )

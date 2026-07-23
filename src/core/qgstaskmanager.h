@@ -603,7 +603,7 @@ class CORE_EXPORT QgsTaskManager : public QObject
 
     bool mInitialized = false;
 
-    mutable QRecursiveMutex *mTaskMutex;
+    std::unique_ptr<QRecursiveMutex> mTaskMutex;
 
     QMap< long, TaskInfo > mTasks;
     QMap< QgsTask *, long> mMapTaskPtrToId;

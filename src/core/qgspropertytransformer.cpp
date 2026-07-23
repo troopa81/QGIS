@@ -675,34 +675,11 @@ QgsCurveTransform::QgsCurveTransform( const QList<QgsPointXY> &controlPoints )
 }
 
 QgsCurveTransform::~QgsCurveTransform()
-{
-  delete[] mSecondDerivativeArray;
-}
+{}
 
-QgsCurveTransform::QgsCurveTransform( const QgsCurveTransform &other )
-  : mControlPoints( other.mControlPoints )
-{
-  if ( other.mSecondDerivativeArray )
-  {
-    mSecondDerivativeArray = new double[mControlPoints.count()];
-    memcpy( mSecondDerivativeArray, other.mSecondDerivativeArray, sizeof( double ) * mControlPoints.count() );
-  }
-}
+QgsCurveTransform::QgsCurveTransform( const QgsCurveTransform &other ) = default;
 
-QgsCurveTransform &QgsCurveTransform::operator=( const QgsCurveTransform &other )
-{
-  if ( this != &other )
-  {
-    mControlPoints = other.mControlPoints;
-    if ( other.mSecondDerivativeArray )
-    {
-      delete[] mSecondDerivativeArray;
-      mSecondDerivativeArray = new double[mControlPoints.count()];
-      memcpy( mSecondDerivativeArray, other.mSecondDerivativeArray, sizeof( double ) * mControlPoints.count() );
-    }
-  }
-  return *this;
-}
+QgsCurveTransform &QgsCurveTransform::operator=( const QgsCurveTransform &other ) = default;
 
 void QgsCurveTransform::setControlPoints( const QList<QgsPointXY> &points )
 {
@@ -972,7 +949,7 @@ void QgsCurveTransform::calcSecondDerivativeArray()
   if ( n < 3 )
     return; // cannot proceed
 
-  delete[] mSecondDerivativeArray;
+  mSecondDerivativeArray.resize( n );
 
   double *matrix = new double[n * 3];
   double *result = new double[n];
@@ -1026,7 +1003,7 @@ void QgsCurveTransform::calcSecondDerivativeArray()
   }
 
   // return second derivative value for each point
-  mSecondDerivativeArray = new double[n];
+
   for ( int i = 0; i < n; ++i )
   {
     mSecondDerivativeArray[i] = result[i] / matrix[( i * 3 ) + 1];
