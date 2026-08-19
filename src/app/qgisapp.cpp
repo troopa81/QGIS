@@ -12456,7 +12456,6 @@ void QgisApp::legendGroupSetWmsData()
     QgsProject::instance()->setDirty( true );
 
     dlg.serverProperties()->copyTo( currentGroup->serverProperties() );
-    currentGroup->setHasWmsTimeDimension( dlg.hasTimeDimension() );
     currentGroup->setWmsGroupRequestMode( dlg.groupRequestMode() );
   }
 }
