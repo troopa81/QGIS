@@ -1299,7 +1299,7 @@ namespace QgsWms
                 break;
 
               case Qgis::WmsDimensionDefaultDisplay::ReferenceValue:
-                defaultDateTime = it->referenceValue.toDateTime();
+                defaultDateTime = it->getReferenceValue().toDateTime();
                 break;
 
               case Qgis::WmsDimensionDefaultDisplay::AllValues:
@@ -1443,7 +1443,7 @@ namespace QgsWms
               }
               else if ( dim.defaultDisplayType == Qgis::WmsDimensionDefaultDisplay::ReferenceValue )
               {
-                dimElem.setAttribute( u"default"_s, dim.referenceValue.toString() );
+                dimElem.setAttribute( u"default"_s, dim.referenceValue().toString() );
               }
               dimElem.setAttribute( u"multipleValues"_s, u"1"_s );
               dimElem.setAttribute( u"nearestValue"_s, u"0"_s );

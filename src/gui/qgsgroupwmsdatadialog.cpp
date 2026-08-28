@@ -65,7 +65,7 @@ QgsGroupWmsDataDialog::QgsGroupWmsDataDialog( const QgsMapLayerServerProperties 
   if ( it != mServerProperties->wmsDimensions().constEnd() )
   {
     setTimeDimensionDefaultDisplay( it->defaultDisplayType );
-    setTimeDimensionReferenceValue( it->referenceValue.toDateTime() );
+    setTimeDimensionReferenceValue( it->referenceValue().toDateTime() );
   }
 
   connect( mComputeTimeDimension, &QGroupBox::toggled, this, &QgsGroupWmsDataDialog::updateServerProperties );
@@ -139,7 +139,7 @@ void QgsGroupWmsDataDialog::updateServerProperties() const
   else
   {
     it->defaultDisplayType = timeDimensionDefaultDisplay();
-    it->referenceValue = timeDimensionReferenceValue();
+    it->setReferenceValue( timeDimensionReferenceValue() );
   }
 
   mServerProperties->setWmsDimensions( wmsDimensions );
