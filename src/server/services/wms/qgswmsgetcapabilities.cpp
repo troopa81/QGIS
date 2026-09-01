@@ -1299,7 +1299,7 @@ namespace QgsWms
                 break;
 
               case Qgis::WmsDimensionDefaultDisplay::ReferenceValue:
-                defaultDateTime = it->getReferenceValue().toDateTime();
+                defaultDateTime = it->referenceValue().toDateTime();
                 break;
 
               case Qgis::WmsDimensionDefaultDisplay::AllValues:
