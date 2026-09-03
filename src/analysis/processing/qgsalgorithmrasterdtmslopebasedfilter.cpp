@@ -184,7 +184,7 @@ QVariantMap QgsRasterDtmSlopeBasedFilterAlgorithm::processAlgorithm( const QVari
     }
     groundWriter->setOutputFormat( outputFormat );
 
-    groundDestProvider.reset( groundWriter->createOneBandRaster( mDataType, mLayerWidth, mLayerHeight, mExtent, mCrs ) );
+    groundDestProvider = groundWriter->createOneBandRaster( mDataType, mLayerWidth, mLayerHeight, mExtent, mCrs );
 
     if ( !groundDestProvider )
       throw QgsProcessingException( QObject::tr( "Could not create raster output: %1" ).arg( groundOutputFile ) );
@@ -211,7 +211,7 @@ QVariantMap QgsRasterDtmSlopeBasedFilterAlgorithm::processAlgorithm( const QVari
     }
     nonGroundWriter->setOutputFormat( outputFormat );
 
-    nonGroundDestProvider.reset( nonGroundWriter->createOneBandRaster( mDataType, mLayerWidth, mLayerHeight, mExtent, mCrs ) );
+    nonGroundDestProvider = nonGroundWriter->createOneBandRaster( mDataType, mLayerWidth, mLayerHeight, mExtent, mCrs );
 
     if ( !nonGroundDestProvider )
       throw QgsProcessingException( QObject::tr( "Could not create raster output: %1" ).arg( nonGroundOutputFile ) );

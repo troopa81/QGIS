@@ -153,7 +153,7 @@ QVariantMap QgsCellStatisticsAlgorithmBase::processAlgorithm( const QVariantMap 
     writer->setCreationOptions( creationOptions.split( '|' ) );
   }
   writer->setOutputFormat( outputFormat );
-  mOutputRasterDataProvider.reset( writer->createOneBandRaster( mDataType, mLayerWidth, mLayerHeight, mExtent, mCrs ) );
+  mOutputRasterDataProvider = writer->createOneBandRaster( mDataType, mLayerWidth, mLayerHeight, mExtent, mCrs );
   if ( !mOutputRasterDataProvider )
     throw QgsProcessingException( QObject::tr( "Could not create raster output: %1" ).arg( outputFile ) );
   if ( !mOutputRasterDataProvider->isValid() )

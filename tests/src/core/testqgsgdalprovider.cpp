@@ -476,12 +476,13 @@ void TestQgsGdalProvider::interactionBetweenRasterChangeAndCache()
   const QgsCoordinateReferenceSystem crs;
   const QString filename = u"/vsimem/temp.tif"_s;
 
-  // Create a all-0 dataset
-  auto provider = QgsRasterDataProvider::create( u"gdal"_s, filename, "GTiff", 1, Qgis::DataType::Byte, 1, 1, geoTransform, crs );
-  delete provider;
+  {
+    // Create a all-0 dataset
+    std::unique_ptr<QgsRasterDataProvider> provider = QgsRasterDataProvider::create( u"gdal"_s, filename, "GTiff", 1, Qgis::DataType::Byte, 1, 1, geoTransform, crs );
+  }
 
   // Open it
-  provider = dynamic_cast<QgsRasterDataProvider *>( QgsProviderRegistry::instance()->createProvider( u"gdal"_s, filename, QgsDataProvider::ProviderOptions() ) );
+  auto provider = dynamic_cast<QgsRasterDataProvider *>( QgsProviderRegistry::instance()->createProvider( u"gdal"_s, filename, QgsDataProvider::ProviderOptions() ) );
   QVERIFY( provider );
   auto rp = dynamic_cast<QgsRasterDataProvider *>( provider );
   QVERIFY( rp );
