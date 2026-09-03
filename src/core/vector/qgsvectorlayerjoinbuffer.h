@@ -139,7 +139,7 @@ class CORE_EXPORT QgsVectorLayerJoinBuffer : public QObject, public QgsFeatureSi
     /**
      * Create a copy of the join buffer
      */
-    QgsVectorLayerJoinBuffer *clone() const SIP_FACTORY;
+    std::unique_ptr<QgsVectorLayerJoinBuffer> clone() const;
 
     using QgsFeatureSink::addFeatures;
     /**

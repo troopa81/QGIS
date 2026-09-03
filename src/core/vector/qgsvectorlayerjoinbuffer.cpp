@@ -504,9 +504,9 @@ QgsFeature QgsVectorLayerJoinBuffer::targetedFeatureOf( const QgsVectorLayerJoin
   return targetedFeature;
 }
 
-QgsVectorLayerJoinBuffer *QgsVectorLayerJoinBuffer::clone() const
+std::unique_ptr<QgsVectorLayerJoinBuffer> QgsVectorLayerJoinBuffer::clone() const
 {
-  QgsVectorLayerJoinBuffer *cloned = new QgsVectorLayerJoinBuffer( mLayer );
+  auto cloned = std::make_unique<QgsVectorLayerJoinBuffer>( mLayer );
   cloned->mVectorJoins = mVectorJoins;
   return cloned;
 }
