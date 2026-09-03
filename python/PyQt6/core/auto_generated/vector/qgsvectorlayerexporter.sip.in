@@ -409,13 +409,13 @@ ownership of the layer and delete it after export.
 .. versionadded:: 3.44
 %End
 
-    static QgsVectorLayerExporterTask *withLayerOwnership(
+    static std::unique_ptr<QgsVectorLayerExporterTask> withLayerOwnership(
       QgsVectorLayer *layer /Transfer/,
       const QString &uri,
       const QString &providerKey,
       const QgsCoordinateReferenceSystem &destinationCrs,
       const QMap<QString, QVariant> &options = QMap<QString, QVariant>()
-    ) /Factory/;
+    );
 %Docstring
 Creates a new QgsVectorLayerExporterTask which has ownership over a
 source ``layer``. When the export task has completed (successfully or

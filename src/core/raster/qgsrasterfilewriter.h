@@ -64,7 +64,7 @@ class CORE_EXPORT QgsRasterFileWriter
      * \returns Instance of data provider in editing mode (on success) or NULLPTR on error.
      * \note Does not work with tiled mode enabled.
      */
-    QgsRasterDataProvider *createOneBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs ) SIP_FACTORY;
+    std::unique_ptr<QgsRasterDataProvider> createOneBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs );
 
     /**
      * Create a raster file with given number of bands without initializing the pixel data.
@@ -73,7 +73,7 @@ class CORE_EXPORT QgsRasterFileWriter
      * \returns Instance of data provider in editing mode (on success) or NULLPTR on error.
      * \note Does not work with tiled mode enabled.
      */
-    QgsRasterDataProvider *createMultiBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs, int nBands ) SIP_FACTORY;
+    std::unique_ptr<QgsRasterDataProvider> createMultiBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs, int nBands );
 
 
     /**
@@ -416,7 +416,7 @@ class CORE_EXPORT QgsRasterFileWriter
     bool buildPyramids( const QString &filename, QgsRasterDataProvider *destProviderIn = nullptr );
 
     //! Create provider and datasource for a part image (vrt mode)
-    QgsRasterDataProvider *createPartProvider(
+    std::unique_ptr<QgsRasterDataProvider> createPartProvider(
       const QgsRectangle &extent, int nCols, int iterCols, int iterRows, int iterLeft, int iterTop, const QString &outputUrl, int fileIndex, int nBands, Qgis::DataType type, const QgsCoordinateReferenceSystem &crs
     );
 
@@ -431,7 +431,7 @@ class CORE_EXPORT QgsRasterFileWriter
      *  \param destHasNoDataValueList TRUE if destination has no data value, indexed from 0
      *  \param destNoDataValueList no data value, indexed from 0
      */
-    QgsRasterDataProvider *initOutput(
+    std::unique_ptr<QgsRasterDataProvider> initOutput(
       int nCols,
       int nRows,
       const QgsCoordinateReferenceSystem &crs,
