@@ -725,7 +725,7 @@ Qgis::VectorExportResult QgsProviderRegistry::createEmptyLayer(
   }
 }
 
-QgsRasterDataProvider *QgsProviderRegistry::createRasterDataProvider(
+std::unique_ptr<QgsRasterDataProvider> QgsProviderRegistry::createRasterDataProvider(
   const QString &providerKey,
   const QString &uri,
   const QString &format,
@@ -740,7 +740,7 @@ QgsRasterDataProvider *QgsProviderRegistry::createRasterDataProvider(
 {
   QgsProviderMetadata *meta = findMetadata_( mProviders, providerKey );
   if ( meta )
-    return meta->createRasterDataProvider( uri, format, nBands, type, width, height, geoTransform, crs, creationOptions );
+    return std::unique_ptr<QgsRasterDataProvider>( meta->createRasterDataProvider( uri, format, nBands, type, width, height, geoTransform, crs, creationOptions ) );
   else
     return nullptr;
 }

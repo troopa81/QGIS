@@ -428,13 +428,13 @@ class CORE_EXPORT QgsVectorLayerExporterTask : public QgsTask
      * deleted. The destination \a uri and \a providerKey, and various export related parameters such as destination CRS
      * and export \a options must be specified.
     */
-    static QgsVectorLayerExporterTask *withLayerOwnership(
+    static std::unique_ptr<QgsVectorLayerExporterTask> withLayerOwnership(
       QgsVectorLayer *layer SIP_TRANSFER,
       const QString &uri,
       const QString &providerKey,
       const QgsCoordinateReferenceSystem &destinationCrs,
       const QMap<QString, QVariant> &options = QMap<QString, QVariant>()
-    ) SIP_FACTORY;
+    );
 
     void cancel() override;
 

@@ -230,7 +230,7 @@ QVariantMap QgsFillSinksWangLiuAlgorithm::processAlgorithm( const QVariantMap &p
     }
     filledDemWriter->setOutputFormat( outputFormat );
 
-    filledDemDestProvider.reset( filledDemWriter->createOneBandRaster( Qgis::DataType::Float32, mLayerWidth, mLayerHeight, mExtent, mCrs ) );
+    filledDemDestProvider = filledDemWriter->createOneBandRaster( Qgis::DataType::Float32, mLayerWidth, mLayerHeight, mExtent, mCrs );
 
     if ( !filledDemDestProvider )
       throw QgsProcessingException( QObject::tr( "Could not create raster output: %1" ).arg( filledDemOutputFile ) );
@@ -252,7 +252,7 @@ QVariantMap QgsFillSinksWangLiuAlgorithm::processAlgorithm( const QVariantMap &p
     flowDirectionsWriter->setOutputProviderKey( u"gdal"_s );
     flowDirectionsWriter->setOutputFormat( outputFormat );
 
-    flowDirectionsDestProvider.reset( flowDirectionsWriter->createOneBandRaster( Qgis::DataType::Byte, mLayerWidth, mLayerHeight, mExtent, mCrs ) );
+    flowDirectionsDestProvider = flowDirectionsWriter->createOneBandRaster( Qgis::DataType::Byte, mLayerWidth, mLayerHeight, mExtent, mCrs );
 
     if ( !flowDirectionsDestProvider )
       throw QgsProcessingException( QObject::tr( "Could not create raster output: %1" ).arg( flowDirectionsOutputFile ) );
@@ -274,7 +274,7 @@ QVariantMap QgsFillSinksWangLiuAlgorithm::processAlgorithm( const QVariantMap &p
     watershedBasinsWriter->setOutputProviderKey( u"gdal"_s );
     watershedBasinsWriter->setOutputFormat( outputFormat );
 
-    watershedBasinsDestProvider.reset( watershedBasinsWriter->createOneBandRaster( Qgis::DataType::Int32, mLayerWidth, mLayerHeight, mExtent, mCrs ) );
+    watershedBasinsDestProvider = watershedBasinsWriter->createOneBandRaster( Qgis::DataType::Int32, mLayerWidth, mLayerHeight, mExtent, mCrs );
 
     if ( !watershedBasinsDestProvider )
       throw QgsProcessingException( QObject::tr( "Could not create raster output: %1" ).arg( watershedBasinsOutputFile ) );

@@ -456,7 +456,7 @@ editing mode in order to allow write operations.
 %End
 
 
-    static QgsRasterDataProvider *create(
+    static std::unique_ptr<QgsRasterDataProvider> create(
       const QString &providerKey,
       const QString &uri,
       const QString &format,

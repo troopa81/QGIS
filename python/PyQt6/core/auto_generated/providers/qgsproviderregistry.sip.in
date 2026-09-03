@@ -137,7 +137,7 @@ Creates new empty vector layer.
 
 
 
-    QgsRasterDataProvider *createRasterDataProvider(
+    std::unique_ptr<QgsRasterDataProvider> createRasterDataProvider(
       const QString &providerKey,
       const QString &uri,
       const QString &format,
@@ -148,7 +148,7 @@ Creates new empty vector layer.
       double *geoTransform,
       const QgsCoordinateReferenceSystem &crs,
       const QStringList &createOptions = QStringList()
-    ) /Factory/;
+    );
 %Docstring
 Creates new instance of raster data provider
 

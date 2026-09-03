@@ -205,7 +205,7 @@ class CORE_EXPORT QgsProviderRegistry
      * \see createProvider()
      * \since QGIS 3.10
      */
-    QgsRasterDataProvider *createRasterDataProvider(
+    std::unique_ptr<QgsRasterDataProvider> createRasterDataProvider(
       const QString &providerKey,
       const QString &uri,
       const QString &format,
@@ -216,7 +216,7 @@ class CORE_EXPORT QgsProviderRegistry
       double *geoTransform,
       const QgsCoordinateReferenceSystem &crs,
       const QStringList &createOptions = QStringList()
-    ) SIP_FACTORY;
+    );
 
     /**
      * Returns list of raster pyramid resampling methods
