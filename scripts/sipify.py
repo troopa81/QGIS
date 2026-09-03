@@ -1618,6 +1618,11 @@ def fix_annotations(line):
     if py_name_match:
         CONTEXT.method_py_name = py_name_match.group(1)
 
+    if "std.unique_ptr" in CONTEXT.return_type and "SIP_FACTORY" in line:
+        exit_with_error(
+            "Don't specify SIP_FACTORY if the return type is std::unique_ptr"
+        )
+
     # Printed annotations
     replacements = {
         r"//\s*SIP_ABSTRACT\b": "/Abstract/",
@@ -3387,6 +3392,8 @@ def process_method_decl():
 
         if CONTEXT.current_method_is_override:
             CONTEXT.overridden_methods[class_name][CONTEXT.current_method_name] = True
+
+    # print(f"--- return_type={CONTEXT.return_type} CONTEXT.current_line={CONTEXT.current_line}")
 
 
 def try_skip_deleted_function():
