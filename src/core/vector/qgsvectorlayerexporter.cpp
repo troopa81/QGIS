@@ -691,12 +691,11 @@ QgsVectorLayerExporterTask::QgsVectorLayerExporterTask(
     mLayer->moveToThread( nullptr );
 }
 
-QgsVectorLayerExporterTask *QgsVectorLayerExporterTask::withLayerOwnership(
+std::unique_ptr<QgsVectorLayerExporterTask> QgsVectorLayerExporterTask::withLayerOwnership(
   QgsVectorLayer *layer, const QString &uri, const QString &providerKey, const QgsCoordinateReferenceSystem &destinationCrs, const QMap<QString, QVariant> &options
 )
 {
-  auto newTask = std::make_unique<QgsVectorLayerExporterTask>( layer, uri, providerKey, destinationCrs, options, true );
-  return newTask.release();
+  return std::make_unique<QgsVectorLayerExporterTask>( layer, uri, providerKey, destinationCrs, options, true );
 }
 
 void QgsVectorLayerExporterTask::cancel()

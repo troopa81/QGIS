@@ -230,7 +230,6 @@ void TestQgsRasterFileWriter::testCreateMultiBandRaster()
   QCOMPARE( dp->bandCount(), 1 );
   QCOMPARE( dp->dataType( 1 ), Qgis::DataType::Byte );
   QVERIFY( dp->isEditable() );
-  dp.reset();
 
   auto rlayer = std::make_unique<QgsRasterLayer>( filename, u"tmp"_s, u"gdal"_s );
   QVERIFY( rlayer->isValid() );
@@ -242,7 +241,7 @@ void TestQgsRasterFileWriter::testCreateMultiBandRaster()
   rlayer.reset();
 
   nBands = 3;
-  dp.reset( writer.createMultiBandRaster( Qgis::DataType::Byte, width, height, extent, QgsCoordinateReferenceSystem( u"EPSG:4326"_s ), nBands ) );
+  dp = writer.createMultiBandRaster( Qgis::DataType::Byte, width, height, extent, QgsCoordinateReferenceSystem( u"EPSG:4326"_s ), nBands );
   QVERIFY( dp );
   QCOMPARE( dp->xSize(), width );
   QCOMPARE( dp->ySize(), height );
@@ -253,7 +252,6 @@ void TestQgsRasterFileWriter::testCreateMultiBandRaster()
     QCOMPARE( dp->dataType( i ), Qgis::DataType::Byte );
   }
   QVERIFY( dp->isEditable() );
-  dp.reset();
 
   rlayer = std::make_unique<QgsRasterLayer>( filename, u"tmp"_s, u"gdal"_s );
   QVERIFY( rlayer->isValid() );
