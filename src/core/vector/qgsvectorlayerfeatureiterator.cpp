@@ -54,7 +54,7 @@ QgsVectorLayerFeatureSource::QgsVectorLayerFeatureSource( const QgsVectorLayer *
   if ( layer->mJoinBuffer->containsJoins() )
     layer->mJoinBuffer->createJoinCaches();
 
-  mJoinBuffer.reset( layer->mJoinBuffer->clone() );
+  mJoinBuffer = layer->mJoinBuffer->clone();
   for ( const QgsVectorLayerJoinInfo &joinInfo : mJoinBuffer->vectorJoins() )
   {
     if ( QgsVectorLayer *joinLayer = joinInfo.joinLayer() )

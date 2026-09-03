@@ -146,7 +146,7 @@ Returns ``True`` if the join information is about auxiliary layer,
          ``False`` otherwise
 %End
 
-    QgsVectorLayerJoinBuffer *clone() const /Factory/;
+    std::unique_ptr<QgsVectorLayerJoinBuffer> clone() const;
 %Docstring
 Create a copy of the join buffer
 %End
