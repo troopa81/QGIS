@@ -459,7 +459,7 @@ const QgsRasterDataProviderElevationProperties *QgsRasterDataProvider::elevation
   return mElevationProperties.get();
 }
 
-QgsRasterDataProvider *QgsRasterDataProvider::create(
+std::unique_ptr<QgsRasterDataProvider> QgsRasterDataProvider::create(
   const QString &providerKey,
   const QString &uri,
   const QString &format,
@@ -472,7 +472,7 @@ QgsRasterDataProvider *QgsRasterDataProvider::create(
   const QStringList &creationOptions
 )
 {
-  QgsRasterDataProvider *ret = QgsProviderRegistry::instance()->createRasterDataProvider( providerKey, uri, format, nBands, type, width, height, geoTransform, crs, creationOptions );
+  std::unique_ptr<QgsRasterDataProvider> ret = QgsProviderRegistry::instance()->createRasterDataProvider( providerKey, uri, format, nBands, type, width, height, geoTransform, crs, creationOptions );
   if ( !ret )
   {
     QgsDebugError( "Cannot resolve 'createRasterDataProviderFunction' function in " + providerKey + " provider" );

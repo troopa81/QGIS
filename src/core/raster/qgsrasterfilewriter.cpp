@@ -41,7 +41,7 @@
 
 using namespace Qt::StringLiterals;
 
-QgsRasterDataProvider *QgsRasterFileWriter::createOneBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs )
+std::unique_ptr<QgsRasterDataProvider> QgsRasterFileWriter::createOneBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs )
 {
   if ( mTiledMode )
     return nullptr; // does not make sense with tiled mode
@@ -53,7 +53,9 @@ QgsRasterDataProvider *QgsRasterFileWriter::createOneBandRaster( Qgis::DataType 
   return initOutput( width, height, crs, geoTransform, 1, dataType, QList<bool>(), QList<double>() );
 }
 
-QgsRasterDataProvider *QgsRasterFileWriter::createMultiBandRaster( Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs, int nBands )
+std::unique_ptr<QgsRasterDataProvider> QgsRasterFileWriter::createMultiBandRaster(
+  Qgis::DataType dataType, int width, int height, const QgsRectangle &extent, const QgsCoordinateReferenceSystem &crs, int nBands
+)
 {
   if ( mTiledMode )
     return nullptr; // does not make sense with tiled mode
@@ -1049,7 +1051,7 @@ bool QgsRasterFileWriter::writeVRT( const QString &file )
   return true;
 }
 
-QgsRasterDataProvider *QgsRasterFileWriter::createPartProvider(
+std::unique_ptr<QgsRasterDataProvider> QgsRasterFileWriter::createPartProvider(
   const QgsRectangle &extent, int nCols, int iterCols, int iterRows, int iterLeft, int iterTop, const QString &outputUrl, int fileIndex, int nBands, Qgis::DataType type, const QgsCoordinateReferenceSystem &crs
 )
 {
@@ -1073,7 +1075,7 @@ QgsRasterDataProvider *QgsRasterFileWriter::createPartProvider(
 
   // perhaps we need a separate creationOptions for tiles ?
 
-  QgsRasterDataProvider *destProvider = QgsRasterDataProvider::create( mOutputProviderKey, outputFile, mOutputFormat, nBands, type, iterCols, iterRows, geoTransform, crs, mCreationOptions );
+  std::unique_ptr<QgsRasterDataProvider> destProvider = QgsRasterDataProvider::create( mOutputProviderKey, outputFile, mOutputFormat, nBands, type, iterCols, iterRows, geoTransform, crs, mCreationOptions );
 
   // TODO: return provider and report error
   return destProvider;
@@ -1094,7 +1096,7 @@ void QgsRasterFileWriter::setBuildPyramidsFlag( Qgis::RasterBuildPyramidOption f
   mBuildPyramidsFlagSet = true;
 }
 
-QgsRasterDataProvider *QgsRasterFileWriter::initOutput(
+std::unique_ptr<QgsRasterDataProvider> QgsRasterFileWriter::initOutput(
   int nCols, int nRows, const QgsCoordinateReferenceSystem &crs, double *geoTransform, int nBands, Qgis::DataType type, const QList<bool> &destHasNoDataValueList, const QList<double> &destNoDataValueList
 )
 {
@@ -1144,8 +1146,7 @@ QgsRasterDataProvider *QgsRasterFileWriter::initOutput(
       }
     }
 
-    QgsRasterDataProvider *destProvider = QgsRasterDataProvider::create( mOutputProviderKey, mOutputUrl, mOutputFormat, nBands, type, nCols, nRows, geoTransform, crs, creationOptions );
-
+    auto destProvider = QgsRasterDataProvider::create( mOutputProviderKey, mOutputUrl, mOutputFormat, nBands, type, nCols, nRows, geoTransform, crs, creationOptions );
     if ( !destProvider )
     {
       QgsDebugError( u"No provider created"_s );

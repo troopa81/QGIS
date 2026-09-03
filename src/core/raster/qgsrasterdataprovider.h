@@ -490,7 +490,7 @@ class CORE_EXPORT QgsRasterDataProvider : public QgsDataProvider, public QgsRast
     // TODO QGIS 5.0: rename createOptions to creationOptions for consistency with GDAL
 
     //! Creates a new dataset with mDataSourceURI
-    static QgsRasterDataProvider *create(
+    static std::unique_ptr<QgsRasterDataProvider> create(
       const QString &providerKey,
       const QString &uri,
       const QString &format,

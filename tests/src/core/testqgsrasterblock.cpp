@@ -177,7 +177,7 @@ void TestQgsRasterBlock::testWrite()
 
   // create a GeoTIFF - this will create data provider in editable mode
   const QString filename = tmpFile.fileName();
-  QgsRasterDataProvider *dp = QgsRasterDataProvider::create( u"gdal"_s, filename, u"GTiff"_s, 1, Qgis::DataType::Byte, 10, 10, tform, mpRasterLayer->crs() );
+  std::unique_ptr<QgsRasterDataProvider> dp = QgsRasterDataProvider::create( u"gdal"_s, filename, u"GTiff"_s, 1, Qgis::DataType::Byte, 10, 10, tform, mpRasterLayer->crs() );
 
   QgsRasterBlock *block = mpRasterLayer->dataProvider()->block( 1, mpRasterLayer->extent(), mpRasterLayer->width(), mpRasterLayer->height() );
 
@@ -197,7 +197,6 @@ void TestQgsRasterBlock::testWrite()
   QCOMPARE( newData2.at( 1 ), '\xa1' );
 
   delete block2;
-  delete dp;
 
   // newly open raster and verify the write was permanent
   QgsRasterLayer *rlayer = new QgsRasterLayer( filename, u"tmp"_s, u"gdal"_s );
