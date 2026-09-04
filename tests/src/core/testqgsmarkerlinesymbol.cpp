@@ -151,7 +151,7 @@ void TestQgsMarkerLineSymbol::pointNumInterval()
   props[u"color"_s] = u"255,0,0"_s;
   props[u"size"_s] = u"2"_s;
   props[u"outline_style"_s] = u"no"_s;
-  QgsSimpleMarkerSymbolLayer *marker = static_cast<QgsSimpleMarkerSymbolLayer *>( QgsSimpleMarkerSymbolLayer::create( props ) );
+  QgsSimpleMarkerSymbolLayer *marker = static_cast<QgsSimpleMarkerSymbolLayer *>( QgsSimpleMarkerSymbolLayer::create( props ).release() );
 
   marker->setDataDefinedProperty( QgsSymbolLayer::Property::Size, QgsProperty::fromExpression( u"@geometry_point_num * 2"_s ) );
 
@@ -180,7 +180,7 @@ void TestQgsMarkerLineSymbol::pointNumVertex()
   props[u"color"_s] = u"255,0,0"_s;
   props[u"size"_s] = u"2"_s;
   props[u"outline_style"_s] = u"no"_s;
-  QgsSimpleMarkerSymbolLayer *marker = static_cast<QgsSimpleMarkerSymbolLayer *>( QgsSimpleMarkerSymbolLayer::create( props ) );
+  QgsSimpleMarkerSymbolLayer *marker = static_cast<QgsSimpleMarkerSymbolLayer *>( QgsSimpleMarkerSymbolLayer::create( props ).release() );
 
   marker->setDataDefinedProperty( QgsSymbolLayer::Property::Size, QgsProperty::fromExpression( u"@geometry_point_num * 2"_s ) );
 

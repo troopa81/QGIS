@@ -99,7 +99,7 @@ void TestQgs3DAnnotationLayerRendering::testAnnotationLayerBillboards()
   auto annotationLayer = std::make_unique<QgsAnnotationLayer>( "test", QgsAnnotationLayer::LayerOptions( QgsCoordinateTransformContext() ) );
 
   auto marker1 = std::make_unique< QgsAnnotationMarkerItem >( QgsPoint( 1000, 1000 ) );
-  QgsMarkerSymbol *markerSymbol = static_cast<QgsMarkerSymbol *>( QgsSymbol::defaultSymbol( Qgis::GeometryType::Point ) );
+  QgsMarkerSymbol *markerSymbol = static_cast<QgsMarkerSymbol *>( QgsSymbol::defaultSymbol( Qgis::GeometryType::Point ).release() );
   markerSymbol->setColor( QColor( 255, 0, 0 ) );
   markerSymbol->setSize( 4 );
   QgsSimpleMarkerSymbolLayer *sl = static_cast<QgsSimpleMarkerSymbolLayer *>( markerSymbol->symbolLayer( 0 ) );
@@ -109,7 +109,7 @@ void TestQgs3DAnnotationLayerRendering::testAnnotationLayerBillboards()
   annotationLayer->addItem( marker1.release() );
 
   auto marker2 = std::make_unique< QgsAnnotationMarkerItem >( QgsPoint( 1000, 2000 ) );
-  markerSymbol = static_cast<QgsMarkerSymbol *>( QgsSymbol::defaultSymbol( Qgis::GeometryType::Point ) );
+  markerSymbol = static_cast<QgsMarkerSymbol *>( QgsSymbol::defaultSymbol( Qgis::GeometryType::Point ).release() );
   markerSymbol->setColor( QColor( 0, 255, 0 ) );
   markerSymbol->setSize( 20 );
   sl = static_cast<QgsSimpleMarkerSymbolLayer *>( markerSymbol->symbolLayer( 0 ) );
@@ -119,7 +119,7 @@ void TestQgs3DAnnotationLayerRendering::testAnnotationLayerBillboards()
   annotationLayer->addItem( marker2.release() );
 
   auto marker3 = std::make_unique< QgsAnnotationMarkerItem >( QgsPoint( 2000, 2000 ) );
-  markerSymbol = static_cast<QgsMarkerSymbol *>( QgsSymbol::defaultSymbol( Qgis::GeometryType::Point ) );
+  markerSymbol = static_cast<QgsMarkerSymbol *>( QgsSymbol::defaultSymbol( Qgis::GeometryType::Point ).release() );
   markerSymbol->setColor( QColor( 0, 0, 255 ) );
   markerSymbol->setSize( 30 );
   sl = static_cast<QgsSimpleMarkerSymbolLayer *>( markerSymbol->symbolLayer( 0 ) );

@@ -65,9 +65,9 @@ QgsMapUnitScale QgsVectorFieldSymbolLayer::mapUnitScale() const
   return QgsMapUnitScale();
 }
 
-QgsSymbolLayer *QgsVectorFieldSymbolLayer::create( const QVariantMap &properties )
+std::unique_ptr<QgsSymbolLayer> QgsVectorFieldSymbolLayer::create( const QVariantMap &properties )
 {
-  QgsVectorFieldSymbolLayer *symbolLayer = new QgsVectorFieldSymbolLayer();
+  auto symbolLayer = std::make_unique<QgsVectorFieldSymbolLayer>();
   if ( properties.contains( u"x_attribute"_s ) )
   {
     symbolLayer->setXAttribute( properties[u"x_attribute"_s].toString() );
@@ -258,7 +258,7 @@ void QgsVectorFieldSymbolLayer::stopRender( QgsSymbolRenderContext &context )
 
 QgsVectorFieldSymbolLayer *QgsVectorFieldSymbolLayer::clone() const
 {
-  QgsSymbolLayer *clonedLayer = QgsVectorFieldSymbolLayer::create( properties() );
+  QgsSymbolLayer *clonedLayer = QgsVectorFieldSymbolLayer::create( properties() ).release();
   if ( mLineSymbol )
   {
     clonedLayer->setSubSymbol( mLineSymbol->clone() );
@@ -310,7 +310,7 @@ bool QgsVectorFieldSymbolLayer::toSld( QDomDocument &doc, QDomElement &element, 
   return false;
 }
 
-QgsSymbolLayer *QgsVectorFieldSymbolLayer::createFromSld( QDomElement &element )
+std::unique_ptr<QgsSymbolLayer> QgsVectorFieldSymbolLayer::createFromSld( QDomElement &element )
 {
   Q_UNUSED( element )
   return nullptr;
