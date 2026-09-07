@@ -19,6 +19,7 @@ import json
 import os
 import re
 import shutil
+import time
 
 # Deterministic XML
 os.environ["QT_HASH_SEED"] = "1"
@@ -61,6 +62,13 @@ from utilities import compareWkt, unitTestDataPath
 
 class QgsServerAPIUtilsTest(QgsServerTestBase):
     """QGIS API server utils tests"""
+
+    def setUp(self):
+        self._start = time.time()
+
+    def tearDown(self):
+        duree = time.time() - self._start
+        print(f"-------- ELAPSEDTIME {duree:.3f}s {self._testMethodName}")
 
     def test_parse_bbox(self):
         bbox = QgsServerApiUtils.parseBbox("8.203495,44.901482,8.203497,44.901484")
@@ -223,6 +231,13 @@ class API(QgsServerApi):
 
 class QgsServerAPITestBase(QgsServerTestBase):
     """QGIS API server tests"""
+
+    def setUp(self):
+        self._start = time.time()
+
+    def tearDown(self):
+        duree = time.time() - self._start
+        print(f"-------- ELAPSEDTIME {duree:.3f}s {self._testMethodName}")
 
     # Set to True in child classes to re-generate reference files for this class
     regenerate_api_reference = False
@@ -2266,7 +2281,6 @@ class QgsServerAPITest(QgsServerAPITestBase):
                 f"http://server.qgis.org/wfs3/collections/points/items?datetime={datetime}"
             )
             response = QgsBufferServerResponse()
-            project.read(project_path)
             self.server.handleRequest(request, response, project)
             body = bytes(response.body()).decode("utf8")
             # print(body)
@@ -2276,7 +2290,7 @@ class QgsServerAPITest(QgsServerAPITestBase):
                 self.assertNotIn(unexp, body)
 
         def _interval(project_path, interval):
-            project.read(project_path)
+            # project.read(project_path)
             layer = list(project.mapLayers().values())[0]
             return QgsServerApiUtils.temporalFilterExpression(
                 layer, interval
@@ -2353,6 +2367,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             '( "created" IS NULL OR ( to_date( \'2017-01-01\' ) <= "created" AND "created" <= to_date( \'2018-01-01\' ) ) )',
         )
 
+        project.read(updated_path)
+
         # Updated (datetime type)
         self.assertEqualBrackets(
             _interval(updated_path, "2017-01-01"),
@@ -2403,6 +2419,7 @@ class QgsServerAPITest(QgsServerAPITestBase):
             _interval(updated_path, "2017-01-01T01:01:01/2018-01-01T01:01:01"),
             '( "updated" IS NULL OR ( to_datetime( \'2017-01-01T01:01:01\' ) <= "updated" AND "updated" <= to_datetime( \'2018-01-01T01:01:01\' ) ) )',
         )
+        project.read(created_string_path)
 
         # Created string (date type)
         self.assertEqualBrackets(
@@ -2455,6 +2472,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             '( "created_string" IS NULL OR ( to_date( \'2017-01-01\' ) <= to_date( "created_string" ) AND to_date( "created_string" ) <= to_date( \'2018-01-01\' ) ) )',
         )
 
+        project.read(updated_string_path)
+
         # Updated string (datetime type)
         self.assertEqualBrackets(
             _interval(updated_string_path, "2017-01-01"),
@@ -2506,6 +2525,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             '( "updated_string" IS NULL OR ( to_datetime( \'2017-01-01T01:01:01\' ) <= to_datetime( "updated_string" ) AND to_datetime( "updated_string" ) <= to_datetime( \'2018-01-01T01:01:01\' ) ) )',
         )
 
+        project.read(date_range_path)
+
         # Ranges
         self.assertEqualBrackets(
             _interval(date_range_path, "2010-01-01"),
@@ -2537,6 +2558,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
         _date_tester(
             created_path, "2000-05-06", [], ["luserna", "bricherasio", "torre"]
         )
+
+        project.read(updated_path)
 
         ##################################################################################
         # Test "updated" datetime field
@@ -2571,6 +2594,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             [],
             ["luserna", "bricherasio", "torre", "villar"],
         )
+
+        project.read(created_path)
 
         # Test intervals
 
@@ -2657,6 +2682,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             ["luserna"],
         )
 
+        project.read(updated_path)
+
         ##################################################################################
         # Test "updated" date field
         _date_tester(
@@ -2737,6 +2764,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             ["torre", "luserna"],
         )
 
+        project.read(both_path)
+
         ##################################################################################
         # Test both
         _date_tester(both_path, "2010-01-01", ["villar"], ["luserna", "bricherasio"])
@@ -2755,6 +2784,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
         _date_tester(
             both_path, "2019-01-01/..", ["luserna"], ["torre", "bricherasio", "villar"]
         )
+
+        project.read(none_path)
 
         ##################################################################################
         # Test none path (should take the first date/datetime field, that is "created")
@@ -2830,6 +2861,8 @@ class QgsServerAPITest(QgsServerAPITestBase):
             ["bricherasio", "torre", "villar"],
             ["luserna"],
         )
+
+        project.read(date_range_path)
 
         #####################################################################################################
         # Test ranges
