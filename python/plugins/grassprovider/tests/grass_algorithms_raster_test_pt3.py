@@ -25,10 +25,11 @@ import tempfile
 
 import AlgorithmsTestBase
 import nose2
-from grassprovider.grass_provider import GrassProvider
-from grassprovider.grass_utils import GrassUtils
 from qgis.core import QgsApplication, QgsProcessingContext, QgsProcessingFeedback
 from qgis.testing import QgisTestCase, start_app
+
+from grassprovider.grass_provider import GrassProvider
+from grassprovider.grass_utils import GrassUtils
 
 testDataPath = os.path.join(os.path.dirname(__file__), "testdata")
 
