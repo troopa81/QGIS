@@ -187,7 +187,7 @@ RUN  apt-get update \
     build-essential \
     g++-x86-64-linux-gnu \
     ccache \
-    clang-22 \
+    clang \
     cmake \
     flex \
     mold \
@@ -236,9 +236,6 @@ RUN  apt-get update \
     opencl-headers \
     ocl-icd-opencl-dev \
   && apt-get clean
-
-RUN update-alternatives --install /usr/bin/clang   clang   /usr/bin/clang-22  220 \
-    --slave /usr/bin/clang++ clang++ /usr/bin/clang++-22
 
 ENV PATH="/usr/local/bin:${PATH}"
 
