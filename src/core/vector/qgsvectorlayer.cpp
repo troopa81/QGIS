@@ -5626,7 +5626,7 @@ void QgsVectorLayer::readSldLabeling( const QDomNode &node )
         }
         else if ( childElem.localName() == "Filter"_L1 )
         {
-          QgsExpression *filter = QgsOgcUtils::expressionFromOgcFilter( childElem );
+          std::unique_ptr<QgsExpression> filter = QgsOgcUtils::expressionFromOgcFilter( childElem );
           if ( filter )
           {
             if ( filter->hasParserError() )
@@ -5637,7 +5637,6 @@ void QgsVectorLayer::readSldLabeling( const QDomNode &node )
             {
               filterExp = filter->expression();
             }
-            delete filter;
           }
         }
         else if ( childElem.localName() == "MinScaleDenominator"_L1 )
