@@ -2910,7 +2910,7 @@ void QgsProjectProperties::customizeBearingFormat()
   dlg.setWindowTitle( tr( "Bearing Format" ) );
   if ( dlg.exec() )
   {
-    mBearingFormat.reset( dlg.format() );
+    mBearingFormat = dlg.format();
   }
 }
 
@@ -2920,6 +2920,6 @@ void QgsProjectProperties::customizeGeographicCoordinateFormat()
   dlg.setWindowTitle( tr( "Coordinate Format" ) );
   if ( dlg.exec() )
   {
-    mGeographicCoordinateFormat.reset( dlg.format() );
+    mGeographicCoordinateFormat = dlg.format();
   }
 }
