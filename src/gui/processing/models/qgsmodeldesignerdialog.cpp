@@ -985,7 +985,7 @@ void QgsModelDesignerDialog::addInput( const QString &parameterType, const QPoin
   if ( !dlg.exec() )
     return;
 
-  newParam.reset( dlg.createParameter() );
+  newParam = dlg.createParameter();
   if ( !newParam )
     return;
 
