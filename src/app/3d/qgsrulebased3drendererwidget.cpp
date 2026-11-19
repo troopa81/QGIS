@@ -84,14 +84,14 @@ void QgsRuleBased3DRendererWidget::setLayer( QgsVectorLayer *layer )
   if ( r && r->type() == "rulebased"_L1 )
   {
     QgsRuleBased3DRenderer *ruleRenderer = static_cast<QgsRuleBased3DRenderer *>( r );
-    mRootRule.reset( ruleRenderer->rootRule()->clone() );
+    mRootRule = ruleRenderer->rootRule()->clone();
   }
   else if ( QgsAbstractVectorLayer3DRenderer *vectorRenderer = dynamic_cast< QgsAbstractVectorLayer3DRenderer * >( r ) )
   {
     std::unique_ptr< QgsRuleBased3DRenderer > newRenderer = QgsRuleBased3DRenderer::convertFromRenderer( vectorRenderer );
     if ( newRenderer )
     {
-      mRootRule.reset( newRenderer->rootRule()->clone() );
+      mRootRule = newRenderer->rootRule()->clone();
     }
   }
   if ( !mRootRule )
@@ -543,7 +543,7 @@ QMimeData *QgsRuleBased3DRendererModel::mimeData( const QModelIndexList &indexes
 
     // we use a clone of the existing rule because it has a new unique rule key
     // non-unique rule keys would confuse other components using them (e.g. legend)
-    QgsRuleBased3DRenderer::Rule *rule = ruleForIndex( index )->clone();
+    std::unique_ptr<QgsRuleBased3DRenderer::Rule> rule = ruleForIndex( index )->clone();
     QDomDocument doc;
 
     QDomElement rootElem = doc.createElement( u"rule_mime"_s );
@@ -551,8 +551,6 @@ QMimeData *QgsRuleBased3DRendererModel::mimeData( const QModelIndexList &indexes
     const QDomElement rulesElem = rule->save( doc, QgsReadWriteContext() );
     rootElem.appendChild( rulesElem );
     doc.appendChild( rootElem );
-
-    delete rule;
 
     stream << doc.toString( -1 );
   }
@@ -598,9 +596,9 @@ bool QgsRuleBased3DRendererModel::dropMimeData( const QMimeData *data, Qt::DropA
     QDomElement ruleElem = rootElem.firstChildElement( u"rule"_s );
     if ( rootElem.attribute( u"type"_s ) == "renderer"_L1 )
       _renderer2renderer3DRules( ruleElem ); // do some modifications so that we load the rules more nicely
-    QgsRuleBased3DRenderer::Rule *rule = QgsRuleBased3DRenderer::Rule::create( ruleElem, QgsReadWriteContext() );
+    std::unique_ptr<QgsRuleBased3DRenderer::Rule> rule = QgsRuleBased3DRenderer::Rule::create( ruleElem, QgsReadWriteContext() );
 
-    insertRule( parent, row + rows, rule );
+    insertRule( parent, row + rows, rule.release() );
 
     ++rows;
   }

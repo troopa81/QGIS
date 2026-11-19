@@ -254,7 +254,7 @@ void QgsVectorLayer3DRendererWidget::apply()
     break;
     case 3:
     {
-      QgsRuleBased3DRenderer *r = new QgsRuleBased3DRenderer( widgetRuleBasedRenderer->rootRule()->clone() );
+      QgsRuleBased3DRenderer *r = new QgsRuleBased3DRenderer( widgetRuleBasedRenderer->rootRule()->clone().release() );
       r->setLayer( qobject_cast<QgsVectorLayer *>( mLayer ) );
       widgetBaseProperties->apply( r );
       mLayer->setRenderer3D( r );

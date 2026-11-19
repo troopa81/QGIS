@@ -211,13 +211,13 @@ Try to find a rule given its unique key
 %End
 
 
-        QgsRuleBased3DRenderer::Rule *clone() const /Factory/;
+        std::unique_ptr<QgsRuleBased3DRenderer::Rule> clone() const;
 %Docstring
 clone this rule, return new instance
 %End
 
 
-        static QgsRuleBased3DRenderer::Rule *create( const QDomElement &ruleElem, const QgsReadWriteContext &context ) /Factory/;
+        static std::unique_ptr<QgsRuleBased3DRenderer::Rule> create( const QDomElement &ruleElem, const QgsReadWriteContext &context );
 %Docstring
 Create a rule from an XML definition
 

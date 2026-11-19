@@ -217,7 +217,7 @@ class _3D_EXPORT QgsRuleBased3DRenderer : public QgsAbstractVectorLayer3DRendere
         QgsRuleBased3DRenderer::Rule *findRuleByKey( const QString &key ) SIP_SKIP;
 
         //! clone this rule, return new instance
-        QgsRuleBased3DRenderer::Rule *clone() const SIP_FACTORY;
+        std::unique_ptr<QgsRuleBased3DRenderer::Rule> clone() const;
 
         // load / save
 
@@ -227,7 +227,7 @@ class _3D_EXPORT QgsRuleBased3DRenderer : public QgsAbstractVectorLayer3DRendere
          * \param context reading context
          * \returns A new rule
          */
-        static QgsRuleBased3DRenderer::Rule *create( const QDomElement &ruleElem, const QgsReadWriteContext &context ) SIP_FACTORY;
+        static std::unique_ptr<QgsRuleBased3DRenderer::Rule> create( const QDomElement &ruleElem, const QgsReadWriteContext &context );
 
         //! store labeling info to XML element
         QDomElement save( QDomDocument &doc, const QgsReadWriteContext &context ) const;

@@ -39,11 +39,11 @@ QgsAbstract3DRenderer *QgsRuleBased3DRendererMetadata::createRenderer( QDomEleme
 {
   QDomElement rulesElem = elem.firstChildElement( u"rules"_s );
 
-  QgsRuleBased3DRenderer::Rule *root = QgsRuleBased3DRenderer::Rule::create( rulesElem, context );
+  std::unique_ptr<QgsRuleBased3DRenderer::Rule> root = QgsRuleBased3DRenderer::Rule::create( rulesElem, context );
   if ( !root )
     return nullptr;
 
-  QgsRuleBased3DRenderer *r = new QgsRuleBased3DRenderer( root );
+  QgsRuleBased3DRenderer *r = new QgsRuleBased3DRenderer( root.release() );
   r->readXml( elem, context );
   return r;
 }
@@ -168,18 +168,18 @@ QgsRuleBased3DRenderer::Rule *QgsRuleBased3DRenderer::Rule::findRuleByKey( const
   return nullptr;
 }
 
-QgsRuleBased3DRenderer::Rule *QgsRuleBased3DRenderer::Rule::clone() const
+std::unique_ptr<QgsRuleBased3DRenderer::Rule> QgsRuleBased3DRenderer::Rule::clone() const
 {
   QgsAbstract3DSymbol *symbol = mSymbol.get() ? mSymbol->clone() : nullptr;
-  Rule *newrule = new Rule( symbol, mFilterExp, mDescription );
+  auto newrule = std::make_unique<Rule>( symbol, mFilterExp, mDescription );
   newrule->setActive( mIsActive );
   // clone children
   for ( Rule *rule : std::as_const( mChildren ) )
-    newrule->appendChild( rule->clone() );
+    newrule->appendChild( rule->clone().release() );
   return newrule;
 }
 
-QgsRuleBased3DRenderer::Rule *QgsRuleBased3DRenderer::Rule::create( const QDomElement &ruleElem, const QgsReadWriteContext &context )
+std::unique_ptr<QgsRuleBased3DRenderer::Rule> QgsRuleBased3DRenderer::Rule::create( const QDomElement &ruleElem, const QgsReadWriteContext &context )
 {
   std::unique_ptr<QgsAbstract3DSymbol> symbol;
   QDomElement elemSymbol = ruleElem.firstChildElement( u"symbol"_s );
@@ -194,7 +194,7 @@ QgsRuleBased3DRenderer::Rule *QgsRuleBased3DRenderer::Rule::create( const QDomEl
   QString filterExp = ruleElem.attribute( u"filter"_s );
   QString description = ruleElem.attribute( u"description"_s );
   QString ruleKey = ruleElem.attribute( u"key"_s );
-  Rule *rule = new Rule( symbol.release(), filterExp, description );
+  auto rule = std::make_unique<Rule>( symbol.release(), filterExp, description );
 
   if ( !ruleKey.isEmpty() )
     rule->mRuleKey = ruleKey;
@@ -204,10 +204,10 @@ QgsRuleBased3DRenderer::Rule *QgsRuleBased3DRenderer::Rule::create( const QDomEl
   QDomElement childRuleElem = ruleElem.firstChildElement( u"rule"_s );
   while ( !childRuleElem.isNull() )
   {
-    Rule *childRule = create( childRuleElem, context );
+    std::unique_ptr<Rule> childRule = create( childRuleElem, context );
     if ( childRule )
     {
-      rule->appendChild( childRule );
+      rule->appendChild( childRule.release() );
     }
     else
     {
@@ -366,7 +366,7 @@ QgsRuleBased3DRenderer::~QgsRuleBased3DRenderer()
 
 QgsRuleBased3DRenderer *QgsRuleBased3DRenderer::clone() const
 {
-  Rule *rootRule = mRootRule->clone();
+  std::unique_ptr<Rule> rootRule = mRootRule->clone();
 
   // normally with clone() the individual rules get new keys (UUID), but here we want to keep
   // the tree of rules intact, so that other components that may use the rule keys work nicely (e.g. map themes)
@@ -377,7 +377,7 @@ QgsRuleBased3DRenderer *QgsRuleBased3DRenderer::clone() const
   for ( int i = 0; i < origDescendants.count(); ++i )
     clonedDescendants[i]->setRuleKey( origDescendants[i]->ruleKey() );
 
-  QgsRuleBased3DRenderer *r = new QgsRuleBased3DRenderer( rootRule );
+  QgsRuleBased3DRenderer *r = new QgsRuleBased3DRenderer( rootRule.release() );
   copyBaseProperties( r );
   return r;
 }
