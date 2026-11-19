@@ -24,9 +24,9 @@
 
 using namespace Qt::StringLiterals;
 
-QgsAbstractTerrainSettings *QgsOnlineDemTerrainSettings::create()
+std::unique_ptr<QgsAbstractTerrainSettings> QgsOnlineDemTerrainSettings::create()
 {
-  return new QgsOnlineDemTerrainSettings();
+  return std::make_unique<QgsOnlineDemTerrainSettings>();
 }
 
 QgsOnlineDemTerrainSettings *QgsOnlineDemTerrainSettings::clone() const

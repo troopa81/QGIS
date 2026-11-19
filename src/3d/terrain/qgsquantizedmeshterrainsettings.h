@@ -41,7 +41,7 @@ class _3D_EXPORT QgsQuantizedMeshTerrainSettings : public QgsAbstractTerrainSett
     /**
      * Creates a new instance of a QgsQuantizedMeshTerrainSettings object.
      */
-    static QgsAbstractTerrainSettings *create() SIP_FACTORY;
+    static std::unique_ptr<QgsAbstractTerrainSettings> create();
 
     QgsQuantizedMeshTerrainSettings *clone() const final SIP_FACTORY;
     QString type() const final;

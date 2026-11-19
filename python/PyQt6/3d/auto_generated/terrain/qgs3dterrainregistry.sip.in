@@ -101,7 +101,7 @@ Registers a new terrain type. Takes ownership of the ``metadata``
 instance.
 %End
 
-    QgsAbstractTerrainSettings *createTerrainSettings( const QString &type ) const /Factory/;
+    std::unique_ptr<QgsAbstractTerrainSettings> createTerrainSettings( const QString &type ) const;
 %Docstring
 Creates a new instance of the terrain settings of the specified
 ``type``.
@@ -112,7 +112,7 @@ Returns ``None`` if the specified type is not found in the registry.
 %End
 
 
-    QgsAbstractTerrainSettings *configureTerrainFromProject( QgsProjectElevationProperties *properties ) /Factory/;
+    std::unique_ptr<QgsAbstractTerrainSettings> configureTerrainFromProject( QgsProjectElevationProperties *properties );
 %Docstring
 Create terrain settings directly from a project's elevation
 ``properties``.

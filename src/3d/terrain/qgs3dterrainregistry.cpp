@@ -58,12 +58,12 @@ bool Qgs3DTerrainRegistry::addType( Qgs3DTerrainAbstractMetadata *metadata )
   return true;
 }
 
-QgsAbstractTerrainSettings *Qgs3DTerrainRegistry::createTerrainSettings( const QString &type ) const
+std::unique_ptr<QgsAbstractTerrainSettings> Qgs3DTerrainRegistry::createTerrainSettings( const QString &type ) const
 {
   if ( !mMetadata.contains( type ) )
     return nullptr;
 
-  return mMetadata[type]->createTerrainSettings();
+  return std::unique_ptr<QgsAbstractTerrainSettings>( mMetadata[type]->createTerrainSettings() );
 }
 
 QgsTerrainGenerator *Qgs3DTerrainRegistry::createTerrainGenerator( const QString &type ) const
@@ -74,13 +74,13 @@ QgsTerrainGenerator *Qgs3DTerrainRegistry::createTerrainGenerator( const QString
   return mMetadata[type]->createTerrainGenerator();
 }
 
-QgsAbstractTerrainSettings *Qgs3DTerrainRegistry::configureTerrainFromProject( QgsProjectElevationProperties *properties )
+std::unique_ptr<QgsAbstractTerrainSettings> Qgs3DTerrainRegistry::configureTerrainFromProject( QgsProjectElevationProperties *properties )
 {
   if ( properties->terrainProvider()->type() == "flat"_L1 )
   {
     auto flatTerrain = std::make_unique<QgsFlatTerrainSettings>();
     flatTerrain->setElevationOffset( properties->terrainProvider()->offset() );
-    return flatTerrain.release();
+    return flatTerrain;
   }
   else if ( properties->terrainProvider()->type() == "raster"_L1 )
   {
@@ -90,7 +90,7 @@ QgsAbstractTerrainSettings *Qgs3DTerrainRegistry::configureTerrainFromProject( Q
     demTerrain->setLayer( rasterProvider->layer() );
     demTerrain->setElevationOffset( properties->terrainProvider()->offset() );
     demTerrain->setVerticalScale( properties->terrainProvider()->scale() );
-    return demTerrain.release();
+    return demTerrain;
   }
   else if ( properties->terrainProvider()->type() == "mesh"_L1 )
   {
@@ -100,12 +100,12 @@ QgsAbstractTerrainSettings *Qgs3DTerrainRegistry::configureTerrainFromProject( Q
     meshTerrain->setLayer( meshProvider->layer() );
     meshTerrain->setElevationOffset( properties->terrainProvider()->offset() );
     meshTerrain->setVerticalScale( properties->terrainProvider()->scale() );
-    return meshTerrain.release();
+    return meshTerrain;
   }
   else
   {
     auto flatTerrain = std::make_unique<QgsFlatTerrainSettings>();
-    return flatTerrain.release();
+    return flatTerrain;
   }
 }
 

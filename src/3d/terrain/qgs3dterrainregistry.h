@@ -93,7 +93,7 @@ class _3D_EXPORT Qgs3DTerrainAbstractMetadata
 };
 
 //! Terrain settings creation function
-SIP_SKIP typedef QgsAbstractTerrainSettings *( *QgsTerrainSettingsCreateFunc )();
+SIP_SKIP typedef std::unique_ptr<QgsAbstractTerrainSettings> ( *QgsTerrainSettingsCreateFunc )();
 //! Terrain generator creation function
 SIP_SKIP typedef QgsTerrainGenerator *( *QgsTerrainGeneratorCreateFunc )();
 
@@ -134,7 +134,7 @@ class _3D_EXPORT Qgs3DTerrainMetadata : public Qgs3DTerrainAbstractMetadata
      */
     QgsTerrainGeneratorCreateFunc createGeneratorFunction() const { return mGeneratorCreateFunc; }
 
-    QgsAbstractTerrainSettings *createTerrainSettings() override SIP_FACTORY { return mCreateFunc ? mCreateFunc() : nullptr; }
+    QgsAbstractTerrainSettings *createTerrainSettings() override SIP_FACTORY { return mCreateFunc ? mCreateFunc().release() : nullptr; }
     QgsTerrainGenerator *createTerrainGenerator() override { return mGeneratorCreateFunc ? mGeneratorCreateFunc() : nullptr; }
 
   private:
@@ -180,7 +180,7 @@ class _3D_EXPORT Qgs3DTerrainRegistry
      *
      * Returns NULLPTR if the specified type is not found in the registry.
      */
-    QgsAbstractTerrainSettings *createTerrainSettings( const QString &type ) const SIP_FACTORY;
+    std::unique_ptr<QgsAbstractTerrainSettings> createTerrainSettings( const QString &type ) const;
 
     /**
      * Creates a new instance of the terrain generator of the specified \a type.
@@ -196,7 +196,7 @@ class _3D_EXPORT Qgs3DTerrainRegistry
     /**
      * Create terrain settings directly from a project's elevation \a properties.
      */
-    QgsAbstractTerrainSettings *configureTerrainFromProject( QgsProjectElevationProperties *properties ) SIP_FACTORY;
+    std::unique_ptr<QgsAbstractTerrainSettings> configureTerrainFromProject( QgsProjectElevationProperties *properties );
 
   private:
 #ifdef SIP_RUN

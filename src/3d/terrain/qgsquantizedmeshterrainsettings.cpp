@@ -23,9 +23,9 @@
 
 using namespace Qt::StringLiterals;
 
-QgsAbstractTerrainSettings *QgsQuantizedMeshTerrainSettings::create()
+std::unique_ptr<QgsAbstractTerrainSettings> QgsQuantizedMeshTerrainSettings::create()
 {
-  return new QgsQuantizedMeshTerrainSettings();
+  return std::make_unique<QgsQuantizedMeshTerrainSettings>();
 }
 
 QgsQuantizedMeshTerrainSettings *QgsQuantizedMeshTerrainSettings::clone() const

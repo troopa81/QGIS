@@ -38,7 +38,7 @@ class _3D_EXPORT QgsDemTerrainSettings : public QgsAbstractTerrainSettings
     /**
      * Creates a new instance of a QgsDemTerrainSettings object.
      */
-    static QgsAbstractTerrainSettings *create() SIP_FACTORY;
+    static std::unique_ptr<QgsAbstractTerrainSettings> create();
 
     QgsDemTerrainSettings *clone() const final SIP_FACTORY;
     QString type() const final;

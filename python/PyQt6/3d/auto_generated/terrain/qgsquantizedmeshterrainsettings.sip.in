@@ -27,7 +27,7 @@ layer to build a terrain.
 #include "qgsquantizedmeshterrainsettings.h"
 %End
   public:
-    static QgsAbstractTerrainSettings *create() /Factory/;
+    static std::unique_ptr<QgsAbstractTerrainSettings> create();
 %Docstring
 Creates a new instance of a QgsQuantizedMeshTerrainSettings object.
 %End

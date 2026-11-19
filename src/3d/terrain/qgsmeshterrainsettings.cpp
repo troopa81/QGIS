@@ -23,9 +23,9 @@
 
 using namespace Qt::StringLiterals;
 
-QgsAbstractTerrainSettings *QgsMeshTerrainSettings::create()
+std::unique_ptr<QgsAbstractTerrainSettings> QgsMeshTerrainSettings::create()
 {
-  return new QgsMeshTerrainSettings();
+  return std::make_unique<QgsMeshTerrainSettings>();
 }
 
 QgsMeshTerrainSettings::QgsMeshTerrainSettings()

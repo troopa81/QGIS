@@ -27,7 +27,7 @@ build terrain.
 #include "qgsdemterrainsettings.h"
 %End
   public:
-    static QgsAbstractTerrainSettings *create() /Factory/;
+    static std::unique_ptr<QgsAbstractTerrainSettings> create();
 %Docstring
 Creates a new instance of a QgsDemTerrainSettings object.
 %End
