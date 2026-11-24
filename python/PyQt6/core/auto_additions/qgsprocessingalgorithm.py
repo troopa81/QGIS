@@ -1,4 +1,16 @@
 # The following has been generated automatically from src/core/processing/qgsprocessingalgorithm.h
+# monkey patching scoped based enum
+QgsProcessingAlgorithm.HelpFormat.Text.__doc__ = "Text content"
+QgsProcessingAlgorithm.HelpFormat.HTML.__doc__ = "HTML content"
+QgsProcessingAlgorithm.HelpFormat.Markdown.__doc__ = "Markdown using Github dialect"
+QgsProcessingAlgorithm.HelpFormat.__doc__ = """
+
+* ``Text``: Text content
+* ``HTML``: HTML content
+* ``Markdown``: Markdown using Github dialect
+
+"""
+# --
 try:
     QgsProcessingAlgorithm.ExternalLink.__attribute_docs__ = {'description': 'Link description text', 'url': 'Link URL'}
     QgsProcessingAlgorithm.ExternalLink.__annotations__ = {'description': str, 'url': str}
@@ -23,7 +35,7 @@ try:
     QgsProcessingAlgorithm.invalidSinkError = staticmethod(QgsProcessingAlgorithm.invalidSinkError)
     QgsProcessingAlgorithm.invalidPointCloudError = staticmethod(QgsProcessingAlgorithm.invalidPointCloudError)
     QgsProcessingAlgorithm.writeFeatureError = staticmethod(QgsProcessingAlgorithm.writeFeatureError)
-    QgsProcessingAlgorithm.__virtual_methods__ = ['shortDescription', 'tags', 'shortHelpString', 'helpString', 'helpUrl', 'documentationFlags', 'academicReferences', 'externalLinks', 'implementationSourceUri', 'icon', 'svgIconPath', 'group', 'groupId', 'flags', 'canExecute', 'checkParameterValues', 'preprocessParameters', 'autogenerateParameterValues', 'sinkProperties', 'createCustomParametersWidget', 'createExpressionContext', 'validateInputCrs', 'asPythonCommand', 'asQgisProcessCommand', 'asMap', 'supportInPlaceEdit', 'prepareAlgorithm', 'postProcessAlgorithm']
+    QgsProcessingAlgorithm.__virtual_methods__ = ['shortDescription', 'tags', 'shortHelpString', 'shortHelpFormat', 'helpString', 'helpUrl', 'documentationFlags', 'academicReferences', 'externalLinks', 'implementationSourceUri', 'icon', 'svgIconPath', 'group', 'groupId', 'flags', 'canExecute', 'checkParameterValues', 'preprocessParameters', 'autogenerateParameterValues', 'sinkProperties', 'createCustomParametersWidget', 'createExpressionContext', 'validateInputCrs', 'asPythonCommand', 'asQgisProcessCommand', 'asMap', 'supportInPlaceEdit', 'prepareAlgorithm', 'postProcessAlgorithm']
     QgsProcessingAlgorithm.__abstract_methods__ = ['name', 'displayName', 'createInstance', 'initAlgorithm', 'processAlgorithm']
     QgsProcessingAlgorithm.__group__ = ['processing']
 except (NameError, AttributeError):

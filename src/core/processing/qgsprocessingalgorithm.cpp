@@ -85,6 +85,11 @@ QString QgsProcessingAlgorithm::shortHelpString() const
   return QString();
 }
 
+QgsProcessingAlgorithm::HelpFormat QgsProcessingAlgorithm::shortHelpFormat() const
+{
+  return QgsProcessingAlgorithm::HelpFormat::Text;
+}
+
 QString QgsProcessingAlgorithm::helpString() const
 {
   return QString();

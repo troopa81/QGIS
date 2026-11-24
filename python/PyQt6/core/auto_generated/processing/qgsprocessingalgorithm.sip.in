@@ -138,6 +138,15 @@ parameters and outputs associated with it.
 .. seealso:: :py:func:`helpUrl`
 %End
 
+    enum class HelpFormat /BaseType=IntEnum/
+    {
+      Text,
+      HTML,
+      Markdown,
+    };
+
+    virtual HelpFormat shortHelpFormat() const /HoldGIL/;
+
  virtual QString helpString() const /HoldGIL,Deprecated="Since 3.40. Unused, will be removed in QGIS 5.0."/;
 %Docstring
 Returns a localised help string for the algorithm. Algorithm subclasses

@@ -361,6 +361,8 @@ void QgsProcessingAlgorithmWidgetBase::setAlgorithm( QgsProcessingAlgorithm *alg
       "p, ul, li { color: #666666; }\n"
       "b { color: #333333; }\n"
       "dl dd { margin - bottom: 5px; }"
+      "table, td, th {  border: 1px solid;  padding: 10px;}"
+      "table { border-collapse: collapse };"
     ) );
     textShortHelp->setHtml( algHelp );
     connect( textShortHelp, &QTextBrowser::anchorClicked, this, &QgsProcessingAlgorithmWidgetBase::linkClicked );
@@ -810,12 +812,31 @@ QString QgsProcessingAlgorithmWidgetBase::formatHelp( QgsProcessingAlgorithm *al
   const QString text = algorithm->shortHelpString();
   if ( !text.isEmpty() )
   {
-    const QStringList paragraphs = text.split( '\n' );
     QString help;
-    for ( const QString &paragraph : paragraphs )
+    switch ( algorithm->shortHelpFormat() )
     {
-      help += u"<p>%1</p>"_s.arg( paragraph );
+      case QgsProcessingAlgorithm::HelpFormat::Text:
+      {
+        const QStringList paragraphs = text.split( '\n' );
+        for ( const QString &paragraph : paragraphs )
+        {
+          help += u"<p>%1</p>"_s.arg( paragraph );
+        }
+        break;
+      }
+      case QgsProcessingAlgorithm::HelpFormat::HTML:
+        help = text;
+        break;
+
+      case QgsProcessingAlgorithm::HelpFormat::Markdown:
+      {
+        QTextDocument md;
+        md.setMarkdown( text, QTextDocument::MarkdownDialectGitHub );
+        help = md.toHtml();
+        break;
+      }
     }
+
     result = u"<h2>%1</h2>%2"_s.arg( algorithm->displayName(), help );
   }
   else if ( !algorithm->shortDescription().isEmpty() )

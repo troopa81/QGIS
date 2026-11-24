@@ -176,6 +176,15 @@ class QgsAcademicReference;
      */
     virtual QString shortHelpString() const SIP_HOLDGIL;
 
+    enum class HelpFormat : int
+    {
+      Text = 0,     //!< Text content
+      HTML = 1,     //!< HTML content
+      Markdown = 2, //!< Markdown using Github dialect
+    };
+
+    virtual HelpFormat shortHelpFormat() const SIP_HOLDGIL;
+
     /**
      * Returns a localised help string for the algorithm. Algorithm subclasses should implement either
      * helpString() or helpUrl().
